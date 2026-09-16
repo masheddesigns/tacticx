@@ -1,0 +1,6 @@
+[
+  {"date": "2024-09-21", "home_team": "West Ham", "away_team": "Chelsea",
+   "home_score": 0, "away_score": 3, "league": "EPL", "season": "2024"},
+  {"date": "2024-09-21", "home_team": "Liverpool", "away_team": "Bournemouth",
+   "home_score": 3, "away_score": 0}
+]

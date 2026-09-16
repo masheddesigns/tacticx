@@ -1,0 +1,6 @@
+Div,Date,Time,HomeTeam,AwayTeam,FTHG,FTAG,FTR,B365H,B365D,B365A
+E0,21/09/2024,15:00,West Ham,Chelsea,0,3,A,4.50,3.60,1.80
+E0,not-a-date,15:00,Liverpool,Bournemouth,3,0,H,1.44,4.75,7.00
+E0,22/09/2024,14:00,,Man United,0,0,D,3.40,3.30,2.20
+E0,22/09/2024,16:30,Arsenal,Chelsea,99,0,H,1.80,3.60,4.50
+E0,22/09/2024,16:30,Leeds,Leeds,1,1,D,2.50,3.20,2.80
