@@ -36,6 +36,9 @@ class FullPrediction(BaseModel):
     score_probabilities: Dict[str, float] = Field(default_factory=dict)
     # Audit trail.
     confidence: Optional[float] = None
+    # How confidence was derived (e.g. "probability margin",
+    # "margin+ensemble disagreement"). Never a correctness guarantee.
+    confidence_basis: str = ""
     xg_used: bool = False
     feature_availability: Dict = Field(default_factory=dict)
     temporal_mode: str = "strict_prematch"

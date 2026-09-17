@@ -57,6 +57,7 @@ def _prediction_to_out(row: Prediction) -> PredictionOut:
 
 
 def _build_model(name: str, seed=None, simulations: int = 10000):
+    from app.services.predictions.advanced import AdvancedGoalModel, AdvancedModel
     from app.services.predictions.elo import EloModel
     from app.services.predictions.ensemble import BaselineModel, EnsembleModel
     from app.services.predictions.montecarlo import MonteCarloModel
@@ -74,6 +75,14 @@ def _build_model(name: str, seed=None, simulations: int = 10000):
         return EnsembleModel()
     if name == "baseline":
         return BaselineModel()
+    if name == "advanced":
+        return AdvancedModel()
+    if name == "advanced-xg":
+        from app.services.predictions.advanced import AdvancedConfig
+
+        return AdvancedModel(config=AdvancedConfig(use_xg=True))
+    if name == "advanced_goal":
+        return AdvancedGoalModel()
     raise ValueError(f"unknown model: {name}")
 
 
@@ -200,3 +209,119 @@ def run_backtest_endpoint(request: BacktestRequest, db: Session = Depends(get_db
     except Exception as exc:
         raise HTTPException(500, f"backtest failed: {exc}")
     return result
+
+
+@router.get("/features/{match_id}", summary="Pre-match feature snapshot")
+def feature_snapshot(match_id: int, db: Session = Depends(get_db),
+                     cutoff: Optional[str] = None,
+                     temporal_mode: str = "strict_prematch"):
+    """Reproducible features with availability, source, as-of and quality."""
+    from app.services.features.engineered import build_feature_snapshot
+
+    match = db.get(Match, match_id)
+    if match is None:
+        raise HTTPException(404, "match not found")
+    try:
+        mode = TemporalMode(temporal_mode)
+    except ValueError:
+        raise HTTPException(400, "temporal_mode must be strict_prematch or historical_estimated")
+    try:
+        resolved = datetime.fromisoformat(cutoff) if cutoff else match.kickoff_at
+    except ValueError:
+        raise HTTPException(400, "cutoff must be ISO format")
+    if resolved is None:
+        raise HTTPException(400, "match has no kickoff; pass cutoff explicitly")
+    try:
+        return build_feature_snapshot(db, match_id, resolved, mode)
+    except ValueError as exc:
+        raise HTTPException(400, str(exc))
+
+
+@router.get("/predictions/{match_id}/explain", summary="Explain a stored prediction")
+def explain_prediction(match_id: int, db: Session = Depends(get_db),
+                       model: Optional[str] = None):
+    """Latest stored prediction plus its feature snapshot, availability and
+    model versions. Works from stored records only (no recomputation)."""
+    from app.services.features.engineered import build_feature_snapshot
+
+    if not db.get(Match, match_id):
+        raise HTTPException(404, "match not found")
+    query = db.query(Prediction).filter_by(match_id=match_id)
+    if model:
+        query = query.filter_by(model_name=model)
+    row = query.order_by(Prediction.prediction_timestamp.desc()).first()
+    if row is None:
+        raise HTTPException(404, "no stored prediction for this match")
+    snapshot = None
+    cutoff = row.prediction_cutoff
+    try:
+        if cutoff is not None:
+            snapshot = build_feature_snapshot(
+                db, match_id, cutoff, TemporalMode(row.temporal_mode or "strict_prematch"))
+    except ValueError as exc:
+        snapshot = {"error": str(exc)}
+    return {
+        "prediction": _prediction_to_out(row),
+        "feature_version": (snapshot or {}).get("feature_version", "features_v1"),
+        "cutoff": str(cutoff),
+        "features": snapshot,
+        "model_versions": {
+            "model": row.model_name,
+            "model_version": row.model_version,
+        },
+    }
+
+
+@router.get("/models", summary="Registered prediction models")
+def list_models():
+    """Model catalog: names, versions, descriptions. No secrets."""
+    from app.services.predictions.advanced import (
+        AdvancedGoalModel,
+        AdvancedModel,
+    )
+    from app.services.predictions.ensemble import MODEL_REGISTRY, BaselineModel, EnsembleModel
+    from app.services.predictions.elo import EloModel
+    from app.services.predictions.montecarlo import MonteCarloModel
+    from app.services.predictions.poisson import PoissonModel
+
+    catalog = []
+    for cls in (BaselineModel, EloModel, PoissonModel, MonteCarloModel,
+                EnsembleModel, AdvancedModel, AdvancedGoalModel):
+        instance = cls()
+        catalog.append({
+            "name": instance.model_name,
+            "version": instance.model_version,
+            "description": (instance.__doc__ or "").strip().split("\n")[0],
+        })
+    catalog.append({
+        "name": "ensemble_v2",
+        "version": "ensemble_v2",
+        "description": "Walk-forward learned-weight ensemble (built per evaluation).",
+    })
+    catalog.append({
+        "name": "advanced-xg",
+        "version": "advanced_v1-xg",
+        "description": "AdvancedModel with xG features (xG-eligible rows only).",
+    })
+    catalog.append({
+        "name": "poisson-xg",
+        "version": "poisson_v1-xg",
+        "description": "PoissonModel with xG blending where eligible.",
+    })
+    return {"data": catalog, "registry": sorted(set(list(MODEL_REGISTRY) + [
+        "advanced", "advanced_goal", "advanced-xg", "ensemble_v2"]))}
+
+
+@router.get("/backtesting/models", summary="Models with recorded evaluations")
+def list_evaluated_models(db: Session = Depends(get_db)):
+    """Distinct models present in backtest runs and evaluations."""
+    from app.db.models.predictions import ModelEvaluation
+
+    names = set()
+    for (name,) in db.query(BacktestRun.model_name).distinct().all():
+        if name:
+            names.add(name)
+    for (name,) in db.query(ModelEvaluation.model_name).distinct().all():
+        if name:
+            names.add(name)
+    return {"data": sorted(names)}

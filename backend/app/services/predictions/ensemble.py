@@ -44,6 +44,23 @@ MODEL_REGISTRY: Dict[str, type] = {
     # touching the ensemble.
 }
 
+_LAZY_REGISTRY: Dict[str, str] = {
+    # Imported lazily (keeps module import light, avoids cycles).
+    "advanced": "app.services.predictions.advanced.AdvancedModel",
+    "advanced_goal": "app.services.predictions.advanced.AdvancedGoalModel",
+}
+
+
+def _resolve_model_class(name: str):
+    if name in MODEL_REGISTRY:
+        return MODEL_REGISTRY[name]
+    if name in _LAZY_REGISTRY:
+        module_name, class_name = _LAZY_REGISTRY[name].rsplit(".", 1)
+        import importlib
+
+        return getattr(importlib.import_module(module_name), class_name)
+    raise ValueError(f"unknown model: {name} (registry: {sorted(list(MODEL_REGISTRY) + list(_LAZY_REGISTRY))})")
+
 
 class EnsembleModel:
     model_name = MODEL_NAME
@@ -65,12 +82,11 @@ class EnsembleModel:
     @classmethod
     def from_names(cls, names: List[str], weights: Optional[List[float]] = None,
                    **kwargs) -> "EnsembleModel":
-        """Build from registry names, e.g. ["elo", "poisson"]."""
+        """Build from registry names, e.g. ["elo", "poisson", "advanced"]."""
         members = []
         for name in names:
-            if name not in MODEL_REGISTRY:
-                raise ValueError(f"unknown model: {name} (registry: {sorted(MODEL_REGISTRY)})")
-            members.append(MODEL_REGISTRY[name](**kwargs) if kwargs else MODEL_REGISTRY[name]())
+            model_class = _resolve_model_class(name)
+            members.append(model_class(**kwargs) if kwargs else model_class())
         return cls(members=members, weights=weights)
 
     def config_dict(self) -> Dict:
@@ -124,9 +140,13 @@ class EnsembleModel:
             markets = markets_from_grid(grid)
         xg_used = any(p.xg_used for p, _ in member_preds)
         member_names = ", ".join(f"{p.model_name}({p.model_version})" for p, _ in member_preds)
+        home_vals = [p.home_win_probability for p, _ in member_preds]
+        disagreement = (max(home_vals) - min(home_vals)) if len(home_vals) > 1 else 0.0
         data_quality = [f"members: {member_names}",
                         f"weights: {[round(w, 3) for w in self.weights]}",
-                        "weights are defaults, not claimed optimal"]
+                        "weights are defaults, not claimed optimal",
+                        f"member home-win spread: {disagreement:.4f} "
+                        "(disagreement is descriptive, not a correctness signal)"]
         return FullPrediction(
             model_name=self.model_name, model_version=self.model_version, status="valid",
             expected_home_goals=(round(sum(exp_home_vals) / len(exp_home_vals), 4)
@@ -138,6 +158,7 @@ class EnsembleModel:
                                   if exp_home_vals and exp_away_vals else None),
             score_probabilities={k: round(v, 6) for k, v in sorted(grid.items())},
             confidence=abs(home - away),
+            confidence_basis="probability margin; member home-win spread reported in data_quality",
             xg_used=xg_used, feature_availability=availability.as_dict(),
             temporal_mode=mode.value, prediction_cutoff=str(as_naive_utc(cutoff)),
             data_quality=data_quality,

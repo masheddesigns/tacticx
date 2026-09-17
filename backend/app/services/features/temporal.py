@@ -33,3 +33,11 @@ def as_naive_utc(value: Optional[datetime]) -> Optional[datetime]:
 
 def utcnow_naive() -> datetime:
     return datetime.now(timezone.utc).replace(tzinfo=None)
+
+
+def season_label(kickoff: Optional[datetime]) -> str:
+    """August–July season label, e.g. 2024-09-21 -> '2024'."""
+    naive = as_naive_utc(kickoff)
+    if naive is None:
+        return "unknown"
+    return str(naive.year if naive.month >= 8 else naive.year - 1)

@@ -48,8 +48,21 @@ def build_model(name: str, seed=None, simulations: int = 10000):
         return EnsembleModel()
     if name == "baseline":
         return BaselineModel()
+    if name == "advanced":
+        from app.services.predictions.advanced import AdvancedModel
+
+        return AdvancedModel()
+    if name == "advanced-xg":
+        from app.services.predictions.advanced import AdvancedConfig, AdvancedModel
+
+        return AdvancedModel(config=AdvancedConfig(use_xg=True))
+    if name == "advanced_goal":
+        from app.services.predictions.advanced import AdvancedGoalModel
+
+        return AdvancedGoalModel()
     raise ValueError(f"unknown model: {name} "
-                     "(elo|poisson|poisson-xg|montecarlo|ensemble|baseline)")
+                     "(elo|poisson|poisson-xg|montecarlo|ensemble|baseline|"
+                     "advanced|advanced-xg|advanced_goal)")
 
 
 def main() -> int:

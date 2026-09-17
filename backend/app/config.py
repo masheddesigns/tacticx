@@ -121,6 +121,25 @@ class Settings(BaseSettings):
     # Raw provenance payload retention (days). 0 = keep indefinitely.
     RAW_RETENTION_DAYS: int = 90
 
+    # --- Phase 4: feature engineering + advanced models ---
+    # All decays expressed as half-lives (days); converted via decay = ln(2)/half_life.
+    FORM_DECAY_HALF_LIFE_DAYS: float = 120.0
+    XG_DECAY_HALF_LIFE_DAYS: float = 180.0
+    MIN_FORM_MATCHES: int = 3
+    MIN_XG_MATCHES: int = 5
+    MIN_H2H_MATCHES: int = 3
+    # Multinomial logistic regression (numpy, deterministic full-batch GD).
+    ML_L2: float = 1.0
+    ML_LEARNING_RATE: float = 0.5
+    ML_ITERATIONS: int = 2000
+    # Ensemble weight grid search step over the simplex (deterministic).
+    ENSEMBLE_GRID_STEP: float = 0.1
+    # Temperature calibration (calibration_v1) needs a minimum fit sample.
+    CALIBRATION_MIN_SAMPLE: int = 50
+    # Bootstrap confidence intervals for reported metrics.
+    BOOTSTRAP_SAMPLES: int = 1000
+    BOOTSTRAP_SEED: int = 7
+
     @property
     def cors_origins_list(self) -> list[str]:
         return [o.strip() for o in self.CORS_ORIGINS.split(",") if o.strip()]

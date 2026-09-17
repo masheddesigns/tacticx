@@ -62,3 +62,48 @@ class BacktestRun(Base):
     metrics: Mapped[Optional[dict]] = mapped_column(JSON, nullable=True)
     model_config: Mapped[Optional[dict]] = mapped_column(JSON, nullable=True)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+
+
+class ModelTrainingRun(Base):
+    """One fitted model artifact: config, windows, metrics, parameters.
+
+    Parameters (coefficients, scaler stats, calibration temperature) are
+    stored so any prediction citing this run is reproducible.
+    """
+
+    __tablename__ = "model_training_runs"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    model_name: Mapped[str] = mapped_column(String(64), default="", index=True)
+    model_version: Mapped[str] = mapped_column(String(64), default="")
+    feature_version: Mapped[str] = mapped_column(String(32), default="features_v1")
+    league: Mapped[str] = mapped_column(String(32), default="")
+    train_from: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True), nullable=True)
+    train_to: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True), nullable=True)
+    train_sample: Mapped[int] = mapped_column(Integer, default=0)
+    train_dropped: Mapped[int] = mapped_column(Integer, default=0)
+    temporal_mode: Mapped[str] = mapped_column(String(32), default="strict_prematch")
+    config: Mapped[Optional[dict]] = mapped_column(JSON, nullable=True)
+    metrics: Mapped[Optional[dict]] = mapped_column(JSON, nullable=True)
+    params: Mapped[Optional[dict]] = mapped_column(JSON, nullable=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+
+
+class ModelEvaluation(Base):
+    """Evaluation of one (model version, training run) on one window."""
+
+    __tablename__ = "model_evaluations"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    training_run_id: Mapped[Optional[int]] = mapped_column(
+        ForeignKey("model_training_runs.id"), nullable=True, index=True)
+    model_name: Mapped[str] = mapped_column(String(64), default="", index=True)
+    model_version: Mapped[str] = mapped_column(String(64), default="")
+    league: Mapped[str] = mapped_column(String(32), default="")
+    season: Mapped[str] = mapped_column(String(16), default="")
+    date_from: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True), nullable=True)
+    date_to: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True), nullable=True)
+    temporal_mode: Mapped[str] = mapped_column(String(32), default="strict_prematch")
+    sample_size: Mapped[int] = mapped_column(Integer, default=0)
+    metrics: Mapped[Optional[dict]] = mapped_column(JSON, nullable=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())

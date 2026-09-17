@@ -107,8 +107,11 @@ def run_backtest(db: Session, model, league_code: Optional[str] = None,
                  date_from: Optional[datetime] = None,
                  date_to: Optional[datetime] = None,
                  mode: TemporalMode = TemporalMode.STRICT_PREMATCH,
-                 persist: bool = True, seed: Optional[int] = None) -> Dict:
-    """Execute a walk-forward backtest for one model. Returns metrics + counts."""
+                 persist: bool = True, seed: Optional[int] = None,
+                 return_details: bool = False) -> Dict:
+    """Execute a walk-forward backtest for one model. Returns metrics + counts.
+    With return_details=True, per-match (match_id, probs, actual) rows are
+    included for CIs and calibration analysis (not persisted)."""
     matches = scope_matches(db, league_code, season, date_from, date_to)
     model_name = getattr(model, "model_name", "?")
     model_version = getattr(model, "model_version", "?")
@@ -127,6 +130,7 @@ def run_backtest(db: Session, model, league_code: Optional[str] = None,
     act_away: List[float] = []
     home_win_probs: List[float] = []
     home_win_actual: List[int] = []
+    detail_rows: List[Dict] = []
     sample = 0
     excluded_insufficient = 0
     excluded_temporal = 0
@@ -181,6 +185,11 @@ def run_backtest(db: Session, model, league_code: Optional[str] = None,
             act_away.append(float(match.away_score or 0))
         home_win_probs.append(pred.home_win_probability)
         home_win_actual.append(1 if actual == "home" else 0)
+        if return_details:
+            detail_rows.append({"match_id": match.id,
+                                "probs": [pred.home_win_probability, pred.draw_probability,
+                                          pred.away_win_probability],
+                                "actual": INDEX[actual]})
 
     result = {
         "model": model_name,
@@ -195,6 +204,8 @@ def run_backtest(db: Session, model, league_code: Optional[str] = None,
             exp_home, exp_away, act_home, act_away,
             home_win_probs, home_win_actual),
     }
+    if return_details:
+        result["details"] = detail_rows
     if persist:
         db.add(BacktestRun(
             model_name=model_name, model_version=model_version,

@@ -36,37 +36,49 @@ class HistoricalFeatureRepository:
         self.cutoff = naive
         self.mode = mode
         self.excluded_unknown_timing = 0
+        # Read-only memo caches (cutoff is fixed per instance, underlying
+        # tables are not written during prediction/backtest reads, and all
+        # temporal filtering still happens per call — speed without leakage).
+        self._finished_cache: dict = {}
+        self._team_matches_cache: dict = {}
+        self._stats_cache: dict = {}
 
     # -- matches ------------------------------------------------------
     def finished_before(self, league_id: Optional[int] = None) -> List[Match]:
         """Finished, scored matches with kickoff strictly before cutoff,
         oldest first. The chronological backbone of every model."""
-        q = self.db.query(Match).filter(
-            Match.status == FINISHED,
-            Match.home_score.is_not(None),
-            Match.away_score.is_not(None),
-            Match.kickoff_at.is_not(None),
-            Match.kickoff_at < self.cutoff,
-        )
-        if league_id is not None:
-            q = q.filter(Match.league_id == league_id)
-        return q.order_by(Match.kickoff_at.asc()).all()
+        key = league_id if league_id is not None else "ALL"
+        if key not in self._finished_cache:
+            q = self.db.query(Match).filter(
+                Match.status == FINISHED,
+                Match.home_score.is_not(None),
+                Match.away_score.is_not(None),
+                Match.kickoff_at.is_not(None),
+                Match.kickoff_at < self.cutoff,
+            )
+            if league_id is not None:
+                q = q.filter(Match.league_id == league_id)
+            self._finished_cache[key] = q.order_by(Match.kickoff_at.asc()).all()
+        return self._finished_cache[key]
 
     def team_matches_before(self, team_id: int, venue: Optional[str] = None) -> List[Match]:
         """Pre-cutoff finished matches for one team, optionally venue-filtered."""
-        q = self.db.query(Match).filter(
-            Match.status == FINISHED,
-            Match.home_score.is_not(None),
-            Match.away_score.is_not(None),
-            Match.kickoff_at.is_not(None),
-            Match.kickoff_at < self.cutoff,
-            ((Match.home_team_id == team_id) | (Match.away_team_id == team_id)),
-        )
-        if venue == "home":
-            q = q.filter(Match.home_team_id == team_id)
-        elif venue == "away":
-            q = q.filter(Match.away_team_id == team_id)
-        return q.order_by(Match.kickoff_at.asc()).all()
+        key = (team_id, venue)
+        if key not in self._team_matches_cache:
+            q = self.db.query(Match).filter(
+                Match.status == FINISHED,
+                Match.home_score.is_not(None),
+                Match.away_score.is_not(None),
+                Match.kickoff_at.is_not(None),
+                Match.kickoff_at < self.cutoff,
+                ((Match.home_team_id == team_id) | (Match.away_team_id == team_id)),
+            )
+            if venue == "home":
+                q = q.filter(Match.home_team_id == team_id)
+            elif venue == "away":
+                q = q.filter(Match.away_team_id == team_id)
+            self._team_matches_cache[key] = q.order_by(Match.kickoff_at.asc()).all()
+        return self._team_matches_cache[key]
 
     # -- league context ------------------------------------------------
     def league_goal_averages(self, league_id: int) -> Tuple[float, float, int]:
@@ -107,8 +119,30 @@ class HistoricalFeatureRepository:
     def match_stats(self, match_id: int) -> List[MatchStatistic]:
         """Eligible statistic rows for one past match. Never call this for
         the match being predicted — callers must exclude it structurally."""
-        rows = self.db.query(MatchStatistic).filter_by(match_id=match_id).all()
+        if match_id not in self._stats_cache:
+            self._stats_cache[match_id] = self.db.query(MatchStatistic).filter_by(
+                match_id=match_id).all()
+        rows = self._stats_cache[match_id]
         return [r for r in rows if self._timing_ok(r.effective_at, match_id)]
+
+    def stat_series(self, team_id: int, stat_name: str,
+                    venue: Optional[str] = None) -> List[Tuple[datetime, float]]:
+        """Chronological (kickoff, value) pairs for one team+stat, oldest
+        first. Values are source observations; unparseable rows are skipped
+        (counted in quality reports, never zero-filled)."""
+        series: List[Tuple[datetime, float]] = []
+        for m in self.team_matches_before(team_id, venue=venue):
+            side = "home" if m.home_team_id == team_id else "away"
+            kickoff = as_naive_utc(m.kickoff_at)
+            if kickoff is None:
+                continue
+            for r in self.match_stats(m.id):
+                if r.team == side and r.stat_name == stat_name:
+                    try:
+                        series.append((kickoff, float(str(r.stat_value).rstrip("%"))))
+                    except (TypeError, ValueError):
+                        continue
+        return series
 
     def team_xg_before(self, team_id: int, venue: Optional[str] = None) -> List[float]:
         """Pre-cutoff expected-goals values for a team (source values only)."""

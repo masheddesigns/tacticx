@@ -28,7 +28,8 @@ from app.services.backtesting.runner import dataset_summary, run_backtest  # noq
 from app.services.features.temporal import TemporalMode  # noqa: E402
 from scripts.predict import build_model  # noqa: E402
 
-MODELS = ["baseline", "elo", "poisson", "poisson-xg", "montecarlo", "ensemble"]
+MODELS = ["baseline", "elo", "poisson", "poisson-xg", "montecarlo", "ensemble",
+          "advanced", "advanced-xg", "advanced_goal"]
 
 
 def _parse_date(value: str):
@@ -76,6 +77,24 @@ def main() -> int:
                 model = build_model(name, seed=args.seed, simulations=args.simulations)
             else:
                 model = build_model(name)
+            if name in ("advanced", "advanced-xg"):
+                # Fit once on finished matches strictly before the test scope
+                # (train strictly before test — same rule as walk-forward).
+                # Fit failure leaves the model unfitted: every prediction then
+                # reports insufficient_data instead of a fabricated result.
+                from app.services.backtesting.runner import scope_matches
+                from app.services.backtesting.walkforward import fit_advanced_for_scope
+
+                scope = scope_matches(db, args.league or None, args.season or None,
+                                      date_from, date_to)
+                if scope:
+                    try:
+                        fit_advanced_for_scope(
+                            db, model, args.league or None,
+                            min(m.kickoff_at for m in scope if m.kickoff_at is not None),
+                            mode, persist=not args.no_persist)
+                    except ValueError as exc:
+                        print(f"{name}: training skipped ({exc})")
             results.append(run_backtest(
                 db, model, args.league or None, args.season or None,
                 date_from, date_to, mode,

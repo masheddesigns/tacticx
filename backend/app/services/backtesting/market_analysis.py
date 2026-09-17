@@ -32,14 +32,20 @@ from app.services.market.repository import closing_state, get_market_state
 OUTCOMES = ("home", "draw", "away")
 
 
-def _latest_predictions(db: Session, model_name: str, match_ids: List[int]):
+def _latest_predictions(db: Session, model_name: str, match_ids: List[int],
+                        model_version: Optional[str] = None):
     """Latest stored prediction per match for one model (no double counting
-    across repeated backtest runs)."""
-    rows = (db.query(Prediction)
-            .filter(Prediction.model_name == model_name,
-                    Prediction.match_id.in_(match_ids),
-                    Prediction.status == "valid")
-            .order_by(Prediction.prediction_timestamp.desc()).all()) if match_ids else []
+    across repeated backtest runs). Optional version pin distinguishes
+    ensemble_v1 from ensemble_v2, which share a model_name."""
+    if not match_ids:
+        return {}
+    query = (db.query(Prediction)
+             .filter(Prediction.model_name == model_name,
+                     Prediction.match_id.in_(match_ids),
+                     Prediction.status == "valid"))
+    if model_version:
+        query = query.filter(Prediction.model_version == model_version)
+    rows = query.order_by(Prediction.prediction_timestamp.desc()).all()
     latest: Dict[int, Prediction] = {}
     for row in rows:
         latest.setdefault(row.match_id, row)
@@ -71,11 +77,12 @@ def compare_with_market(db: Session, model_name: str,
                         league_code: Optional[str] = None,
                         season: Optional[str] = None,
                         date_from=None, date_to=None,
-                        market: str = "h2h") -> Dict:
+                        market: str = "h2h",
+                        model_version: Optional[str] = None) -> Dict:
     """Model vs market over stored predictions. Returns aggregates + examples."""
     matches = scope_matches(db, league_code, season, date_from, date_to)
     match_ids = [m.id for m in matches]
-    stored = _latest_predictions(db, model_name, match_ids)
+    stored = _latest_predictions(db, model_name, match_ids, model_version)
     model_probs: List[List[float]] = []
     market_probs: List[List[float]] = []
     closing_probs: List[List[float]] = []

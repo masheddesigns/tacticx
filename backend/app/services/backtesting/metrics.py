@@ -125,3 +125,32 @@ def expected_calibration_error(probabilities: List[float], outcomes: List[int],
         if b["count"] and b["mean_predicted"] is not None and b["empirical_rate"] is not None:
             err += (b["count"] / total) * abs(b["mean_predicted"] - b["empirical_rate"])
     return round(err, 4)
+
+
+def bootstrap_ci(metric_fn, probs, actual, n_boot: int = 1000, seed: int = 7,
+                 ci: float = 95.0) -> Optional[Dict]:
+    """Bootstrap confidence interval for a metric over (prob, outcome) pairs.
+
+    Chronological test predictions are the evaluation population; resampling
+    is seeded and deterministic. Returns {"lo", "hi", "n_boot"} or None when
+    the sample is empty. CIs describe uncertainty — never rankings.
+    """
+    probs_arr = np.asarray(probs, dtype=float)
+    actual_arr = np.asarray(actual, dtype=int)
+    n = len(actual_arr)
+    if n == 0:
+        return None
+    rng = np.random.RandomState(seed)
+    estimates = []
+    for _ in range(max(1, n_boot)):
+        idx = rng.randint(0, n, size=n)
+        try:
+            estimates.append(float(metric_fn(list(probs_arr[idx]), list(actual_arr[idx]))))
+        except Exception:
+            continue
+    if not estimates:
+        return None
+    lower_pct = (100.0 - ci) / 2.0
+    return {"lo": round(float(np.percentile(estimates, lower_pct)), 4),
+            "hi": round(float(np.percentile(estimates, 100.0 - lower_pct)), 4),
+            "n_boot": len(estimates)}

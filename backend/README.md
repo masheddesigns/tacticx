@@ -523,3 +523,43 @@ Descriptors only — never recommendations, never "sharp/insider" narratives.
   without consensus.
 - TacticX market probabilities are analytical transformations of observed
   bookmaker prices and are not guaranteed probabilities of the actual outcome.
+
+## Phase 4 — Advanced features + walk-forward validation
+
+Feature pipeline (`app/services/features/engineered.py`, version
+`features_v1`): rolling form last 3/5/10 (W/D/L, GF/GA, GD, points, PPM),
+venue splits, half-life recency weights (`FORM/XG_DECAY_HALF_LIFE_DAYS`),
+goal differentials, xG/shots rolling (source values only), rest days +
+congestion (finished matches only; missing = unavailable, never zero),
+season context, chronologically reconstructed standings (current season only,
+never the final table), descriptive H2H (min sample gate), Elo-based
+strength of schedule. Every leaf carries
+`{value, available, source, as_of, quality}`; missing data is flagged, never
+invented. Target match never contributes to its own features (cutoff-gated,
+tested).
+
+Models: `advanced_v1` (numpy softmax regression, deterministic full-batch
+GD, L2, train-standardized), `advanced_v1-xg` (+xG diff, xG-eligible rows
+only), `advanced_goal_v1` (Poisson + shrinkage toward league mean for thin
+histories), `ensemble_v2` (walk-forward learned weights), `calibration_v1`
+(temperature scaling, train-window only, `-cal` version suffix). Confidence
+derives from probability margin (+ entropy/disagreement notes), labeled as
+uncertainty basis, never correctness.
+
+```bash
+python scripts/features.py --match-id ID [--cutoff ... --json]
+python scripts/walkforward.py --league EPL --train 2015,2022 --validate 2023 --test 2024 [--use-xg]
+python scripts/backtest.py --model advanced --league EPL --season 2024
+```
+
+Walk-forward: train → validate (weights + temperature) → test, expanding
+windows, no shuffling. Purge/embargo analysis: no embargo needed — features
+aggregate completed matches strictly before cutoff; same-day earlier matches
+are legitimately usable; the target is structurally excluded.
+
+Validated (EPL test 2024, strict): ensemble_v1 ≥ poisson ≥ Elo > baseline on
+log-loss/Brier; learned v2 weights and calibration did not improve
+out-of-sample here (reported, not hidden). Poisson-xg beats poisson on the
+La Liga 2015 ablation (identical N=330). Market slice (n=284): market ahead
+of Elo descriptively; paired bootstrap CI excludes zero but closing lines
+inform the market side — stated, not a superiority claim.
