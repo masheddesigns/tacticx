@@ -599,3 +599,42 @@ market Brier 0.568 vs model 0.594, N=284) and are never a model input.
 
 Read-only artifacts API: `GET /api/v1/validation/phase5/runs`,
 `/runs/{run_id}/{artifact}`, `/model-registry`, `/disclaimer`.
+
+## Phase 6 — Prediction intelligence + scenarios + MiroFish
+
+Intelligence layer (`app/services/intelligence/`): `PredictionComposer`
+(snapshot → regime-selected core model → derived markets → uncertainty →
+disagreement → market context → explanation; never trains, never mutates),
+pure derived-markets math (`derived.py`: O/U 0.5–3.5, BTTS joint +
+closed-form cross-check, double chance identities, team totals, correct
+scores with required-16 coverage, grid/tail mass exposure, 1X2 rejection of
+invalid vectors), factual explanation service (Elo ratings, Poisson
+strengths/lambdas, xG status never-zero-filled, advanced coef×feature
+contributions labeled "model contribution"), cutoff-safe historical
+analogues (standardized distance, target excluded, min-sample gate,
+descriptive outcome frequencies), deterministic scenario engine
+(baseline always first, baseline+scenario+difference output), and an
+optional MiroFish adapter (labeled context, output validation, timeout,
+failure → `unavailable`, never touches core probabilities).
+
+Default core model unchanged: ensemble_v1 (Phase 5 evidence stands).
+
+```bash
+python scripts/tacticx.py predict <match_id> [--model ensemble --json]
+python scripts/tacticx.py explain <match_id>
+python scripts/tacticx.py scenarios <match_id> [--names baseline,high_scoring]
+python scripts/tacticx.py analogues <match_id> [--top-k 10]
+python scripts/tacticx.py mirofish <match_id>
+```
+
+API: `GET /api/v1/predictions/{id}/full|explanation|distribution|scenarios|analogues|models`,
+`POST .../scenarios` (recorded, core untouched), `POST .../mirofish`
+(optional, failure-safe). Storage reuses `predictions.input_snapshot`;
+new audit tables (`prediction_explanations`, `scenario_runs`,
+`analogue_results`, `mirofish_runs`) carry prediction/model/cutoff/version/
+input-reference/status columns via the established `create_all` pattern.
+
+Validated: 288 tests green (258 prior + 30 new); integration over real
+Bundesliga/EPL/La Liga matches with probability + temporal audits;
+MiroFish adapter ready with no external service bound (honest
+`unavailable`, never fabricated).
