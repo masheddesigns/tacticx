@@ -310,6 +310,86 @@ def _cmd_evaluate(db, args) -> int:
     return 0
 
 
+def _cmd_reconcile(db, args) -> int:
+    import time
+
+    from app.services.reconciliation import matches as match_recon
+
+    start = time.monotonic()
+    if args.match:
+        from app.db.models.core import Match as MatchModel
+
+        match = db.get(MatchModel, args.match)
+        if match is None:
+            print(f"no match with id {args.match}")
+            return 1
+        observed = {"kickoff_at": match.kickoff_at, "status": match.status,
+                    "home_score": match.home_score, "away_score": match.away_score}
+        result = match_recon.reconcile_match(
+            db, args.match, match.provider or "unknown", observed,
+            dry_run=args.dry_run)
+    else:
+        if not args.league and not args.all_leagues:
+            print("pass --match, --league, or --all (bounded by --limit)")
+            return 1
+        result = match_recon.reconcile_league(
+            db, league_code=args.league, season=args.season,
+            limit=args.limit, dry_run=args.dry_run)
+    result["duration_seconds"] = round(time.monotonic() - start, 2)
+    if args.as_json:
+        print(json.dumps(result, indent=2, default=str))
+        return 0
+    print(f"reconcile (dry_run={args.dry_run}): "
+          f"{json.dumps({k: v for k, v in result.items() if k != 'conflicts'}, default=str)}")
+    for conflict in (result.get("conflicts") or [])[:10]:
+        print(f"  {conflict.get('type')}:{conflict.get('field')} "
+              f"{conflict.get('canonical')} vs {conflict.get('observed')} "
+              f"[{conflict.get('severity', '?')}/{conflict.get('status', '?')}]")
+    return 0
+
+
+def _cmd_data_quality(db, args) -> int:
+    from app.services.reconciliation import conflicts as conflict_svc
+    from app.services.reconciliation import identities, matrix, quality
+
+    report = {
+        "coverage": matrix.canonical_coverage(db, league_code=args.league),
+        "completeness": quality.league_completeness(db, league_code=args.league),
+        "conflicts": conflict_svc.summarize(db),
+        "unresolved_queue": identities.queue_summary(db),
+        "sources": matrix.coverage_matrix(db),
+    }
+    if args.as_json:
+        print(json.dumps(report, indent=2, default=str))
+        return 0
+    print(f"matches: {report['coverage'].get('matches')} "
+          f"(multi={report['coverage'].get('multi_source')} "
+          f"single={report['coverage'].get('single_source')} "
+          f"unresolved={report['coverage'].get('unresolved')})")
+    print(f"conflicts: {report['conflicts'].get('total')} "
+          f"{report['conflicts'].get('by_severity')}")
+    print(f"unresolved queue: {report['unresolved_queue']}")
+    print("sources:")
+    for source, dims in (report["sources"].get("sources") or {}).items():
+        present = [d for d, has in dims.items() if has]
+        print(f"  {source}: {', '.join(present) if present else 'no measured coverage'}")
+    return 0
+
+
+def _cmd_mapping(db, args) -> int:
+    from app.services.reconciliation import identities
+
+    try:
+        result = identities.apply_manual_mapping(
+            db, args.entity_type, args.source, args.source_record_id,
+            args.canonical_id, created_by=args.by, dry_run=args.dry_run)
+    except ValueError as exc:
+        print(f"error: {exc}")
+        return 1
+    print(json.dumps(result, indent=2, default=str))
+    return 0
+
+
 def main() -> int:
     configure_logging(get_settings().LOG_LEVEL)
     ap = argparse.ArgumentParser(description="TacticX prediction intelligence.")
@@ -360,6 +440,27 @@ def main() -> int:
     p = sub.add_parser("evaluate", help="Evaluate completed predictions")
     p.add_argument("--limit", type=int, default=500)
 
+    p = sub.add_parser("reconcile", help="Multi-source reconciliation")
+    p.add_argument("--match", type=int, default=None)
+    p.add_argument("--league", default=None)
+    p.add_argument("--season", default=None)
+    p.add_argument("--all", action="store_true", dest="all_leagues")
+    p.add_argument("--limit", type=int, default=500)
+    p.add_argument("--dry-run", action="store_true")
+    p.add_argument("--json", action="store_true", dest="as_json")
+
+    p = sub.add_parser("data-quality", help="Coverage + conflicts + quality report")
+    p.add_argument("--league", default=None)
+    p.add_argument("--json", action="store_true", dest="as_json")
+
+    p = sub.add_parser("mapping", help="Manual identity mapping")
+    p.add_argument("entity_type", choices=["team", "player", "match", "bookmaker"])
+    p.add_argument("source")
+    p.add_argument("source_record_id")
+    p.add_argument("canonical_id", type=int)
+    p.add_argument("--by", default="cli")
+    p.add_argument("--dry-run", action="store_true")
+
     args = ap.parse_args()
     Base.metadata.create_all(get_engine())
     db = get_session_local()()
@@ -382,6 +483,12 @@ def main() -> int:
             return _cmd_refresh(db, args)
         if args.command == "evaluate":
             return _cmd_evaluate(db, args)
+        if args.command == "reconcile":
+            return _cmd_reconcile(db, args)
+        if args.command == "data-quality":
+            return _cmd_data_quality(db, args)
+        if args.command == "mapping":
+            return _cmd_mapping(db, args)
         ap.error(f"unknown command: {args.command}")
         return 1
     finally:

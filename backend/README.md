@@ -673,3 +673,39 @@ Validated: 310 tests green (288 prior + 22 new); full v1→v2→lock→evaluate
 chain on real + controlled fixtures; real-provider check (5 football + 1 odds
 request: 380-season pull works, date filter dead on this key, 20 upcoming odds
 events resolve to zero canonical matches — correctly unmatched, never guessed).
+
+## Phase 8 — Multi-source reconciliation + data quality
+
+Reconciliation layer (`app/services/reconciliation/`): source envelopes with
+raw references (`records.py`), typed match comparison with kickoff tolerance
++ season buckets (`matches.py`), team/player identity with unresolved queue
+and versioned manual mappings (`identities.py`), event matching within
+`EVENT_TIME_TOLERANCE_SECONDS` (`events.py`), semantic statistic
+classification with a definition registry (`statistics.py`), bookmaker/market
+selection canonicalization (`odds_norm.py`), per-field canonical resolvers
+with version history (`canonical.py`), documented quality scoring
+(`quality.py`), measured source matrix (`matrix.py`), and prediction gating
+(`gating.py`: critical identity conflicts block, irrelevant gaps do not;
+temporal gates never weakened).
+
+```bash
+python scripts/tacticx.py reconcile --match 1 [--dry-run]
+python scripts/tacticx.py reconcile --league EPL [--all --limit 500]
+python scripts/tacticx.py data-quality [--league EPL]
+python scripts/tacticx.py mapping team <source> <source_id> <canonical_id> [--dry-run]
+```
+
+API: `GET /api/v1/data-quality[/{entity}]`,
+`/matches/{id}/sources|conflicts|provenance`,
+`/reconciliation/queue`, `POST /reconciliation/mappings`.
+New tables (`reconciliation_conflicts`, `canonical_field_versions`,
+`unresolved_records`, `manual_mappings`, `stat_definitions`) via `create_all`;
+legacy `source_conflicts` untouched. Field authority is explicit
+(`FIELD_SOURCE_PRIORITY`: score/status/kickoff → api_football, xG →
+statsbomb, odds → odds_api, closing → football_data_co_uk).
+
+Validated: 332 tests green (310 prior + 22 new); real-data run over 5 leagues
+(3272 matches, 414 multi-source, 0 unresolved; same-stat cross-source overlap
+is 0 — disjoint coverage, honestly reported); synthetic overlap proves
+classification, event matching (8s-apart duplicate matched), idempotency, and
+prediction isolation (4388 prediction rows byte-identical after reconcile).

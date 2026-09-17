@@ -51,6 +51,19 @@ def readiness_gate(db: Session, match_id: int, cutoff: datetime,
                 "reasons": ["match missing"]}
     availability = assess_availability(db, match_id, cutoff, mode)
     reasons = list(availability.notes)
+    # Phase 8 quality gating: critical identity conflicts block prediction;
+    # irrelevant missing fields do not. Temporal gates are never weakened.
+    try:
+        from app.services.reconciliation import gating as gating_svc
+
+        gate_decision = gating_svc.gating_decision(db, match_id)
+        if gate_decision.get("decision") == "blocked":
+            return {"readiness": "insufficient_data",
+                    "reasons": reasons + gate_decision.get("reasons", []),
+                    "availability": availability.as_dict(),
+                    "gating": gate_decision}
+    except Exception:
+        pass
     if not availability.goals:
         return {"readiness": "insufficient_data", "reasons": reasons,
                 "availability": availability.as_dict()}

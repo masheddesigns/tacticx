@@ -83,6 +83,18 @@ class Settings(BaseSettings):
     DRIFT_WATCH_BRIER_DELTA: float = 0.02
     DRIFT_DEGRADED_BRIER_DELTA: float = 0.05
 
+    # --- Phase 8: reconciliation (evidence preserved, never silently merged) ---
+    # Kickoff differences within this tolerance merge; larger ones conflict.
+    MATCH_KICKOFF_TOLERANCE_MINUTES: int = 15
+    # Event matching window across sources (seconds).
+    EVENT_TIME_TOLERANCE_SECONDS: int = 30
+    # Field-level source authority ("field:source;..."). No universal winner:
+    # each field names its authoritative source explicitly and reviewably.
+    FIELD_SOURCE_PRIORITY: str = (
+        "score:api_football;status:api_football;kickoff:api_football;"
+        "xg:statsbomb;odds:odds_api;closing_odds:football_data_co_uk"
+    )
+
     CELERY_BROKER_URL: str = "redis://localhost:6379/1"
     CELERY_RESULT_BACKEND: str = "redis://localhost:6379/2"
 

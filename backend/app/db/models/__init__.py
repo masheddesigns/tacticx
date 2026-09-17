@@ -18,6 +18,13 @@ from app.db.models.lifecycle import (  # noqa: F401
     PredictionVersion,
     SourceHealth,
 )
+from app.db.models.reconciliation import (  # noqa: F401
+    CanonicalFieldVersion,
+    ManualMapping,
+    ReconciliationConflict,
+    StatDefinition,
+    UnresolvedRecord,
+)
 from app.db.models.intelligence import (  # noqa: F401
     AnalogueResult,
     MiroFishRun,
