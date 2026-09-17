@@ -37,8 +37,11 @@ from app.services.predictions.outputs import FullPrediction
 MODEL_NAME = "poisson"
 MODEL_VERSION = "poisson_v1"
 
-GRID_MAX = 10  # 0..10 each side: truncation mass beyond is negligible,
-# so analytic and Monte Carlo markets converge tightly.
+GRID_MAX = 10  # 0..10 each side. Phase 5 measured the truncation tail on
+# EPL 2024 (strict, N=375): mean outside mass 0.00036, 3 matches above 1%
+# (max 0.033 on extreme lambdas ~5.7). A grid-12 variant was widened and
+# retested on the identical population: Brier delta -0.000015, log-loss
+# delta -0.000131 — immaterial. The 0..10 grid stands on this evidence.
 
 
 @dataclass

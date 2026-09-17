@@ -4,7 +4,7 @@ from __future__ import annotations
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from app.api.routes import catalog, health, markets, matches, odds, predictions, sync
+from app.api.routes import catalog, health, markets, matches, odds, predictions, sync, validation
 from app.config import get_settings
 from app.logging_config import configure_logging
 
@@ -33,6 +33,7 @@ app.include_router(odds.router, prefix=prefix)
 app.include_router(markets.router, prefix=prefix)
 app.include_router(predictions.router, prefix=prefix)
 app.include_router(sync.router, prefix=prefix)
+app.include_router(validation.router, prefix=prefix)
 
 
 @app.get("/", include_in_schema=False)

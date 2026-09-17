@@ -189,7 +189,14 @@ def run_backtest(db: Session, model, league_code: Optional[str] = None,
             detail_rows.append({"match_id": match.id,
                                 "probs": [pred.home_win_probability, pred.draw_probability,
                                           pred.away_win_probability],
-                                "actual": INDEX[actual]})
+                                "actual": INDEX[actual],
+                                "expected_home_goals": pred.expected_home_goals,
+                                "expected_away_goals": pred.expected_away_goals,
+                                "actual_home_goals": int(match.home_score or 0),
+                                "actual_away_goals": int(match.away_score or 0),
+                                "actual_score": f"{int(match.home_score or 0)}-"
+                                                f"{int(match.away_score or 0)}",
+                                "score_probabilities": dict(pred.score_probabilities or {})})
 
     result = {
         "model": model_name,

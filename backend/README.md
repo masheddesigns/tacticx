@@ -563,3 +563,39 @@ out-of-sample here (reported, not hidden). Poisson-xg beats poisson on the
 La Liga 2015 ablation (identical N=330). Market slice (n=284): market ahead
 of Elo descriptively; paired bootstrap CI excludes zero but closing lines
 inform the market side — stated, not a superiority claim.
+
+## Phase 5 — Robustness + cross-league validation + probability quality
+
+Evaluation package (`app/services/evaluation/`): identical-population
+comparisons (`compare.py`: match-id intersection, paired per-match Brier /
+log-loss diffs, deterministic bootstrap CIs), per-class calibration with
+sparse-bin flags (`calibration.py`), descriptive uncertainty — entropy,
+probability margin, member disagreement (`uncertainty.py`; never correctness
+claims), parameter sensitivity + Monte Carlo convergence + Poisson
+truncation audit (`sensitivity.py`), availability-based model regimes +
+model status registry (`regimes.py`), subgroup / extreme-probability / draw /
+goal-distribution / correct-score / drift analyses (`subgroups.py`), and
+deterministic run artifacts with dataset fingerprint + environment metadata
+(`artifacts.py`, `data/phase5/<run_id>/`).
+
+```bash
+python scripts/phase5_validate.py --analysis baseline --scope "EPL:2024,LA_LIGA:2015" --models "elo,poisson,ensemble" [--with-market]
+python scripts/phase5_validate.py --analysis sensitivity|mc|weights|advanced --scope "EPL:2024"
+python scripts/phase5_deepdive.py --label v1
+```
+
+Validated: ensemble_v1 (equal weights) is the production default across 6
+league-seasons (EPL 2024/2023, La Liga 2015/2023, Serie A 2023, Bundesliga
+2023) — learned v2 weights and validation-fit temperature did not transfer
+out-of-sample (measured, CIs reported). xG pathway: xG rows carry unknown
+timing, so strict mode correctly excludes them (poisson-xg ≡ poisson_v1);
+under parent-anchored estimated mode poisson-xg beats poisson_v1 decisively
+on identical populations (EPL 2015 dBrier +0.052, La Liga 2015 +0.069, CIs
+exclude zero) — estimated, never a strict claim. Monte Carlo: 10k draws are
+within ~0.012 of 25k worst-case (seed 7); 1k backtest draws carry sampling
+noise up to ~0.05. Poisson 0..10 grid retained on evidence (grid-12 retest:
+Brier Δ 0.000015). Closing lines remain the sharper benchmark (EPL 2024
+market Brier 0.568 vs model 0.594, N=284) and are never a model input.
+
+Read-only artifacts API: `GET /api/v1/validation/phase5/runs`,
+`/runs/{run_id}/{artifact}`, `/model-registry`, `/disclaimer`.
