@@ -310,6 +310,56 @@ def _cmd_evaluate(db, args) -> int:
     return 0
 
 
+def _cmd_player_features(db, args) -> int:
+    from app.services.player_intelligence import feature_snapshot
+
+    if args.match_id is None and not args.league:
+        print("pass --match-id or --league")
+        return 1
+    from app.db.models.core import League, Match
+
+    if args.match_id is not None:
+        targets = [args.match_id]
+    else:
+        league = db.query(League).filter_by(code=args.league).first()
+        if league is None:
+            print(f"unknown league: {args.league}")
+            return 1
+        targets = [m.id for m in db.query(Match.id).filter_by(
+            league_id=league.id).order_by(Match.id.asc()).limit(args.limit).all()]
+    mode = {"strict": "strict_prematch", "estimated": "historical_estimated"}[args.mode]
+    from app.services.features.temporal import TemporalMode
+
+    for match_id in targets:
+        match = db.get(Match, match_id)
+        if match is None or match.kickoff_at is None:
+            print(f"match {match_id}: UNAVAILABLE (no kickoff)")
+            continue
+        try:
+            out = feature_snapshot.build_snapshot(
+                db, match_id, match.kickoff_at, TemporalMode(mode), persist=False)
+        except ValueError as exc:
+            print(f"match {match_id}: UNAVAILABLE ({exc})")
+            continue
+        if args.as_json:
+            print(json.dumps(out, indent=2, default=str))
+            continue
+        for side in ("home", "away"):
+            block = out[side]
+            status = block.get("status", "unknown").upper()
+            if status != "OK":
+                print(f"match {match_id} {side}: {status} "
+                      f"({block.get('reason', '')})")
+                continue
+            team = block.get("team", {})
+            quality = (block.get("quality", {}) or {}).get("quality", "unknown")
+            tag = "ESTIMATED" if out["mode"] == "historical_estimated" else "AVAILABLE"
+            print(f"match {match_id} {side}: {tag} quality={quality} "
+                  f"regulars={team.get('n_regular_contributors')} "
+                  f"contributors={len(block.get('contributors', []))}")
+    return 0
+
+
 def _cmd_reconcile(db, args) -> int:
     import time
 
@@ -440,6 +490,13 @@ def main() -> int:
     p = sub.add_parser("evaluate", help="Evaluate completed predictions")
     p.add_argument("--limit", type=int, default=500)
 
+    p = sub.add_parser("player-features", help="Player/event/lineup feature snapshot")
+    p.add_argument("--match-id", type=int, default=None)
+    p.add_argument("--league", default=None)
+    p.add_argument("--limit", type=int, default=20)
+    p.add_argument("--mode", default="strict", choices=["strict", "estimated"])
+    p.add_argument("--json", action="store_true", dest="as_json")
+
     p = sub.add_parser("reconcile", help="Multi-source reconciliation")
     p.add_argument("--match", type=int, default=None)
     p.add_argument("--league", default=None)
@@ -483,6 +540,8 @@ def main() -> int:
             return _cmd_refresh(db, args)
         if args.command == "evaluate":
             return _cmd_evaluate(db, args)
+        if args.command == "player-features":
+            return _cmd_player_features(db, args)
         if args.command == "reconcile":
             return _cmd_reconcile(db, args)
         if args.command == "data-quality":

@@ -709,3 +709,27 @@ Validated: 332 tests green (310 prior + 22 new); real-data run over 5 leagues
 is 0 — disjoint coverage, honestly reported); synthetic overlap proves
 classification, event matching (8s-apart duplicate matched), idempotency, and
 prediction isolation (4388 prediction rows byte-identical after reconcile).
+
+## Phase 9 — Player, lineup & event intelligence (additive feature layer)
+
+Player intelligence (`app/services/player_intelligence/`): cutoff-safe
+repository (target contributes zero; unknown timing strict-excluded),
+appearance histories (starts/subs; minutes honestly unavailable), registered
+event features (goals/penalties/cards/subs with source definitions — no
+shots/passes/tackles invented), per-appearance form with sample gates,
+transparent team aggregates with contributors, lineup continuity + formation
+frequency/entropy/stability, versioned memberships, availability boundary
+(unknown, never injury-inferred), 5-dimension quality, hashed versioned
+snapshots (`player_features_v1`).
+
+```bash
+python scripts/tacticx.py player-features --match-id 702 --mode estimated
+python scripts/player_experiment.py --league LA_LIGA  # isolated, descriptive
+```
+
+API: `GET /api/v1/features/player/{id}[/availability|contributors|quality]`
+(inspection only). No prediction model modified; offline experiment showed
+no activatable signal (weights 0.0 / null CI); strict mode yields nothing
+on current data (effective_at NULL) — reported, not worked around.
+Docs: `PHASE9_REPORT.md`, `PHASE9_LEAKAGE_AUDIT.md`, `PHASE9_REGRESSION_REPORT.md`
+(changed = 0).

@@ -25,6 +25,11 @@ from app.db.models.reconciliation import (  # noqa: F401
     StatDefinition,
     UnresolvedRecord,
 )
+from app.db.models.player_intelligence import (  # noqa: F401
+    PlayerFeatureProvenance,
+    PlayerFeatureSnapshot,
+    PlayerTeamMembership,
+)
 from app.db.models.intelligence import (  # noqa: F401
     AnalogueResult,
     MiroFishRun,
