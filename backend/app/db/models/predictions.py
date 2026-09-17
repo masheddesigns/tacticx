@@ -24,6 +24,14 @@ class Prediction(Base):
     probabilities: Mapped[Optional[dict]] = mapped_column(JSON, nullable=True)
     confidence: Mapped[Optional[float]] = mapped_column(Float, nullable=True)
     input_snapshot: Mapped[Optional[dict]] = mapped_column(JSON, nullable=True)
+    # Phase 2 audit columns (all optional/nullable-safe for old rows).
+    model_name: Mapped[str] = mapped_column(String(64), default="", index=True)
+    prediction_cutoff: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True), nullable=True)
+    temporal_mode: Mapped[str] = mapped_column(String(32), default="strict_prematch")
+    status: Mapped[str] = mapped_column(String(32), default="valid", index=True)
+    feature_availability: Mapped[Optional[dict]] = mapped_column(JSON, nullable=True)
+    model_config: Mapped[Optional[dict]] = mapped_column(JSON, nullable=True)
+    random_seed: Mapped[Optional[int]] = mapped_column(Integer, nullable=True)
 
 
 class PredictionResult(Base):
@@ -33,3 +41,24 @@ class PredictionResult(Base):
     prediction_id: Mapped[int] = mapped_column(ForeignKey("predictions.id"), index=True)
     actual_result: Mapped[str] = mapped_column(String(64))
     resolved_timestamp: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+
+
+class BacktestRun(Base):
+    """One recorded backtest execution with its aggregate metrics."""
+
+    __tablename__ = "backtest_runs"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    model_name: Mapped[str] = mapped_column(String(64), default="", index=True)
+    model_version: Mapped[str] = mapped_column(String(64), default="")
+    league: Mapped[str] = mapped_column(String(32), default="")
+    season: Mapped[str] = mapped_column(String(16), default="")
+    temporal_mode: Mapped[str] = mapped_column(String(32), default="strict_prematch")
+    date_from: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True), nullable=True)
+    date_to: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True), nullable=True)
+    sample_size: Mapped[int] = mapped_column(Integer, default=0)
+    excluded_insufficient: Mapped[int] = mapped_column(Integer, default=0)
+    excluded_temporal: Mapped[int] = mapped_column(Integer, default=0)
+    metrics: Mapped[Optional[dict]] = mapped_column(JSON, nullable=True)
+    model_config: Mapped[Optional[dict]] = mapped_column(JSON, nullable=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())

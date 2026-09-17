@@ -417,3 +417,28 @@ today: results/shots/corners/cards/closing-odds modeling on fdco seasons,
 and xG/event-based modeling strictly within the 794 fully-detailed matches.
 Next data if wanted: more StatsBomb detail seasons (mechanical from here),
 a permitted possession source (none exists among evaluated sources).
+
+## Phase 2 — Statistical prediction engine
+
+Models (`app/services/predictions/`): **Elo** (chronological ratings + home
+edge + empirical draw prior), **Poisson** (venue-split attack/defense, recency
+weights, league context, optional xG blend), **Monte Carlo** (seeded sampling
+of Poisson lambdas), **Ensemble** (configurable weights, registry for future
+xG/ML/Market/MiroFish members), **Baseline** (pre-cutoff empirical
+distribution). All outputs: 1X2 (sums to 1), expected goals, O/U 1.5/2.5/3.5,
+BTTS, score grid, audit trail. No guarantees language anywhere.
+
+Temporal safety: `HistoricalFeatureRepository` (cutoff + strict/estimated
+modes) is the only read path for models; unknown-timing records excluded in
+strict mode; backtests default to strict and walk forward chronologically
+(train = all before cutoff, test = next match).
+
+```bash
+python scripts/predict.py --match-id ID --model ensemble [--seed 7] [--json]
+python scripts/backtest.py --league EPL --season 2024 [--model poisson] [--temporal-mode strict_prematch] [--json]
+```
+
+Real validation (strict, EPL 2024/La Liga 2015): ensemble ≥ poisson ≥ Elo >
+baseline on accuracy/log-loss/Brier; xG blend active only where eligible
+(`xg_used` recorded). Poisson/ensemble backtests are slow on full seasons
+(O(n²) history scans) — bound with `--from-date/--to-date` for iteration.
