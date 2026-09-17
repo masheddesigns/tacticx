@@ -48,6 +48,23 @@ class Settings(BaseSettings):
     PROVIDER_RETRY_BASE_SECONDS: float = 1.0
     PROVIDER_TIMEOUT_SECONDS: float = 20.0
 
+    # --- Phase 3: market intelligence (analytical only, never betting) ---
+    # Consensus aggregates no-vig probabilities across bookmakers.
+    ODDS_CONSENSUS_METHOD: str = "median"  # median | mean | trimmed_mean
+    # Snapshots within this window count as simultaneous for best-price views.
+    ODDS_CONSENSUS_TIME_WINDOW_MINUTES: int = 5
+    # Minimum bookmakers required to publish a consensus.
+    ODDS_CONSENSUS_MIN_BOOKMAKERS: int = 2
+    # Price moves smaller than this (decimal) are noise, not movement.
+    ODDS_MOVEMENT_FLAT_TOLERANCE: float = 0.005
+    # Velocity needs a meaningful interval: bulk imports stamp batches
+    # milliseconds apart, which would annualize into nonsense. Intervals
+    # below this (seconds) yield velocity None (movement still recorded).
+    ODDS_MIN_VELOCITY_INTERVAL_SECONDS: float = 60.0
+    # Model-vs-market agreement bands (absolute probability points).
+    MODEL_MARKET_NEUTRAL_THRESHOLD: float = 0.03
+    MODEL_MARKET_STRONG_THRESHOLD: float = 0.08
+
     CELERY_BROKER_URL: str = "redis://localhost:6379/1"
     CELERY_RESULT_BACKEND: str = "redis://localhost:6379/2"
 

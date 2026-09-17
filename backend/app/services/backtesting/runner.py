@@ -166,7 +166,7 @@ def run_backtest(db: Session, model, league_code: Optional[str] = None,
         outcome_probs.append([pred.home_win_probability, pred.draw_probability,
                               pred.away_win_probability])
         outcome_actual.append(INDEX[actual])
-        outcome_predicted.append(int(max(range(3), key=lambda i: outcome_probs[-1][i])))
+        outcome_predicted.append(met.argmax_labels([outcome_probs[-1]])[0])
         total_goals = (match.home_score or 0) + (match.away_score or 0)
         if pred.over_2_5_probability is not None:
             over25_probs.append(pred.over_2_5_probability)

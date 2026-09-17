@@ -69,7 +69,11 @@ uvicorn app.main:app --reload
 All tunables live in `backend/.env` (see `backend/.env.example`):
 `DATABASE_URL`, `REDIS_URL`, `FOOTBALL_API_KEY`, `ODDS_API_KEY`,
 `SUPPORTED_LEAGUES` (`CODE:provider_id:season` — add leagues without code changes),
-cache TTLs (`TTL_*`), quota guards (`PROVIDER_MAX_REQUESTS_*`, retry settings).
+cache TTLs (`TTL_*`), quota guards (`PROVIDER_MAX_REQUESTS_*`, retry settings),
+market settings (`ODDS_CONSENSUS_METHOD`, `ODDS_CONSENSUS_TIME_WINDOW_MINUTES`,
+`ODDS_CONSENSUS_MIN_BOOKMAKERS`, `ODDS_MOVEMENT_FLAT_TOLERANCE`,
+`ODDS_MIN_VELOCITY_INTERVAL_SECONDS`, `MODEL_MARKET_NEUTRAL_THRESHOLD`,
+`MODEL_MARKET_STRONG_THRESHOLD`).
 
 ## Architecture
 
@@ -102,6 +106,7 @@ cache TTLs (`TTL_*`), quota guards (`PROVIDER_MAX_REQUESTS_*`, retry settings).
 | GET | `/api/v1/odds`, `/api/v1/odds/{id}`, `/api/v1/odds/{id}/history`, `/api/v1/odds/{id}/movement` | movement = opening/current/Δ/%/direction/velocity |
 | GET | `/api/v1/leagues`, `/api/v1/teams` | catalog |
 | GET | `/api/v1/predictions/{match_id}` | stored predictions (stub in Phase 1) |
+| GET | `/api/v1/markets/{id}`, `…/history`, `…/movement`, `…/consensus`, `…/comparison` | market state, timeline, consensus, model-vs-market (all support `?cutoff=`) |
 | GET | `/api/v1/sync/logs`, `/api/v1/sync/leagues` | ingestion visibility |
 
 ## No fake data rule
@@ -267,13 +272,14 @@ upserts. `--source` overrides the configured primary→fallback chain per run.
 
 ### 14. Testing
 
-`tests/test_phase16.py` (48 tests) + `tests/test_phase17.py` (32 tests) +
-`tests/test_phase18.py` (29 tests), all mocked — no live network in pytest.
-fdco stats/closing/AH parsing, xG validation, stat-conflict tolerance,
-StatsBomb event/lineup mapping, pipeline detail persistence, player identity
-(exact/legacy/alias/ambiguous/team-scoped/created), raw provenance fields,
-temporal-quality assessment, registry, dataset cache, season ranges, API
-event/lineup extensions, cross-source identity, prune. Full suite: 118 passed.
+`tests/test_phase1.py` (20) + `test_phase15.py` (18) + `test_phase16.py` (48) +
+`test_phase17.py` (32) + `test_phase18.py` (29) + `test_phase2.py` (37) +
+`tests/test_phase3.py` (25), all mocked — no live network in pytest.
+Phase 3 covers: implied/overround/no-vig, consensus (median/mean/trimmed),
+movement/velocity incl. zero-interval and sub-minute guards, cutoff
+reconstruction (future excluded), model comparison + agreement bands, closing
+as benchmark-only, completeness handling, market API, market backtesting.
+Full suite: 209 passed.
 
 ### 15. Known API limitations (unchanged)
 
@@ -442,3 +448,78 @@ Real validation (strict, EPL 2024/La Liga 2015): ensemble ≥ poisson ≥ Elo >
 baseline on accuracy/log-loss/Brier; xG blend active only where eligible
 (`xg_used` recorded). Poisson/ensemble backtests are slow on full seasons
 (O(n²) history scans) — bound with `--from-date/--to-date` for iteration.
+
+## Phase 3 — Market intelligence + odds analysis
+
+Separate analytical layer over bookmaker prices. The statistical ensemble
+never consumes odds; the market never overwrites model probabilities.
+
+### Market architecture
+
+```
+Observed snapshots (append-only, per match/bookmaker/market/timestamp)
+        │
+        ▼
+Implied probability (1/price) → overround check (complete markets only)
+        │
+        ▼
+No-vig normalization → per-bookmaker fair probabilities
+        │
+        ▼
+Consensus (median/mean/trimmed-mean across books, configurable minimum)
+        │
+        ▼
+Model-vs-market comparison (differences + agreement bands, thresholds in .env)
+```
+
+### Implied probability, overround, no-vig
+
+`raw = 1/price` per selection. Overround = Σraw over a **complete** market
+(h2h needs home+draw+away; totals grouped by line) — never computed from
+partial markets. No-vig = raw/Σraw, kept alongside raw (never overwriting).
+Calculation version: `market_probability_v1`.
+
+### Consensus methodology
+
+Probabilities (not decimal odds) are aggregated: median by default (robust to
+one stale book), mean or trimmed-mean configurable via
+`ODDS_CONSENSUS_METHOD`. Consensus requires
+`ODDS_CONSENSUS_MIN_BOOKMAKERS` (default 2) complete books. Best/worst prices
+only compare snapshots inside `ODDS_CONSENSUS_TIME_WINDOW_MINUTES` (default
+5). Version: `market_consensus_v1`.
+
+### Movement methodology
+
+Per (bookmaker, market, selection) timeline: consecutive equal prices
+collapse; moves below `ODDS_MOVEMENT_FLAT_TOLERANCE` are noise; velocity is
+percentage-points-per-hour, `None` on zero/duplicate timestamps or intervals
+below `ODDS_MIN_VELOCITY_INTERVAL_SECONDS` (bulk imports stamp batches
+milliseconds apart — recorded, never annualized). Version: `movement_v1`.
+
+### Cutoff reconstruction
+
+`get_market_state(match_id, cutoff, market)` returns the latest snapshot per
+bookmaker with timestamp ≤ cutoff — future odds are unreachable by
+construction. Completeness: complete (≥1 full book) / partial /
+insufficient. Closing lines (C-suffixed source market IDs) are a benchmark
+only, never a pre-closing input.
+
+### Model-market comparison
+
+Per-outcome absolute/relative differences plus agreement bands from
+`MODEL_MARKET_NEUTRAL_THRESHOLD` (0.03) / `MODEL_MARKET_STRONG_THRESHOLD`
+(0.08): same top outcome within neutral → strong agreement, and so on.
+Descriptors only — never recommendations, never "sharp/insider" narratives.
+
+### Limitations
+
+- Bulk historical timestamps are import-time (or kickoff-stamped estimates):
+  pre-kickoff reconstruction works only for live-polled data; closing lines
+  are the historical benchmark.
+- Only h2h/totals/asian_handicap observed so far; BTTS and others appear only
+  if a source supplies them.
+- 7 bookmakers via football-data.co.uk; live coverage depends on provider.
+- Consensus needs ≥2 complete books; single-book states report completeness
+  without consensus.
+- TacticX market probabilities are analytical transformations of observed
+  bookmaker prices and are not guaranteed probabilities of the actual outcome.

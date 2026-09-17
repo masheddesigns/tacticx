@@ -23,6 +23,27 @@ def accuracy(predicted: List[str], actual: List[str]) -> float:
     return sum(1 for p, a in zip(predicted, actual) if p == a) / len(actual)
 
 
+def argmax_labels(prob_matrix: List[List[float]]) -> List[int]:
+    """Predicted class indices (ties resolve to the lowest index)."""
+    out = []
+    for row in prob_matrix:
+        best, best_idx = None, 0
+        for i, value in enumerate(row):
+            if best is None or value > best:
+                best, best_idx = value, i
+        out.append(best_idx)
+    return out
+
+
+def accuracy_from_probs(prob_matrix: List[List[float]], actual_indices: List[int],
+                        labels: Optional[List[str]] = None) -> float:
+    """Accuracy of argmax predictions against integer class labels."""
+    if not actual_indices:
+        return 0.0
+    predicted = argmax_labels(prob_matrix)
+    return sum(1 for p, a in zip(predicted, actual_indices) if p == a) / len(actual_indices)
+
+
 def multiclass_log_loss(prob_matrix: np.ndarray, actual_indices: List[int]) -> float:
     """Mean negative log-likelihood of the true class."""
     if not actual_indices:
