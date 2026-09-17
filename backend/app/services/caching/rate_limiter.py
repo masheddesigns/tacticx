@@ -12,10 +12,19 @@ from app.services.caching import cache as _cache_mod
 _buckets: dict[str, tuple[float, float]] = {}  # provider -> (tokens, last_refill)
 
 
+def _capacity_for(provider: str) -> int:
+    settings = get_settings()
+    key = f"{provider.upper()}_RATE_LIMIT_PER_MINUTE"
+    configured = getattr(settings, key, None)
+    if isinstance(configured, (int, float)) and configured > 0:
+        return max(1, int(configured))
+    return max(1, settings.PROVIDER_MAX_REQUESTS_PER_MINUTE)
+
+
 def acquire(provider: str) -> bool:
     """Return True if a request slot is available (and consume it)."""
     settings = get_settings()
-    capacity = max(1, settings.PROVIDER_MAX_REQUESTS_PER_MINUTE)
+    capacity = _capacity_for(provider)
     refill_per_sec = capacity / 60.0
     now = time.time()
     tokens, last = _buckets.get(provider, (float(capacity), now))
@@ -28,8 +37,7 @@ def acquire(provider: str) -> bool:
 
 
 def time_until_available(provider: str) -> float:
-    settings = get_settings()
-    capacity = max(1, settings.PROVIDER_MAX_REQUESTS_PER_MINUTE)
+    capacity = _capacity_for(provider)
     refill_per_sec = capacity / 60.0
     tokens, _ = _buckets.get(provider, (float(capacity), time.time()))
     if tokens >= 1.0:

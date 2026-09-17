@@ -638,3 +638,38 @@ Validated: 288 tests green (258 prior + 30 new); integration over real
 Bundesliga/EPL/La Liga matches with probability + temporal audits;
 MiroFish adapter ready with no external service bound (honest
 `unavailable`, never fabricated).
+
+## Phase 7 — Live pipeline + prediction lifecycle
+
+Lifecycle layer (`app/services/lifecycle/`): source-agnostic upcoming
+discovery (`upcoming.py`; API-Football season fetch + local windowing, odds
+events with unresolved league left unset), idempotent canonical sync
+(`sync.py` via Phase 1.6 resolvers; metadata may advance, predictions never
+touched), versioned predictions (`versions.py`: generated → refreshed →
+superseded → locked → evaluated; readiness gate; input-reference cache;
+neutral diffs; kickoff lock), append-only odds refresh + current market state
+(`odds_refresh.py`; closing reported separately, never merged), source health
+with bounded retries and fail-fast auth (`health.py`), post-match evaluation
+(`evaluate.py`; finished-only, idempotent, never mutates predictions),
+descriptive monitoring (`monitoring.py`; rolling metrics, drift bands,
+data drift — never switches models or retrains), and
+`UpcomingPredictionService` (readiness-gated single + isolated batch).
+
+```bash
+python scripts/tacticx.py sync-upcoming [--league EPL --hours 168]
+python scripts/tacticx.py predict-upcoming [--league EPL --hours 48]
+python scripts/tacticx.py refresh <match_id>
+python scripts/tacticx.py evaluate [--limit 500]
+```
+
+API: `GET /api/v1/matches/{id}/predictions|prediction/latest|prediction/diff`,
+`POST .../predict|refresh`, `GET /api/v1/sources/health|status`,
+`POST /api/v1/lifecycle/evaluate`, `GET .../monitoring`, `POST .../lock`.
+New tables (`prediction_versions`, `prediction_diffs`, `source_health`,
+`prediction_evaluations`) via the established `create_all` pattern with
+lifecycle indexes; sync logging reuses `data_sync_logs`.
+
+Validated: 310 tests green (288 prior + 22 new); full v1→v2→lock→evaluate
+chain on real + controlled fixtures; real-provider check (5 football + 1 odds
+request: 380-season pull works, date filter dead on this key, 20 upcoming odds
+events resolve to zero canonical matches — correctly unmatched, never guessed).

@@ -65,6 +65,24 @@ class Settings(BaseSettings):
     MODEL_MARKET_NEUTRAL_THRESHOLD: float = 0.03
     MODEL_MARKET_STRONG_THRESHOLD: float = 0.08
 
+    # --- Phase 7: live pipeline + prediction lifecycle (analytical only) ---
+    # Upcoming-match discovery window (hours ahead). Never hard-coded elsewhere.
+    NEXT_MATCH_LOOKAHEAD_HOURS: int = 168
+    # Odds re-poll interval floor (minutes). Polls must not run more often.
+    ODDS_REFRESH_INTERVAL_MINUTES: int = 15
+    # Per-provider rate limits (requests/minute). The limiter reads these by
+    # provider name and falls back to PROVIDER_MAX_REQUESTS_PER_MINUTE.
+    API_FOOTBALL_RATE_LIMIT_PER_MINUTE: int = 25
+    ODDS_API_RATE_LIMIT_PER_MINUTE: int = 25
+    # Cache TTLs for lifecycle reads (seconds).
+    UPCOMING_FIXTURES_CACHE_TTL_SECONDS: int = 900
+    CURRENT_ODDS_CACHE_TTL_SECONDS: int = 300
+    SOURCE_META_CACHE_TTL_SECONDS: int = 3600
+    # Monitoring: rolling windows and drift bands (descriptive, never switching).
+    MONITOR_ROLLING_WINDOWS: str = "50,100"
+    DRIFT_WATCH_BRIER_DELTA: float = 0.02
+    DRIFT_DEGRADED_BRIER_DELTA: float = 0.05
+
     CELERY_BROKER_URL: str = "redis://localhost:6379/1"
     CELERY_RESULT_BACKEND: str = "redis://localhost:6379/2"
 

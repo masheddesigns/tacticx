@@ -205,6 +205,111 @@ def _cmd_mirofish(db, args) -> int:
     return 0
 
 
+def _cmd_sync_upcoming(db, args) -> int:
+    from app.services.lifecycle import cached
+    from app.services.lifecycle import sync as sync_service
+    from app.services.lifecycle import upcoming as upcoming_service
+
+    start, end = sync_service.upcoming_window(args.hours)
+    sources = upcoming_service.default_sources()
+    if not sources:
+        print("no providers configured (FOOTBALL_API_KEY/ODDS_API_KEY missing); "
+              "nothing to sync against")
+        return 1
+    key = cached.cache_key("upcoming", "fetch", args.league or "all",
+                           start.date().isoformat(), end.date().isoformat())
+    def _load():
+        grouped = upcoming_service.fetch_all(sources, start, end, args.league)
+        serializable = {}
+        for name, records in grouped.items():
+            if name.endswith("__error"):
+                serializable[name] = records
+            else:
+                serializable[name] = [r.model_dump(mode="json") for r in records]
+        return serializable
+
+    envelope = cached.cached_fetch(key, cached.upcoming_ttl(), _load)
+    from app.services.lifecycle.upcoming import UpcomingMatch
+
+    grouped = {}
+    for name, records in (envelope["data"] or {}).items():
+        if name.endswith("__error"):
+            grouped[name] = records
+        else:
+            grouped[name] = [UpcomingMatch(**r) for r in records]
+    grouped = envelope["data"] or {}
+    print(f"fixture response: {envelope['data_status']} "
+          f"(fetched_at={envelope['fetched_at']})")
+    total_seen = total_created = 0
+    for name, records in grouped.items():
+        if name.endswith("__error"):
+            print(f"source {name}: error: {records}")
+            continue
+        stats = sync_service.sync_upcoming_matches(db, records)
+        print(f"source {name}: seen={stats.received} created={stats.inserted} "
+              f"updated={stats.updated} skipped={stats.skipped} "
+              f"errors={len(stats.errors)}")
+        total_seen += stats.received
+        total_created += stats.inserted
+    print(f"total: seen={total_seen} created={total_created} "
+          f"window=[{start.isoformat()}, {end.isoformat()}]")
+    return 0
+
+
+def _cmd_predict_upcoming(db, args) -> int:
+    from app.services.lifecycle.upcoming_predictions import UpcomingPredictionService
+    from app.services.features.temporal import TemporalMode as Mode
+
+    service = UpcomingPredictionService(model=args.model, mode=Mode(args.temporal_mode),
+                                        seed=args.seed)
+    result = service.predict_window(db, hours=args.hours, league_code=args.league,
+                                    limit=args.limit)
+    if args.as_json:
+        print(json.dumps(result, indent=2, default=str))
+        return 0 if result["status"] != "failed" else 1
+    print(f"batch: {result['status']} matches={result['n_matches']} "
+          f"ok={result['n_success']} partial={result['n_partial']} "
+          f"failed={result['n_failed']} ({result['duration_seconds']}s)")
+    for item in result["results"]:
+        version = (item.get("version") or {}).get("version_number", "-")
+        print(f"  match {item['match_id']}: {item['status']} v{version} "
+              f"{item.get('error', '')}")
+    return 0 if result["status"] != "failed" else 1
+
+
+def _cmd_refresh(db, args) -> int:
+    from app.services.lifecycle.upcoming_predictions import UpcomingPredictionService
+    from app.services.features.temporal import TemporalMode as Mode
+
+    service = UpcomingPredictionService(model=args.model, mode=Mode(args.temporal_mode),
+                                        seed=args.seed)
+    result = service.refresh_one(db, args.match_id)
+    if args.as_json:
+        print(json.dumps(result, indent=2, default=str))
+        return 0 if result["status"] == "success" else 1
+    if result["status"] != "success":
+        print(f"refresh failed: {result.get('error')}")
+        return 1
+    print(f"match {args.match_id}: v{result['version']['version_number']} "
+          f"({result['version']['state']})")
+    diff = result.get("diff") or {}
+    for key, change in (diff.get("probability_changes") or {}).items():
+        print(f"  {key}: {change['before']:.3f} -> {change['after']:.3f} "
+              f"({change['wording']})")
+    return 0
+
+
+def _cmd_evaluate(db, args) -> int:
+    from app.services.lifecycle.evaluate import evaluate_completed_predictions
+
+    stats = evaluate_completed_predictions(db, limit=args.limit)
+    print(f"evaluate: received={stats.received} inserted={stats.inserted} "
+          f"skipped={stats.skipped} errors={len(stats.errors)}")
+    for error in stats.errors[:5]:
+        print(f"  error: {error}")
+    return 0
+
+
 def main() -> int:
     configure_logging(get_settings().LOG_LEVEL)
     ap = argparse.ArgumentParser(description="TacticX prediction intelligence.")
@@ -230,6 +335,31 @@ def main() -> int:
     p.add_argument("--scenario", default="baseline")
     p.add_argument("--timeout-seconds", type=float, default=30.0)
 
+    p = sub.add_parser("sync-upcoming", help="Discover + sync upcoming fixtures")
+    p.add_argument("--hours", type=int, default=None)
+    p.add_argument("--league", default=None)
+
+    p = sub.add_parser("predict-upcoming", help="Batch predictions for upcoming matches")
+    p.add_argument("--hours", type=int, default=None)
+    p.add_argument("--league", default=None)
+    p.add_argument("--limit", type=int, default=100)
+    p.add_argument("--model", default=None)
+    p.add_argument("--temporal-mode", default="strict_prematch",
+                   choices=["strict_prematch", "historical_estimated"])
+    p.add_argument("--seed", type=int, default=None)
+    p.add_argument("--json", action="store_true", dest="as_json")
+
+    p = sub.add_parser("refresh", help="Refresh one match into a new version")
+    p.add_argument("match_id", type=int)
+    p.add_argument("--model", default=None)
+    p.add_argument("--temporal-mode", default="strict_prematch",
+                   choices=["strict_prematch", "historical_estimated"])
+    p.add_argument("--seed", type=int, default=None)
+    p.add_argument("--json", action="store_true", dest="as_json")
+
+    p = sub.add_parser("evaluate", help="Evaluate completed predictions")
+    p.add_argument("--limit", type=int, default=500)
+
     args = ap.parse_args()
     Base.metadata.create_all(get_engine())
     db = get_session_local()()
@@ -244,6 +374,14 @@ def main() -> int:
             return _cmd_analogues(db, args)
         if args.command == "mirofish":
             return _cmd_mirofish(db, args)
+        if args.command == "sync-upcoming":
+            return _cmd_sync_upcoming(db, args)
+        if args.command == "predict-upcoming":
+            return _cmd_predict_upcoming(db, args)
+        if args.command == "refresh":
+            return _cmd_refresh(db, args)
+        if args.command == "evaluate":
+            return _cmd_evaluate(db, args)
         ap.error(f"unknown command: {args.command}")
         return 1
     finally:
