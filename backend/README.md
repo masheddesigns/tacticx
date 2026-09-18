@@ -773,3 +773,26 @@ Current-season acquisition honestly records empty/unavailable (no qualifying
 source in environment — documented, no workaround). Docs:
 `PHASE11_REPORT.md`, `PHASE11_ACQUISITION.md`, `PHASE11_DATA_BOUNDARIES.md`.
 All 366 tests green; models unchanged.
+
+## Phase 12 — Advanced pre-match modeling & walk-forward research
+
+Research framework (`app/services/model_research/`): versioned immutable
+datasets (one chronological pass, bulk prefetch), season splits + expanding
+folds (never random), family-gated features with missingness reports (no
+imputation), deterministic numpy candidates (softmax logreg + production
+baselines), train-only preprocessing, validation-only calibration as `-cal`
+versions, identical-population paired evaluation with bootstrap CIs,
+additive/leave-one-out ablation, evidence-only promotion gate (no
+auto-promote; human decision required with reason), hashed artifacts +
+`research_models` registry.
+
+```bash
+python scripts/tacticx.py research run --league EPL --candidate logreg_team --train 2015,2022 --validate 2023 --test 2024 [--split-date ...] [--folds N]
+python scripts/tacticx.py research ablate --league EPL [...]
+python scripts/tacticx.py research registry|promote-check --model-id ...
+```
+
+Result: primary hypothesis failed (logreg_team degradation vs ensemble_v1);
+all exploratory null; NO PROMOTION, ensemble_v1 retained. Docs:
+`PHASE12_REPORT.md`, `PHASE12_MODEL_REGISTRY.md`, `PHASE12_LEAKAGE_AUDIT.md`.
+All 394 tests green; production predictions unchanged (changed = 0).

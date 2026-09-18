@@ -442,6 +442,95 @@ def _cmd_player_features(db, args) -> int:
     return 0
 
 
+def _cmd_research(db, args) -> int:
+    from app.services.features.temporal import TemporalMode
+    from app.services.model_research import ablation as ablation_svc
+    from app.services.model_research import experiments as experiments_svc
+    from app.services.model_research import promotion as promotion_svc
+
+    mode = TemporalMode(args.mode)
+    if args.action == "registry":
+        counts = promotion_svc.count_tested(db)
+        if args.as_json:
+            print(json.dumps(counts, indent=2, default=str))
+        else:
+            print(f"tested candidates: {counts['total']} {counts['by_status']}")
+        return 0
+    if args.action == "promote-check":
+        if not args.model_id:
+            print("pass --model-id")
+            return 1
+        from app.db.models.research import ResearchModel
+
+        record = db.query(ResearchModel).filter_by(
+            model_id=args.model_id).order_by(ResearchModel.id.desc()).first()
+        if record is None:
+            print(f"unknown model: {args.model_id}")
+            return 1
+        checklist = promotion_svc.promotion_checklist(
+            (record.metrics or {}).get("gate_evidence", {}))
+        print(json.dumps(checklist, indent=2, default=str))
+        return 0
+    if args.action == "ablate":
+        families = ["team", "xg", "shots", "player"]
+
+        def evaluate_fn(plan):
+            report = experiments_svc.run_season_experiment(
+                db, args.league, "logreg_all" if set(plan) == set(families)
+                else _candidate_for(plan),
+                args.train.split(","), args.validate, args.test.split(","),
+                mode=mode, hypothesis="exploratory", persist_artifacts=False)
+            return {"brier": report["metrics"]["brier"],
+                    "log_loss": report["metrics"]["log_loss"],
+                    "n": report["test_n"],
+                    "delta_brier": report["deltas_vs_ensemble"]["delta_brier"]}
+
+        def coverage_fn(plan):
+            return {"eligible": True}
+
+        result = ablation_svc.run_ablation(evaluate_fn, families, coverage_fn)
+        print(json.dumps(result, indent=2, default=str))
+        return 0
+    # run
+    try:
+        if args.folds and args.folds > 0:
+            report = experiments_svc.run_folds_experiment(
+                db, args.league, args.candidate, n_folds=args.folds,
+                mode=mode, hypothesis=args.hypothesis)
+        else:
+            report = experiments_svc.run_season_experiment(
+                db, args.league, args.candidate, args.train.split(","),
+                args.validate, args.test.split(","), mode=mode,
+                hypothesis=args.hypothesis, split_date=args.split_date)
+    except ValueError as exc:
+        print(f"error: {exc}")
+        return 1
+    if args.as_json:
+        print(json.dumps(report, indent=2, default=str))
+        return 0
+    print(f"{report['candidate']} [{report.get('status', 'complete')}] "
+          f"test_n={report['test_n']} ({report['duration_seconds']}s)")
+    print(f"  metrics: {report['metrics']}")
+    print(f"  baseline: {report['baseline_metrics']}")
+    print(f"  deltas: {report['deltas_vs_ensemble']}")
+    if report.get("calibration"):
+        print(f"  calibration: raw={report['calibration']['raw']} "
+              f"cal={report['calibration']['calibrated']}")
+    print(f"  artifact: {report.get('artifact')}")
+    return 0
+
+
+def _candidate_for(plan) -> str:
+    families = set(plan)
+    if families == {"team"}:
+        return "logreg_team"
+    if families == {"team", "xg"}:
+        return "logreg_team_xg"
+    if families == {"team", "player"}:
+        return "logreg_team_player"
+    return "logreg_all"
+
+
 def _cmd_reconcile(db, args) -> int:
     import time
 
@@ -750,6 +839,25 @@ def main() -> int:
     p.add_argument("--league", default=None)
     p.add_argument("--json", action="store_true", dest="as_json")
 
+    p = sub.add_parser("research", help="Model research experiments (isolated)")
+    p.add_argument("action", choices=["run", "ablate", "registry", "promote-check"],
+                   nargs="?", default="run")
+    p.add_argument("--league", default="EPL")
+    p.add_argument("--candidate", default="logreg_team")
+    p.add_argument("--train", default="2022")
+    p.add_argument("--validate", default="2023")
+    p.add_argument("--test", default="2024")
+    p.add_argument("--mode", default="strict_prematch",
+                   choices=["strict_prematch", "historical_estimated"])
+    p.add_argument("--hypothesis", default="exploratory",
+                   choices=["primary", "exploratory"])
+    p.add_argument("--model-id", default="")
+    p.add_argument("--split-date", default=None,
+                   help="ISO cutoff splitting shared validate/test seasons")
+    p.add_argument("--folds", type=int, default=0,
+                   help="expanding folds instead of season protocol (0 = off)")
+    p.add_argument("--json", action="store_true", dest="as_json")
+
     args = ap.parse_args()
     Base.metadata.create_all(get_engine())
     db = get_session_local()()
@@ -786,6 +894,8 @@ def main() -> int:
             return _cmd_readiness(db, args)
         if args.command == "sources":
             return _cmd_sources(db, args)
+        if args.command == "research":
+            return _cmd_research(db, args)
         ap.error(f"unknown command: {args.command}")
         return 1
     finally:
