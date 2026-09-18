@@ -30,6 +30,7 @@ from app.db.models.player_intelligence import (  # noqa: F401
     PlayerFeatureSnapshot,
     PlayerTeamMembership,
 )
+from app.db.models.freshness import MatchObservation  # noqa: F401
 from app.db.models.intelligence import (  # noqa: F401
     AnalogueResult,
     MiroFishRun,

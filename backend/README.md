@@ -733,3 +733,23 @@ no activatable signal (weights 0.0 / null CI); strict mode yields nothing
 on current data (effective_at NULL) — reported, not worked around.
 Docs: `PHASE9_REPORT.md`, `PHASE9_LEAKAGE_AUDIT.md`, `PHASE9_REGRESSION_REPORT.md`
 (changed = 0).
+
+## Phase 10 — Production coverage, freshness & temporal provenance
+
+Freshness layer (`app/services/freshness/`): four-timestamp provenance
+(event/effective/retrieved/created, never conflated), deterministic status
+classifier, per-family freshness policies (standings/form/membership/lineup/
+odds/xG), measured-only capability registry, current-season audit, append-only
+fixture observations, match + feature-family eligibility gates
+(`production_strict` vs `estimated`, explicit degraded mode), staleness/xG/
+player audits. New table `match_observations` via `create_all`.
+
+```bash
+python scripts/tacticx.py sources status|coverage|freshness|validate [--league EPL]
+```
+
+Eligibility verdict: `{eligible, reasons, warnings, degraded_mode,
+data_quality, temporal_quality, freshness}`. Production strict demands known
+timing, resolved identity, no critical conflicts; estimated research stays
+visibly labeled. Docs: `PHASE10_REPORT.md`, `PHASE10_TEMPORAL_PROVENANCE.md`,
+`PHASE10_SOURCE_MATRIX.md`. All 364 tests green; models unchanged.

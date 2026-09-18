@@ -440,6 +440,139 @@ def _cmd_mapping(db, args) -> int:
     return 0
 
 
+def _cmd_sources(db, args) -> int:
+    import time
+
+    from app.services.freshness import audit as audit_svc
+    from app.services.freshness import registry as registry_svc
+
+    start = time.monotonic()
+    if args.action == "status":
+        view = registry_svc.registry_view(db)
+        if args.as_json:
+            print(json.dumps(view, indent=2, default=str))
+            return 0
+        for entry in view:
+            print(f"{entry['source']} [{entry['axis']}]: "
+                  f"health={entry['health'].get('state')}")
+            measured = entry.get("measured", {})
+            have = [k for k, v in measured.items()
+                    if v == "measured" and k in (
+                        "fixtures", "results", "statistics", "events",
+                        "lineups", "xg", "odds", "upcoming")]
+            print(f"  MEASURED: {', '.join(have) if have else 'none'}")
+    elif args.action == "coverage":
+        report = audit_svc.current_season_audit(db)
+        if args.as_json:
+            print(json.dumps(report, indent=2, default=str))
+            return 0
+        print(f"current season: {report['current_season']} (as of {report['as_of'][:10]})")
+        for league, slot in sorted(report["leagues"].items()):
+            if args.league and league != args.league:
+                continue
+            print(f"{league}: {slot['status'].upper()} "
+                  f"completed={slot['completed']} upcoming={slot['upcoming']} "
+                  f"stats={slot['statistics']} events={slot['events']} "
+                  f"lineups={slot['lineups']} xg={slot['xg']} odds={slot['odds']}")
+            if slot["status"] == "unavailable":
+                print(f"  reason: {slot['reason']}")
+    elif args.action == "freshness":
+        report = audit_svc.staleness_distribution(
+            db, league_code=args.league)
+        if args.as_json:
+            print(json.dumps(report, indent=2, default=str))
+            return 0
+        print(f"staleness ({report.get('league')}, n={report.get('sampled')}):")
+        for family, buckets in (report.get("distribution") or {}).items():
+            print(f"  {family}: " + " ".join(f"{b}={v}" for b, v in buckets.items()))
+    elif args.action == "validate":
+        report = _validate_sources(db)
+        if args.as_json:
+            print(json.dumps(report, indent=2, default=str))
+            return 0 if report["failures"] == 0 else 1
+        print(f"source validation: {report['checks']} checks, "
+              f"{report['failures']} failures")
+        for line in report["lines"]:
+            print(f"  {line}")
+        return 0 if report["failures"] == 0 else 1
+    print(f"({time.monotonic() - start:.2f}s)")
+    return 0
+
+
+def _validate_sources(db) -> dict:
+    """Validation gate evidence: identity, fixtures, results, temporal,
+    idempotency, security (no secrets in stored payloads)."""
+    import time
+
+    from app.db.models.core import League, Match, Team
+
+    lines, failures = [], 0
+
+    def check(name: str, ok: bool, detail: str = ""):
+        nonlocal failures
+        lines.append(f"{'PASS' if ok else 'FAIL'} {name} {detail}")
+        if not ok:
+            failures += 1
+
+    # Identity: no duplicate canonical teams by normalized name per league.
+    from app.services.identity.normalize import normalize_name
+
+    dupes = 0
+    for league in db.query(League).all():
+        seen = {}
+        for team in db.query(Team).filter(
+                (Team.league_id == league.id) | (Team.league_id.is_(None))).all():
+            key = normalize_name(team.name)
+            if key in seen:
+                dupes += 1
+            seen[key] = team.id
+    check("identity/no-duplicate-teams", dupes == 0, f"dupes={dupes}")
+    # Fixtures: kickoff present on scheduled; scores only on finished.
+    bad_kickoff = db.query(Match).filter(
+        Match.status.in_(["SCHEDULED", "PRE_MATCH"]),
+        Match.kickoff_at.is_(None)).count()
+    check("fixtures/kickoff-known", bad_kickoff == 0, f"missing={bad_kickoff}")
+    unfinished_scored = db.query(Match).filter(
+        Match.status.in_(["SCHEDULED", "PRE_MATCH", "POSTPONED", "CANCELLED"]),
+        ((Match.home_score.is_not(None)) | (Match.away_score.is_not(None)))).count()
+    check("results/no-scores-before-finish", unfinished_scored == 0,
+          f"violations={unfinished_scored}")
+    # Temporal: effective_at never claims future validity.
+    from datetime import datetime as _dt
+    from datetime import timezone as _tz
+
+    from app.db.models.core import Lineup, MatchEvent, MatchStatistic
+
+    now_utc = _dt.now(_tz.utc)
+    future_eff = 0
+    for model in (Lineup, MatchEvent, MatchStatistic):
+        rows = db.query(getattr(model, "effective_at")).filter(
+            getattr(model, "effective_at").is_not(None)).all()
+        future_eff += sum(1 for (eff,) in rows if eff is not None and (
+            eff.replace(tzinfo=None) if eff.tzinfo else eff) > now_utc.replace(tzinfo=None))
+    check("temporal/no-future-effective", future_eff == 0, f"rows={future_eff}")
+    # Idempotency evidence: no duplicate provider keys / event keys.
+    from sqlalchemy import func as _func
+
+    dup_matches = db.query(Match.provider, Match.provider_match_id,
+                           _func.count()).group_by(
+        Match.provider, Match.provider_match_id).having(_func.count() > 1).count()
+    check("idempotency/unique-provider-keys", dup_matches == 0, f"dupes={dup_matches}")
+    # Security: no secret-looking values in raw records / observations.
+    from app.db.models.freshness import MatchObservation
+    from app.db.models.provenance import RawDataRecord
+
+    suspicious = 0
+    for model, cols in ((RawDataRecord, ("source_record_id",)),
+                        (MatchObservation, ("raw_reference",))):
+        for (value,) in db.query(*[getattr(model, c) for c in cols]).all():
+            lowered = (value or "").lower()
+            if "apikey" in lowered or "api_key" in lowered or "bearer " in lowered:
+                suspicious += 1
+    check("security/no-secrets-stored", suspicious == 0, f"hits={suspicious}")
+    return {"checks": len(lines), "failures": failures, "lines": lines}
+
+
 def main() -> int:
     configure_logging(get_settings().LOG_LEVEL)
     ap = argparse.ArgumentParser(description="TacticX prediction intelligence.")
@@ -518,6 +651,12 @@ def main() -> int:
     p.add_argument("--by", default="cli")
     p.add_argument("--dry-run", action="store_true")
 
+    p = sub.add_parser("sources", help="Source status/coverage/freshness/validation")
+    p.add_argument("action", choices=["status", "coverage", "freshness", "validate"],
+                   nargs="?", default="status")
+    p.add_argument("--league", default=None)
+    p.add_argument("--json", action="store_true", dest="as_json")
+
     args = ap.parse_args()
     Base.metadata.create_all(get_engine())
     db = get_session_local()()
@@ -548,6 +687,8 @@ def main() -> int:
             return _cmd_data_quality(db, args)
         if args.command == "mapping":
             return _cmd_mapping(db, args)
+        if args.command == "sources":
+            return _cmd_sources(db, args)
         ap.error(f"unknown command: {args.command}")
         return 1
     finally:
