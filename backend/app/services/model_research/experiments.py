@@ -91,6 +91,9 @@ def run_season_experiment(db: Session, league_code: str, candidate: str,
     dataset = dataset_svc.build_dataset(db, league_code, seasons=None,
                                         families=families or ["team"], mode=mode)
     season_of = lambda r: _season_label(datetime.fromisoformat(r["kickoff"]))
+    if set([validate_season]) & set(test_seasons) and split_date is None:
+        raise ValueError("validate and test share seasons without split_date: "
+                         "calibration contamination risk refused")
     parts = splits_svc.season_splits(dataset["rows"], train_seasons,
                                      validate_season, test_seasons, season_of)
     if split_date is not None:
@@ -222,8 +225,9 @@ def run_season_experiment(db: Session, league_code: str, candidate: str,
     }
     if not candidate.startswith("baseline_"):
         report["calibration"] = calibration
-    key = artifact_svc.artifact_key(dataset["dataset_version"], candidate,
-                                    seed, league_code)
+    key = artifact_svc.artifact_key(
+        dataset["dataset_version"], candidate, seed,
+        f"{league_code}-{'_'.join(train_seasons)}-{validate_season}-{'_'.join(test_seasons)}")
     if persist_artifacts:
         path = artifact_svc.save_artifact(key, "experiment", report)
         report["artifact"] = path

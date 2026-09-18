@@ -526,6 +526,8 @@ def _candidate_for(plan) -> str:
         return "logreg_team"
     if families == {"team", "xg"}:
         return "logreg_team_xg"
+    if families == {"team", "shots"}:
+        return "logreg_team_shots"
     if families == {"team", "player"}:
         return "logreg_team_player"
     return "logreg_all"

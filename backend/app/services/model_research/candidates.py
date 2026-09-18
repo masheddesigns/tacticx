@@ -12,13 +12,14 @@ from __future__ import annotations
 from typing import Dict, List, Optional
 
 CANDIDATES = ("logreg_team", "logreg_team_xg", "logreg_team_player",
-              "logreg_all", "baseline_ensemble", "baseline_elo",
+              "logreg_team_shots", "logreg_all", "baseline_ensemble", "baseline_elo",
               "baseline_poisson")
 
 CANDIDATE_FAMILIES = {
     "logreg_team": ["team"],
     "logreg_team_xg": ["team", "xg"],
     "logreg_team_player": ["team", "player"],
+    "logreg_team_shots": ["team", "shots"],
     "logreg_all": ["team", "xg", "shots", "player"],
     "baseline_ensemble": [],
     "baseline_elo": [],

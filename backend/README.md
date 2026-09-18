@@ -817,3 +817,14 @@ No model, weight, calibration, or registry change. Docs:
 `PHASE13_REPORT.md`, `PHASE13_SOURCE_INVENTORY.md`,
 `PHASE13_COVERAGE_DELTA.md`, `PHASE13_LEAKAGE_AUDIT.md`.
 All 407 tests green.
+
+## Phase 14 — Expanded-dataset model validation
+
+Re-ran the Phase 12 question on 16,639 matches with identical methodology
+(same framework, new dataset versions): baseline reproduced exactly
+(0.5237/0.9905/0.5913); primary team+shots inconclusive in 7/8 EPL seasons
+(1 marginal 2023 hit), null cross-league, SERIE_A degradation; learning
+curve shows diminishing returns plateauing at ~80% data. NO PROMOTION —
+ensemble_v1 retained. Docs: `PHASE14_REPORT.md`,
+`PHASE14_DATASET_COMPARISON.md`, `PHASE14_LEAKAGE_AUDIT.md`.
+All 415 tests green; production predictions unchanged (changed = 0).

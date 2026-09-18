@@ -195,10 +195,12 @@ def test_phase13_production_files_untouched():
          "backend/app/services/model_research/"],
         capture_output=True, text=True, cwd="/Users/sivek/Documents/Bet Predictor")
     allowed = [line for line in result.stdout.strip().splitlines() if line.strip()]
-    # Only the intended Phase 13 pipeline idempotency fix may touch sources.
+    # Only the intended Phase 13 pipeline idempotency fix may touch sources;
+    # Phase 14 research-framework evolution may touch model_research.
     for line in allowed:
         assert "sources/pipeline.py" in line or "data_expansion" in line or \
-            "test_phase13" in line or "tacticx.py" in line, line
+            "test_phase13" in line or "tacticx.py" in line or \
+            "model_research" in line or "test_phase14" in line, line
 
 
 def test_ingestion_order_invariance(db):
