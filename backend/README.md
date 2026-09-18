@@ -828,3 +828,14 @@ curve shows diminishing returns plateauing at ~80% data. NO PROMOTION —
 ensemble_v1 retained. Docs: `PHASE14_REPORT.md`,
 `PHASE14_DATASET_COMPARISON.md`, `PHASE14_LEAKAGE_AUDIT.md`.
 All 415 tests green; production predictions unchanged (changed = 0).
+
+## Phase 15b — Prediction intelligence & decision-support layer
+
+Read-only orchestration (`app/services/intelligence_v2/`) over the Phase 6
+engine: hashed immutable snapshots, evidence-based warnings, configurable
+market-divergence labels, full §20 summary shape. API: 7 GET + snapshot
+read + whitelisted scenario POST under `/api/v1/intelligence/`. CLI:
+`tacticx intelligence <id> [--analogues --scenarios --json]`. Validated on
+15/15 matches × 5 leagues; 431 tests green; production unchanged.
+Docs: `PHASE15_REPORT.md`, `PHASE15_INTELLIGENCE_SCHEMA.md`,
+`PHASE15_LEAKAGE_AUDIT.md`.

@@ -205,6 +205,51 @@ def _cmd_mirofish(db, args) -> int:
     return 0
 
 
+def _cmd_intelligence(db, args) -> int:
+    from app.services.features.temporal import TemporalMode as Mode
+    from app.services.intelligence_v2 import service as intel_service
+
+    match = db.get(Match, args.match_id)
+    if match is None:
+        print(f"no match with id {args.match_id}")
+        return 1
+    try:
+        cutoff = datetime.fromisoformat(args.cutoff) if args.cutoff else match.kickoff_at
+    except ValueError:
+        print("cutoff must be ISO format")
+        return 1
+    if cutoff is None:
+        print("match has no kickoff; pass --cutoff explicitly")
+        return 1
+    try:
+        out = intel_service.build_intelligence(
+            db, args.match_id, cutoff, Mode(args.temporal_mode),
+            model=args.model, seed=args.seed,
+            with_analogues=args.analogues, with_scenarios=args.scenarios)
+    except ValueError as exc:
+        print(f"error: {exc}")
+        return 1
+    if args.as_json:
+        print(json.dumps(out, indent=2, default=str))
+        return 0
+    probs = out["prediction"]
+    print(f"1X2: H={probs['home']:.3f} D={probs['draw']:.3f} A={probs['away']:.3f} "
+          f"(sums to {probs['home'] + probs['draw'] + probs['away']:.6f})")
+    print(f"goals: H={out['goals'].get('home_lambda')} "
+          f"A={out['goals'].get('away_lambda')}")
+    print(f"uncertainty: entropy={out['uncertainty'].get('predictive_entropy')} "
+          f"margin={out['uncertainty'].get('probability_margin')}")
+    print(f"market: {out['market_comparison'].get('interpretation', {}).get('overall', '?')}")
+    for warning in out["warnings"]:
+        print(f"warning [{warning['severity']}]: {warning['code']}: {warning['detail']}")
+    print(f"analogues: {out['analogues'].get('status')} "
+          f"scenarios: {len(out['scenarios'])} "
+          f"snapshot: {out['provenance'].get('snapshot_id')}")
+    print(f"cutoff={out['provenance'].get('cutoff')} "
+          f"hash={str(out['provenance'].get('hash'))[:12]}")
+    return 0
+
+
 def _cmd_sync_upcoming(db, args) -> int:
     from app.services.lifecycle import cached
     from app.services.lifecycle import sync as sync_service
@@ -810,6 +855,11 @@ def main() -> int:
     p.add_argument("--scenario", default="baseline")
     p.add_argument("--timeout-seconds", type=float, default=30.0)
 
+    p = sub.add_parser("intelligence", help="Prediction intelligence summary")
+    _common(p)
+    p.add_argument("--analogues", action="store_true")
+    p.add_argument("--scenarios", action="store_true")
+
     p = sub.add_parser("sync-upcoming", help="Discover + sync upcoming fixtures")
     p.add_argument("--hours", type=int, default=None)
     p.add_argument("--league", default=None)
@@ -921,6 +971,8 @@ def main() -> int:
             return _cmd_analogues(db, args)
         if args.command == "mirofish":
             return _cmd_mirofish(db, args)
+        if args.command == "intelligence":
+            return _cmd_intelligence(db, args)
         if args.command == "sync-upcoming":
             return _cmd_sync_upcoming(db, args)
         if args.command == "predict-upcoming":
