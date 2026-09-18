@@ -524,7 +524,8 @@ def test_pipeline_odds_append_and_redelivery(db):
     pipe.ingest_odds(_snap(1.76, "2024-09-21T10:05:00+00:00"), parser_version="t_v1")  # move
     prices = sorted(s.odds for s in db.query(OddsSelection).all())
     assert prices == [1.76, 1.80]
-    assert db.query(OddsSnapshot).filter_by(match_id=match_id).count() == 3
+    # Phase 13 idempotency: redelivery reuses the snapshot row (was 3).
+    assert db.query(OddsSnapshot).filter_by(match_id=match_id).count() == 2
 
 
 def test_pipeline_odds_multiple_bookmakers(db):

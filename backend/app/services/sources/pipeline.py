@@ -474,13 +474,41 @@ class Pipeline:
         if not self.db.query(Market).filter_by(market_key=snap.market).first():
             self.db.add(Market(market_key=snap.market))
             self.db.flush()
-        shot = OddsSnapshot(match_id=match_id, bookmaker_id=bm.id, market_type=snap.market,
-                            timestamp=ts, source=self.source, is_live=snap.is_live,
-                            source_event_id=snap.source_event_id or None,
-                            source_market_id=snap.source_market_id or None)
-        self.db.add(shot)
-        self.db.flush()
+        # Snapshot-level idempotency: same observation re-ingested reuses the
+        # existing row (selections dedupe by hash below; never duplicate rows).
+        # source_market_id distinguishes opening vs closing variants sharing a
+        # timestamp. Timestamp-unknown observations (midnight kickoffs: the
+        # source gives date-only evidence) match on identity alone, since
+        # their stored ts is import-time by documented design.
+        ts_known = snap.timestamp is not None
+        query = self.db.query(OddsSnapshot).filter_by(
+            match_id=match_id, bookmaker_id=bm.id, market_type=snap.market,
+            source_market_id=snap.source_market_id or None)
+        if ts_known:
+            query = query.filter_by(timestamp=ts)
+        shot = query.first()
+        if shot is None:
+            shot = OddsSnapshot(match_id=match_id, bookmaker_id=bm.id, market_type=snap.market,
+                                timestamp=ts, source=self.source, is_live=snap.is_live,
+                                source_event_id=snap.source_event_id or None,
+                                source_market_id=snap.source_market_id or None)
+            self.db.add(shot)
+            self.db.flush()
+            reused = False
+        else:
+            reused = True
         for sel in snap.selections:
+            if reused:
+                # Reused snapshot: its selections were stored on first ingest.
+                # Verify by value (hash embeds import-time ts for unknown
+                # timestamps, so value comparison is the stable check).
+                exists = self.db.query(OddsSelection).filter_by(
+                    snapshot_id=shot.id, selection=sel.selection,
+                    odds=sel.price).first()
+                if exists is not None and (exists.point or None) == (
+                        sel.point if sel.point is not None else None):
+                    self.stats.duplicates += 1
+                    continue
             dh = legacy.dedup_hash(match_id, bookmaker_pid, snap.market,
                                    sel.selection, sel.price, ts.isoformat())
             if self.db.query(OddsSelection).filter_by(dedup_hash=dh).first():

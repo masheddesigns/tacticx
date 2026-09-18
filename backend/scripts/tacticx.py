@@ -611,6 +611,45 @@ def _cmd_mapping(db, args) -> int:
     return 0
 
 
+def _cmd_data(db, args) -> int:
+    from app.services.data_expansion import backfill as backfill_svc
+    from app.services.data_expansion import inventory as inventory_svc
+    from app.services.data_expansion import source_candidates as candidates_svc
+
+    if args.action == "candidates":
+        rows = candidates_svc.registry()
+        if args.as_json:
+            print(json.dumps(rows, indent=2, default=str))
+            return 0
+        for entry in rows:
+            print(f"{entry['source']}: {entry['validation_status']} — {entry['reason'][:100]}")
+        return 0
+    if args.action == "backfill":
+        if not args.league or not args.season:
+            print("pass --league and --season (fdcuk season tag, e.g. 1617)")
+            return 1
+        report = backfill_svc.backfill_season(db, args.league, args.season,
+                                              dest_dir="/tmp",
+                                              dry_run=args.dry_run)
+        print(json.dumps(report, indent=2, default=str))
+        return 0
+    # coverage
+    report = inventory_svc.league_inventory(db, args.league)
+    if args.as_json:
+        print(json.dumps(report, indent=2, default=str))
+        return 0
+    header = (f"{'league':<10}{'season':<8}{'match':>6}{'stats':>6}{'xg':>5}"
+              f"{'shots':>6}{'events':>7}{'lineups':>8}{'odds':>6}  temporal S/E/U")
+    print(header)
+    for entry in report.get("seasons", []):
+        print(f"{entry['league']:<10}{entry['season']:<8}{entry['matches']:>6}"
+              f"{entry['stats']:>6}{entry['xg']:>5}{entry['shots']:>6}"
+              f"{entry['events']:>7}{entry['lineups']:>8}{entry['odds']:>6}  "
+              f"{entry['strict_rows']}/{entry.get('estimated_rows', 0)}/{entry['unknown_rows']}")
+    print("totals:", report.get("totals"))
+    return 0
+
+
 def _cmd_sources(db, args) -> int:
     import time
 
@@ -839,6 +878,14 @@ def main() -> int:
     p.add_argument("--league", default=None)
     p.add_argument("--json", action="store_true", dest="as_json")
 
+    p = sub.add_parser("data", help="Data expansion coverage")
+    p.add_argument("action", choices=["coverage", "backfill", "candidates"],
+                   nargs="?", default="coverage")
+    p.add_argument("--league", default=None)
+    p.add_argument("--season", default=None)
+    p.add_argument("--dry-run", action="store_true")
+    p.add_argument("--json", action="store_true", dest="as_json")
+
     p = sub.add_parser("research", help="Model research experiments (isolated)")
     p.add_argument("action", choices=["run", "ablate", "registry", "promote-check"],
                    nargs="?", default="run")
@@ -894,6 +941,8 @@ def main() -> int:
             return _cmd_readiness(db, args)
         if args.command == "sources":
             return _cmd_sources(db, args)
+        if args.command == "data":
+            return _cmd_data(db, args)
         if args.command == "research":
             return _cmd_research(db, args)
         ap.error(f"unknown command: {args.command}")

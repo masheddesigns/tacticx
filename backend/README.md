@@ -796,3 +796,24 @@ Result: primary hypothesis failed (logreg_team degradation vs ensemble_v1);
 all exploratory null; NO PROMOTION, ensemble_v1 retained. Docs:
 `PHASE12_REPORT.md`, `PHASE12_MODEL_REGISTRY.md`, `PHASE12_LEAKAGE_AUDIT.md`.
 All 394 tests green; production predictions unchanged (changed = 0).
+
+## Phase 13 — Historical data expansion & feature coverage
+
+Data expansion (`app/services/data_expansion/`): measured inventory,
+candidate registry (validated/tested/rejected with reasons), polite
+acquisition, row validation, backfill through the proven pipeline
+(identity + reconciliation + idempotency), temporal checks, quality gates,
+coverage deltas, deterministic dedup keys.
+
+```bash
+python scripts/tacticx.py data coverage [--league EPL]
+python scripts/tacticx.py data backfill --league EPL --season 1617 [--dry-run]
+python scripts/tacticx.py data candidates
+```
+
+Result: 3,272 → 16,639 matches (+13,367) across 37 new season-slots;
+EPL contiguous 2015–2024. Pipeline odds idempotency fixed along the way.
+No model, weight, calibration, or registry change. Docs:
+`PHASE13_REPORT.md`, `PHASE13_SOURCE_INVENTORY.md`,
+`PHASE13_COVERAGE_DELTA.md`, `PHASE13_LEAKAGE_AUDIT.md`.
+All 407 tests green.
