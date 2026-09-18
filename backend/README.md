@@ -753,3 +753,23 @@ data_quality, temporal_quality, freshness}`. Production strict demands known
 timing, resolved identity, no critical conflicts; estimated research stays
 visibly labeled. Docs: `PHASE10_REPORT.md`, `PHASE10_TEMPORAL_PROVENANCE.md`,
 `PHASE10_SOURCE_MATRIX.md`. All 364 tests green; models unchanged.
+
+## Phase 11 — Production match universe & acquisition pipeline
+
+Acquisition layer (`app/services/acquisition/`): explicit match universe
+view (lifecycle + evidence confidence), idempotent workflow with classified
+failures and partial-success safety, source activation gate (10 checks),
+scheduler job registry, capability-checked enrichment, deterministic
+production snapshots, per-match readiness reports, explicit dataset
+boundaries (historical/validation/test/production). Tables:
+`acquisition_runs`, `source_activations`, `acquisition_jobs` via `create_all`.
+
+```bash
+python scripts/tacticx.py sync-fixtures [--league EPL]
+python scripts/tacticx.py readiness [--match-id 1 --league EPL --limit 20]
+```
+
+Current-season acquisition honestly records empty/unavailable (no qualifying
+source in environment — documented, no workaround). Docs:
+`PHASE11_REPORT.md`, `PHASE11_ACQUISITION.md`, `PHASE11_DATA_BOUNDARIES.md`.
+All 366 tests green; models unchanged.

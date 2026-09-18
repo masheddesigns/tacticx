@@ -237,7 +237,6 @@ def _cmd_sync_upcoming(db, args) -> int:
             grouped[name] = records
         else:
             grouped[name] = [UpcomingMatch(**r) for r in records]
-    grouped = envelope["data"] or {}
     print(f"fixture response: {envelope['data_status']} "
           f"(fetched_at={envelope['fetched_at']})")
     total_seen = total_created = 0
@@ -253,6 +252,89 @@ def _cmd_sync_upcoming(db, args) -> int:
         total_created += stats.inserted
     print(f"total: seen={total_seen} created={total_created} "
           f"window=[{start.isoformat()}, {end.isoformat()}]")
+    return 0
+
+
+def _cmd_sync_fixtures(db, args) -> int:
+    """Acquisition-run-logged fixture sync (idempotent; partial-safe)."""
+    from app.services.acquisition import activation, workflow
+    from app.services.lifecycle import sync as sync_service
+    from app.services.lifecycle import upcoming as upcoming_service
+
+    start, end = sync_service.upcoming_window(args.hours)
+    sources = upcoming_service.default_sources()
+    if not sources:
+        print("no providers configured; nothing to sync against")
+        return 1
+    if args.league:
+        sources = [s for s in sources]  # league filter applied per fetch
+    activation.ensure_jobs(db)
+    overall = {"sources": {}}
+    for source in sources:
+        try:
+            grouped_records = upcoming_service.fetch_all(
+                [source], start, end, args.league)
+            records = grouped_records.get(source.name, [])
+            error_key = f"{source.name}__error"
+            if error_key in grouped_records:
+                result = workflow.run_acquisition(
+                    db, source.name, [],
+                    job="fixture_discovery",
+                    requested_scope={"league": args.league or "all"},
+                    failure=RuntimeError(str(grouped_records[error_key])))
+            else:
+                result = workflow.run_acquisition(
+                    db, source.name, records, job="fixture_discovery",
+                    requested_scope={"league": args.league or "all",
+                                     "from": start.isoformat(),
+                                     "to": end.isoformat()})
+        except Exception as exc:
+            result = workflow.run_acquisition(
+                db, source.name, [], job="fixture_discovery", failure=exc)
+        overall["sources"][source.name] = result
+        print(f"{source.name}: {result.get('status')} "
+              f"seen={result.get('seen', 0)} created={result.get('created', 0)} "
+              f"updated={result.get('updated', 0)} "
+              f"({result.get('classification', 'ok')})")
+        activation.mark_job_run(db, "fixture_discovery")
+    if args.as_json:
+        print(json.dumps(overall, indent=2, default=str))
+    return 0
+
+
+def _cmd_readiness(db, args) -> int:
+    from app.services.acquisition.snapshot import readiness_report
+
+    if args.match_id is not None:
+        targets = [args.match_id]
+    else:
+        from app.db.models.core import League, Match
+
+        query = db.query(Match.id)
+        if args.league:
+            league = db.query(League).filter_by(code=args.league).first()
+            if league is None:
+                print(f"unknown league: {args.league}")
+                return 1
+            query = query.filter(Match.league_id == league.id)
+        targets = [mid for (mid,) in query.order_by(Match.id.asc())
+                   .limit(args.limit).all()]
+    reports = []
+    for match_id in targets:
+        report = readiness_report(db, match_id)
+        reports.append(report)
+        if not args.as_json:
+            print(f"{report.get('match', match_id)} "
+                  f"{report.get('kickoff', '')[:16]} "
+                  f"Fixture: {report.get('fixture_status', '?').upper()} "
+                  f"Identity: {report.get('source_count', 0)}src "
+                  f"Hist: {report.get('historical_features')} "
+                  f"Players: {report.get('player_features')} "
+                  f"XG: {report.get('xg')} Market: {report.get('market')} "
+                  f"Prediction: {report.get('prediction')} "
+                  f"Mode: {report.get('mode')}")
+    if args.as_json:
+        print(json.dumps(reports, indent=2, default=str))
     return 0
 
 
@@ -651,6 +733,17 @@ def main() -> int:
     p.add_argument("--by", default="cli")
     p.add_argument("--dry-run", action="store_true")
 
+    p = sub.add_parser("sync-fixtures", help="Acquisition-run fixture sync")
+    p.add_argument("--hours", type=int, default=None)
+    p.add_argument("--league", default=None)
+    p.add_argument("--json", action="store_true", dest="as_json")
+
+    p = sub.add_parser("readiness", help="Upcoming-match readiness report")
+    p.add_argument("--match-id", type=int, default=None)
+    p.add_argument("--league", default=None)
+    p.add_argument("--limit", type=int, default=20)
+    p.add_argument("--json", action="store_true", dest="as_json")
+
     p = sub.add_parser("sources", help="Source status/coverage/freshness/validation")
     p.add_argument("action", choices=["status", "coverage", "freshness", "validate"],
                    nargs="?", default="status")
@@ -687,6 +780,10 @@ def main() -> int:
             return _cmd_data_quality(db, args)
         if args.command == "mapping":
             return _cmd_mapping(db, args)
+        if args.command == "sync-fixtures":
+            return _cmd_sync_fixtures(db, args)
+        if args.command == "readiness":
+            return _cmd_readiness(db, args)
         if args.command == "sources":
             return _cmd_sources(db, args)
         ap.error(f"unknown command: {args.command}")
