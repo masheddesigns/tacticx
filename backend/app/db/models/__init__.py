@@ -32,6 +32,7 @@ from app.db.models.player_intelligence import (  # noqa: F401
 )
 from app.db.models.freshness import MatchObservation  # noqa: F401
 from app.db.models.intelligence_v2 import IntelligenceSnapshot  # noqa: F401
+from app.db.models.mirofish import MiroFishScenarioRun  # noqa: F401
 from app.db.models.research import ResearchModel  # noqa: F401
 from app.db.models.acquisition import (  # noqa: F401
     AcquisitionJob,

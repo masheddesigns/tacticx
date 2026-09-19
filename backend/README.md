@@ -839,3 +839,16 @@ read + whitelisted scenario POST under `/api/v1/intelligence/`. CLI:
 15/15 matches × 5 leagues; 431 tests green; production unchanged.
 Docs: `PHASE15_REPORT.md`, `PHASE15_INTELLIGENCE_SCHEMA.md`,
 `PHASE15_LEAKAGE_AUDIT.md`.
+
+## Phase 16 — MiroFish scenario intelligence (isolated layer)
+
+MiroFish integration (`app/services/mirofish/`): versioned contract
+(`mirofish_contract_v1`, whitelisted fields, canonical-JSON determinism),
+provider interface (disabled default + HTTP with bounded timeout/retries),
+strict response validation, narrative safety labeling, full provenance,
+append-only run history. API under `/api/v1/intelligence/{id}/mirofish*`
+(GET/POST/batch); CLI: `tacticx intelligence <id> --mirofish
+[--scenario ID]`. No provider bound — honest unavailable states;
+mock-validated on 5 leagues with predictions byte-identical.
+Docs: `PHASE16_REPORT.md`, `PHASE16_MIROFISH_CONTRACT.md`,
+`PHASE16_LEAKAGE_AUDIT.md`. All 448 tests green; ensemble untouched.

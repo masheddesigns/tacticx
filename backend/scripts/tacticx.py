@@ -247,6 +247,33 @@ def _cmd_intelligence(db, args) -> int:
           f"snapshot: {out['provenance'].get('snapshot_id')}")
     print(f"cutoff={out['provenance'].get('cutoff')} "
           f"hash={str(out['provenance'].get('hash'))[:12]}")
+    if args.mirofish:
+        from app.services.features.temporal import TemporalMode as Mode2
+        from app.services.mirofish import config as mirofish_config
+        from app.services.mirofish import scenario_builder
+        from app.services.mirofish import service as mirofish_service
+
+        scenario_id = args.scenario or "baseline"
+        if scenario_id not in scenario_builder.allowed_scenario_ids():
+            print(f"error: unknown scenario: {scenario_id} "
+                  f"(known: {scenario_builder.allowed_scenario_ids()})")
+            return 1
+        print(f"mirofish: {mirofish_config.diagnose()}")
+        try:
+            result = mirofish_service.run_mirofish_scenario(
+                db, args.match_id, cutoff, scenario_id,
+                Mode(args.temporal_mode), model=args.model, seed=args.seed)
+        except ValueError as exc:
+            print(f"error: {exc}")
+            return 1
+        print(f"mirofish status: {result.get('status')}")
+        if result.get("status") == "ok":
+            print(f"  observations: {len(result.get('structured_observations', []))}")
+            print(f"  narrative: {result.get('narrative', '')[:300]}")
+            print(f"  response: {str(result.get('response_hash'))[:12]}")
+        else:
+            print(f"  reason: {result.get('error_code')}: "
+                  f"{result.get('error_detail', '')[:200]}")
     return 0
 
 
@@ -859,6 +886,10 @@ def main() -> int:
     _common(p)
     p.add_argument("--analogues", action="store_true")
     p.add_argument("--scenarios", action="store_true")
+    p.add_argument("--mirofish", action="store_true",
+                   help="also run the isolated MiroFish scenario layer")
+    p.add_argument("--scenario", default="baseline",
+                   help="whitelisted MiroFish scenario ID")
 
     p = sub.add_parser("sync-upcoming", help="Discover + sync upcoming fixtures")
     p.add_argument("--hours", type=int, default=None)

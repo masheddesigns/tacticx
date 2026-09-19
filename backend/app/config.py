@@ -48,6 +48,17 @@ class Settings(BaseSettings):
     PROVIDER_RETRY_BASE_SECONDS: float = 1.0
     PROVIDER_TIMEOUT_SECONDS: float = 20.0
 
+    # MiroFish scenario layer (optional; safe defaults when unconfigured).
+    MIROFISH_ENABLED: bool = False
+    MIROFISH_ENDPOINT: str = ""
+    MIROFISH_API_KEY: str = ""
+    MIROFISH_TIMEOUT_SECONDS: float = 20.0
+    MIROFISH_RETRY_ATTEMPTS: int = 2
+    MIROFISH_RETRY_BASE_SECONDS: float = 1.0
+    MIROFISH_MAX_SCENARIOS: int = 7
+    MIROFISH_CONTRACT_VERSION: str = "mirofish_contract_v1"
+    MIROFISH_RESPONSE_MAX_BYTES: int = 65536
+
     # --- Phase 3: market intelligence (analytical only, never betting) ---
     # Consensus aggregates no-vig probabilities across bookmakers.
     ODDS_CONSENSUS_METHOD: str = "median"  # median | mean | trimmed_mean
@@ -182,11 +193,16 @@ class Settings(BaseSettings):
     def is_odds_configured(self) -> bool:
         return bool(self.ODDS_API_KEY.strip())
 
+    @property
+    def is_mirofish_configured(self) -> bool:
+        return bool(self.MIROFISH_ENABLED and self.MIROFISH_ENDPOINT.strip())
+
     def diagnose(self) -> dict:
         """Safe diagnostics: presence only — NEVER include secret values."""
         return {
             "FOOTBALL_API_KEY": "configured" if self.is_football_configured else "missing",
             "ODDS_API_KEY": "configured" if self.is_odds_configured else "missing",
+            "MIROFISH": "configured" if self.is_mirofish_configured else "missing",
             "DATABASE": "configured" if self.DATABASE_URL else "missing",
             "REDIS": "configured" if self.REDIS_URL else "missing",
             "football_provider": self.FOOTBALL_PROVIDER,
