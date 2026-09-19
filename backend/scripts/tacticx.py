@@ -235,6 +235,24 @@ def _cmd_intelligence(db, args) -> int:
     probs = out["prediction"]
     print(f"1X2: H={probs['home']:.3f} D={probs['draw']:.3f} A={probs['away']:.3f} "
           f"(sums to {probs['home'] + probs['draw'] + probs['away']:.6f})")
+    if args.match_intelligence:
+        from app.services.match_intelligence import service as mi_service
+
+        try:
+            doc = mi_service.build_match_intelligence(
+                db, args.match_id, cutoff, Mode(args.temporal_mode),
+                model=args.model, seed=args.seed,
+                response_mode="compact" if args.compact else "standard")
+        except ValueError as exc:
+            print(f"error: {exc}")
+            return 1
+        core = doc["core_prediction"]
+        print(f"match_intelligence_v1 match={doc['match']['match_id']} "
+              f"H={core['home']:.3f} D={core['draw']:.3f} A={core['away']:.3f}")
+        print(f"  mirofish={doc['mirofish']['status']} "
+              f"warnings={len(doc['warnings'])} "
+              f"hash={doc['provenance']['response_hash'][:12]}")
+        return 0
     print(f"goals: H={out['goals'].get('home_lambda')} "
           f"A={out['goals'].get('away_lambda')}")
     print(f"uncertainty: entropy={out['uncertainty'].get('predictive_entropy')} "
@@ -890,6 +908,10 @@ def main() -> int:
                    help="also run the isolated MiroFish scenario layer")
     p.add_argument("--scenario", default="baseline",
                    help="whitelisted MiroFish scenario ID")
+    p.add_argument("--match-intelligence", action="store_true",
+                   help="emit the canonical match_intelligence_v1 document")
+    p.add_argument("--compact", action="store_true",
+                   help="compact presentation mode")
 
     p = sub.add_parser("sync-upcoming", help="Discover + sync upcoming fixtures")
     p.add_argument("--hours", type=int, default=None)

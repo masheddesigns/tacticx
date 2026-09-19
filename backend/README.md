@@ -852,3 +852,16 @@ append-only run history. API under `/api/v1/intelligence/{id}/mirofish*`
 mock-validated on 5 leagues with predictions byte-identical.
 Docs: `PHASE16_REPORT.md`, `PHASE16_MIROFISH_CONTRACT.md`,
 `PHASE16_LEAKAGE_AUDIT.md`. All 448 tests green; ensemble untouched.
+
+## Phase 17 — Intelligence product surface & canonical API
+
+Canonical consumer API (`app/services/match_intelligence/` + routes):
+`GET /api/v1/matches/{id}/intelligence` returns one versioned
+`match_intelligence_v1` document (prediction, derived markets, scores,
+uncertainty, disagreement, quality, temporal, market, analogues,
+scenarios, MiroFish, explanation, warnings, provenance+hash); summary and
+section endpoints, standard/compact modes (same values), snapshot-hash
+caching, machine-readable errors, OpenAPI-validated. CLI:
+`tacticx intelligence <id> --match-intelligence [--compact]`.
+Validated 15/15 × 5 leagues; 462 tests green; backbone unchanged.
+Docs: `PHASE17_REPORT.md`, `PHASE17_API_SCHEMA.md`, `PHASE17_PROVENANCE.md`.

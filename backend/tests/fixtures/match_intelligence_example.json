@@ -1,0 +1,1262 @@
+{
+  "schema_version": "match_intelligence_v1",
+  "match": {
+    "match_id": 381,
+    "home_team": {
+      "team_id": 21,
+      "name": "Union Berlin"
+    },
+    "away_team": {
+      "team_id": 22,
+      "name": "Bayer Leverkusen"
+    },
+    "competition": {
+      "league_id": 2,
+      "code": "BUNDESLIGA",
+      "name": "BUNDESLIGA"
+    },
+    "season": "2023",
+    "kickoff": "2024-04-06 15:30:00",
+    "venue": null,
+    "status": "FINISHED",
+    "sources": [
+      {
+        "source": "statsbomb",
+        "source_match_id": "9:281:3895292"
+      },
+      {
+        "source": "football_data_co_uk",
+        "source_match_id": "fdco:BUNDESLIGA:2023#248"
+      }
+    ]
+  },
+  "cutoff": {
+    "cutoff": "2024-04-06 15:30:00",
+    "cutoff_policy": "strict_prematch: only pre-cutoff records contribute",
+    "prediction_as_of": "2024-04-06 15:30:00",
+    "market_as_of": "2024-04-06 14:30:00",
+    "temporal_quality": "unknown",
+    "has_estimated_timing": false,
+    "has_unknown_timing": true
+  },
+  "core_prediction": {
+    "home": 0.20242265481708038,
+    "draw": 0.2561268334189133,
+    "away": 0.5414505117640063,
+    "expected_goals": {
+      "home": 0.7789,
+      "away": 1.6612
+    },
+    "model_version": "ensemble_v1-elo+poisson",
+    "prediction_mode": "strict_prematch",
+    "calibration_state": "uncalibrated",
+    "dataset_version": "canonical_store",
+    "feature_version": "features_v1",
+    "prediction_snapshot": {
+      "prediction_id": null,
+      "hash": "4ab42f90f5a1b03e7e78ebd9d32289e299a2f3a1a1dd11e5a27697e603a30225"
+    }
+  },
+  "derived_markets": {
+    "one_x_two": {
+      "home": 0.20242265481708038,
+      "draw": 0.2561268334189133,
+      "away": 0.5414505117640063
+    },
+    "double_chance": {
+      "1x": 0.458549488,
+      "x2": 0.797577345,
+      "12": 0.743873167
+    },
+    "totals": {
+      "over_0_5": 0.912847738,
+      "under_0_5": 0.087152262,
+      "over_1_5": 0.7001875,
+      "under_1_5": 0.2998125,
+      "over_2_5": 0.440731376,
+      "under_2_5": 0.559268624,
+      "over_3_5": 0.229698413,
+      "under_3_5": 0.770301587
+    },
+    "btts": {
+      "yes": 0.438330501,
+      "no": 0.561669499
+    },
+    "team_totals": {
+      "status": "ok",
+      "home": {
+        "over_0_5": 0.541089465,
+        "over_1_5": 0.183644049,
+        "over_2_5": 0.044436931
+      },
+      "away": {
+        "over_0_5": 0.81008905,
+        "over_1_5": 0.494608979,
+        "over_2_5": 0.232571233
+      }
+    }
+  },
+  "expected_goals": {
+    "home_lambda": 0.7789,
+    "away_lambda": 1.6612,
+    "total_lambda": 2.4401
+  },
+  "correct_score": {
+    "distribution": {
+      "0-0": 0.087153,
+      "0-1": 0.144776,
+      "0-10": 4e-06,
+      "0-2": 0.120249,
+      "0-3": 0.066585,
+      "0-4": 0.027652,
+      "0-5": 0.009187,
+      "0-6": 0.002544,
+      "0-7": 0.000604,
+      "0-8": 0.000125,
+      "0-9": 2.3e-05,
+      "1-0": 0.067886,
+      "1-1": 0.112769,
+      "1-10": 3e-06,
+      "1-2": 0.093664,
+      "1-3": 0.051864,
+      "1-4": 0.021539,
+      "1-5": 0.007156,
+      "1-6": 0.001981,
+      "1-7": 0.00047,
+      "1-8": 9.8e-05,
+      "1-9": 1.8e-05,
+      "10-0": 0.0,
+      "10-1": 0.0,
+      "10-10": 0.0,
+      "10-2": 0.0,
+      "10-3": 0.0,
+      "10-4": 0.0,
+      "10-5": 0.0,
+      "10-6": 0.0,
+      "10-7": 0.0,
+      "10-8": 0.0,
+      "10-9": 0.0,
+      "2-0": 0.026439,
+      "2-1": 0.043919,
+      "2-10": 1e-06,
+      "2-2": 0.036478,
+      "2-3": 0.020199,
+      "2-4": 0.008388,
+      "2-5": 0.002787,
+      "2-6": 0.000772,
+      "2-7": 0.000183,
+      "2-8": 3.8e-05,
+      "2-9": 7e-06,
+      "3-0": 0.006865,
+      "3-1": 0.011403,
+      "3-10": 0.0,
+      "3-2": 0.009471,
+      "3-3": 0.005244,
+      "3-4": 0.002178,
+      "3-5": 0.000724,
+      "3-6": 0.0002,
+      "3-7": 4.8e-05,
+      "3-8": 1e-05,
+      "3-9": 2e-06,
+      "4-0": 0.001337,
+      "4-1": 0.002221,
+      "4-10": 0.0,
+      "4-2": 0.001844,
+      "4-3": 0.001021,
+      "4-4": 0.000424,
+      "4-5": 0.000141,
+      "4-6": 3.9e-05,
+      "4-7": 9e-06,
+      "4-8": 2e-06,
+      "4-9": 0.0,
+      "5-0": 0.000208,
+      "5-1": 0.000346,
+      "5-10": 0.0,
+      "5-2": 0.000287,
+      "5-3": 0.000159,
+      "5-4": 6.6e-05,
+      "5-5": 2.2e-05,
+      "5-6": 6e-06,
+      "5-7": 1e-06,
+      "5-8": 0.0,
+      "5-9": 0.0,
+      "6-0": 2.7e-05,
+      "6-1": 4.5e-05,
+      "6-10": 0.0,
+      "6-2": 3.7e-05,
+      "6-3": 2.1e-05,
+      "6-4": 9e-06,
+      "6-5": 3e-06,
+      "6-6": 1e-06,
+      "6-7": 0.0,
+      "6-8": 0.0,
+      "6-9": 0.0,
+      "7-0": 3e-06,
+      "7-1": 5e-06,
+      "7-10": 0.0,
+      "7-2": 4e-06,
+      "7-3": 2e-06,
+      "7-4": 1e-06,
+      "7-5": 0.0,
+      "7-6": 0.0,
+      "7-7": 0.0,
+      "7-8": 0.0,
+      "7-9": 0.0,
+      "8-0": 0.0,
+      "8-1": 0.0,
+      "8-10": 0.0,
+      "8-2": 0.0,
+      "8-3": 0.0,
+      "8-4": 0.0,
+      "8-5": 0.0,
+      "8-6": 0.0,
+      "8-7": 0.0,
+      "8-8": 0.0,
+      "8-9": 0.0,
+      "9-0": 0.0,
+      "9-1": 0.0,
+      "9-10": 0.0,
+      "9-2": 0.0,
+      "9-3": 0.0,
+      "9-4": 0.0,
+      "9-5": 0.0,
+      "9-6": 0.0,
+      "9-7": 0.0,
+      "9-8": 0.0,
+      "9-9": 0.0
+    },
+    "top_n": [
+      {
+        "score": "0-1",
+        "probability": 0.14477734
+      },
+      {
+        "score": "0-2",
+        "probability": 0.120252059
+      },
+      {
+        "score": "1-1",
+        "probability": 0.11276707
+      },
+      {
+        "score": "1-2",
+        "probability": 0.093664329
+      },
+      {
+        "score": "0-0",
+        "probability": 0.087152264
+      },
+      {
+        "score": "1-0",
+        "probability": 0.067882898
+      },
+      {
+        "score": "0-3",
+        "probability": 0.066587573
+      },
+      {
+        "score": "1-3",
+        "probability": 0.051865061
+      }
+    ],
+    "required_16_mass": 0.899716217,
+    "tail_mass": 0.100283783,
+    "probability_sum": 0.999997
+  },
+  "uncertainty": {
+    "predictive_entropy": 1.004397,
+    "top_probability": 0.541451,
+    "probability_margin": 0.285324,
+    "model_disagreement": {},
+    "data_completeness": {
+      "home_history": 27,
+      "away_history": 27,
+      "home_xg_history": 0,
+      "away_xg_history": 0,
+      "xg_available": false
+    },
+    "note": "Probability, uncertainty and data quality are different concepts; none of them is a correctness guarantee."
+  },
+  "model_disagreement": {
+    "members": {
+      "elo": {
+        "status": "valid",
+        "version": "elo_v1",
+        "home": 0.23121483809282836,
+        "draw": 0.2701612903225806,
+        "away": 0.498623871584591
+      },
+      "poisson": {
+        "status": "valid",
+        "version": "poisson_v1",
+        "home": 0.17363047154133243,
+        "draw": 0.242092376515246,
+        "away": 0.5842771519434214
+      },
+      "advanced": {
+        "status": "insufficient_data",
+        "notes": [
+          "model not fitted; fit on a training window first",
+          "uniform probabilities are a placeholder, not an estimate"
+        ]
+      },
+      "ensemble": {
+        "status": "valid",
+        "version": "ensemble_v1-elo+poisson",
+        "home": 0.20242265481708038,
+        "draw": 0.2561268334189133,
+        "away": 0.5414505117640063
+      }
+    },
+    "per_outcome": {
+      "home": {
+        "mean": 0.202423,
+        "std": 0.023509,
+        "min": 0.17363,
+        "max": 0.231215,
+        "range": 0.057584,
+        "n_members": 3,
+        "members": [
+          "elo",
+          "ensemble",
+          "poisson"
+        ]
+      },
+      "draw": {
+        "mean": 0.256127,
+        "std": 0.011459,
+        "min": 0.242092,
+        "max": 0.270161,
+        "range": 0.028069,
+        "n_members": 3,
+        "members": [
+          "elo",
+          "ensemble",
+          "poisson"
+        ]
+      },
+      "away": {
+        "mean": 0.541451,
+        "std": 0.034968,
+        "min": 0.498624,
+        "max": 0.584277,
+        "range": 0.085653,
+        "n_members": 3,
+        "members": [
+          "elo",
+          "ensemble",
+          "poisson"
+        ]
+      }
+    },
+    "label": "model disagreement (descriptive, not a correctness signal)"
+  },
+  "data_quality": {
+    "completeness": {
+      "feature_count": 38,
+      "available": 29,
+      "missing": 9
+    },
+    "coverage": {
+      "xg_available": false,
+      "event_data_available": false,
+      "lineup_data_available": false,
+      "market_available": true
+    },
+    "source_count": 4,
+    "missing_families": [
+      "xg",
+      "events",
+      "lineups"
+    ],
+    "conflicts": []
+  },
+  "temporal_quality": {
+    "strict": [
+      "team_form",
+      "shots"
+    ],
+    "estimated": [],
+    "unknown": [
+      "xg",
+      "events",
+      "lineups"
+    ]
+  },
+  "market": {
+    "available_markets": [],
+    "bookmaker_count": 4,
+    "consensus": {
+      "draw": 0.22356,
+      "home": 0.163268,
+      "away": 0.614324
+    },
+    "model_probabilities": {
+      "home": 0.20242265481708038,
+      "draw": 0.2561268334189133,
+      "away": 0.5414505117640063
+    },
+    "divergence": {
+      "per_outcome": {
+        "home": {
+          "model": 0.202423,
+          "market": 0.163268,
+          "absolute_difference": 0.039155,
+          "magnitude": "moderate_difference"
+        },
+        "draw": {
+          "model": 0.256127,
+          "market": 0.22356,
+          "absolute_difference": 0.032567,
+          "magnitude": "moderate_difference"
+        },
+        "away": {
+          "model": 0.541451,
+          "market": 0.614324,
+          "absolute_difference": -0.072873,
+          "magnitude": "moderate_difference"
+        }
+      },
+      "overall": "moderate_difference",
+      "peak_absolute_difference": 0.072873,
+      "thresholds": {
+        "moderate": 0.03,
+        "large": 0.08
+      },
+      "note": "Magnitude labels are descriptive; not betting recommendations."
+    },
+    "movement": {},
+    "market_timing": "2024-04-06 14:30:00",
+    "closing_used": false,
+    "overround": null,
+    "market_status": "ok"
+  },
+  "analogues": {
+    "status": "ok",
+    "analogues": [
+      {
+        "match_id": 393,
+        "kickoff_at": "2024-03-17 16:30:00",
+        "home_team_id": 34,
+        "away_team_id": 22,
+        "actual": "away",
+        "home_score": 2,
+        "away_score": 3,
+        "distance": 1.02243,
+        "similarity": 0.6201
+      },
+      {
+        "match_id": 390,
+        "kickoff_at": "2024-02-03 16:30:00",
+        "home_team_id": 31,
+        "away_team_id": 22,
+        "actual": "away",
+        "home_score": 0,
+        "away_score": 2,
+        "distance": 1.109205,
+        "similarity": 0.6008
+      },
+      {
+        "match_id": 409,
+        "kickoff_at": "2023-11-25 16:30:00",
+        "home_team_id": 28,
+        "away_team_id": 22,
+        "actual": "away",
+        "home_score": 0,
+        "away_score": 3,
+        "distance": 1.184278,
+        "similarity": 0.585
+      },
+      {
+        "match_id": 2896,
+        "kickoff_at": "2024-03-16 14:30:00",
+        "home_team_id": 31,
+        "away_team_id": 35,
+        "actual": "away",
+        "home_score": 2,
+        "away_score": 5,
+        "distance": 1.442764,
+        "similarity": 0.5364
+      },
+      {
+        "match_id": 2879,
+        "kickoff_at": "2024-03-01 19:30:00",
+        "home_team_id": 34,
+        "away_team_id": 35,
+        "actual": "draw",
+        "home_score": 2,
+        "away_score": 2,
+        "distance": 1.481015,
+        "similarity": 0.5299
+      },
+      {
+        "match_id": 2831,
+        "kickoff_at": "2024-01-20 14:30:00",
+        "home_team_id": 31,
+        "away_team_id": 29,
+        "actual": "draw",
+        "home_score": 2,
+        "away_score": 2,
+        "distance": 1.498088,
+        "similarity": 0.527
+      },
+      {
+        "match_id": 2914,
+        "kickoff_at": "2024-04-06 14:30:00",
+        "home_team_id": 36,
+        "away_team_id": 35,
+        "actual": "home",
+        "home_score": 3,
+        "away_score": 2,
+        "distance": 1.524836,
+        "similarity": 0.5226
+      },
+      {
+        "match_id": 401,
+        "kickoff_at": "2024-03-03 16:30:00",
+        "home_team_id": 25,
+        "away_team_id": 22,
+        "actual": "away",
+        "home_score": 0,
+        "away_score": 2,
+        "distance": 1.625376,
+        "similarity": 0.5067
+      },
+      {
+        "match_id": 406,
+        "kickoff_at": "2024-01-13 16:30:00",
+        "home_team_id": 30,
+        "away_team_id": 22,
+        "actual": "away",
+        "home_score": 0,
+        "away_score": 1,
+        "distance": 1.668887,
+        "similarity": 0.5
+      },
+      {
+        "match_id": 2895,
+        "kickoff_at": "2024-03-15 19:30:00",
+        "home_team_id": 25,
+        "away_team_id": 38,
+        "actual": "away",
+        "home_score": 1,
+        "away_score": 5,
+        "distance": 1.669197,
+        "similarity": 0.5
+      }
+    ],
+    "outcome_distribution": {
+      "n": 221,
+      "home": 0.4253,
+      "draw": 0.276,
+      "away": 0.2986,
+      "note": "Descriptive frequency over similar pre-match situations; not a forecast and never a guarantee."
+    },
+    "methodology": "standardized Euclidean distance over pre-match features (elo_diff, form_ppm_diff, goal_diff_diff, rest_diff, total_goals_avg); candidates are finished matches with kickoff strictly before the target cutoff, evaluated at their own kickoff; target outcome and post-match data never used",
+    "provenance": {
+      "source": "historical_analogues",
+      "calculation_version": "composer_v1",
+      "model_version": "",
+      "feature_version": "features_v1",
+      "cutoff": "2024-04-06 15:30:00",
+      "temporal_mode": "strict_prematch",
+      "status": "ok"
+    }
+  },
+  "scenarios": [
+    {
+      "name": "baseline",
+      "parameters": {
+        "kind": "none",
+        "home_mult": 1.0,
+        "away_mult": 1.0,
+        "description": "Unmodified baseline inputs.",
+        "calculation_version": "scenarios_v1"
+      },
+      "probabilities": {
+        "home": 0.173622,
+        "draw": 0.242088,
+        "away": 0.58429
+      },
+      "goals": {
+        "home_lambda": 0.7789,
+        "away_lambda": 1.6612,
+        "total_lambda": 2.4401
+      },
+      "markets": {
+        "over_1_5": 0.7001875,
+        "over_2_5": 0.440731376,
+        "over_3_5": 0.229698413,
+        "btts": 0.438330501
+      },
+      "score_top": [
+        {
+          "score": "0-1",
+          "probability": 0.14477734
+        },
+        {
+          "score": "0-2",
+          "probability": 0.120252059
+        },
+        {
+          "score": "1-1",
+          "probability": 0.11276707
+        },
+        {
+          "score": "1-2",
+          "probability": 0.093664329
+        },
+        {
+          "score": "0-0",
+          "probability": 0.087152264
+        },
+        {
+          "score": "1-0",
+          "probability": 0.067882898
+        },
+        {
+          "score": "0-3",
+          "probability": 0.066587573
+        },
+        {
+          "score": "1-3",
+          "probability": 0.051865061
+        }
+      ],
+      "difference_from_baseline": {
+        "probabilities": {
+          "home": -0.028801,
+          "draw": -0.014039,
+          "away": 0.04284
+        },
+        "goals": {
+          "home_lambda": 0.0,
+          "away_lambda": 0.0,
+          "total_lambda": 0.0
+        },
+        "markets": {
+          "over_1_5": 0.0,
+          "over_2_5": 0.0,
+          "over_3_5": 0.0,
+          "btts": 0.0
+        }
+      },
+      "label": "sensitivity analysis, not a prediction of what will happen"
+    },
+    {
+      "name": "away_strength_down",
+      "parameters": {
+        "kind": "lambda",
+        "home_mult": 1.0,
+        "away_mult": 0.9,
+        "description": "Away scoring rate -10%.",
+        "calculation_version": "scenarios_v1"
+      },
+      "probabilities": {
+        "home": 0.195127,
+        "draw": 0.262478,
+        "away": 0.542395
+      },
+      "goals": {
+        "home_lambda": 0.7789,
+        "away_lambda": 1.4951,
+        "total_lambda": 2.274
+      },
+      "markets": {
+        "over_1_5": 0.663101332,
+        "over_2_5": 0.397049318,
+        "over_3_5": 0.195383665,
+        "btts": 0.419760546
+      },
+      "score_top": [
+        {
+          "score": "0-1",
+          "probability": 0.153846528
+        },
+        {
+          "score": "1-1",
+          "probability": 0.11983106
+        },
+        {
+          "score": "0-2",
+          "probability": 0.115006433
+        },
+        {
+          "score": "0-0",
+          "probability": 0.10290187
+        },
+        {
+          "score": "1-2",
+          "probability": 0.089578511
+        },
+        {
+          "score": "1-0",
+          "probability": 0.080150266
+        },
+        {
+          "score": "0-3",
+          "probability": 0.057314606
+        },
+        {
+          "score": "2-1",
+          "probability": 0.046668206
+        }
+      ],
+      "difference_from_baseline": {
+        "probabilities": {
+          "home": -0.007295,
+          "draw": 0.006351,
+          "away": 0.000945
+        },
+        "goals": {
+          "home_lambda": 0.0,
+          "away_lambda": -0.1661,
+          "total_lambda": -0.1661
+        },
+        "markets": {
+          "over_1_5": -0.037086,
+          "over_2_5": -0.043682,
+          "over_3_5": -0.034315,
+          "btts": -0.01857
+        }
+      },
+      "label": "sensitivity analysis, not a prediction of what will happen"
+    },
+    {
+      "name": "away_strength_up",
+      "parameters": {
+        "kind": "lambda",
+        "home_mult": 1.0,
+        "away_mult": 1.1,
+        "description": "Away scoring rate +10%.",
+        "calculation_version": "scenarios_v1"
+      },
+      "probabilities": {
+        "home": 0.154395,
+        "draw": 0.222723,
+        "away": 0.622882
+      },
+      "goals": {
+        "home_lambda": 0.7789,
+        "away_lambda": 1.8273,
+        "total_lambda": 2.6062
+      },
+      "markets": {
+        "over_1_5": 0.733813013,
+        "over_2_5": 0.483128937,
+        "over_3_5": 0.265349651,
+        "btts": 0.454058129
+      },
+      "score_top": [
+        {
+          "score": "0-1",
+          "probability": 0.134880512
+        },
+        {
+          "score": "0-2",
+          "probability": 0.123234928
+        },
+        {
+          "score": "1-1",
+          "probability": 0.105058431
+        },
+        {
+          "score": "1-2",
+          "probability": 0.095987686
+        },
+        {
+          "score": "0-3",
+          "probability": 0.075063217
+        },
+        {
+          "score": "0-0",
+          "probability": 0.073813296
+        },
+        {
+          "score": "1-3",
+          "probability": 0.058466739
+        },
+        {
+          "score": "1-0",
+          "probability": 0.057493176
+        }
+      ],
+      "difference_from_baseline": {
+        "probabilities": {
+          "home": -0.048028,
+          "draw": -0.033404,
+          "away": 0.081431
+        },
+        "goals": {
+          "home_lambda": 0.0,
+          "away_lambda": 0.1661,
+          "total_lambda": 0.1661
+        },
+        "markets": {
+          "over_1_5": 0.033626,
+          "over_2_5": 0.042398,
+          "over_3_5": 0.035651,
+          "btts": 0.015728
+        }
+      },
+      "label": "sensitivity analysis, not a prediction of what will happen"
+    },
+    {
+      "name": "high_scoring",
+      "parameters": {
+        "kind": "lambda",
+        "home_mult": 1.1,
+        "away_mult": 1.1,
+        "description": "Both scoring rates +10% (e.g. open tactical matchup).",
+        "calculation_version": "scenarios_v1"
+      },
+      "probabilities": {
+        "home": 0.171838,
+        "draw": 0.225068,
+        "away": 0.603094
+      },
+      "goals": {
+        "home_lambda": 0.8568,
+        "away_lambda": 1.8273,
+        "total_lambda": 2.6841
+      },
+      "markets": {
+        "over_1_5": 0.748440924,
+        "over_2_5": 0.502473255,
+        "over_3_5": 0.282405161,
+        "btts": 0.482914935
+      },
+      "score_top": [
+        {
+          "score": "0-1",
+          "probability": 0.1247734
+        },
+        {
+          "score": "0-2",
+          "probability": 0.114000464
+        },
+        {
+          "score": "1-1",
+          "probability": 0.106904601
+        },
+        {
+          "score": "1-2",
+          "probability": 0.097674458
+        },
+        {
+          "score": "0-3",
+          "probability": 0.069438443
+        },
+        {
+          "score": "0-0",
+          "probability": 0.068282184
+        },
+        {
+          "score": "1-3",
+          "probability": 0.059494163
+        },
+        {
+          "score": "1-0",
+          "probability": 0.058503492
+        }
+      ],
+      "difference_from_baseline": {
+        "probabilities": {
+          "home": -0.030585,
+          "draw": -0.031059,
+          "away": 0.061644
+        },
+        "goals": {
+          "home_lambda": 0.0779,
+          "away_lambda": 0.1661,
+          "total_lambda": 0.244
+        },
+        "markets": {
+          "over_1_5": 0.048253,
+          "over_2_5": 0.061742,
+          "over_3_5": 0.052707,
+          "btts": 0.044584
+        }
+      },
+      "label": "sensitivity analysis, not a prediction of what will happen"
+    },
+    {
+      "name": "home_strength_down",
+      "parameters": {
+        "kind": "lambda",
+        "home_mult": 0.9,
+        "away_mult": 1.0,
+        "description": "Home scoring rate -10% (e.g. key attacker missing).",
+        "calculation_version": "scenarios_v1"
+      },
+      "probabilities": {
+        "home": 0.154831,
+        "draw": 0.240312,
+        "away": 0.604858
+      },
+      "goals": {
+        "home_lambda": 0.701,
+        "away_lambda": 1.6612,
+        "total_lambda": 2.3622
+      },
+      "markets": {
+        "over_1_5": 0.683239726,
+        "over_2_5": 0.420386762,
+        "over_3_5": 0.213415461,
+        "btts": 0.408216684
+      },
+      "score_top": [
+        {
+          "score": "0-1",
+          "probability": 0.156504846
+        },
+        {
+          "score": "0-2",
+          "probability": 0.129992925
+        },
+        {
+          "score": "1-1",
+          "probability": 0.109711462
+        },
+        {
+          "score": "0-0",
+          "probability": 0.094211923
+        },
+        {
+          "score": "1-2",
+          "probability": 0.091126341
+        },
+        {
+          "score": "0-3",
+          "probability": 0.071981416
+        },
+        {
+          "score": "1-0",
+          "probability": 0.0660435
+        },
+        {
+          "score": "1-3",
+          "probability": 0.050459692
+        }
+      ],
+      "difference_from_baseline": {
+        "probabilities": {
+          "home": -0.047592,
+          "draw": -0.015815,
+          "away": 0.063407
+        },
+        "goals": {
+          "home_lambda": -0.0779,
+          "away_lambda": 0.0,
+          "total_lambda": -0.0779
+        },
+        "markets": {
+          "over_1_5": -0.016948,
+          "over_2_5": -0.020345,
+          "over_3_5": -0.016283,
+          "btts": -0.030114
+        }
+      },
+      "label": "sensitivity analysis, not a prediction of what will happen"
+    },
+    {
+      "name": "home_strength_up",
+      "parameters": {
+        "kind": "lambda",
+        "home_mult": 1.1,
+        "away_mult": 1.0,
+        "description": "Home scoring rate +10% (e.g. key attacker available).",
+        "calculation_version": "scenarios_v1"
+      },
+      "probabilities": {
+        "home": 0.192528,
+        "draw": 0.243266,
+        "away": 0.564206
+      },
+      "goals": {
+        "home_lambda": 0.8568,
+        "away_lambda": 1.6612,
+        "total_lambda": 2.518
+      },
+      "markets": {
+        "over_1_5": 0.716373982,
+        "over_2_5": 0.460792443,
+        "over_3_5": 0.246275189,
+        "btts": 0.466187771
+      },
+      "score_top": [
+        {
+          "score": "0-1",
+          "probability": 0.133928621
+        },
+        {
+          "score": "1-1",
+          "probability": 0.114748703
+        },
+        {
+          "score": "0-2",
+          "probability": 0.111241113
+        },
+        {
+          "score": "1-2",
+          "probability": 0.095310273
+        },
+        {
+          "score": "0-0",
+          "probability": 0.080621612
+        },
+        {
+          "score": "1-0",
+          "probability": 0.069075791
+        },
+        {
+          "score": "0-3",
+          "probability": 0.061597912
+        },
+        {
+          "score": "1-3",
+          "probability": 0.052776475
+        }
+      ],
+      "difference_from_baseline": {
+        "probabilities": {
+          "home": -0.009895,
+          "draw": -0.012861,
+          "away": 0.022756
+        },
+        "goals": {
+          "home_lambda": 0.0779,
+          "away_lambda": 0.0,
+          "total_lambda": 0.0779
+        },
+        "markets": {
+          "over_1_5": 0.016186,
+          "over_2_5": 0.020061,
+          "over_3_5": 0.016577,
+          "btts": 0.027857
+        }
+      },
+      "label": "sensitivity analysis, not a prediction of what will happen"
+    },
+    {
+      "name": "low_scoring",
+      "parameters": {
+        "kind": "lambda",
+        "home_mult": 0.9,
+        "away_mult": 0.9,
+        "description": "Both scoring rates -10% (e.g. cagey tactical matchup).",
+        "calculation_version": "scenarios_v1"
+      },
+      "probabilities": {
+        "home": 0.174691,
+        "draw": 0.262169,
+        "away": 0.56314
+      },
+      "goals": {
+        "home_lambda": 0.701,
+        "away_lambda": 1.4951,
+        "total_lambda": 2.1961
+      },
+      "markets": {
+        "over_1_5": 0.644475553,
+        "over_2_5": 0.376237284,
+        "over_3_5": 0.179878824,
+        "btts": 0.39092251
+      },
+      "score_top": [
+        {
+          "score": "0-1",
+          "probability": 0.166308672
+        },
+        {
+          "score": "0-2",
+          "probability": 0.124322385
+        },
+        {
+          "score": "1-1",
+          "probability": 0.116584042
+        },
+        {
+          "score": "0-0",
+          "probability": 0.111237306
+        },
+        {
+          "score": "1-2",
+          "probability": 0.087151235
+        },
+        {
+          "score": "1-0",
+          "probability": 0.077978464
+        },
+        {
+          "score": "0-3",
+          "probability": 0.061957304
+        },
+        {
+          "score": "1-3",
+          "probability": 0.043432689
+        }
+      ],
+      "difference_from_baseline": {
+        "probabilities": {
+          "home": -0.027732,
+          "draw": 0.006042,
+          "away": 0.02169
+        },
+        "goals": {
+          "home_lambda": -0.0779,
+          "away_lambda": -0.1661,
+          "total_lambda": -0.244
+        },
+        "markets": {
+          "over_1_5": -0.055712,
+          "over_2_5": -0.064494,
+          "over_3_5": -0.04982,
+          "btts": -0.047408
+        }
+      },
+      "label": "sensitivity analysis, not a prediction of what will happen"
+    }
+  ],
+  "mirofish": {
+    "status": "unavailable",
+    "provider": "disabled",
+    "contract_version": "mirofish_contract_v1",
+    "scenarios": [],
+    "provenance": {
+      "match_id": 381,
+      "cutoff": "2024-04-06 15:30:00",
+      "prediction_version": "ensemble_v1-elo+poisson",
+      "model_version": "ensemble_v1-elo+poisson",
+      "intelligence_snapshot_hash": "1020275d0fc2c3391f7569164eeaf800b8abf3482f7d321ef5eabf8fce7fc07a",
+      "scenario_version": "baseline",
+      "scenario_id": "baseline",
+      "scenario_hash": "db638272989a0de5da08260fde106631aa4515f1b9d36a0b51dfd165163a2c58",
+      "contract_version": "mirofish_contract_v1",
+      "provider": "disabled",
+      "request_hash": "03be9a38c1e827c46a2a79684fa7508ffc2d5ae740b067f289913085d731df84"
+    },
+    "reason": "MiroFish is not configured (no external service bound)"
+  },
+  "explanation": {
+    "headline": "The ensemble_v1-elo+poisson model assigns Bayer Leverkusen the highest probability (54.1%; H=20.2% D=25.6% A=54.1%). These are statistical estimates with uncertainty, not certainties.",
+    "factors": [
+      {
+        "factor": "elo_ratings",
+        "statement": "Bayer Leverkusen receives a higher model probability partly because its pre-cutoff Elo rating is higher (1662 vs 1469, 2542 pre-cutoff matches in rating history).",
+        "source": "elo ratings_at (pre-cutoff finished matches only)"
+      },
+      {
+        "factor": "scoring_rates",
+        "statement": "Bayer Leverkusen receives a higher model probability partly because its estimated scoring rate is higher (home \u03bb=0.78, away \u03bb=1.66, venue-split pre-cutoff rates vs league averages H=1.671 A=1.4483).",
+        "source": "poisson estimate_lambdas (pre-cutoff finished matches only)"
+      },
+      {
+        "factor": "expected_goals",
+        "statement": "xG is unavailable for this prediction, so the goal estimate uses goals-only rates. xG is not treated as zero; it is reported missing (histories home=0, away=0; insufficient xG history (home=0, away=0, minimum=3); xG excluded, goals-only fallback; events/lineups collected but not consumed by v1 model math).",
+        "source": "feature availability record (missing stays missing)"
+      },
+      {
+        "factor": "form_and_context",
+        "statement": "Pre-cutoff form and context inputs are available (features: elo_diff, form_ppm_diff_5, gd_diff_5, rest_diff); they feed the advanced model where fitted. Raw values describe inputs, not causes.",
+        "source": "feature snapshot (pre-cutoff only)"
+      }
+    ],
+    "elo": {
+      "status": "ok",
+      "home_elo": 1468.6,
+      "away_elo": 1662.1,
+      "elo_difference": -193.5,
+      "home_advantage_points": 60.0,
+      "expected_home_result": 0.3168,
+      "history_matches": 2542,
+      "method": "logistic(home - away + home_advantage); draw from pre-cutoff league empirical rate"
+    },
+    "poisson": {
+      "status": "ok",
+      "home_lambda": 0.779,
+      "away_lambda": 1.661,
+      "league_avg_home": 1.671,
+      "league_avg_away": 1.4483,
+      "venue_counts": {
+        "home_home": 13,
+        "home_away": 14,
+        "away_home": 14,
+        "away_away": 13
+      },
+      "n_history": 248,
+      "xg_used": false,
+      "method": "venue-split recency-weighted attack/defense vs league averages"
+    },
+    "xg": {
+      "xg_status": "unavailable",
+      "home_xg_history": 0,
+      "away_xg_history": 0
+    },
+    "features": {
+      "feature_version": "features_v1",
+      "row_sufficient": true,
+      "goals_history": {
+        "home": 27,
+        "away": 27
+      },
+      "secondary": {
+        "shots": true,
+        "corners": true,
+        "cards": true
+      }
+    },
+    "model_disagreement_note": "Model outputs are relatively concentrated on one outcome.",
+    "provenance": {
+      "source": "prediction_explanation",
+      "calculation_version": "composer_v1",
+      "model_version": "ensemble_v1-elo+poisson",
+      "feature_version": "features_v1",
+      "cutoff": "2024-04-06 15:30:00",
+      "temporal_mode": "strict_prematch",
+      "status": "ok"
+    }
+  },
+  "warnings": [
+    {
+      "code": "XG_UNAVAILABLE",
+      "severity": "info",
+      "detail": "xG history below minimum; goals-only pathway",
+      "message": "xG history below minimum; goals-only pathway",
+      "evidence": {
+        "home_xg_history": 0,
+        "away_xg_history": 0
+      }
+    },
+    {
+      "code": "CLOSING_ONLY",
+      "severity": "info",
+      "detail": "closing snapshots excluded from consensus",
+      "message": "closing snapshots excluded from consensus",
+      "evidence": {
+        "closing_excluded": true
+      }
+    }
+  ],
+  "provenance": {
+    "match_id": 381,
+    "cutoff": "",
+    "prediction_snapshot": {
+      "prediction_id": null,
+      "hash": "4ab42f90f5a1b03e7e78ebd9d32289e299a2f3a1a1dd11e5a27697e603a30225"
+    },
+    "model_version": "ensemble_v1-elo+poisson",
+    "feature_version": "features_v1",
+    "dataset_version": "canonical_store",
+    "intelligence_snapshot": {
+      "snapshot_id": "intel_4ab42f90f5a1b03e",
+      "hash": "4ab42f90f5a1b03e7e78ebd9d32289e299a2f3a1a1dd11e5a27697e603a30225"
+    },
+    "scenario_version": "phase15_scenarios_v1",
+    "mirofish_contract_version": "mirofish_contract_v1",
+    "mirofish_provider": "disabled",
+    "request_hash": "",
+    "response_hash": "0de97076140497a282f24b5a50400630e55e010a4aad136fbceec0b091894900",
+    "generated_at": "DETERMINISTIC_FIXTURE"
+  }
+}
