@@ -1,6 +1,6 @@
 import React from 'react';
-import { ShieldCheck, Server, Radio, Database, Activity, RefreshCw, CheckCircle2, XCircle, Globe } from 'lucide-react';
-import { useSources, useAcquisitionStatus, useReadyProbe, useReadinessReport } from '../api/queries';
+import { ShieldCheck, Server, Radio, Database, Activity, RefreshCw, CheckCircle2, XCircle, Globe, ShieldAlert } from 'lucide-react';
+import { useSources, useAcquisitionStatus, useReadyProbe, useReadinessReport, usePreMatchReadinessSummary } from '../api/queries';
 import { CurrentSeasonBanner } from '../components/dashboard/CurrentSeasonBanner';
 import { LoadingSpinner } from '../components/common/LoadingSpinner';
 import { ErrorCard } from '../components/common/ErrorCard';
@@ -12,6 +12,7 @@ export const SystemStatusPage: React.FC = () => {
   const { data: acqData, isLoading: acqLoading, error: acqError, refetch: refetchAcq } = useAcquisitionStatus();
   const { data: readyProbe, refetch: refetchReady } = useReadyProbe();
   const { data: readinessData, refetch: refetchReadiness } = useReadinessReport();
+  const { data: preMatchSummary, refetch: refetchPreMatch } = usePreMatchReadinessSummary();
 
   if (srcLoading || acqLoading) {
     return <LoadingSpinner label="Auditing Provider Health and Acquisition Systems..." />;
@@ -28,6 +29,7 @@ export const SystemStatusPage: React.FC = () => {
     refetchAcq();
     refetchReady();
     refetchReadiness();
+    refetchPreMatch();
   };
 
   return (
@@ -148,6 +150,89 @@ export const SystemStatusPage: React.FC = () => {
                   })}
                 </tbody>
               </table>
+            </div>
+          )}
+        </div>
+      </section>
+
+      {/* Phase 25: Pre-Match Data Quality & Readiness Gate Summary */}
+      <section className="space-y-4">
+        <div className="flex items-center justify-between">
+          <h2 className="text-base font-semibold text-slate-100 flex items-center gap-2">
+            <ShieldCheck className="w-4 h-4 text-emerald-400" />
+            <span>Pre-Match Data Quality & Readiness Gate Summary</span>
+          </h2>
+          <span className="text-xs font-mono text-slate-400">
+            Phase 25 Gate Architecture | Contract: PREMATCH_CERTIFICATE_V1
+          </span>
+        </div>
+
+        <div className="p-5 rounded-xl border border-surface-border bg-surface-card space-y-4 shadow-sm">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-800 pb-3">
+            <div className="flex items-center gap-2">
+              <Badge variant={preMatchSummary?.operational_mode === 'operational' ? 'success' : 'info'}>
+                Mode: {preMatchSummary?.operational_mode || 'readiness_only'}
+              </Badge>
+              <span className="text-xs font-mono text-slate-400">
+                Season: {preMatchSummary?.season || '2026/27'}
+              </span>
+            </div>
+            <span className="text-xs font-mono text-slate-400">
+              Provider State: <strong className="text-slate-200">{preMatchSummary?.provider_state || 'UNAVAILABLE'}</strong>
+            </span>
+          </div>
+
+          <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 gap-3 text-center text-xs font-mono">
+            <div className="p-3 rounded bg-slate-900/60 border border-slate-800">
+              <span className="text-slate-400 block text-[10px]">Total Fixtures</span>
+              <span className="text-base font-bold text-slate-100 mt-1 block">
+                {preMatchSummary?.fixture_count ?? 0}
+              </span>
+            </div>
+            <div className="p-3 rounded bg-slate-900/60 border border-slate-800">
+              <span className="text-slate-400 block text-[10px]">Reconciled (G1+G2)</span>
+              <span className="text-base font-bold text-emerald-400 mt-1 block">
+                {preMatchSummary?.reconciled_count ?? 0}
+              </span>
+            </div>
+            <div className="p-3 rounded bg-slate-900/60 border border-slate-800">
+              <span className="text-slate-400 block text-[10px]">Temporal Valid (G3)</span>
+              <span className="text-base font-bold text-emerald-400 mt-1 block">
+                {preMatchSummary?.temporally_valid_count ?? 0}
+              </span>
+            </div>
+            <div className="p-3 rounded bg-slate-900/60 border border-slate-800">
+              <span className="text-slate-400 block text-[10px]">Quality Passed (G4)</span>
+              <span className="text-base font-bold text-emerald-400 mt-1 block">
+                {preMatchSummary?.quality_passed_count ?? 0}
+              </span>
+            </div>
+            <div className="p-3 rounded bg-slate-900/60 border border-slate-800">
+              <span className="text-slate-400 block text-[10px]">Prediction Ready</span>
+              <span className="text-base font-bold text-emerald-400 mt-1 block">
+                {preMatchSummary?.prediction_ready_count ?? 0}
+              </span>
+            </div>
+            <div className="p-3 rounded bg-slate-900/60 border border-slate-800">
+              <span className="text-slate-400 block text-[10px]">Ready Degraded</span>
+              <span className="text-base font-bold text-amber-400 mt-1 block">
+                {preMatchSummary?.ready_degraded_count ?? 0}
+              </span>
+            </div>
+            <div className="p-3 rounded bg-slate-900/60 border border-slate-800">
+              <span className="text-slate-400 block text-[10px]">Blocked</span>
+              <span className="text-base font-bold text-rose-400 mt-1 block">
+                {preMatchSummary?.blocked_count ?? 0}
+              </span>
+            </div>
+          </div>
+
+          {preMatchSummary?.fixture_count === 0 && (
+            <div className="p-3 rounded-lg bg-slate-900/80 border border-slate-800 flex items-start gap-2.5 text-xs font-mono text-slate-400">
+              <ShieldAlert className="w-4 h-4 text-amber-400 shrink-0 mt-0.5" />
+              <div>
+                <strong className="text-slate-300">Readiness-Only Telemetry Active:</strong> Zero 2026/27 fixtures currently ingested. The pre-match data quality gate, cross-source reconciliation check, and immutable certificate generator are armed and operational, awaiting qualified current-season provider activation.
+              </div>
             </div>
           )}
         </div>

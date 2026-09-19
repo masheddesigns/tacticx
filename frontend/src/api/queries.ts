@@ -19,6 +19,8 @@ export const QUERY_KEYS = {
   jobDue: () => ['jobDue'],
   readyProbe: () => ['readyProbe'],
   readinessReport: (params?: any) => ['readinessReport', params],
+  preMatchReadiness: (matchId: number, options?: any) => ['preMatchReadiness', matchId, options],
+  preMatchReadinessSummary: (params?: any) => ['preMatchReadinessSummary', params],
 };
 
 export function useMatches(params?: {
@@ -198,6 +200,26 @@ export function useReadinessReport(params?: { season?: string; competition?: str
   return useQuery({
     queryKey: QUERY_KEYS.readinessReport(params),
     queryFn: ({ signal }) => apiClient.getReadinessReport({ ...params, signal }),
+    staleTime: 30 * 1000,
+  });
+}
+
+export function usePreMatchReadiness(
+  matchId: number,
+  options?: { cutoff?: string; mode?: string; persist?: boolean }
+) {
+  return useQuery({
+    queryKey: QUERY_KEYS.preMatchReadiness(matchId, options),
+    queryFn: ({ signal }) => apiClient.getPreMatchReadiness(matchId, { ...options, signal }),
+    enabled: !!matchId,
+    staleTime: 30 * 1000,
+  });
+}
+
+export function usePreMatchReadinessSummary(params?: { season?: string }) {
+  return useQuery({
+    queryKey: QUERY_KEYS.preMatchReadinessSummary(params),
+    queryFn: ({ signal }) => apiClient.getPreMatchReadinessSummary({ ...params, signal }),
     staleTime: 30 * 1000,
   });
 }

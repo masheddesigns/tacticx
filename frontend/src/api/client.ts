@@ -12,6 +12,8 @@ import {
   SchedulerDashboardResponse,
   JobRecord,
   ReadyProbeResponse,
+  PreMatchReadinessResponse,
+  PreMatchReadinessSummaryResponse,
 } from './types';
 
 export class ApiError extends Error {
@@ -231,5 +233,34 @@ export const apiClient = {
     if (params?.competition) query.set('competition', params.competition);
     const qs = query.toString();
     return request<any>(`/acquisition/readiness${qs ? `?${qs}` : ''}`, { signal: params?.signal });
+  },
+
+  // Phase 25: Pre-Match Readiness Gate & Quality Summary
+  getPreMatchReadiness: async (
+    matchId: number,
+    options?: { cutoff?: string; mode?: string; persist?: boolean; signal?: AbortSignal }
+  ): Promise<PreMatchReadinessResponse> => {
+    const query = new URLSearchParams();
+    if (options?.cutoff) query.set('cutoff', options.cutoff);
+    if (options?.mode) query.set('mode', options.mode);
+    if (options?.persist) query.set('persist', 'true');
+    const qs = query.toString();
+    return request<PreMatchReadinessResponse>(
+      `/matches/${matchId}/pre-match-readiness${qs ? `?${qs}` : ''}`,
+      { signal: options?.signal }
+    );
+  },
+
+  getPreMatchReadinessSummary: async (params?: {
+    season?: string;
+    signal?: AbortSignal;
+  }): Promise<PreMatchReadinessSummaryResponse> => {
+    const query = new URLSearchParams();
+    if (params?.season) query.set('season', params.season);
+    const qs = query.toString();
+    return request<PreMatchReadinessSummaryResponse>(
+      `/matches/current/readiness-summary${qs ? `?${qs}` : ''}`,
+      { signal: params?.signal }
+    );
   },
 };

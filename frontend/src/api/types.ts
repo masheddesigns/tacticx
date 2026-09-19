@@ -514,3 +514,58 @@ export interface ReadyProbeResponse {
   status: 'ok' | 'degraded';
   checks: Record<string, string>;
 }
+
+export interface GateVerdict {
+  passed: boolean;
+  reasons: string[];
+  status?: 'pass' | 'degraded' | 'fail';
+  warnings?: string[];
+}
+
+export interface PreMatchReadinessResponse {
+  match_id: number;
+  competition: string;
+  season: string;
+  home_team_id: number;
+  away_team_id: number;
+  kickoff_at: string | null;
+  cutoff: string;
+  readiness_state: 'PREDICTION_READY' | 'READY_DEGRADED' | 'BLOCKED';
+  eligible: boolean;
+  mode: string;
+  gate_verdicts: {
+    gate1_structural: GateVerdict;
+    gate2_reconciliation: GateVerdict;
+    gate3_temporal: GateVerdict;
+    gate4_features: GateVerdict;
+  };
+  blocking_reasons: string[];
+  warnings: string[];
+  missing_features: {
+    core: string[];
+    optional: string[];
+  };
+  evaluated_at: string;
+  certificate?: {
+    certificate_id: string;
+    certificate_version: string;
+    payload_hash: string;
+    supersedes_certificate_id?: string | null;
+    created_at?: string | null;
+  };
+}
+
+export interface PreMatchReadinessSummaryResponse {
+  season: string;
+  operational_mode: string;
+  provider_state: string;
+  fixture_count: number;
+  reconciled_count: number;
+  temporally_valid_count: number;
+  quality_passed_count: number;
+  prediction_ready_count: number;
+  ready_degraded_count: number;
+  blocked_count: number;
+  blocking_reasons: Record<string, number>;
+  checked_at: string;
+}

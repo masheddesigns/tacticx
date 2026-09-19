@@ -1205,6 +1205,99 @@ def _cmd_current_season(db, args) -> int:
     return 1
 
 
+def _cmd_pre_match(db, args) -> int:
+    from app.services.acquisition.readiness_gate import (
+        evaluate_pre_match_readiness,
+        generate_readiness_certificate,
+        get_current_season_prematch_summary,
+    )
+
+    action = args.action
+    as_json = args.as_json
+
+    if action == "audit":
+        if args.match_id is None:
+            print("error: match_id is required for audit action")
+            return 1
+
+        cutoff_dt = None
+        if args.cutoff:
+            try:
+                cutoff_dt = datetime.fromisoformat(args.cutoff.replace("Z", "+00:00"))
+            except ValueError:
+                print("error: cutoff must be valid ISO-8601 timestamp")
+                return 1
+
+        mode = args.mode or "PRE_MATCH"
+        if args.persist:
+            cert = generate_readiness_certificate(db, args.match_id, cutoff=cutoff_dt, mode=mode)
+            evaluation = evaluate_pre_match_readiness(db, args.match_id, cutoff=cutoff_dt, mode=mode)
+            evaluation["certificate"] = {
+                "certificate_id": cert.certificate_id,
+                "certificate_version": cert.certificate_version,
+                "payload_hash": cert.payload_hash,
+                "supersedes_certificate_id": cert.supersedes_certificate_id,
+                "created_at": cert.created_at.isoformat() if cert.created_at else None,
+            }
+        else:
+            evaluation = evaluate_pre_match_readiness(db, args.match_id, cutoff=cutoff_dt, mode=mode)
+
+        if as_json:
+            print(json.dumps(evaluation, indent=2, default=str))
+            return 0 if evaluation["eligible"] else 1
+
+        print(f"Pre-Match Readiness Audit: match={evaluation['match_id']} [{evaluation['competition']}]")
+        print(f"  Kickoff: {evaluation['kickoff_at']} | Cutoff: {evaluation['cutoff']} (mode={evaluation['mode']})")
+        print(f"  State:   {evaluation['readiness_state']} (Eligible: {'YES' if evaluation['eligible'] else 'NO'})")
+        gv = evaluation["gate_verdicts"]
+        print(f"  Gate 1 (Structural):     {'PASS' if gv['gate1_structural']['passed'] else 'FAIL'}")
+        print(f"  Gate 2 (Reconciliation): {'PASS' if gv['gate2_reconciliation']['passed'] else 'FAIL'}")
+        print(f"  Gate 3 (Temporal):       {'PASS' if gv['gate3_temporal']['passed'] else 'FAIL'}")
+        print(f"  Gate 4 (Features):       {gv['gate4_features']['status'].upper()}")
+        if evaluation["blocking_reasons"]:
+            print("  Blocking Reasons:")
+            for br in evaluation["blocking_reasons"]:
+                print(f"    - {br}")
+        if evaluation["warnings"]:
+            print("  Warnings:")
+            for w in evaluation["warnings"]:
+                print(f"    - {w}")
+        if "certificate" in evaluation:
+            c = evaluation["certificate"]
+            print(f"  Certificate ID: {c['certificate_id']}")
+            print(f"  Payload Hash:   {c['payload_hash']}")
+            if c.get("supersedes_certificate_id"):
+                print(f"  Supersedes:     {c['supersedes_certificate_id']}")
+
+        return 0 if evaluation["eligible"] else 1
+
+    if action == "summary":
+        season = args.season or "current"
+        summary = get_current_season_prematch_summary(db, season=season)
+        if as_json:
+            print(json.dumps(summary, indent=2, default=str))
+            return 0
+
+        print(f"Current Season Pre-Match Readiness Summary [{summary['season']}]")
+        print(f"  Operational Mode:       {summary['operational_mode']}")
+        print(f"  Provider State:         {summary['provider_state']}")
+        print(f"  Total Fixtures:         {summary['fixture_count']}")
+        print(f"  Reconciled Fixtures:    {summary['reconciled_count']}")
+        print(f"  Temporally Valid:       {summary['temporally_valid_count']}")
+        print(f"  Quality Passed:         {summary['quality_passed_count']}")
+        print(f"  Prediction Ready:       {summary['prediction_ready_count']}")
+        print(f"  Ready Degraded:         {summary['ready_degraded_count']}")
+        print(f"  Blocked:                {summary['blocked_count']}")
+        if summary.get("blocking_reasons"):
+            print("  Blocking Reasons Breakdown:")
+            for reason, count in summary["blocking_reasons"].items():
+                print(f"    - {reason}: {count}")
+        return 0
+
+    print(f"unknown action: {action}")
+    return 1
+
+
 def main() -> int:
     configure_logging(get_settings().LOG_LEVEL)
     ap = argparse.ArgumentParser(description="TacticX prediction intelligence.")
@@ -1382,6 +1475,15 @@ def main() -> int:
     p.add_argument("--force", action="store_true", help="force activation override")
     p.add_argument("--json", action="store_true", dest="as_json")
 
+    p = sub.add_parser("pre-match", help="Pre-match data quality & readiness gate")
+    p.add_argument("action", choices=["audit", "summary"], nargs="?", default="summary")
+    p.add_argument("match_id", type=int, nargs="?", default=None, help="match ID for audit")
+    p.add_argument("--cutoff", default=None, help="ISO cutoff (default: now/kickoff)")
+    p.add_argument("--mode", default="PRE_MATCH", choices=["PRE_MATCH", "POST_MATCH", "EVALUATION"])
+    p.add_argument("--persist", action="store_true", help="persist immutable readiness certificate")
+    p.add_argument("--season", default="current", help="season code or 'current'")
+    p.add_argument("--json", action="store_true", dest="as_json")
+
     args = ap.parse_args()
     Base.metadata.create_all(get_engine())
     db = get_session_local()()
@@ -1430,6 +1532,8 @@ def main() -> int:
             return _cmd_jobs(db, args)
         if args.command == "current-season":
             return _cmd_current_season(db, args)
+        if args.command == "pre-match":
+            return _cmd_pre_match(db, args)
         ap.error(f"unknown command: {args.command}")
         return 1
     finally:

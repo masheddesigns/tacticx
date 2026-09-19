@@ -146,12 +146,63 @@ def current_matches(
     }
 
 
+@router.get("/current/readiness-summary", summary="Current season pre-match readiness summary")
+def current_season_readiness_summary_endpoint(
+    season: str = Query("current", description="Season code or 'current'"),
+    db: Session = Depends(get_db),
+):
+    """Aggregate pre-match readiness counts and state breakdown across current-season universe."""
+    from app.services.acquisition.readiness_gate import get_current_season_prematch_summary
+
+    return get_current_season_prematch_summary(db, season=season)
+
+
 @router.get("/{match_id}", summary="Match detail", response_model=MatchOut)
 def get_match(match_id: int, db: Session = Depends(get_db)):
     m = db.get(Match, match_id)
     if not m:
         raise HTTPException(404, "match not found")
     return _match_out(m, db)
+
+
+@router.get("/{match_id}/pre-match-readiness", summary="Pre-match data quality and readiness gate evaluation")
+def match_pre_match_readiness_endpoint(
+    match_id: int,
+    cutoff: Optional[str] = Query(None, description="ISO-8601 evaluation cutoff timestamp"),
+    mode: str = Query("PRE_MATCH", description="Evaluation mode: PRE_MATCH | POST_MATCH | EVALUATION"),
+    persist: bool = Query(False, description="Whether to persist an immutable readiness certificate"),
+    db: Session = Depends(get_db),
+):
+    """Evaluate pre-match data quality, cross-source reconciliation, and temporal readiness."""
+    m = db.get(Match, match_id)
+    if not m:
+        raise HTTPException(404, "match not found")
+
+    cutoff_dt = None
+    if cutoff:
+        try:
+            cutoff_dt = datetime.fromisoformat(cutoff.replace("Z", "+00:00"))
+        except ValueError:
+            raise HTTPException(400, "cutoff must be valid ISO-8601 timestamp")
+
+    from app.services.acquisition.readiness_gate import (
+        evaluate_pre_match_readiness,
+        generate_readiness_certificate,
+    )
+
+    if persist:
+        cert = generate_readiness_certificate(db, match_id, cutoff=cutoff_dt, mode=mode)
+        evaluation = evaluate_pre_match_readiness(db, match_id, cutoff=cutoff_dt, mode=mode)
+        evaluation["certificate"] = {
+            "certificate_id": cert.certificate_id,
+            "certificate_version": cert.certificate_version,
+            "payload_hash": cert.payload_hash,
+            "supersedes_certificate_id": cert.supersedes_certificate_id,
+            "created_at": cert.created_at.isoformat() if cert.created_at else None,
+        }
+        return evaluation
+
+    return evaluate_pre_match_readiness(db, match_id, cutoff=cutoff_dt, mode=mode)
 
 
 @router.get("/{match_id}/statistics", summary="Match statistics")
