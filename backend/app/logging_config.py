@@ -52,15 +52,47 @@ def _has_secret(text: str) -> bool:
     return any(pat.search(text) is not None for pat in _SECRET_PATTERNS)
 
 
-def configure_logging(level: str = "INFO") -> None:
+import json
+from datetime import datetime, timezone
+
+
+class JSONFormatter(logging.Formatter):
+    """Structured JSON formatter with request correlation and operational metadata."""
+
+    def format(self, record: logging.LogRecord) -> str:
+        from app.observability.request_context import get_request_id
+
+        log_data: dict[str, any] = {
+            "timestamp": datetime.now(timezone.utc).isoformat(),
+            "level": record.levelname,
+            "logger": record.name,
+            "message": record.getMessage(),
+        }
+        req_id = getattr(record, "request_id", None) or get_request_id()
+        if req_id:
+            log_data["request_id"] = req_id
+
+        for field in ("path", "method", "status_code", "duration_ms", "client_ip", "job_id", "source"):
+            val = getattr(record, field, None)
+            if val is not None:
+                log_data[field] = val
+
+        if record.exc_info:
+            log_data["exception"] = self.formatException(record.exc_info)
+
+        return json.dumps(log_data, default=str)
+
+
+def configure_logging(level: str = "INFO", log_format: str = "console") -> None:
     global _configured
-    if _configured:
-        return
     # Logs go to stderr so scripts can emit machine-readable JSON on stdout.
     handler = logging.StreamHandler(sys.stderr)
-    handler.setFormatter(logging.Formatter(
-        "%(asctime)s level=%(levelname)s logger=%(name)s msg=%(message)s"
-    ))
+    if str(log_format).lower() == "json":
+        handler.setFormatter(JSONFormatter())
+    else:
+        handler.setFormatter(logging.Formatter(
+            "%(asctime)s level=%(levelname)s logger=%(name)s msg=%(message)s"
+        ))
     filt = _RedactSecretsFilter()
     handler.addFilter(filt)
     root = logging.getLogger()

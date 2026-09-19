@@ -1,7 +1,7 @@
-"""Central application configuration — every tunable lives here (env vars), never hard-coded."""
 from __future__ import annotations
 
 from functools import lru_cache
+from typing import Optional
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -13,8 +13,15 @@ class Settings(BaseSettings):
 
     ENVIRONMENT: str = "development"
     LOG_LEVEL: str = "INFO"
+    LOG_FORMAT: str = "console"  # console | json
     API_V1_PREFIX: str = "/api/v1"
     CORS_ORIGINS: str = "http://localhost:3000"
+    SECRET_KEY: str = "dev-secret-key-change-in-production"
+    ENABLE_OPERATIONAL_ENDPOINTS: Optional[bool] = None
+    RATE_LIMIT_PER_MINUTE: int = 120
+    METRICS_ENABLED: bool = True
+    METRICS_INTERNAL_ONLY: bool = True
+    METRICS_TOKEN: str = ""
 
     FOOTBALL_PROVIDER: str = "api_football"
     FOOTBALL_API_KEY: str = ""
@@ -243,6 +250,23 @@ class Settings(BaseSettings):
         except ValueError:
             return {}
         return {str(k): str(v) for k, v in raw.items()} if isinstance(raw, dict) else {}
+    @property
+    def operational_endpoints_enabled(self) -> bool:
+        """Operational mutations (running jobs, qualifying sources, lock cleanup) are disabled
+        by default in production to prevent unintended execution from public web traffic."""
+        if self.ENABLE_OPERATIONAL_ENDPOINTS is not None:
+            return bool(self.ENABLE_OPERATIONAL_ENDPOINTS)
+        return self.ENVIRONMENT.lower() != "production"
+
+    def validate_production(self) -> None:
+        """Fail fast if critical production settings are missing, default, or unsafe."""
+        if self.ENVIRONMENT.lower() == "production":
+            if self.DATABASE_URL.startswith("sqlite"):
+                raise ValueError("DATABASE_URL must be a production PostgreSQL database, not SQLite")
+            if not self.SECRET_KEY or self.SECRET_KEY in ("dev-secret-key-change-in-production", "secret", "changeme"):
+                raise ValueError("SECRET_KEY must be set to a secure, non-default value in production")
+            if "*" in self.cors_origins_list:
+                raise ValueError("CORS_ORIGINS cannot contain wildcard '*' in production")
 
 
 @lru_cache

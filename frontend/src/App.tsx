@@ -3,6 +3,7 @@ import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { Navbar } from './components/layout/Navbar';
 import { Footer } from './components/layout/Footer';
+import { ApplicationErrorBoundary } from './components/common/ApplicationErrorBoundary';
 import { DashboardPage } from './pages/DashboardPage';
 import { MatchExplorerPage } from './pages/MatchExplorerPage';
 import { MatchIntelligencePage } from './pages/MatchIntelligencePage';
@@ -20,9 +21,10 @@ const queryClient = new QueryClient({
 
 export const App: React.FC = () => {
   return (
-    <QueryClientProvider client={queryClient}>
-      <BrowserRouter>
-        <div className="flex flex-col min-h-screen bg-[#090d16] text-slate-100 font-sans selection:bg-emerald-500/20 selection:text-emerald-300">
+    <ApplicationErrorBoundary>
+      <QueryClientProvider client={queryClient}>
+        <BrowserRouter>
+          <div className="flex flex-col min-h-screen bg-[#090d16] text-slate-100 font-sans selection:bg-emerald-500/20 selection:text-emerald-300">
           <Navbar />
           <main className="flex-1">
             <Routes>
@@ -38,6 +40,7 @@ export const App: React.FC = () => {
         </div>
       </BrowserRouter>
     </QueryClientProvider>
+    </ApplicationErrorBoundary>
   );
 };
 

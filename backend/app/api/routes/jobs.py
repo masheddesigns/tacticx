@@ -15,6 +15,7 @@ from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.orm import Session
 
 from app.api.dependencies import get_db
+from app.config import get_settings
 from app.services.scheduler import (
     ALL_JOB_TYPES,
     check_alerts,
@@ -82,6 +83,8 @@ def dashboard(db: Session = Depends(get_db)):
 
 @router.post("/locks/cleanup")
 def cleanup_locks_endpoint(db: Session = Depends(get_db)):
+    if not get_settings().operational_endpoints_enabled:
+        raise HTTPException(status_code=403, detail="Operational mutation endpoints are disabled in this environment")
     count = cleanup_expired_locks(db)
     return {"cleaned": count}
 
@@ -128,6 +131,8 @@ def run_job_endpoint(
     dry_run: bool = Query(False),
     db: Session = Depends(get_db),
 ):
+    if not get_settings().operational_endpoints_enabled:
+        raise HTTPException(status_code=403, detail="Operational mutation endpoints are disabled in this environment")
     if job_type not in ALL_JOB_TYPES:
         raise HTTPException(
             status_code=400,

@@ -1,0 +1,117 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: tacticx-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-bet}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-bet}
+      POSTGRES_DB: ${POSTGRES_DB:-betpredictor}
+    ports:
+      - "127.0.0.1:5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-bet}"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+    networks:
+      - tacticx-network
+
+  redis:
+    image: redis:7-alpine
+    container_name: tacticx-redis
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:6379:6379"
+    volumes:
+      - redisdata:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+    networks:
+      - tacticx-network
+
+  # Dedicated migration runner: run explicitly via `docker compose run --rm migration`
+  migration:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: tacticx-migration
+    environment:
+      DATABASE_URL: postgresql+psycopg2://${POSTGRES_USER:-bet}:${POSTGRES_PASSWORD:-bet}@postgres:5432/${POSTGRES_DB:-betpredictor}
+    depends_on:
+      postgres:
+        condition: service_healthy
+    command: ["alembic", "upgrade", "head"]
+    networks:
+      - tacticx-network
+    profiles:
+      - migration
+      - tools
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: tacticx-backend
+    restart: unless-stopped
+    stop_grace_period: 20s
+    environment:
+      ENVIRONMENT: production
+      LOG_LEVEL: INFO
+      LOG_FORMAT: json
+      DATABASE_URL: postgresql+psycopg2://${POSTGRES_USER:-bet}:${POSTGRES_PASSWORD:-bet}@postgres:5432/${POSTGRES_DB:-betpredictor}
+      REDIS_URL: redis://redis:6379/0
+      CELERY_BROKER_URL: redis://redis:6379/1
+      CELERY_RESULT_BACKEND: redis://redis:6379/2
+      CORS_ORIGINS: http://localhost:80,http://127.0.0.1:80
+      ENABLE_OPERATIONAL_ENDPOINTS: "false"
+      SECRET_KEY: ${SECRET_KEY:-tacticx-production-secret-key-32chars-minimum-token}
+      METRICS_ENABLED: "true"
+      METRICS_INTERNAL_ONLY: "true"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    ports:
+      # Expose locally for internal scrapers/observability
+      - "127.0.0.1:8000:8000"
+    healthcheck:
+      test: ["CMD-SHELL", "python -c \"import urllib.request; urllib.request.urlopen('http://localhost:8000/health/live')\""]
+      interval: 10s
+      timeout: 3s
+      retries: 3
+    networks:
+      - tacticx-network
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: tacticx-frontend
+    restart: unless-stopped
+    ports:
+      - "80:80"
+    depends_on:
+      backend:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q -O /dev/null http://localhost/ || exit 1"]
+      interval: 15s
+      timeout: 3s
+      retries: 3
+    networks:
+      - tacticx-network
+
+volumes:
+  pgdata:
+  redisdata:
+
+networks:
+  tacticx-network:
+    driver: bridge

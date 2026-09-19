@@ -68,6 +68,10 @@ def qualify_source_endpoint(source_id: str, request: QualifyRequest,
                             db: Session = Depends(get_db)):
     """Bounded live qualification. Accepts only competition/season/budget —
     never URLs, credentials, or adapter names beyond the registry id."""
+    from app.config import get_settings
+
+    if not get_settings().operational_endpoints_enabled:
+        raise HTTPException(status_code=403, detail="Operational mutation endpoints are disabled in this environment")
     try:
         registry.get_registry().get(source_id)
     except ValueError as exc:
