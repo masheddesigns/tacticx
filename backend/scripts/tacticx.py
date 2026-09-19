@@ -986,6 +986,136 @@ def _validate_sources(db) -> dict:
     return {"checks": len(lines), "failures": failures, "lines": lines}
 
 
+def _cmd_jobs(db, args) -> int:
+    from app.services.scheduler import (
+        ALL_JOB_TYPES, get_job_config, recent_records, find_due_jobs,
+        run_job, run_job_manual, run_due, check_alerts, detect_anomalies,
+        operational_summary, scheduler_status,
+    )
+    from app.services.scheduler.store import get_record, cleanup_expired_locks
+    from app.services.scheduler.config import ALL_JOB_TYPES
+
+    action = args.action
+    as_json = args.as_json
+
+    if action == "list":
+        records = recent_records(db, limit=20)
+        if as_json:
+            print(json.dumps([{
+                "job_id": r.job_id, "job_type": r.job_type,
+                "competition": r.competition, "status": r.status,
+                "trigger": r.trigger, "completed_at": str(r.completed_at),
+            } for r in records], indent=2, default=str))
+            return 0
+        if not records:
+            print("no job records")
+            return 0
+        print(f"{'job_id':<30} {'type':<20} {'comp':<12} {'status':<12} {'trigger':<10}")
+        print("-" * 84)
+        for r in records:
+            print(f"{r.job_id:<30} {r.job_type:<20} {r.competition:<12} "
+                  f"{r.status:<12} {r.trigger:<10}")
+        return 0
+
+    if action == "status":
+        status = scheduler_status(db)
+        if as_json:
+            print(json.dumps(status, indent=2, default=str))
+            return 0
+        print(f"Scheduler status as of {status['as_of']}")
+        print(f"\n--- Sources ---")
+        for source, info in status.get("sources", {}).items():
+            health = info.get("health", {})
+            print(f"  {source}: qual={info['qualification']} "
+                  f"health={health.get('state', '?')}")
+        print(f"\n--- Jobs ---")
+        for job_type, info in status.get("jobs", {}).items():
+            last = info.get("last_run")
+            last_str = f"last={last['status']}" if last else "last=never"
+            print(f"  {job_type}: enabled={info['enabled']} "
+                  f"interval={info['interval_seconds']}s {last_str}")
+        print(f"\n--- Locks ---")
+        locks = status.get("locks", {})
+        print(f"  active={locks.get('active', 0)} stale={locks.get('stale', 0)}")
+        return 0
+
+    if action == "run":
+        job_type = args.job_type
+        if job_type is None:
+            print("usage: tacticx jobs run <job_type> [--competition X] [--dry-run]")
+            return 1
+        if job_type not in ALL_JOB_TYPES:
+            print(f"unknown job type: {job_type!r} (valid: {', '.join(ALL_JOB_TYPES)})")
+            return 1
+        result = run_job_manual(
+            db, job_type,
+            competition=args.competition or "",
+            season=args.season or "",
+            source=args.source or "",
+            dry_run=args.dry_run)
+        if as_json:
+            print(json.dumps(result, indent=2, default=str))
+            return 0
+        status = result.get("status", "?")
+        label = "dry-run" if args.dry_run else "executed"
+        print(f"[{label}] {job_type} -> {status}")
+        if result.get("error_message"):
+            print(f"  error: {result['error_message']}")
+        return 0 if status in ("succeeded", "partial", "dry_run", "skipped") else 1
+
+    if action == "run-due":
+        results = run_due(db, dry_run=args.dry_run)
+        if as_json:
+            print(json.dumps(results, indent=2, default=str))
+            return 0
+        if not results:
+            print("no jobs due")
+            return 0
+        for r in results:
+            label = "dry-run" if args.dry_run else "executed"
+            print(f"[{label}] {r.get('job_type', '?')} "
+                  f"({r.get('competition', '')}) -> {r.get('status', '?')}")
+        return 0
+
+    if action == "alerts":
+        alerts = check_alerts(db)
+        if as_json:
+            print(json.dumps(alerts, indent=2, default=str))
+            return 0
+        if not alerts:
+            print("no alerts")
+            return 0
+        for a in alerts:
+            print(f"  [{a['severity']}] {a['condition']}: {a.get('detail', '')}")
+        return 0
+
+    if action == "anomalies":
+        anomalies = detect_anomalies(db)
+        if as_json:
+            print(json.dumps(anomalies, indent=2, default=str))
+            return 0
+        if not anomalies:
+            print("no anomalies detected")
+            return 0
+        for a in anomalies:
+            print(f"  [{a['type']}] {a.get('detail', '')}")
+        return 0
+
+    if action == "dashboard":
+        summary = operational_summary(db)
+        if as_json:
+            print(json.dumps(summary, indent=2, default=str))
+            return 0
+        print(f"Operational summary as of {summary['as_of']}")
+        print(f"  alerts: {summary['alert_count']}")
+        print(f"  anomalies: {summary['anomaly_count']}")
+        print(f"  active locks: {summary['active_locks']}")
+        return 0
+
+    print(f"unknown action: {action}")
+    return 1
+
+
 def main() -> int:
     configure_logging(get_settings().LOG_LEVEL)
     ap = argparse.ArgumentParser(description="TacticX prediction intelligence.")
@@ -1138,6 +1268,19 @@ def main() -> int:
                    help="expanding folds instead of season protocol (0 = off)")
     p.add_argument("--json", action="store_true", dest="as_json")
 
+    p = sub.add_parser("jobs", help="Acquisition scheduler jobs")
+    p.add_argument("action",
+                   choices=["list", "status", "run", "run-due",
+                            "alerts", "anomalies", "dashboard"],
+                   nargs="?", default="status")
+    p.add_argument("job_type", nargs="?", default=None,
+                   help="job type for 'run' action")
+    p.add_argument("--competition", default="")
+    p.add_argument("--season", default="")
+    p.add_argument("--source", default="")
+    p.add_argument("--dry-run", action="store_true")
+    p.add_argument("--json", action="store_true", dest="as_json")
+
     args = ap.parse_args()
     Base.metadata.create_all(get_engine())
     db = get_session_local()()
@@ -1182,6 +1325,8 @@ def main() -> int:
             return _cmd_data(db, args)
         if args.command == "research":
             return _cmd_research(db, args)
+        if args.command == "jobs":
+            return _cmd_jobs(db, args)
         ap.error(f"unknown command: {args.command}")
         return 1
     finally:

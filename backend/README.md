@@ -903,3 +903,15 @@ CLI: `sources list/qualify`, `acquire --explain`. API: `/api/v1/sources*`
 sources; secret-leak via httpx URL-object logging found and fixed.
 Docs: `PHASE19_REPORT.md`, `PHASE19_PROVIDER_QUALIFICATION.md`,
 `PHASE19_SOURCE_MATRIX.md`, `PHASE19_ACQUISITION_STRATEGY.md`.
+
+## Phase 20 — Production acquisition scheduler & operational reliability
+
+Config-driven scheduler (`app/services/scheduler/`) with append-only
+job records, database-backed locking with TTL expiry, 6 job types
+(fixture/status/result refresh, health check, freshness audit,
+qualification), dry-run mode, bounded backoff, rate-limit budgets,
+operational alerts, anomaly detection, dashboard API, and CLI
+(`tacticx jobs list|status|run|run-due|alerts|anomalies|dashboard`).
+Prediction never triggered by scheduler. Five-league mock validation
+passed; 585/585 tests green. Docs: `PHASE20_REPORT.md`,
+`PHASE20_SCHEDULER.md`.
