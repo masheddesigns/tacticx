@@ -558,7 +558,10 @@ export interface PreMatchReadinessResponse {
 export interface PreMatchReadinessSummaryResponse {
   season: string;
   operational_mode: string;
+  /** Global provider state (ACTIVE if any competition is ACTIVE for this season) */
   provider_state: string;
+  /** Per-competition provider activation state, scoped to provider × competition × season (Phase 25.1) */
+  provider_activation_by_competition: Record<string, string>;
   fixture_count: number;
   reconciled_count: number;
   temporally_valid_count: number;
@@ -569,3 +572,10 @@ export interface PreMatchReadinessSummaryResponse {
   blocking_reasons: Record<string, number>;
   checked_at: string;
 }
+
+/** 4-state duplicate detection result (Phase 25.1 FIX 2) */
+export type DuplicateDetectionState =
+  | 'NO_DUPLICATE'
+  | 'DUPLICATE_CANDIDATE'      // proximity only — warning, not blocking
+  | 'DUPLICATE_CONFIRMED'      // exact provider+provider_match_id collision — blocking
+  | 'DUPLICATE_RESOLUTION_REQUIRED';  // both conditions — blocking

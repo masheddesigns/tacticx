@@ -227,6 +227,7 @@ export const SystemStatusPage: React.FC = () => {
             </div>
           </div>
 
+
           {preMatchSummary?.fixture_count === 0 && (
             <div className="p-3 rounded-lg bg-slate-900/80 border border-slate-800 flex items-start gap-2.5 text-xs font-mono text-slate-400">
               <ShieldAlert className="w-4 h-4 text-amber-400 shrink-0 mt-0.5" />
@@ -235,8 +236,53 @@ export const SystemStatusPage: React.FC = () => {
               </div>
             </div>
           )}
+
+          {/* Phase 25.1 FIX 4/8: Per-competition provider activation context */}
+          {preMatchSummary?.provider_activation_by_competition &&
+            Object.keys(preMatchSummary.provider_activation_by_competition).length > 0 && (
+            <div className="space-y-2">
+              <span className="text-[10px] font-mono font-semibold text-slate-400 uppercase tracking-wider block">
+                Provider Activation — Competition × Season Context
+              </span>
+              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2">
+                {Object.entries(preMatchSummary.provider_activation_by_competition).map(([comp, state]) => {
+                  const isActive = state === 'ACTIVE';
+                  const isQual = state === 'QUALIFIED';
+                  const isDegraded = state === 'DEGRADED';
+                  const stateColor = isActive
+                    ? 'text-emerald-400 border-emerald-800'
+                    : isQual
+                    ? 'text-blue-400 border-blue-800'
+                    : isDegraded
+                    ? 'text-amber-400 border-amber-800'
+                    : 'text-slate-500 border-slate-700';
+                  return (
+                    <div
+                      key={comp}
+                      className={`p-2 rounded bg-slate-900/60 border text-center text-[10px] font-mono ${stateColor}`}
+                    >
+                      <span className="text-slate-300 block font-bold">{comp}</span>
+                      <span className="block mt-0.5">{state}</span>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+
+          {/* Phase 25.1 FIX 2/10: Duplicate detection state legend */}
+          <div className="p-3 rounded-lg bg-slate-900/50 border border-slate-800 text-[10px] font-mono text-slate-500 space-y-1">
+            <span className="text-slate-400 font-semibold block">Duplicate Detection (Gate 2) — 4-State Logic:</span>
+            <div className="grid grid-cols-2 gap-x-4 gap-y-0.5">
+              <span><span className="text-slate-300">NO_DUPLICATE</span> — no collision</span>
+              <span><span className="text-amber-400">DUPLICATE_CANDIDATE</span> — proximity ±24h, warning only</span>
+              <span><span className="text-rose-400">DUPLICATE_CONFIRMED</span> — same provider ID, blocking</span>
+              <span><span className="text-rose-500">RESOLUTION_REQUIRED</span> — identity + proximity, blocking</span>
+            </div>
+          </div>
         </div>
       </section>
+
 
       {/* Registered Provider Registry */}
       <section className="space-y-4">
