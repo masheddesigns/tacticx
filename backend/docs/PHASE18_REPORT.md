@@ -123,8 +123,7 @@ bounded acquisition (league list finite, run-limited queries).
 
 ## Tests
 
-Previous: 448. New: 20 (`test_phase18_current_season.py`). Total: 468
-pending final full-suite confirmation below. Failed: 0. Skipped: 0.
+Previous: 462. New: 20 (`test_phase18_current_season.py`). Total: 482. Passed: 482. Failed: 0. Skipped: 0.
 
 ## Production regression
 
