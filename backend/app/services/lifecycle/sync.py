@@ -24,6 +24,8 @@ STATUS_TO_MATCH = {
     "scheduled": MatchStatus.SCHEDULED.value,
     "postponed": MatchStatus.POSTPONED.value,
     "cancelled": MatchStatus.CANCELLED.value,
+    "abandoned": MatchStatus.CANCELLED.value,
+    "live": MatchStatus.LIVE.value,
     "finished": MatchStatus.FINISHED.value,
     "unknown": MatchStatus.SCHEDULED.value,
 }

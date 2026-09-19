@@ -865,3 +865,29 @@ caching, machine-readable errors, OpenAPI-validated. CLI:
 `tacticx intelligence <id> --match-intelligence [--compact]`.
 Validated 15/15 × 5 leagues; 462 tests green; backbone unchanged.
 Docs: `PHASE17_REPORT.md`, `PHASE17_API_SCHEMA.md`, `PHASE17_PROVENANCE.md`.
+
+## Phase 18 — Live match universe & current-season acquisition
+
+Current-season orchestration (`app/services/acquisition/current_season.py`):
+versioned season maps, extended status taxonomy (live/abandoned preserved),
+per-league isolated acquisition with partial success, season-aware
+readiness, five-league validation. CLI: `tacticx acquire --season current
+[--competition EPL --source api-football]`. API:
+`GET /api/v1/matches/current`, `GET /api/v1/acquisition/status`.
+2026/27 measured unavailable at all sources (honestly empty, never
+fabricated); pipeline validated end-to-end. Docs: `PHASE18_REPORT.md`,
+`PHASE18_CURRENT_SEASON.md`, `PHASE18_SOURCE_MATRIX.md`,
+`PHASE18_TEMPORAL_AUDIT.md`.
+
+## Phase 18 — Live match universe & current-season acquisition
+
+Current-season orchestration (`app/services/acquisition/current_season.py`):
+versioned season maps, extended status taxonomy (live/abandoned preserved),
+per-league isolated acquisition with partial success, season-aware
+readiness, five-league validation. CLI: `tacticx acquire --season current
+[--competition EPL --source api-football]`. API:
+`GET /api/v1/matches/current`, `GET /api/v1/acquisition/status`.
+2026/27 measured unavailable at all sources (honestly empty, never
+fabricated); pipeline validated end-to-end. Docs: `PHASE18_REPORT.md`,
+`PHASE18_CURRENT_SEASON.md`, `PHASE18_SOURCE_MATRIX.md`,
+`PHASE18_TEMPORAL_AUDIT.md`.

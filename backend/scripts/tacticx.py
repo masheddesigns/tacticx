@@ -428,6 +428,54 @@ def _cmd_readiness(db, args) -> int:
     return 0
 
 
+def _cmd_acquire(db, args) -> int:
+    from app.services.acquisition import current_season
+
+    leagues = [args.competition] if args.competition else None
+    sources = None
+    if args.source:
+        # Source-scoped run: resolve through the provider factory so only
+        # real configured adapters can be selected (never arbitrary code).
+        from app.services.lifecycle import upcoming as upcoming_service
+        from app.services.providers import get_football_provider, get_odds_provider
+
+        if args.source == "api_football":
+            provider = get_football_provider()
+            sources = [upcoming_service.ApiFootballUpcomingSource(
+                provider=provider)]
+        elif args.source == "odds_api":
+            provider = get_odds_provider()
+            sources = [upcoming_service.OddsApiUpcomingSource(
+                provider=provider)]
+        else:
+            print(f"unknown source: {args.source} (api_football|odds_api)")
+            return 1
+    if args.season == "current":
+        report = current_season.acquire_current_season(
+            db, leagues=leagues, sources=sources)
+    else:
+        # Explicit historical season: same pipeline, labeled scope.
+        report = current_season.acquire_current_season(
+            db, leagues=leagues, season=args.season, sources=sources)
+    if args.as_json:
+        print(json.dumps(report, indent=2, default=str))
+        return 0 if report.get("status") != "failed" else 1
+    print(f"acquire season={report.get('season')} status={report.get('status')}")
+    for league_code, league_report in (report.get("leagues") or {}).items():
+        created = sum(
+            (s.get("created", 0) or 0)
+            for s in (league_report.get("sources") or {}).values()
+            if isinstance(s, dict))
+        print(f"  {league_code}: {league_report.get('status')} "
+              f"created={created}")
+        for name, result in (league_report.get("sources") or {}).items():
+            if isinstance(result, dict) and result.get("status") not in (
+                    "success", "partial_success", "empty"):
+                print(f"    {name}: {result.get('status')}: "
+                      f"{result.get('error', result.get('classification', ''))}")
+    return 0 if report.get("status") != "failed" else 1
+
+
 def _cmd_predict_upcoming(db, args) -> int:
     from app.services.lifecycle.upcoming_predictions import UpcomingPredictionService
     from app.services.features.temporal import TemporalMode as Mode
@@ -977,6 +1025,15 @@ def main() -> int:
     p.add_argument("--limit", type=int, default=20)
     p.add_argument("--json", action="store_true", dest="as_json")
 
+    p = sub.add_parser("acquire", help="Current-season acquisition job")
+    p.add_argument("--season", default="current",
+                   help="canonical season (e.g. 2026/27) or 'current'")
+    p.add_argument("--competition", default=None,
+                   help="league code (default: all five target leagues)")
+    p.add_argument("--source", default=None,
+                   help="source name (default: all configured sources)")
+    p.add_argument("--json", action="store_true", dest="as_json")
+
     p = sub.add_parser("sources", help="Source status/coverage/freshness/validation")
     p.add_argument("action", choices=["status", "coverage", "freshness", "validate"],
                    nargs="?", default="status")
@@ -1046,6 +1103,8 @@ def main() -> int:
             return _cmd_sync_fixtures(db, args)
         if args.command == "readiness":
             return _cmd_readiness(db, args)
+        if args.command == "acquire":
+            return _cmd_acquire(db, args)
         if args.command == "sources":
             return _cmd_sources(db, args)
         if args.command == "data":

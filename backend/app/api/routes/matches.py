@@ -96,6 +96,56 @@ def live_matches(db: Session = Depends(get_db)):
     return {"data": [_match_out(m, db) for m in rows]}
 
 
+@router.get("/current", summary="Current-season universe (read-only)")
+def current_matches(
+    db: Session = Depends(get_db),
+    competition: Optional[str] = Query(None, description="League code, e.g. EPL"),
+    status: Optional[str] = Query(None, description="SCHEDULED|LIVE|FINISHED|POSTPONED|..."),
+    date: Optional[str] = Query(None, description="YYYY-MM-DD (kickoff date, UTC)"),
+    eligible: Optional[bool] = Query(None, description="Filter by prediction eligibility"),
+    page: int = Query(1, ge=1),
+    page_size: int = Query(20, ge=1, le=100),
+):
+    """Current-season matches from the canonical universe. Read-only: no
+    raw source payloads, no credentials, no acquisition side effects."""
+    from app.services.acquisition import current_season
+    from app.services.freshness import eligibility
+
+    season = current_season.current_canonical_season()
+    now = datetime.now(timezone.utc)
+    q, err = _filtered_query(db, competition, None, status)
+    if err:
+        raise HTTPException(400, err)
+    assert q is not None
+    if date:
+        try:
+            day = datetime.strptime(date, "%Y-%m-%d").replace(tzinfo=timezone.utc)
+        except ValueError:
+            raise HTTPException(400, "date must be YYYY-MM-DD")
+        q = q.filter(Match.kickoff_at >= day, Match.kickoff_at < day + timedelta(days=1))
+    total = q.count()
+    rows = q.order_by(Match.kickoff_at).offset((page - 1) * page_size).limit(page_size).all()
+    data = []
+    for match in rows:
+        item = _match_out(match, db).model_dump()
+        item["canonical_season"] = season
+        if eligible is not None:
+            try:
+                verdict = eligibility.check_eligibility(
+                    db, match.id, now, mode="production_strict")
+            except Exception:
+                verdict = {"eligible": False}
+            if bool(verdict.get("eligible")) != eligible:
+                continue
+            item["prediction_eligible"] = verdict.get("eligible", False)
+        data.append(item)
+    return {
+        "data": data,
+        "meta": PaginatedMeta(page=page, page_size=page_size, total=total),
+        "season": season,
+    }
+
+
 @router.get("/{match_id}", summary="Match detail", response_model=MatchOut)
 def get_match(match_id: int, db: Session = Depends(get_db)):
     m = db.get(Match, match_id)

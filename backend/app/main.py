@@ -4,7 +4,7 @@ from __future__ import annotations
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from app.api.routes import catalog, health, intelligence, lifecycle, markets, matches, match_intelligence, mirofish, odds, player_features, predictions, reconciliation, sync, validation
+from app.api.routes import acquisition, catalog, health, intelligence, lifecycle, markets, matches, match_intelligence, mirofish, odds, player_features, predictions, reconciliation, sync, validation
 from app.config import get_settings
 from app.logging_config import configure_logging
 
@@ -40,6 +40,7 @@ app.include_router(player_features.router, prefix=prefix)
 app.include_router(intelligence.router, prefix=prefix)
 app.include_router(mirofish.router, prefix=prefix)
 app.include_router(match_intelligence.router, prefix=prefix)
+app.include_router(acquisition.router, prefix=prefix)
 
 
 @app.get("/", include_in_schema=False)
