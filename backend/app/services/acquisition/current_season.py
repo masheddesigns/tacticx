@@ -97,7 +97,8 @@ def current_canonical_season(at: Optional[datetime] = None) -> str:
 
 
 def acquire_competition(db: Session, league_code: str, season: str,
-                        sources=None, job: str = "current_season") -> Dict:
+                        sources=None, job: str = "current_season",
+                        enforce_activation: Optional[bool] = None) -> Dict:
     """Acquire one competition's fixtures for one provider season.
 
     ``season`` is the PROVIDER season label (e.g. "2026"); the canonical
@@ -108,15 +109,29 @@ def acquire_competition(db: Session, league_code: str, season: str,
 
     outcome: Dict = {"league": league_code, "season": season, "sources": {},
                      "status": "success"}
+    default_sources_used = False
     if sources is None:
+        default_sources_used = True
         try:
             sources = default_sources()
         except Exception as exc:
             return {"league": league_code, "season": season,
-                    "status": "failed", "error": f"no sources: {exc}"}
-    now = datetime.now(timezone.utc)
-    horizon = now.replace(year=now.year + 1)
-    start = now
+                    "status": "failed", "error": f"sources: {exc}"}
+        if not sources:
+            return {
+                "league": league_code,
+                "season": season,
+                "sources": {
+                    "default": {
+                        "status": "skipped",
+                        "reason": "no configured or active external provider",
+                    }
+                },
+                "status": "skipped",
+            }
+
+    start: Optional[datetime] = None
+    horizon: Optional[datetime] = None
     try:
         start_year = int(str(season).split("/")[0])
         if len(str(season).split("/")) == 1:
@@ -127,13 +142,34 @@ def acquire_competition(db: Session, league_code: str, season: str,
     except ValueError:
         pass
     failures = 0
+    from app.services.acquisition.activation import (
+        ActivationState,
+        get_activation_state,
+    )
+
     for source in sources:
         name = getattr(source, "name", type(source).__name__)
+        canonical = canonical_season_for(name, season, league_code) or season
+
+        # SCHEDULER INVARIANT: Only ACTIVE sources trigger provider acquisition.
+        # Local database lookup only — never contacts external provider.
+        should_check = enforce_activation if enforce_activation is not None else (
+            default_sources_used or name in ("api_football", "odds_api", "football_data_co_uk")
+        )
+        if should_check:
+            act_state = get_activation_state(db, name, league_code, canonical)
+            if act_state != ActivationState.ACTIVE.value:
+                outcome["sources"][name] = {
+                    "status": "skipped",
+                    "activation_state": act_state,
+                    "reason": f"source '{name}' is {act_state} for {league_code} {canonical} (only ACTIVE sources trigger acquisition)",
+                }
+                continue
+
         try:
             grouped = fetch_all([source], start, horizon, league_code)
             records = grouped.get(name, [])
             # Tag canonical season; leave provider season on the record.
-            canonical = canonical_season_for(name, season, league_code)
             for record in records:
                 if isinstance(record, UpcomingMatch) and canonical:
                     record.season = canonical
@@ -149,17 +185,20 @@ def acquire_competition(db: Session, league_code: str, season: str,
             outcome["sources"][name] = {"status": "failed",
                                         "error": f"{type(exc).__name__}: {exc}"[:300]}
             failures += 1
-    if failures and len(outcome["sources"]) > failures:
+    skipped_count = sum(1 for s in outcome["sources"].values() if s.get("status") == "skipped")
+    if skipped_count == len(outcome["sources"]) and skipped_count > 0:
+        outcome["status"] = "skipped"
+    elif failures and len(outcome["sources"]) > failures:
         outcome["status"] = "partial"
     elif failures:
         outcome["status"] = "failed"
     return outcome
 
 
-def acquire_current_season(db: Session, leagues: Optional[List[str]] = None,
+def acquire_current_season(db: Session, leagues=None, sources=None,
                            season: str = "current",
-                           sources=None) -> Dict:
-    """Five-league (or subset) current-season acquisition.
+                           enforce_activation: Optional[bool] = None) -> Dict:
+    """Acquire the five target competitions for a canonical season.
 
     Each competition is isolated: one league's provider failure persists
     nothing for that league but never erases or corrupts the others.
@@ -175,12 +214,16 @@ def acquire_current_season(db: Session, leagues: Optional[List[str]] = None,
         # Provider seasons are calendar years for August-July seasons.
         provider_season = season.split("/")[0]
         result = acquire_competition(db, league_code, provider_season,
-                                     sources=sources)
+                                     sources=sources,
+                                     enforce_activation=enforce_activation)
         result["canonical_season"] = season
         report["leagues"][league_code] = result
-        if result.get("status") not in ("success", "partial"):
+        if result.get("status") not in ("success", "partial", "skipped"):
             failed += 1
-    if failed and failed < len(targets):
+    skipped = sum(1 for r in report["leagues"].values() if r.get("status") == "skipped")
+    if skipped == len(targets) and skipped > 0:
+        report["status"] = "skipped"
+    elif failed and failed < len(targets):
         report["status"] = "partial"
     elif failed:
         report["status"] = "failed"
@@ -274,3 +317,139 @@ def validate_five_leagues(db: Session, season: str = "current") -> Dict:
                 "status": "failed", "error": str(exc)[:300]}
     report["readiness"] = current_season_readiness(db, season=season)
     return report
+
+
+def get_current_season_readiness_report(
+    db: Session,
+    season: str = "current",
+    leagues: Optional[List[str]] = None,
+) -> Dict[str, Any]:
+    """Comprehensive, evidence-based current-season readiness report across target leagues.
+
+    Evaluates:
+    - Actual fixtures in database for that competition & season
+    - Real qualification state from SourceQualification table
+    - Current activation state from SourceActivation table
+    - Gate eligibility via can_activate_current_season
+    - Distinguishes '0 fixtures returned' from 'fixture count unavailable'
+    - Flags coverage as measurable or not measurable
+    """
+    from app.db.models.acquisition import AcquisitionRun
+    from app.db.models.qualification import SourceQualification
+    from app.services.acquisition.activation import (
+        ActivationState,
+        can_activate_current_season,
+        get_activation_state,
+    )
+
+    targets = list(leagues) if leagues else list(TARGET_LEAGUES)
+    if season == "current":
+        canonical_season = current_canonical_season()
+    else:
+        canonical_season = season
+    provider_season = canonical_season.split("/")[0]
+
+    now = datetime.now(timezone.utc)
+    report_items = []
+
+    # Registered provider candidates (e.g. api_football, football_data_co_uk, etc.)
+    candidate_providers = ["api_football"]
+
+    for league_code in targets:
+        league = db.query(League).filter_by(code=league_code).first()
+        league_id = league.id if league else None
+
+        # Check existing matches in DB for this competition and season
+        db_matches = []
+        if league_id is not None:
+            try:
+                start_dt = datetime(int(provider_season), 8, 1, tzinfo=timezone.utc)
+                end_dt = datetime(int(provider_season) + 1, 7, 31, 23, 59, tzinfo=timezone.utc)
+                db_matches = db.query(Match).filter(
+                    Match.league_id == league_id,
+                    Match.kickoff_at >= start_dt,
+                    Match.kickoff_at <= end_dt,
+                ).all()
+            except Exception:
+                db_matches = []
+
+        completed_db = sum(1 for m in db_matches if m.status == "FINISHED")
+        upcoming_db = sum(1 for m in db_matches if m.status in ("SCHEDULED", "PRE_MATCH"))
+
+        for provider in candidate_providers:
+            act_state = get_activation_state(db, provider, league_code, canonical_season)
+            decision = can_activate_current_season(provider, league_code, canonical_season, db)
+
+            # Retrieve latest qualification evidence
+            qual_row = db.query(SourceQualification).filter_by(
+                source=provider, competition=league_code
+            ).order_by(SourceQualification.id.desc()).first()
+            if qual_row is None:
+                qual_row = db.query(SourceQualification).filter_by(
+                    source=provider
+                ).order_by(SourceQualification.id.desc()).first()
+
+            # Retrieve latest sync run
+            last_run = db.query(AcquisitionRun).filter_by(
+                source=provider
+            ).order_by(AcquisitionRun.id.desc()).first()
+            last_sync = last_run.finished_at.isoformat() if (last_run and last_run.finished_at) else None
+
+            # Distinguish:
+            # - Provider unavailable vs probed and returned 0 fixtures
+            if qual_row is None:
+                fixture_count = None
+                coverage_measurable = False
+                qual_level = "unqualified"
+                status = act_state if act_state in (ActivationState.ACTIVE.value, ActivationState.REVOKED.value) else ActivationState.UNAVAILABLE.value
+                resolution_rate = None
+                timestamp_completeness = None
+            elif qual_row.status in ("unavailable", "rejected"):
+                fixture_count = None
+                coverage_measurable = False
+                qual_level = qual_row.status
+                status = ActivationState.UNAVAILABLE.value
+                resolution_rate = None
+                timestamp_completeness = None
+            else:
+                # Provider was qualified or probed
+                fixture_count = qual_row.fixture_count
+                coverage_measurable = True
+                qual_level = qual_row.status
+                status = act_state
+                tot = qual_row.fixture_count
+                res = qual_row.resolved_count
+                resolution_rate = round(res / max(1, tot), 2) if tot > 0 else 1.0
+                timestamp_completeness = 1.0 if qual_row.status == "qualified" else 0.5
+
+            report_items.append({
+                "competition": league_code,
+                "season": canonical_season,
+                "provider": provider,
+                "fixture_count": fixture_count,
+                "completed_count": completed_db,
+                "upcoming_count": upcoming_db,
+                "identity_resolution_rate": resolution_rate,
+                "timestamp_completeness": timestamp_completeness,
+                "freshness": "fresh" if qual_row and qual_row.retrieved_at and (now - qual_row.retrieved_at.replace(tzinfo=timezone.utc)).total_seconds() < 86400 * 7 else "stale" if qual_row else "unknown",
+                "qualification_level": qual_level,
+                "activation_status": status,
+                "eligible_for_activation": decision["eligible"],
+                "blocking_reasons": decision["reasons"],
+                "warnings": decision["warnings"],
+                "last_successful_sync": last_sync,
+                "coverage_measurable": coverage_measurable,
+            })
+
+    return {
+        "as_of": now.isoformat(),
+        "season": canonical_season,
+        "items": report_items,
+        "summary": {
+            "total_competitions": len(targets),
+            "active_competitions": sum(1 for it in report_items if it["activation_status"] == ActivationState.ACTIVE.value),
+            "qualified_competitions": sum(1 for it in report_items if it["activation_status"] == ActivationState.QUALIFIED.value),
+            "unavailable_competitions": sum(1 for it in report_items if it["activation_status"] == ActivationState.UNAVAILABLE.value),
+        },
+    }
+

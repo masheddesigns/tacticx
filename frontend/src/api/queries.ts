@@ -18,6 +18,7 @@ export const QUERY_KEYS = {
   jobAnomalies: () => ['jobAnomalies'],
   jobDue: () => ['jobDue'],
   readyProbe: () => ['readyProbe'],
+  readinessReport: (params?: any) => ['readinessReport', params],
 };
 
 export function useMatches(params?: {
@@ -192,3 +193,12 @@ export function useCleanupLocks() {
     },
   });
 }
+
+export function useReadinessReport(params?: { season?: string; competition?: string }) {
+  return useQuery({
+    queryKey: QUERY_KEYS.readinessReport(params),
+    queryFn: ({ signal }) => apiClient.getReadinessReport({ ...params, signal }),
+    staleTime: 30 * 1000,
+  });
+}
+

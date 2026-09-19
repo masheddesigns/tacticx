@@ -223,4 +223,13 @@ export const apiClient = {
   getReadyProbe: async (signal?: AbortSignal): Promise<ReadyProbeResponse> => {
     return request<ReadyProbeResponse>('/ready', { signal });
   },
+
+  // Controlled Current-Season Activation & Readiness
+  getReadinessReport: async (params?: { season?: string; competition?: string; signal?: AbortSignal }): Promise<any> => {
+    const query = new URLSearchParams();
+    if (params?.season) query.set('season', params.season);
+    if (params?.competition) query.set('competition', params.competition);
+    const qs = query.toString();
+    return request<any>(`/acquisition/readiness${qs ? `?${qs}` : ''}`, { signal: params?.signal });
+  },
 };

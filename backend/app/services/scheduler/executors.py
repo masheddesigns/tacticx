@@ -49,7 +49,8 @@ def execute_fixture_refresh(db: Session, config: dict[str, Any],
 
     result = acquire_current_season(db, leagues=competitions or None, season=season)
     statuses = [lr.get("status", "") for lr in result.get("leagues", {}).values()]
-    failures = sum(1 for s in statuses if s not in ("success", "partial"))
+    failures = sum(1 for s in statuses if s not in ("success", "partial", "skipped"))
+    skipped = sum(1 for s in statuses if s == "skipped")
     total_fixtures = sum(
         lr.get("fixtures", 0)
         for lr in result.get("leagues", {}).values())
@@ -57,15 +58,25 @@ def execute_fixture_refresh(db: Session, config: dict[str, Any],
         lr.get("new_matches", 0)
         for lr in result.get("leagues", {}).values()
         if isinstance(lr, dict))
+
+    if failures == len(statuses) and failures > 0:
+        overall_status = "failed"
+    elif skipped == len(statuses) and skipped > 0:
+        overall_status = "skipped"
+    elif failures > 0:
+        overall_status = "partial"
+    else:
+        overall_status = "succeeded"
+
     return {
-        "status": "failed" if failures == len(statuses) else
-                  "partial" if failures > 0 else "succeeded",
+        "status": overall_status,
         "competitions": competitions,
         "season": season,
         "leagues": result.get("leagues", {}),
         "total_fixtures": total_fixtures,
         "new_matches": new_matches,
         "failures": failures,
+        "skipped": skipped,
     }
 
 

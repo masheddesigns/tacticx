@@ -1116,6 +1116,95 @@ def _cmd_jobs(db, args) -> int:
     return 1
 
 
+def _cmd_current_season(db, args) -> int:
+    from app.services.acquisition.activation import (
+        activate_current_season,
+        can_activate_current_season,
+        get_activation_state,
+    )
+    from app.services.acquisition.current_season import (
+        current_canonical_season,
+        get_current_season_readiness_report,
+    )
+
+    action = args.action
+    as_json = args.as_json
+    season = args.season or current_canonical_season()
+
+    if action == "readiness":
+        report = get_current_season_readiness_report(db, season=season)
+        if as_json:
+            print(json.dumps(report, indent=2, default=str))
+            return 0
+        print(f"Current Season Readiness [{season}] (as of {report.get('as_of', '')})")
+        print(f"{'Competition':<18} {'Provider':<16} {'Fixtures':<10} {'Qual Status':<14} {'Activation':<14} {'Eligible':<10} {'Blocking Reasons'}")
+        print("-" * 105)
+        for item in report.get("items", []):
+            fix_str = str(item.get("fixture_count")) if item.get("fixture_count") is not None else "N/A"
+            reasons = "; ".join(item.get("blocking_reasons", [])) or "-"
+            print(f"{item.get('competition', ''):<18} "
+                  f"{item.get('provider', ''):<16} "
+                  f"{fix_str:<10} "
+                  f"{item.get('qualification_level', ''):<14} "
+                  f"{item.get('activation_status', ''):<14} "
+                  f"{'YES' if item.get('eligible_for_activation') else 'NO':<10} "
+                  f"{reasons}")
+        summary = report.get("summary", {})
+        print("-" * 105)
+        print(f"Total: {summary.get('total_competitions', 0)} | "
+              f"Active: {summary.get('active_competitions', 0)} | "
+              f"Qualified: {summary.get('qualified_competitions', 0)} | "
+              f"Unavailable: {summary.get('unavailable_competitions', 0)}")
+        return 0
+
+    if action == "can-activate":
+        source = args.source or "api_football"
+        competition = args.competition or "EPL"
+        decision = can_activate_current_season(source, competition, season, db)
+        if as_json:
+            print(json.dumps(decision, indent=2, default=str))
+            return 0 if decision.get("eligible") else 1
+        print(f"Activation Eligibility Check: source={source} comp={competition} season={season}")
+        print(f"  Eligible: {'YES' if decision.get('eligible') else 'NO'}")
+        if decision.get("reasons"):
+            print("  Blocking reasons:")
+            for r in decision["reasons"]:
+                print(f"    - {r}")
+        if decision.get("warnings"):
+            print("  Warnings:")
+            for w in decision["warnings"]:
+                print(f"    - {w}")
+        return 0 if decision.get("eligible") else 1
+
+    if action == "activate":
+        source = args.source or "api_football"
+        competition = args.competition or "EPL"
+        result = activate_current_season(
+            db,
+            source=source,
+            competition=competition,
+            season=season,
+            actor=args.actor or "cli_operator",
+            reason=args.reason or "cli activation",
+            force=args.force,
+        )
+        if as_json:
+            print(json.dumps(result, indent=2, default=str))
+            return 0 if result.get("success") else 1
+        if result.get("success"):
+            print(f"SUCCESS: Activated {source} for {competition} {season}")
+            print(f"  Activation record ID: {result.get('activation_id')}")
+            return 0
+        else:
+            print(f"FAILED: Cannot activate {source} for {competition} {season}")
+            for r in result.get("reasons", []):
+                print(f"  - {r}")
+            return 1
+
+    print(f"unknown action: {action}")
+    return 1
+
+
 def main() -> int:
     configure_logging(get_settings().LOG_LEVEL)
     ap = argparse.ArgumentParser(description="TacticX prediction intelligence.")
@@ -1281,6 +1370,18 @@ def main() -> int:
     p.add_argument("--dry-run", action="store_true")
     p.add_argument("--json", action="store_true", dest="as_json")
 
+    p = sub.add_parser("current-season", help="Controlled current-season data activation")
+    p.add_argument("action",
+                   choices=["readiness", "can-activate", "activate"],
+                   nargs="?", default="readiness")
+    p.add_argument("--competition", default="", help="competition code (e.g. EPL)")
+    p.add_argument("--season", default="", help="canonical season (e.g. 2026/27)")
+    p.add_argument("--source", default="", help="provider name (e.g. api_football)")
+    p.add_argument("--actor", default="", help="audit actor name")
+    p.add_argument("--reason", default="", help="audit activation reason")
+    p.add_argument("--force", action="store_true", help="force activation override")
+    p.add_argument("--json", action="store_true", dest="as_json")
+
     args = ap.parse_args()
     Base.metadata.create_all(get_engine())
     db = get_session_local()()
@@ -1327,6 +1428,8 @@ def main() -> int:
             return _cmd_research(db, args)
         if args.command == "jobs":
             return _cmd_jobs(db, args)
+        if args.command == "current-season":
+            return _cmd_current_season(db, args)
         ap.error(f"unknown command: {args.command}")
         return 1
     finally:

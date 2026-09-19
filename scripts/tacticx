@@ -1,0 +1,11 @@
+#!/usr/bin/env bash
+set -e
+ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+if [ -x "$ROOT_DIR/backend/.venv/bin/python" ]; then
+    PYTHON="$ROOT_DIR/backend/.venv/bin/python"
+else
+    PYTHON="python3"
+fi
+export PYTHONPATH="$ROOT_DIR/backend:$PYTHONPATH"
+cd "$ROOT_DIR/backend"
+exec "$PYTHON" scripts/tacticx.py "$@"

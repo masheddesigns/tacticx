@@ -60,3 +60,98 @@ def acquisition_status(db: Session = Depends(get_db),
             for r in runs
         ],
     }
+
+
+from pydantic import BaseModel
+from fastapi import HTTPException
+from app.config import get_settings
+
+
+class ActivationRequest(BaseModel):
+    source: str = "api_football"
+    competition: str
+    season: str = "current"
+    force: bool = False
+    reason: str = "api activation"
+    actor: str = "api_operator"
+
+
+class RevocationRequest(BaseModel):
+    source: str = "api_football"
+    competition: str
+    season: str = "current"
+    reason: str = "revoked via api"
+    actor: str = "api_operator"
+
+
+@router.get("/readiness", summary="Current season readiness report")
+def current_season_readiness_endpoint(
+    season: str = Query("current"),
+    competition: Optional[str] = Query(None),
+    db: Session = Depends(get_db),
+):
+    """Evidence-based current-season readiness and activation status across competitions."""
+    from app.services.acquisition.current_season import get_current_season_readiness_report
+    leagues = [competition] if competition else None
+    return get_current_season_readiness_report(db, season=season, leagues=leagues)
+
+
+@router.post("/activate", summary="Controlled current-season provider activation")
+def activate_provider_endpoint(
+    body: ActivationRequest,
+    db: Session = Depends(get_db),
+):
+    """Explicit, audited operational activation of a provider for a competition and season."""
+    if not get_settings().operational_endpoints_enabled:
+        raise HTTPException(
+            status_code=403,
+            detail="Operational mutation endpoints are disabled in this environment",
+        )
+    from app.services.acquisition.activation import activate_current_season
+    from app.services.acquisition.current_season import current_canonical_season
+
+    season = current_canonical_season() if body.season == "current" else body.season
+    result = activate_current_season(
+        db,
+        source=body.source,
+        competition=body.competition,
+        season=season,
+        actor=body.actor,
+        reason=body.reason,
+        force=body.force,
+    )
+    if not result.get("success", False) and not body.force:
+        raise HTTPException(
+            status_code=400,
+            detail={
+                "message": f"Provider {body.source} cannot be activated for {body.competition}",
+                "result": result,
+            },
+        )
+    return result
+
+
+@router.post("/revoke", summary="Revoke current-season provider activation")
+def revoke_provider_endpoint(
+    body: RevocationRequest,
+    db: Session = Depends(get_db),
+):
+    """Revoke an active provider for a competition and season."""
+    if not get_settings().operational_endpoints_enabled:
+        raise HTTPException(
+            status_code=403,
+            detail="Operational mutation endpoints are disabled in this environment",
+        )
+    from app.services.acquisition.activation import revoke_activation
+    from app.services.acquisition.current_season import current_canonical_season
+
+    season = current_canonical_season() if body.season == "current" else body.season
+    return revoke_activation(
+        db,
+        provider=body.source,
+        competition=body.competition,
+        season=season,
+        reason=body.reason,
+        decided_by=body.actor,
+    )
+

@@ -1,6 +1,6 @@
 import React from 'react';
-import { ShieldCheck, Server, Radio, Database, Activity, RefreshCw, CheckCircle2, XCircle } from 'lucide-react';
-import { useSources, useAcquisitionStatus, useReadyProbe } from '../api/queries';
+import { ShieldCheck, Server, Radio, Database, Activity, RefreshCw, CheckCircle2, XCircle, Globe } from 'lucide-react';
+import { useSources, useAcquisitionStatus, useReadyProbe, useReadinessReport } from '../api/queries';
 import { CurrentSeasonBanner } from '../components/dashboard/CurrentSeasonBanner';
 import { LoadingSpinner } from '../components/common/LoadingSpinner';
 import { ErrorCard } from '../components/common/ErrorCard';
@@ -11,6 +11,7 @@ export const SystemStatusPage: React.FC = () => {
   const { data: sourcesData, isLoading: srcLoading, error: srcError, refetch: refetchSources } = useSources();
   const { data: acqData, isLoading: acqLoading, error: acqError, refetch: refetchAcq } = useAcquisitionStatus();
   const { data: readyProbe, refetch: refetchReady } = useReadyProbe();
+  const { data: readinessData, refetch: refetchReadiness } = useReadinessReport();
 
   if (srcLoading || acqLoading) {
     return <LoadingSpinner label="Auditing Provider Health and Acquisition Systems..." />;
@@ -19,12 +20,14 @@ export const SystemStatusPage: React.FC = () => {
   const sources = sourcesData?.sources || [];
   const recentRuns = acqData?.recent_runs || [];
   const coverage = acqData?.coverage || {};
+  const readinessItems = readinessData?.items || [];
   const isEngineReady = readyProbe?.status === 'ok';
 
   const handleRefresh = () => {
     refetchSources();
     refetchAcq();
     refetchReady();
+    refetchReadiness();
   };
 
   return (
@@ -74,7 +77,81 @@ export const SystemStatusPage: React.FC = () => {
       </div>
 
       {/* Current Season Availability Banner */}
-      <CurrentSeasonBanner currentSeason={coverage.current_season || '2026/27'} />
+      <CurrentSeasonBanner
+        currentSeason={coverage.current_season || readinessData?.season || '2026/27'}
+        readinessItems={readinessItems}
+      />
+
+      {/* Controlled Current-Season Competition Activation Matrix */}
+      <section className="space-y-4">
+        <div className="flex items-center justify-between">
+          <h2 className="text-base font-semibold text-slate-100 flex items-center gap-2">
+            <Globe className="w-4 h-4 text-emerald-400" />
+            <span>Controlled Current-Season Competition Activation</span>
+          </h2>
+          <span className="text-xs font-mono text-slate-400">
+            5 Primary Leagues | Canonical Season {readinessData?.season || '2026/27'}
+          </span>
+        </div>
+
+        <div className="rounded-xl border border-surface-border bg-surface-card overflow-hidden shadow-sm">
+          {readinessItems.length === 0 ? (
+            <div className="p-8 text-center text-xs font-mono text-slate-400">
+              No readiness telemetry available for current season.
+            </div>
+          ) : (
+            <div className="overflow-x-auto">
+              <table className="w-full text-xs font-mono border-collapse" aria-label="Current Season Readiness">
+                <thead>
+                  <tr className="border-b border-slate-800 bg-slate-950/60 text-slate-400">
+                    <th className="p-2.5 text-left font-medium">Competition</th>
+                    <th className="p-2.5 text-left font-medium">Candidate Provider</th>
+                    <th className="p-2.5 text-center font-medium">Activation Status</th>
+                    <th className="p-2.5 text-center font-medium">Qualification</th>
+                    <th className="p-2.5 text-right font-medium">Fixtures</th>
+                    <th className="p-2.5 text-center font-medium">Eligible</th>
+                    <th className="p-2.5 text-left font-medium">Blocking Reasons</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-800/60">
+                  {readinessItems.map((item: any) => {
+                    const isAct = item.activation_status === 'ACTIVE';
+                    const isQual = item.activation_status === 'QUALIFIED';
+                    const isEligible = item.eligible_for_activation;
+                    const badgeVariant = isAct ? 'success' : isQual ? 'info' : 'warning';
+
+                    return (
+                      <tr key={`${item.competition}-${item.provider}`} className="hover:bg-slate-900/40 transition-colors">
+                        <td className="p-2.5 text-slate-200 font-bold">{item.competition}</td>
+                        <td className="p-2.5 text-slate-400">{item.provider}</td>
+                        <td className="p-2.5 text-center">
+                          <Badge variant={badgeVariant} size="sm">
+                            {item.activation_status}
+                          </Badge>
+                        </td>
+                        <td className="p-2.5 text-center text-slate-300">
+                          {item.qualification_level}
+                        </td>
+                        <td className="p-2.5 text-right text-slate-300">
+                          {item.fixture_count !== null && item.fixture_count !== undefined ? item.fixture_count : 'N/A'}
+                        </td>
+                        <td className="p-2.5 text-center">
+                          <span className={isEligible ? 'text-emerald-400 font-bold' : 'text-slate-400'}>
+                            {isEligible ? 'YES' : 'NO'}
+                          </span>
+                        </td>
+                        <td className="p-2.5 text-slate-400 max-w-xs truncate" title={item.blocking_reasons?.join('; ')}>
+                          {item.blocking_reasons?.length ? item.blocking_reasons.join('; ') : '-'}
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </div>
+      </section>
 
       {/* Registered Provider Registry */}
       <section className="space-y-4">
