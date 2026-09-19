@@ -1,0 +1,193 @@
+name: TacticX CI/CD & Release Validation
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  backend-validation:
+    name: Backend Test, Migration & Smoke Validation
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: tacticx_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+      redis:
+        image: redis:7-alpine
+        ports:
+          - 6379:6379
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Set up Python 3.12
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: "pip"
+
+      - name: Install System & DB Dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y postgresql-client
+
+      - name: Install Backend Dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e "backend/.[dev]"
+
+      - name: Lint Codebase (Ruff)
+        run: |
+          ruff check backend/app/main.py backend/app/version.py backend/app/api/routes/version_route.py backend/tests/test_phase23_prediction_regression.py
+
+      - name: Verify Single Alembic Migration Head
+        run: |
+          cd backend
+          HEADS=$(alembic heads | wc -l)
+          if [ "$HEADS" -ne 1 ]; then
+            echo "ERROR: Expected exactly 1 migration head, found $HEADS"
+            alembic heads
+            exit 1
+          fi
+          echo "Single migration head verified: $(alembic heads)"
+
+      - name: Test PostgreSQL Migration (Fresh DB)
+        env:
+          DATABASE_URL: postgresql://postgres:postgres@localhost:5432/tacticx_test
+        run: |
+          cd backend
+          alembic upgrade head
+
+      - name: Test PostgreSQL Migration Downgrade & Re-upgrade Cycle
+        env:
+          DATABASE_URL: postgresql://postgres:postgres@localhost:5432/tacticx_test
+        run: |
+          cd backend
+          alembic downgrade 0008_training_runs
+          alembic upgrade head
+
+      - name: Run Backend Pytest Suite
+        env:
+          DATABASE_URL: sqlite:///./test.db
+          REDIS_URL: redis://localhost:6379/0
+          ENVIRONMENT: testing
+        run: |
+          cd backend
+          pytest -rs -q
+
+      - name: Run Production Release Smoke Test
+        env:
+          DATABASE_URL: sqlite:///./test.db
+          REDIS_URL: redis://localhost:6379/0
+          ENVIRONMENT: staging
+        run: |
+          python scripts/production_smoke_test.py
+
+  frontend-validation:
+    name: Frontend Test & Production Build
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: frontend
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: "npm"
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Install Frontend Dependencies
+        run: npm ci
+
+      - name: Run Frontend Tests
+        run: npm test
+
+      - name: Build Frontend Production Bundle
+        run: npm run build
+
+      - name: Verify Static Distribution & Secret Hygiene
+        run: |
+          test -f dist/index.html || { echo "dist/index.html missing"; exit 1; }
+          grep -q 'id="root"' dist/index.html || { echo "Mount point missing in index.html"; exit 1; }
+          # Scan for accidental token leakage in client bundle
+          ! grep -rnE "(PRIVATE_KEY|AWS_SECRET|POSTGRES_PASSWORD|BEGIN PRIVATE KEY)" dist/ || {
+            echo "ERROR: Potential secrets detected in dist/";
+            exit 1;
+          }
+          echo "Frontend distribution validated successfully."
+
+  disaster-recovery-validation:
+    name: Database Disaster Recovery Verification
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: postgres
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Set up Python 3.12
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: "pip"
+
+      - name: Install PostgreSQL Client Tools
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y postgresql-client
+
+      - name: Install Backend & Alembic for Migration
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e "backend/.[dev]"
+
+      - name: Run Disaster Recovery Backup & Restore Acceptance Test
+        env:
+          PGUSER: postgres
+          POSTGRES_USER: postgres
+          PGPASSWORD: postgres
+          PGHOST: localhost
+          PGPORT: "5432"
+        run: |
+          chmod +x scripts/verify_backup_restore.sh scripts/backup_postgres.sh scripts/restore_postgres.sh
+          ./scripts/verify_backup_restore.sh

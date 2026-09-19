@@ -29,9 +29,11 @@ from app.api.routes import (
     sources,
     sync,
     validation,
+    version_route,
 )
 from app.config import get_settings
 from app.logging_config import configure_logging
+from app.version import get_version_info
 
 settings = get_settings()
 settings.validate_production()
@@ -65,10 +67,12 @@ app.add_middleware(RequestIDMiddleware)
 # Root observability & health endpoints
 app.include_router(health.router)
 app.include_router(metrics_route.router)
+app.include_router(version_route.router)
 
 # API v1 routes
 prefix = settings.API_V1_PREFIX
 app.include_router(health.router, prefix=prefix)
+app.include_router(version_route.router, prefix=prefix)
 app.include_router(matches.router, prefix=prefix)
 app.include_router(catalog.router, prefix=prefix)
 app.include_router(odds.router, prefix=prefix)
@@ -89,11 +93,14 @@ app.include_router(jobs.router, prefix=prefix)
 
 @app.get("/", include_in_schema=False)
 def root() -> dict:
+    v_info = get_version_info()
     return {
         "service": "bet-predictor",
-        "version": "0.1.0",
+        "version": v_info.get("version", "0.1.0"),
+        "commit": v_info.get("commit", "unknown"),
         "docs": "/docs",
         "health": "/health/live",
         "ready": "/health/ready",
         "metrics": "/metrics",
+        "version_info": "/version",
     }
