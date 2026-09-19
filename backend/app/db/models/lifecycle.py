@@ -80,6 +80,14 @@ class SourceHealth(Base):
     latency_ms: Mapped[Optional[float]] = mapped_column(Float, nullable=True)
     quota_remaining: Mapped[Optional[int]] = mapped_column(Integer, nullable=True)
     last_error: Mapped[str] = mapped_column(String(512), default="")
+    # Phase 19 extensions (all nullable/additive; never secrets).
+    last_http_status: Mapped[Optional[int]] = mapped_column(Integer, nullable=True)
+    consecutive_failures: Mapped[int] = mapped_column(Integer, default=0)
+    backoff_until: Mapped[Optional[datetime]] = mapped_column(
+        DateTime(timezone=True), nullable=True)
+    last_response_bytes: Mapped[Optional[int]] = mapped_column(Integer, nullable=True)
+    last_fixture_count: Mapped[Optional[int]] = mapped_column(Integer, nullable=True)
+    last_qualification: Mapped[str] = mapped_column(String(32), default="")
     updated_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), server_default=func.now())
 

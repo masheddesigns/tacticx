@@ -891,3 +891,15 @@ readiness, five-league validation. CLI: `tacticx acquire --season current
 fabricated); pipeline validated end-to-end. Docs: `PHASE18_REPORT.md`,
 `PHASE18_CURRENT_SEASON.md`, `PHASE18_SOURCE_MATRIX.md`,
 `PHASE18_TEMPORAL_AUDIT.md`.
+
+## Phase 19 — Provider qualification & acquisition reliability
+
+Qualification framework (`app/services/provider_qualification/`): measured
+capability model, bounded probing with evidence-bearing verdicts (levels
+A–D), declarative registry, field-specific authority, classified fallback,
+deterministic hashed plans, extended health/freshness, append-only evidence.
+CLI: `sources list/qualify`, `acquire --explain`. API: `/api/v1/sources*`
++ extended acquisition status. 2026/27 honestly unavailable at all live
+sources; secret-leak via httpx URL-object logging found and fixed.
+Docs: `PHASE19_REPORT.md`, `PHASE19_PROVIDER_QUALIFICATION.md`,
+`PHASE19_SOURCE_MATRIX.md`, `PHASE19_ACQUISITION_STRATEGY.md`.

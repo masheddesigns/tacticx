@@ -457,6 +457,31 @@ def _cmd_acquire(db, args) -> int:
         # Explicit historical season: same pipeline, labeled scope.
         report = current_season.acquire_current_season(
             db, leagues=leagues, season=args.season, sources=sources)
+    if getattr(args, "explain", False):
+        from app.services.provider_qualification import plans as plans_mod
+        from app.services.provider_qualification import registry as qual_registry
+        from app.services.provider_qualification import snapshots as snapshots_mod
+
+        for league_code in (leagues or list(current_season.TARGET_LEAGUES)):
+            states = {}
+            for source_id in qual_registry.get_registry().describe():
+                latest = snapshots_mod.latest_for(db, source_id, league_code)
+                status = latest.get("status", "unqualified")
+                # Canonical selection only: qualified->A, partial->B,
+                # anything else->D (market role is separate, never promoted).
+                states[source_id] = {"qualified": "A",
+                                     "partially_qualified": "B"}.get(status, "D")
+            plan = plans_mod.build_plan(league_code, report.get("season", ""),
+                                        states)
+            print(f"plan {league_code}: selected={plan.selected_source or 'none'} "
+                  f"hash={plan.plan_hash}")
+            print(f"  reason: {plan.reason}")
+            print(f"  fallbacks={plan.fallback_sources} "
+                  f"candidates={plan.candidate_sources}")
+            readiness = (report.get("readiness", {}) or {}).get("leagues", {})
+            league_ready = readiness.get(league_code, {})
+            print(f"  coverage: fixtures={league_ready.get('fixtures', '?')} "
+                  f"eligible={league_ready.get('prediction_eligible', '?')}")
     if args.as_json:
         print(json.dumps(report, indent=2, default=str))
         return 0 if report.get("status") != "failed" else 1
@@ -845,6 +870,44 @@ def _cmd_sources(db, args) -> int:
         for line in report["lines"]:
             print(f"  {line}")
         return 0 if report["failures"] == 0 else 1
+    elif args.action == "list":
+        from app.services.provider_qualification import registry as qual_registry
+
+        view = qual_registry.get_registry().describe()
+        if args.as_json:
+            print(json.dumps(view, indent=2, default=str))
+            return 0
+        for source_id, entry in view.items():
+            print(f"{source_id}: enabled={entry['enabled']} "
+                  f"qualification={entry['qualification_status']} "
+                  f"priority={entry['priority']}")
+            print(f"  competitions={entry['supported_competitions']} "
+                  f"seasons={entry['supported_seasons']}")
+        return 0
+    elif args.action == "qualify":
+        from app.services.provider_qualification import health_ext
+        from app.services.provider_qualification import qualification as qual_svc
+        from app.services.provider_qualification import registry as qual_registry
+
+        names = [args.source] if args.source else [
+            entry for entry in qual_registry.get_registry().describe()]
+        results = {}
+        competition = getattr(args, "competition", None) or args.league
+        for name in names:
+            verdict = qual_svc.qualify_source(
+                name, competition=competition, season=args.season,
+                max_requests=5, db=db)
+            results[name] = verdict
+            health_ext.record_qualification(db, name, verdict["status"])
+        if args.as_json:
+            print(json.dumps(results, indent=2, default=str))
+            return 0
+        for name, verdict in results.items():
+            print(f"{name}: {verdict['status']} "
+                  f"[{', '.join(verdict['reason_codes'])}] "
+                  f"requests={verdict['request_count']} "
+                  f"fixtures={verdict['coverage']['fixtures']}")
+        return 0
     print(f"({time.monotonic() - start:.2f}s)")
     return 0
 
@@ -1033,11 +1096,19 @@ def main() -> int:
     p.add_argument("--source", default=None,
                    help="source name (default: all configured sources)")
     p.add_argument("--json", action="store_true", dest="as_json")
+    p.add_argument("--explain", action="store_true",
+                   help="show acquisition plan: source selection, qualification "
+                        "reasons, coverage, freshness, identity results")
 
     p = sub.add_parser("sources", help="Source status/coverage/freshness/validation")
-    p.add_argument("action", choices=["status", "coverage", "freshness", "validate"],
+    p.add_argument("action", choices=["status", "coverage", "freshness", "validate",
+                                      "list", "qualify"],
                    nargs="?", default="status")
     p.add_argument("--league", default=None)
+    p.add_argument("--competition", default=None,
+                   help="league code (defaults to --league when set)")
+    p.add_argument("--source", default=None)
+    p.add_argument("--season", default="current")
     p.add_argument("--json", action="store_true", dest="as_json")
 
     p = sub.add_parser("data", help="Data expansion coverage")

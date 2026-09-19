@@ -28,13 +28,28 @@ class _RedactSecretsFilter(logging.Filter):
             if isinstance(record.msg, str):
                 record.msg = redact_secrets(record.msg)
             if record.args:
-                record.args = tuple(
-                    redact_secrets(a) if isinstance(a, str) else a
-                    for a in record.args  # type: ignore[union-attr]
-                )
+                cleaned = []
+                for arg in record.args:  # type: ignore[union-attr]
+                    if isinstance(arg, str):
+                        cleaned.append(redact_secrets(arg))
+                        continue
+                    # httpx passes URL objects (not str) as format args;
+                    # stringify to catch embedded secrets, then redact.
+                    try:
+                        text = str(arg)
+                    except Exception:
+                        cleaned.append(arg)
+                        continue
+                    cleaned.append(redact_secrets(text)
+                                   if _has_secret(text) else arg)
+                record.args = tuple(cleaned)
         except Exception:
             pass
         return True
+
+
+def _has_secret(text: str) -> bool:
+    return any(pat.search(text) is not None for pat in _SECRET_PATTERNS)
 
 
 def configure_logging(level: str = "INFO") -> None:

@@ -39,6 +39,7 @@ from app.db.models.acquisition import (  # noqa: F401
     AcquisitionRun,
     SourceActivation,
 )
+from app.db.models.qualification import SourceQualification  # noqa: F401
 from app.db.models.intelligence import (  # noqa: F401
     AnalogueResult,
     MiroFishRun,
