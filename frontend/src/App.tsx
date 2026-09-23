@@ -8,6 +8,7 @@ import { DashboardPage } from './pages/DashboardPage';
 import { MatchExplorerPage } from './pages/MatchExplorerPage';
 import { MatchIntelligencePage } from './pages/MatchIntelligencePage';
 import { SystemStatusPage } from './pages/SystemStatusPage';
+import { MonitoringPage } from './pages/MonitoringPage';
 import { OperationsPage } from './pages/OperationsPage';
 
 const queryClient = new QueryClient({
@@ -32,6 +33,7 @@ export const App: React.FC = () => {
               <Route path="/matches" element={<MatchExplorerPage />} />
               <Route path="/matches/:matchId" element={<MatchIntelligencePage />} />
               <Route path="/system" element={<SystemStatusPage />} />
+              <Route path="/monitoring" element={<MonitoringPage />} />
               <Route path="/operations" element={<OperationsPage />} />
               <Route path="*" element={<Navigate to="/" replace />} />
             </Routes>

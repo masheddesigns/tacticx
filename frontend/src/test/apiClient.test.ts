@@ -170,3 +170,40 @@ describe('Phase 27 evaluation client', () => {
     expect(drift.sufficient_sample).toBe(false);
   });
 });
+
+describe('Phase 28 monitoring client', () => {
+  beforeEach(() => {
+    vi.restoreAllMocks();
+  });
+
+  it('fetches monitoring overview', async () => {
+    global.fetch = vi.fn().mockResolvedValue({
+      ok: true,
+      json: async () => ({ evaluation_count: 3, accuracy: 0.66, drift_state: 'INSUFFICIENT_DATA' }),
+    });
+    const res = await apiClient.getMonitoringOverview();
+    expect(res.evaluation_count).toBe(3);
+  });
+
+  it('fetches monitoring coverage with filters', async () => {
+    const fetchMock = vi.fn().mockResolvedValue({
+      ok: true,
+      json: async () => ({ eligible_count: 7, evaluated_count: 1 }),
+    });
+    global.fetch = fetchMock;
+    const res = await apiClient.getMonitoringCoverage({ competition: 'EPL' });
+    expect(res.eligible_count).toBe(7);
+    const [url] = fetchMock.mock.calls[0];
+    expect(url).toContain('/monitoring/coverage');
+    expect(url).toContain('competition=EPL');
+  });
+
+  it('fetches monitoring anomalies', async () => {
+    global.fetch = vi.fn().mockResolvedValue({
+      ok: true,
+      json: async () => ({ anomaly_count: 0, anomalies: [] }),
+    });
+    const res = await apiClient.getMonitoringAnomalies();
+    expect(res.anomaly_count).toBe(0);
+  });
+});

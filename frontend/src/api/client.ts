@@ -376,4 +376,39 @@ export const apiClient = {
       { signal: params?.signal }
     );
   },
+
+  // Phase 28: Production Monitoring (read-only)
+  getMonitoringOverview: async (params?: {
+    competition?: string;
+    season?: string;
+    signal?: AbortSignal;
+  }): Promise<any> => {
+    const query = new URLSearchParams();
+    if (params?.competition) query.set('competition', params.competition);
+    if (params?.season) query.set('season', params.season);
+    const qs = query.toString();
+    return request<any>(
+      `/monitoring/overview${qs ? `?${qs}` : ''}`,
+      { signal: params?.signal }
+    );
+  },
+
+  getMonitoringCoverage: async (params?: {
+    competition?: string;
+    season?: string;
+    signal?: AbortSignal;
+  }): Promise<any> => {
+    const query = new URLSearchParams();
+    if (params?.competition) query.set('competition', params.competition);
+    if (params?.season) query.set('season', params.season);
+    const qs = query.toString();
+    return request<any>(
+      `/monitoring/coverage${qs ? `?${qs}` : ''}`,
+      { signal: params?.signal }
+    );
+  },
+
+  getMonitoringAnomalies: async (signal?: AbortSignal): Promise<any> => {
+    return request<any>('/monitoring/anomalies', { signal });
+  },
 };

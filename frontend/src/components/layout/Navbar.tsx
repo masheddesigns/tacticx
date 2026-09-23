@@ -11,6 +11,7 @@ export const Navbar: React.FC = () => {
     { to: '/', label: 'Dashboard', icon: BarChart2 },
     { to: '/matches', label: 'Match Explorer', icon: Database },
     { to: '/system', label: 'System & Sources', icon: ShieldCheck },
+    { to: '/monitoring', label: 'Monitoring', icon: Activity },
     { to: '/operations', label: 'Job Operations', icon: Terminal },
   ];
 

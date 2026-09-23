@@ -297,3 +297,19 @@ export function useDrift(recent_n?: number) {
     staleTime: 60 * 1000,
   });
 }
+
+export function useMonitoringCoverage(params?: { competition?: string; season?: string }) {
+  return useQuery({
+    queryKey: ['monitoringCoverage', params],
+    queryFn: ({ signal }) => apiClient.getMonitoringCoverage({ ...params, signal }),
+    staleTime: 60 * 1000,
+  });
+}
+
+export function useMonitoringAnomalies() {
+  return useQuery({
+    queryKey: ['monitoringAnomalies'],
+    queryFn: ({ signal }) => apiClient.getMonitoringAnomalies(signal),
+    staleTime: 60 * 1000,
+  });
+}
