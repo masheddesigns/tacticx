@@ -295,6 +295,93 @@ def execute_pre_match_prediction(db: Session, config: dict[str, Any],
 
 
 # Dispatch table: job_type -> executor function.
+def execute_post_match_evaluation(db: Session, config: dict[str, Any],
+                                  dry_run: bool = False) -> dict[str, Any]:
+    """Evaluate Phase 26 prediction snapshots of finished matches.
+
+    Due = FINISHED match with recorded scores and at least one prediction
+    snapshot lacking an evaluation for the current outcome. Incomplete
+    matches are never evaluated. Idempotent: repeated runs reuse records.
+    """
+    from app.db.models.core import League, Match
+    from app.services.prediction_evaluation import (
+        EvaluationBlocked,
+        evaluate_prediction_snapshot,
+        evaluations_for_prediction,
+    )
+    from app.services.prediction_evaluation.outcomes import latest_outcome
+    from app.services.prediction_execution.store import (
+        list_predictions_for_match,
+    )
+
+    competitions = config.get("competitions", [])
+    query = db.query(Match).filter(
+        Match.status == "FINISHED",
+        Match.home_score.isnot(None), Match.away_score.isnot(None))
+    if competitions:
+        query = query.join(League, Match.league_id == League.id).filter(
+            League.code.in_(competitions))
+    matches = query.order_by(Match.kickoff_at.desc()).limit(100).all()
+
+    due, evaluated, skipped, errors = [], [], [], []
+    for match in matches:
+        snaps = list_predictions_for_match(db, match.id, limit=500)
+        if not snaps:
+            skipped.append({"match_id": match.id, "reason": "no_predictions"})
+            continue
+        outcome = latest_outcome(db, match.id)
+        pending = False
+        for snap in snaps:
+            existing = evaluations_for_prediction(db, snap.prediction_id)
+            if not existing:
+                pending = True
+                break
+            if outcome is not None and not any(
+                    e.outcome_hash == outcome.outcome_hash
+                    for e in existing):
+                pending = True
+                break
+        if not pending:
+            skipped.append({"match_id": match.id,
+                            "reason": "already_evaluated"})
+            continue
+        due.append(match.id)
+
+    if dry_run:
+        return {
+            "status": "dry_run",
+            "due_match_ids": due,
+            "skipped": skipped,
+            "note": "no writes performed",
+        }
+
+    for match_id in due:
+        for snap in list_predictions_for_match(db, match_id, limit=500):
+            try:
+                result = evaluate_prediction_snapshot(db, snap.prediction_id)
+                evaluated.append({
+                    "match_id": match_id,
+                    "prediction_id": snap.prediction_id,
+                    "reused": bool(result.get("cache_hit")),
+                    "evaluation_id": result["evaluation_id"]})
+            except EvaluationBlocked as exc:
+                errors.append({"match_id": match_id, "code": exc.code,
+                               "reason": exc.reason})
+            except Exception as exc:  # noqa: BLE001 — record, don't crash
+                errors.append({"match_id": match_id, "code": "EXECUTOR_ERROR",
+                               "reason": str(exc)})
+
+    status = "succeeded" if not errors else (
+        "partial" if evaluated else "failed")
+    return {
+        "status": status,
+        "due": len(due),
+        "evaluated": evaluated,
+        "skipped": skipped,
+        "errors": errors,
+    }
+
+
 EXECUTORS = {
     "fixture_refresh": execute_fixture_refresh,
     "status_refresh": execute_status_refresh,
@@ -303,6 +390,7 @@ EXECUTORS = {
     "freshness_audit": execute_freshness_audit,
     "qualification": execute_qualification,
     "pre_match_prediction": execute_pre_match_prediction,
+    "post_match_evaluation": execute_post_match_evaluation,
 }
 
 

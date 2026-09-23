@@ -1,6 +1,7 @@
 import React from 'react';
 import { ShieldCheck, Server, Radio, Database, Activity, RefreshCw, CheckCircle2, XCircle, Globe, ShieldAlert } from 'lucide-react';
-import { useSources, useAcquisitionStatus, useReadyProbe, useReadinessReport, usePreMatchReadinessSummary } from '../api/queries';
+import { useSources, useAcquisitionStatus, useReadyProbe, useReadinessReport, usePreMatchReadinessSummary, useEvaluationsSummary, useCalibration, useDrift } from '../api/queries';
+import { ModelPerformanceSection } from '../components/dashboard/ModelPerformanceSection';
 import { CurrentSeasonBanner } from '../components/dashboard/CurrentSeasonBanner';
 import { LoadingSpinner } from '../components/common/LoadingSpinner';
 import { ErrorCard } from '../components/common/ErrorCard';
@@ -13,6 +14,9 @@ export const SystemStatusPage: React.FC = () => {
   const { data: readyProbe, refetch: refetchReady } = useReadyProbe();
   const { data: readinessData, refetch: refetchReadiness } = useReadinessReport();
   const { data: preMatchSummary, refetch: refetchPreMatch } = usePreMatchReadinessSummary();
+  const { data: evalSummary, refetch: refetchEvalSummary } = useEvaluationsSummary();
+  const { data: calibration, refetch: refetchCalibration } = useCalibration();
+  const { data: drift, refetch: refetchDrift } = useDrift(50);
 
   if (srcLoading || acqLoading) {
     return <LoadingSpinner label="Auditing Provider Health and Acquisition Systems..." />;
@@ -30,6 +34,9 @@ export const SystemStatusPage: React.FC = () => {
     refetchReady();
     refetchReadiness();
     refetchPreMatch();
+    refetchEvalSummary();
+    refetchCalibration();
+    refetchDrift();
   };
 
   return (
@@ -352,6 +359,12 @@ export const SystemStatusPage: React.FC = () => {
       </section>
 
       {/* Recent Acquisition Runs */}
+      <ModelPerformanceSection
+        summary={evalSummary}
+        calibration={calibration}
+        drift={drift}
+      />
+
       <section className="space-y-4">
         <div className="flex items-center justify-between">
           <h2 className="text-base font-semibold text-slate-100 flex items-center gap-2">

@@ -633,3 +633,87 @@ export interface PredictionSnapshotsResponse {
   latest_readiness_state?: string | null;
   snapshots: PredictionSnapshotSummary[];
 }
+
+/** Phase 27: prediction evaluation */
+export interface EvaluationMetrics {
+  actual_result?: string;
+  actual_home_goals?: number;
+  actual_away_goals?: number;
+  accuracy_1x2?: number;
+  log_loss_1x2?: number;
+  brier_1x2?: number;
+  home_goal_error?: number;
+  away_goal_error?: number;
+  goal_mae?: number;
+  total_goal_error?: number;
+  ou_1_5_accuracy?: number;
+  ou_2_5_accuracy?: number;
+  ou_3_5_accuracy?: number;
+  btts_accuracy?: number;
+  exact_score_hit?: number;
+  [key: string]: any;
+}
+
+export interface OutcomeSnapshot {
+  outcome_id: string;
+  match_id: number;
+  final_home_goals: number;
+  final_away_goals: number;
+  final_result: string;
+  status: string;
+  outcome_hash: string;
+  supersedes_outcome_id?: string | null;
+  created_at?: string | null;
+}
+
+export interface EvaluationRecord {
+  evaluation_id: string;
+  prediction_id: string;
+  prediction_hash: string;
+  outcome_snapshot_id: string;
+  outcome_hash: string;
+  model_id: string;
+  model_version: string;
+  actual_result: string;
+  actual_home_goals: number;
+  actual_away_goals: number;
+  metrics: EvaluationMetrics;
+  evaluation_version: number;
+  created_at?: string | null;
+}
+
+export interface MatchEvaluationResponse {
+  match_id: number;
+  match_status: string;
+  final_score: { home?: number | null; away?: number | null };
+  outcome_eligible: boolean;
+  outcome_eligibility_code: string;
+  outcome?: OutcomeSnapshot | null;
+  prediction_count: number;
+  evaluation_count: number;
+  evaluations: EvaluationRecord[];
+}
+
+export interface EvaluationsSummaryResponse {
+  filters: Record<string, any>;
+  evaluation_period: { from?: string | null; to?: string | null };
+  metrics: Record<string, any>;
+}
+
+export interface CalibrationResponse {
+  n_bins: number;
+  sample_count: number;
+  filters: Record<string, any>;
+  per_outcome: Record<string, any>;
+}
+
+export interface DriftResponse {
+  recent_n_requested: number;
+  recent_sample: number;
+  baseline_sample: number;
+  sufficient_sample: boolean;
+  min_sample: number;
+  recent_means: Record<string, any>;
+  baseline_means: Record<string, any>;
+  differences_recent_minus_baseline: Record<string, any>;
+}

@@ -16,6 +16,11 @@ import {
   PreMatchReadinessSummaryResponse,
   PredictionExecutionResult,
   PredictionSnapshotsResponse,
+  MatchEvaluationResponse,
+  EvaluationRecord,
+  EvaluationsSummaryResponse,
+  CalibrationResponse,
+  DriftResponse,
 } from './types';
 
 export class ApiError extends Error {
@@ -299,6 +304,76 @@ export const apiClient = {
     return request<PredictionExecutionResult>(
       `/prediction-snapshots/${predictionId}`,
       { signal }
+    );
+  },
+
+  // Phase 27: Prediction Evaluation (read-only)
+  getMatchEvaluation: async (
+    matchId: number,
+    signal?: AbortSignal
+  ): Promise<MatchEvaluationResponse> => {
+    return request<MatchEvaluationResponse>(
+      `/matches/${matchId}/evaluation`,
+      { signal }
+    );
+  },
+
+  getPredictionEvaluation: async (
+    predictionId: string,
+    signal?: AbortSignal
+  ): Promise<{ prediction_id: string; evaluation_count: number; evaluations: EvaluationRecord[] }> => {
+    return request(
+      `/prediction-snapshots/${predictionId}/evaluation`,
+      { signal }
+    );
+  },
+
+  getEvaluationsSummary: async (params?: {
+    model_id?: string;
+    model_version?: string;
+    competition?: string;
+    season?: string;
+    signal?: AbortSignal;
+  }): Promise<EvaluationsSummaryResponse> => {
+    const query = new URLSearchParams();
+    if (params?.model_id) query.set('model_id', params.model_id);
+    if (params?.model_version) query.set('model_version', params.model_version);
+    if (params?.competition) query.set('competition', params.competition);
+    if (params?.season) query.set('season', params.season);
+    const qs = query.toString();
+    return request<EvaluationsSummaryResponse>(
+      `/evaluations/summary${qs ? `?${qs}` : ''}`,
+      { signal: params?.signal }
+    );
+  },
+
+  getCalibration: async (params?: {
+    model_id?: string;
+    model_version?: string;
+    signal?: AbortSignal;
+  }): Promise<CalibrationResponse> => {
+    const query = new URLSearchParams();
+    if (params?.model_id) query.set('model_id', params.model_id);
+    if (params?.model_version) query.set('model_version', params.model_version);
+    const qs = query.toString();
+    return request<CalibrationResponse>(
+      `/evaluations/calibration${qs ? `?${qs}` : ''}`,
+      { signal: params?.signal }
+    );
+  },
+
+  getDrift: async (params?: {
+    recent_n?: number;
+    model_id?: string;
+    signal?: AbortSignal;
+  }): Promise<DriftResponse> => {
+    const query = new URLSearchParams();
+    if (params?.recent_n) query.set('recent_n', String(params.recent_n));
+    if (params?.model_id) query.set('model_id', params.model_id);
+    const qs = query.toString();
+    return request<DriftResponse>(
+      `/evaluations/drift${qs ? `?${qs}` : ''}`,
+      { signal: params?.signal }
     );
   },
 };

@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { ArrowLeft, RefreshCw, Layers, ShieldCheck, AlertCircle } from 'lucide-react';
-import { useMatchIntelligence, useMatch, usePredictionSnapshots } from '../api/queries';
+import { useMatchIntelligence, useMatch, usePredictionSnapshots, useMatchEvaluation } from '../api/queries';
 import { MatchHeader } from '../components/intelligence/MatchHeader';
 import { CorePredictionCard } from '../components/intelligence/CorePredictionCard';
 import { ExpectedGoalsCard } from '../components/intelligence/ExpectedGoalsCard';
@@ -15,6 +15,7 @@ import { ScenarioAnalysisCard } from '../components/intelligence/ScenarioAnalysi
 import { MiroFishSection } from '../components/intelligence/MiroFishSection';
 import { ExplanationSection } from '../components/intelligence/ExplanationSection';
 import { DataQualitySection } from '../components/intelligence/DataQualitySection';
+import { EvaluationSection } from '../components/intelligence/EvaluationSection';
 import { PredictionExecutionSection } from '../components/intelligence/PredictionExecutionSection';
 import { WarningsSection } from '../components/intelligence/WarningsSection';
 import { ProvenanceSection } from '../components/intelligence/ProvenanceSection';
@@ -29,6 +30,7 @@ export const MatchIntelligencePage: React.FC = () => {
 
   const { data: matchFallback } = useMatch(idNum);
   const { data: execution, isLoading: executionLoading } = usePredictionSnapshots(idNum);
+  const { data: matchEvaluation, isLoading: evaluationLoading } = useMatchEvaluation(idNum);
   const {
     data: intel,
     isLoading,
@@ -192,7 +194,16 @@ export const MatchIntelligencePage: React.FC = () => {
         isLoading={executionLoading}
       />
 
-      {/* 15. Cryptographic Provenance */}
+      {/* 15. Post-Match Evaluation (Phase 27, completed matches only) */}
+      <EvaluationSection
+        evaluation={matchEvaluation}
+        isLoading={evaluationLoading}
+        predictedHome={intel.core_prediction?.home}
+        predictedDraw={intel.core_prediction?.draw}
+        predictedAway={intel.core_prediction?.away}
+      />
+
+      {/* 16. Cryptographic Provenance */}
       <ProvenanceSection provenance={intel.provenance} rawJson={intel} />
     </div>
   );

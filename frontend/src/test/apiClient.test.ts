@@ -127,3 +127,46 @@ describe('Phase 26 prediction execution client', () => {
     expect(res.model_version).toBe('ensemble_v1-elo+poisson');
   });
 });
+
+describe('Phase 27 evaluation client', () => {
+  beforeEach(() => {
+    vi.restoreAllMocks();
+  });
+
+  it('fetches match evaluation', async () => {
+    global.fetch = vi.fn().mockResolvedValue({
+      ok: true,
+      json: async () => ({ match_id: 7, match_status: 'FINISHED', evaluation_count: 1, evaluations: [] }),
+    });
+    const res = await apiClient.getMatchEvaluation(7);
+    expect(res.evaluation_count).toBe(1);
+  });
+
+  it('fetches evaluations summary with filters', async () => {
+    const fetchMock = vi.fn().mockResolvedValue({
+      ok: true,
+      json: async () => ({ metrics: { sample_count: 5, accuracy_1x2: 0.6 } }),
+    });
+    global.fetch = fetchMock;
+    const res = await apiClient.getEvaluationsSummary({ model_id: 'ensemble_v1-elo+poisson' });
+    expect(res.metrics.sample_count).toBe(5);
+    const [url] = fetchMock.mock.calls[0];
+    expect(url).toContain('/evaluations/summary');
+    expect(url).toContain('model_id=ensemble_v1-elo%2Bpoisson');
+  });
+
+  it('fetches calibration and drift', async () => {
+    global.fetch = vi.fn().mockResolvedValue({
+      ok: true,
+      json: async () => ({ n_bins: 10, sample_count: 2, per_outcome: {} }),
+    });
+    const cal = await apiClient.getCalibration();
+    expect(cal.n_bins).toBe(10);
+    global.fetch = vi.fn().mockResolvedValue({
+      ok: true,
+      json: async () => ({ recent_sample: 2, sufficient_sample: false }),
+    });
+    const drift = await apiClient.getDrift({ recent_n: 50 });
+    expect(drift.sufficient_sample).toBe(false);
+  });
+});

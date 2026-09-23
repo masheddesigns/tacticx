@@ -264,3 +264,36 @@ export function useExecutePrediction() {
     },
   });
 }
+
+export function useMatchEvaluation(matchId: number) {
+  return useQuery({
+    queryKey: ['matchEvaluation', matchId],
+    queryFn: ({ signal }) => apiClient.getMatchEvaluation(matchId, signal),
+    enabled: !!matchId,
+    staleTime: 60 * 1000,
+  });
+}
+
+export function useEvaluationsSummary(params?: { model_id?: string; competition?: string; season?: string }) {
+  return useQuery({
+    queryKey: ['evaluationsSummary', params],
+    queryFn: ({ signal }) => apiClient.getEvaluationsSummary({ ...params, signal }),
+    staleTime: 60 * 1000,
+  });
+}
+
+export function useCalibration(params?: { model_id?: string }) {
+  return useQuery({
+    queryKey: ['calibration', params],
+    queryFn: ({ signal }) => apiClient.getCalibration({ ...params, signal }),
+    staleTime: 60 * 1000,
+  });
+}
+
+export function useDrift(recent_n?: number) {
+  return useQuery({
+    queryKey: ['drift', recent_n],
+    queryFn: ({ signal }) => apiClient.getDrift({ recent_n, signal }),
+    staleTime: 60 * 1000,
+  });
+}

@@ -443,7 +443,7 @@ class TestMigrationChain:
         assert mod.down_revision == "0010_prematch_readiness"
         assert mod.branch_labels is None
 
-    def test_exactly_one_head_is_0011(self):
+    def test_0011_links_into_chain(self):
         import importlib.util
         from pathlib import Path
 
@@ -460,9 +460,13 @@ class TestMigrationChain:
                     revisions[mod.revision] = mod.down_revision
             except Exception:
                 pass
+        # 0011 must chain 0010 -> 0011; head ownership belongs to the
+        # latest phase test (no branch divergence).
+        assert revisions["0011_prediction_snapshots"] == \
+            "0010_prematch_readiness"
         down_revs = {v for v in revisions.values() if v is not None}
         heads = [r for r in revisions if r not in down_revs]
-        assert heads == ["0011_prediction_snapshots"]
+        assert len(heads) == 1
 
     def test_snapshot_tables_created(self, db):
         from app.db.models.prediction_snapshots import (

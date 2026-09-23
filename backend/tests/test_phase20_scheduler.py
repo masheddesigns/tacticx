@@ -58,8 +58,9 @@ def _match(db, league, home, away, status="SCHEDULED", hours_from_now=5):
 class TestSchedulerConfig:
     def test_all_job_types(self):
         from app.services.scheduler.config import ALL_JOB_TYPES, DEFAULT_JOBS
-        assert len(ALL_JOB_TYPES) == 7  # Phase 26 adds pre_match_prediction
+        assert len(ALL_JOB_TYPES) == 8  # Phase 27 adds post_match_evaluation
         assert "pre_match_prediction" in ALL_JOB_TYPES
+        assert "post_match_evaluation" in ALL_JOB_TYPES
         for jt in ALL_JOB_TYPES:
             assert jt in DEFAULT_JOBS
 
