@@ -207,3 +207,40 @@ describe('Phase 28 monitoring client', () => {
     expect(res.anomaly_count).toBe(0);
   });
 });
+
+describe('Phase 29 research client', () => {
+  beforeEach(() => {
+    vi.restoreAllMocks();
+  });
+
+  it('fetches builtin candidates', async () => {
+    global.fetch = vi.fn().mockResolvedValue({
+      ok: true,
+      json: async () => ({ builtin: ['baseline_repro', 'poisson_only'] }),
+    });
+    const res = await apiClient.getBuiltinCandidates();
+    expect(res.builtin).toContain('baseline_repro');
+  });
+
+  it('runs a research experiment', async () => {
+    const fetchMock = vi.fn().mockResolvedValue({
+      ok: true,
+      json: async () => ({ experiment_id: 'exp_1', evidence_state: 'NO_CLEAR_DIFFERENCE' }),
+    });
+    global.fetch = fetchMock;
+    const res = await apiClient.runResearchExperiment({ candidate_id: 'cand_1', dataset_id: 'ds_1' });
+    expect(res.evidence_state).toBe('NO_CLEAR_DIFFERENCE');
+    const [url, opts] = fetchMock.mock.calls[0];
+    expect(url).toContain('/research/experiments');
+    expect(opts.method).toBe('POST');
+  });
+
+  it('fetches experiment comparison', async () => {
+    global.fetch = vi.fn().mockResolvedValue({
+      ok: true,
+      json: async () => ({ experiment_id: 'exp_1', evidence_state: 'PASS' }),
+    });
+    const res = await apiClient.getExperimentComparison('exp_1');
+    expect(res.experiment_id).toBe('exp_1');
+  });
+});

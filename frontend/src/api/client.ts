@@ -21,6 +21,9 @@ import {
   EvaluationsSummaryResponse,
   CalibrationResponse,
   DriftResponse,
+  ResearchCandidate,
+  ResearchDataset,
+  ResearchExperiment,
 } from './types';
 
 export class ApiError extends Error {
@@ -410,5 +413,72 @@ export const apiClient = {
 
   getMonitoringAnomalies: async (signal?: AbortSignal): Promise<any> => {
     return request<any>('/monitoring/anomalies', { signal });
+  },
+
+  // Phase 29: Controlled Research (execution guarded server-side)
+  getBuiltinCandidates: async (signal?: AbortSignal): Promise<{ builtin: string[] }> => {
+    return request<{ builtin: string[] }>('/research/candidates/builtin', { signal });
+  },
+
+  registerBuiltinCandidate: async (key: string): Promise<ResearchCandidate> => {
+    return request<ResearchCandidate>(`/research/candidates/builtin/${key}`, { method: 'POST' });
+  },
+
+  getResearchCandidates: async (signal?: AbortSignal): Promise<{ candidates: ResearchCandidate[] }> => {
+    return request<{ candidates: ResearchCandidate[] }>('/research/candidates', { signal });
+  },
+
+  getResearchCandidate: async (candidateId: string, signal?: AbortSignal): Promise<ResearchCandidate> => {
+    return request<ResearchCandidate>(`/research/candidates/${candidateId}`, { signal });
+  },
+
+  buildResearchDataset: async (params?: {
+    competitions?: string[];
+    seasons?: string[];
+  }): Promise<ResearchDataset> => {
+    return request<ResearchDataset>('/research/datasets', {
+      method: 'POST',
+      body: JSON.stringify({
+        competitions: params?.competitions ?? [],
+        seasons: params?.seasons ?? [],
+      }),
+    });
+  },
+
+  getResearchDatasets: async (signal?: AbortSignal): Promise<{ datasets: ResearchDataset[] }> => {
+    return request<{ datasets: ResearchDataset[] }>('/research/datasets', { signal });
+  },
+
+  runResearchExperiment: async (params: {
+    candidate_id: string;
+    dataset_id: string;
+    seed?: number;
+  }): Promise<ResearchExperiment> => {
+    return request<ResearchExperiment>('/research/experiments', {
+      method: 'POST',
+      body: JSON.stringify({
+        candidate_id: params.candidate_id,
+        dataset_id: params.dataset_id,
+        seed: params.seed ?? 7,
+      }),
+    });
+  },
+
+  getResearchExperiments: async (signal?: AbortSignal): Promise<{ experiments: ResearchExperiment[] }> => {
+    return request<{ experiments: ResearchExperiment[] }>('/research/experiments', { signal });
+  },
+
+  getResearchExperiment: async (
+    experimentId: string,
+    signal?: AbortSignal
+  ): Promise<ResearchExperiment> => {
+    return request<ResearchExperiment>(`/research/experiments/${experimentId}`, { signal });
+  },
+
+  getExperimentComparison: async (
+    experimentId: string,
+    signal?: AbortSignal
+  ): Promise<any> => {
+    return request<any>(`/research/experiments/${experimentId}/comparison`, { signal });
   },
 };

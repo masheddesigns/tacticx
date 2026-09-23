@@ -562,7 +562,7 @@ class TestMigrationChain:
         assert mod.down_revision == "0011_prediction_snapshots"
         assert mod.branch_labels is None
 
-    def test_single_head_is_0012(self):
+    def test_0012_links_into_chain(self):
         import importlib.util
         from pathlib import Path
 
@@ -579,9 +579,13 @@ class TestMigrationChain:
                     revisions[mod.revision] = mod.down_revision
             except Exception:
                 pass
+        # 0012 must chain 0011 -> 0012; head ownership belongs to the
+        # latest phase test (no branch divergence).
+        assert revisions["0012_evaluation_records"] == \
+            "0011_prediction_snapshots"
         down_revs = {v for v in revisions.values() if v is not None}
         heads = [r for r in revisions if r not in down_revs]
-        assert heads == ["0012_evaluation_records"]
+        assert len(heads) == 1
 
     def test_tables_exist(self, db):
         assert db.query(MatchOutcomeSnapshot).count() == 0

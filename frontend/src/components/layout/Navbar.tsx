@@ -1,6 +1,6 @@
 import React from 'react';
 import { NavLink } from 'react-router-dom';
-import { Activity, Database, Cpu, BarChart2, ShieldCheck, Terminal } from 'lucide-react';
+import { Activity, Database, Cpu, BarChart2, ShieldCheck, Terminal, FlaskConical } from 'lucide-react';
 import { useReadyProbe } from '../../api/queries';
 
 export const Navbar: React.FC = () => {
@@ -12,6 +12,7 @@ export const Navbar: React.FC = () => {
     { to: '/matches', label: 'Match Explorer', icon: Database },
     { to: '/system', label: 'System & Sources', icon: ShieldCheck },
     { to: '/monitoring', label: 'Monitoring', icon: Activity },
+    { to: '/research', label: 'Research', icon: FlaskConical },
     { to: '/operations', label: 'Job Operations', icon: Terminal },
   ];
 

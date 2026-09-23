@@ -61,6 +61,11 @@ from app.db.models.reconciliation import (  # noqa: F401
     UnresolvedRecord,
 )
 from app.db.models.prematch import PreMatchReadinessCertificate  # noqa: F401
+from app.db.models.research_registry import (  # noqa: F401
+    ResearchCandidate,
+    ResearchDataset,
+    ResearchExperiment,
+)
 from app.db.models.evaluation_records import (  # noqa: F401
     MatchOutcomeSnapshot,
     PredictionEvaluationRecord,

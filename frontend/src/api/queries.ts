@@ -313,3 +313,45 @@ export function useMonitoringAnomalies() {
     staleTime: 60 * 1000,
   });
 }
+
+export function useResearchCandidates() {
+  return useQuery({
+    queryKey: ['researchCandidates'],
+    queryFn: ({ signal }) => apiClient.getResearchCandidates(signal),
+    staleTime: 60 * 1000,
+  });
+}
+
+export function useResearchCandidate(candidateId: string) {
+  return useQuery({
+    queryKey: ['researchCandidate', candidateId],
+    queryFn: ({ signal }) => apiClient.getResearchCandidate(candidateId, signal),
+    enabled: !!candidateId,
+    staleTime: 60 * 1000,
+  });
+}
+
+export function useResearchDatasets() {
+  return useQuery({
+    queryKey: ['researchDatasets'],
+    queryFn: ({ signal }) => apiClient.getResearchDatasets(signal),
+    staleTime: 60 * 1000,
+  });
+}
+
+export function useResearchExperiments() {
+  return useQuery({
+    queryKey: ['researchExperiments'],
+    queryFn: ({ signal }) => apiClient.getResearchExperiments(signal),
+    staleTime: 60 * 1000,
+  });
+}
+
+export function useResearchExperiment(experimentId: string) {
+  return useQuery({
+    queryKey: ['researchExperiment', experimentId],
+    queryFn: ({ signal }) => apiClient.getResearchExperiment(experimentId, signal),
+    enabled: !!experimentId,
+    staleTime: 60 * 1000,
+  });
+}

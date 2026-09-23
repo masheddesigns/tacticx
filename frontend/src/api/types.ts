@@ -717,3 +717,54 @@ export interface DriftResponse {
   baseline_means: Record<string, any>;
   differences_recent_minus_baseline: Record<string, any>;
 }
+
+/** Phase 29: controlled research pipeline */
+export interface ResearchCandidate {
+  candidate_id: string;
+  name: string;
+  version: string;
+  description?: string;
+  hypothesis?: string;
+  feature_set?: any;
+  model_family?: string;
+  hyperparameters?: any;
+  declared_inputs?: any;
+  code_hash?: string;
+  status: string;
+  supersedes_candidate_id?: string | null;
+  created_at?: string | null;
+}
+
+export interface ResearchDataset {
+  dataset_id: string;
+  dataset_version: string;
+  feature_version: string;
+  cutoff_policy: string;
+  observation_count: number;
+  train_period?: any;
+  validation_period?: any;
+  test_period?: any;
+  dataset_hash: string;
+  created_at?: string | null;
+}
+
+export interface ResearchExperiment {
+  experiment_id: string;
+  candidate_id: string;
+  candidate_version: string;
+  dataset_id: string;
+  dataset_hash: string;
+  baseline_model_id: string;
+  baseline_metrics?: any;
+  candidate_metrics?: any;
+  comparison?: any;
+  uncertainty?: any;
+  calibration?: any;
+  leakage_status: string;
+  evidence_state: string;
+  reproducibility?: any;
+  execution_metadata?: any;
+  result_hash: string;
+  rerun?: boolean;
+  created_at?: string | null;
+}
