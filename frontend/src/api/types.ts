@@ -579,3 +579,57 @@ export type DuplicateDetectionState =
   | 'DUPLICATE_CANDIDATE'      // proximity only — warning, not blocking
   | 'DUPLICATE_CONFIRMED'      // exact provider+provider_match_id collision — blocking
   | 'DUPLICATE_RESOLUTION_REQUIRED';  // both conditions — blocking
+
+/** Phase 26: pre-match prediction execution status */
+export type PredictionExecutionStatus =
+  | 'NOT_GENERATED'
+  | 'GENERATED'
+  | 'DEGRADED'
+  | 'BLOCKED';
+
+export interface PredictionSnapshotSummary {
+  prediction_id: string;
+  prediction_version: number;
+  model_id: string;
+  model_version: string;
+  cutoff_time?: string | null;
+  readiness_state?: string | null;
+  prediction_hash: string;
+  created_at?: string | null;
+}
+
+export interface PredictionExecutionResult {
+  executed?: boolean;
+  blocked?: boolean;
+  code?: string;
+  reason?: string;
+  details?: any;
+  cache_hit?: boolean;
+  prediction_id?: string;
+  match_id?: number;
+  prediction_version?: number;
+  model_id?: string;
+  model_version?: string;
+  prediction_mode?: string;
+  cutoff_time?: string | null;
+  kickoff_time?: string | null;
+  readiness_certificate_id?: string | null;
+  readiness_certificate_hash?: string | null;
+  readiness_state?: string | null;
+  feature_snapshot_id?: string | null;
+  feature_snapshot_hash?: string | null;
+  prediction_payload?: any;
+  prediction_hash?: string | null;
+  provenance?: any;
+  created_at?: string | null;
+}
+
+export interface PredictionSnapshotsResponse {
+  match_id: number;
+  status: PredictionExecutionStatus;
+  prediction_count: number;
+  latest?: PredictionExecutionResult | null;
+  latest_certificate_id?: string | null;
+  latest_readiness_state?: string | null;
+  snapshots: PredictionSnapshotSummary[];
+}

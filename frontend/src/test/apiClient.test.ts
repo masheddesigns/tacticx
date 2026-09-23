@@ -87,3 +87,43 @@ describe('Centralized apiClient', () => {
     expect(calledUrl).toContain('page_size=10');
   });
 });
+
+describe('Phase 26 prediction execution client', () => {
+  beforeEach(() => {
+    vi.restoreAllMocks();
+  });
+
+  it('posts execution with cutoff payload', async () => {
+    const fetchMock = vi.fn().mockResolvedValue({
+      ok: true,
+      json: async () => ({ executed: true, blocked: false, prediction_id: 'pred_1_x' }),
+    });
+    global.fetch = fetchMock;
+    const res = await apiClient.executePrediction(7, { cutoff: '2024-09-01T12:00:00' });
+    expect(res.prediction_id).toBe('pred_1_x');
+    expect(fetchMock).toHaveBeenCalledOnce();
+    const [url, opts] = fetchMock.mock.calls[0];
+    expect(url).toContain('/matches/7/predictions');
+    expect(opts.method).toBe('POST');
+    expect(JSON.parse(opts.body).cutoff).toBe('2024-09-01T12:00:00');
+  });
+
+  it('fetches prediction snapshots status', async () => {
+    global.fetch = vi.fn().mockResolvedValue({
+      ok: true,
+      json: async () => ({ match_id: 7, status: 'GENERATED', prediction_count: 1, snapshots: [] }),
+    });
+    const res = await apiClient.getPredictionSnapshots(7);
+    expect(res.status).toBe('GENERATED');
+    expect(res.prediction_count).toBe(1);
+  });
+
+  it('fetches a single prediction snapshot', async () => {
+    global.fetch = vi.fn().mockResolvedValue({
+      ok: true,
+      json: async () => ({ prediction_id: 'pred_1_x', model_version: 'ensemble_v1-elo+poisson' }),
+    });
+    const res = await apiClient.getPredictionSnapshot('pred_1_x');
+    expect(res.model_version).toBe('ensemble_v1-elo+poisson');
+  });
+});

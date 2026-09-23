@@ -61,6 +61,10 @@ from app.db.models.reconciliation import (  # noqa: F401
     UnresolvedRecord,
 )
 from app.db.models.prematch import PreMatchReadinessCertificate  # noqa: F401
+from app.db.models.prediction_snapshots import (  # noqa: F401
+    PredictionFeatureSnapshot,
+    PreMatchPredictionSnapshot,
+)
 from app.db.models.research import ResearchModel  # noqa: F401
 from app.db.models.scheduler import (  # noqa: F401
     AcquisitionJobLock,

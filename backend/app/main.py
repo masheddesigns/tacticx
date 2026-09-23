@@ -24,6 +24,7 @@ from app.api.routes import (
     mirofish,
     odds,
     player_features,
+    prediction_execution,
     predictions,
     reconciliation,
     sources,
@@ -83,6 +84,7 @@ app.include_router(validation.router, prefix=prefix)
 app.include_router(lifecycle.router, prefix=prefix)
 app.include_router(reconciliation.router, prefix=prefix)
 app.include_router(player_features.router, prefix=prefix)
+app.include_router(prediction_execution.router, prefix=prefix)
 app.include_router(intelligence.router, prefix=prefix)
 app.include_router(mirofish.router, prefix=prefix)
 app.include_router(match_intelligence.router, prefix=prefix)

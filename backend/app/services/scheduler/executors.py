@@ -2,9 +2,10 @@
 
 Each executor receives (db, config, dry_run) and returns a standardized
 result dict. Executors use existing services exclusively; they never
-train models, generate predictions, or fabricate data. Partial results
-persist; failed sources are recorded; idempotency is guaranteed by
-the underlying services.
+train models or fabricate data. The pre_match_prediction executor invokes
+the Phase 26 execution service, which enforces readiness gating, cutoff
+safety, and idempotency. Partial results persist; failed sources are
+recorded; idempotency is guaranteed by the underlying services.
 """
 from __future__ import annotations
 
@@ -228,6 +229,72 @@ def execute_qualification(db: Session, config: dict[str, Any],
 
 
 # Dispatch table: job_type -> executor function.
+def execute_pre_match_prediction(db: Session, config: dict[str, Any],
+                                 dry_run: bool = False) -> dict[str, Any]:
+    """Execute Phase 26 pre-match predictions for due matches.
+
+    Due = latest readiness certificate is PREDICTION_READY/READY_DEGRADED
+    and no prediction snapshot is bound to that certificate. BLOCKED matches
+    are skipped (no infinite retries for permanently blocked matches).
+    Idempotent: repeated runs reuse existing snapshots.
+    """
+    from app.db.models.core import League, Match
+    from app.services.prediction_execution import (
+        PredictionBlocked,
+        execute_pre_match_prediction as run_prediction,
+        get_latest_certificate,
+    )
+
+    competitions = config.get("competitions", [])
+    now = _now()
+    query = db.query(Match).filter(
+        Match.status == "SCHEDULED", Match.kickoff_at > now)
+    if competitions:
+        query = query.join(League, Match.league_id == League.id).filter(
+            League.code.in_(competitions))
+    matches = query.order_by(Match.kickoff_at.asc()).limit(50).all()
+
+    due, generated, skipped_blocked, errors = [], [], [], []
+    for match in matches:
+        cert = get_latest_certificate(db, match.id)
+        if cert is None or cert.readiness_state == "BLOCKED":
+            skipped_blocked.append(match.id)
+            continue
+        due.append((match.id, cert.cutoff))
+
+    if dry_run:
+        return {
+            "status": "dry_run",
+            "due_match_ids": [mid for mid, _ in due],
+            "skipped_blocked": skipped_blocked,
+            "note": "no writes performed",
+        }
+
+    for match_id, cutoff in due:
+        try:
+            result = run_prediction(db, match_id, cutoff)
+            generated.append({"match_id": match_id,
+                              "reused": bool(result.get("cache_hit")),
+                              "prediction_id": result["prediction_id"]})
+        except PredictionBlocked as exc:
+            errors.append({"match_id": match_id, "code": exc.code,
+                           "reason": exc.reason})
+        except Exception as exc:  # noqa: BLE001 — record, don't crash the job
+            errors.append({"match_id": match_id, "code": "EXECUTOR_ERROR",
+                           "reason": str(exc)})
+
+    status = "succeeded" if not errors else (
+        "partial" if generated else "failed")
+    return {
+        "status": status,
+        "due": len(due),
+        "generated": generated,
+        "skipped_blocked": skipped_blocked,
+        "errors": errors,
+    }
+
+
+# Dispatch table: job_type -> executor function.
 EXECUTORS = {
     "fixture_refresh": execute_fixture_refresh,
     "status_refresh": execute_status_refresh,
@@ -235,6 +302,7 @@ EXECUTORS = {
     "source_health": execute_health_check,
     "freshness_audit": execute_freshness_audit,
     "qualification": execute_qualification,
+    "pre_match_prediction": execute_pre_match_prediction,
 }
 
 

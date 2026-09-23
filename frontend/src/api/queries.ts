@@ -21,6 +21,8 @@ export const QUERY_KEYS = {
   readinessReport: (params?: any) => ['readinessReport', params],
   preMatchReadiness: (matchId: number, options?: any) => ['preMatchReadiness', matchId, options],
   preMatchReadinessSummary: (params?: any) => ['preMatchReadinessSummary', params],
+  predictionSnapshots: (matchId: number) => ['predictionSnapshots', matchId],
+  predictionSnapshot: (predictionId: string) => ['predictionSnapshot', predictionId],
 };
 
 export function useMatches(params?: {
@@ -224,3 +226,41 @@ export function usePreMatchReadinessSummary(params?: { season?: string }) {
   });
 }
 
+
+export function usePredictionSnapshots(matchId: number) {
+  return useQuery({
+    queryKey: QUERY_KEYS.predictionSnapshots(matchId),
+    queryFn: ({ signal }) => apiClient.getPredictionSnapshots(matchId, signal),
+    enabled: !!matchId,
+    staleTime: 30 * 1000,
+  });
+}
+
+export function usePredictionSnapshot(predictionId: string) {
+  return useQuery({
+    queryKey: QUERY_KEYS.predictionSnapshot(predictionId),
+    queryFn: ({ signal }) => apiClient.getPredictionSnapshot(predictionId, signal),
+    enabled: !!predictionId,
+    staleTime: 60 * 1000,
+  });
+}
+
+export function useExecutePrediction() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (args: {
+      matchId: number;
+      cutoff: string;
+      model_id?: string;
+      certificate_id?: string;
+    }) =>
+      apiClient.executePrediction(args.matchId, {
+        cutoff: args.cutoff,
+        model_id: args.model_id,
+        certificate_id: args.certificate_id,
+      }),
+    onSuccess: (data, vars) => {
+      queryClient.invalidateQueries({ queryKey: QUERY_KEYS.predictionSnapshots(vars.matchId) });
+    },
+  });
+}

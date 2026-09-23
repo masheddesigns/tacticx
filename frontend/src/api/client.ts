@@ -14,6 +14,8 @@ import {
   ReadyProbeResponse,
   PreMatchReadinessResponse,
   PreMatchReadinessSummaryResponse,
+  PredictionExecutionResult,
+  PredictionSnapshotsResponse,
 } from './types';
 
 export class ApiError extends Error {
@@ -261,6 +263,42 @@ export const apiClient = {
     return request<PreMatchReadinessSummaryResponse>(
       `/matches/current/readiness-summary${qs ? `?${qs}` : ''}`,
       { signal: params?.signal }
+    );
+  },
+
+  // Phase 26: Pre-Match Prediction Execution
+  executePrediction: async (
+    matchId: number,
+    options?: { cutoff: string; model_id?: string; certificate_id?: string; with_intelligence?: boolean }
+  ): Promise<PredictionExecutionResult> => {
+    return request<PredictionExecutionResult>(`/matches/${matchId}/predictions`, {
+      method: 'POST',
+      body: JSON.stringify({
+        cutoff: options?.cutoff,
+        model_id: options?.model_id,
+        certificate_id: options?.certificate_id,
+        with_intelligence: options?.with_intelligence ?? false,
+      }),
+    });
+  },
+
+  getPredictionSnapshots: async (
+    matchId: number,
+    signal?: AbortSignal
+  ): Promise<PredictionSnapshotsResponse> => {
+    return request<PredictionSnapshotsResponse>(
+      `/matches/${matchId}/prediction-snapshots`,
+      { signal }
+    );
+  },
+
+  getPredictionSnapshot: async (
+    predictionId: string,
+    signal?: AbortSignal
+  ): Promise<PredictionExecutionResult> => {
+    return request<PredictionExecutionResult>(
+      `/prediction-snapshots/${predictionId}`,
+      { signal }
     );
   },
 };
