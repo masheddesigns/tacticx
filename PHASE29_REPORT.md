@@ -4,7 +4,7 @@
 READY
 
 ## Commit
-(to be filled after commit)
+fbeef83
 
 ## Research Architecture
 - isolated `app/services/research/` (contracts/datasets/candidates/experiments/isolation)
