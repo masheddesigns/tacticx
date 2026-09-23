@@ -4,7 +4,7 @@
 READY
 
 ## Commit
-(to be filled after commit; implementation verified pre-commit)
+10c979f
 
 ## Performance
 - evaluation sample: aggregated with explicit sample_count; empty scopes return sample_count 0 with null metrics
