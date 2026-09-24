@@ -4,7 +4,7 @@
 READY
 
 ## Commit
-(to be filled after commit)
+0a5ce01
 
 ## Files/modules added
 - `backend/app/services/model_governance/`: contracts, artifact, registry,
