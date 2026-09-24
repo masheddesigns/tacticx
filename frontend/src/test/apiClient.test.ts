@@ -244,3 +244,33 @@ describe('Phase 29 research client', () => {
     expect(res.experiment_id).toBe('exp_1');
   });
 });
+
+describe('Phase 30 governance client', () => {
+  beforeEach(() => {
+    vi.restoreAllMocks();
+  });
+
+  it('fetches champion', async () => {
+    global.fetch = vi.fn().mockResolvedValue({
+      ok: true,
+      json: async () => ({ role: 'CHAMPION', artifact: { model_id: 'ensemble_v1-elo+poisson' } }),
+    });
+    const res = await apiClient.getChampion();
+    expect(res.artifact.model_id).toBe('ensemble_v1-elo+poisson');
+  });
+
+  it('fetches registry and audit', async () => {
+    global.fetch = vi.fn().mockResolvedValue({
+      ok: true,
+      json: async () => ({ bindings: [] }),
+    });
+    const reg = await apiClient.getGovernanceRegistry();
+    expect(reg.bindings).toEqual([]);
+    global.fetch = vi.fn().mockResolvedValue({
+      ok: true,
+      json: async () => ({ events: [] }),
+    });
+    const audit = await apiClient.getGovernanceAudit();
+    expect(audit.events).toEqual([]);
+  });
+});

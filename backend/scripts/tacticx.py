@@ -986,6 +986,116 @@ def _validate_sources(db) -> dict:
     return {"checks": len(lines), "failures": failures, "lines": lines}
 
 
+def _cmd_model(db, args) -> int:
+    """Model governance operations (Phase 30). Explicit only; no auto-promotion."""
+    from app.services import model_governance as gov
+
+    def emit(payload):
+        if args.as_json:
+            print(json.dumps(payload, indent=2, default=str))
+        else:
+            print(json.dumps(payload, indent=2, default=str))
+        return 0
+
+    action = args.action
+    if action == "registry":
+        return emit({"bindings": gov.list_bindings(db)})
+    if action == "champion":
+        return emit(gov.active_champion_view(db))
+    if action == "validate":
+        if not args.artifact:
+            print("pass --artifact <artifact_id>")
+            return 1
+        try:
+            return emit(gov.validate_candidate(
+                db, args.artifact, experiment_id=args.experiment or None,
+                actor=args.actor))
+        except Exception as exc:
+            print(f"validation failed: {exc}")
+            return 1
+    if action == "validation":
+        from app.db.models.governance import ModelValidationReport
+
+        row = db.query(ModelValidationReport).filter_by(
+            validation_id=args.validation).first()
+        if row is None:
+            print(f"unknown validation: {args.validation}")
+            return 1
+        return emit(gov.validation_to_dict(row))
+    if action == "promotion-request":
+        if not args.artifact or not args.validation:
+            print("pass --artifact <id> --validation <id>")
+            return 1
+        try:
+            return emit(gov.request_promotion(
+                db, args.artifact, validation_id=args.validation,
+                deployment_mode=args.mode, requester=args.actor,
+                reason=args.reason))
+        except Exception as exc:
+            print(f"promotion request failed: {exc}")
+            return 1
+    if action in ("approve", "reject"):
+        if not args.request:
+            print("pass --request <request_id>")
+            return 1
+        try:
+            return emit(gov.decide(
+                db, args.request,
+                decision="APPROVE" if action == "approve" else "REJECT",
+                actor=args.actor, reason=args.reason))
+        except Exception as exc:
+            print(f"decision failed: {exc}")
+            return 1
+    if action == "shadow-start":
+        if not args.artifact or not args.champion:
+            print("pass --artifact <challenger> --champion <champion>")
+            return 1
+        try:
+            return emit(gov.start_shadow(
+                db, args.artifact, args.champion, actor=args.actor))
+        except Exception as exc:
+            print(f"shadow start failed: {exc}")
+            return 1
+    if action == "canary-activate":
+        if not args.artifact:
+            print("pass --artifact <artifact_id>")
+            return 1
+        try:
+            return emit(gov.mark_canary_eligible(
+                db, args.artifact, actor=args.actor))
+        except Exception as exc:
+            print(f"canary eligibility failed: {exc}")
+            return 1
+    if action == "production-activate":
+        if not args.artifact or not args.expected_champion:
+            print("pass --artifact <id> --expected-champion <id> --actor <name>")
+            return 1
+        try:
+            return emit(gov.activate_production(
+                db, args.artifact, actor=args.actor,
+                expected_champion_artifact_id=args.expected_champion,
+                reason=args.reason))
+        except Exception as exc:
+            print(f"production activation failed: {exc}")
+            return 1
+    if action == "rollback":
+        if not args.artifact or not args.actor:
+            print("pass --artifact <target> --actor <name>")
+            return 1
+        try:
+            return emit(gov.rollback(
+                db, actor=args.actor, target_artifact_id=args.artifact,
+                reason=args.reason))
+        except Exception as exc:
+            print(f"rollback failed: {exc}")
+            return 1
+    if action == "audit":
+        return emit({"events": gov.audit_trail(
+            db, artifact_id=args.artifact or None)})
+    print(f"unknown model action: {action}")
+    return 1
+
+
 def _cmd_jobs(db, args) -> int:
     from app.services.scheduler import (
         ALL_JOB_TYPES, get_job_config, recent_records, find_due_jobs,
@@ -1450,6 +1560,25 @@ def main() -> int:
                    help="expanding folds instead of season protocol (0 = off)")
     p.add_argument("--json", action="store_true", dest="as_json")
 
+    p = sub.add_parser("model", help="Model governance (explicit, human-gated)")
+    p.add_argument("action",
+                   choices=["registry", "champion", "validate", "validation",
+                            "promotion-request", "approve", "reject",
+                            "shadow-start", "canary-activate",
+                            "production-activate", "rollback", "audit"],
+                   nargs="?", default="registry")
+    p.add_argument("--artifact", default="")
+    p.add_argument("--validation", default="")
+    p.add_argument("--request", default="")
+    p.add_argument("--experiment", default="")
+    p.add_argument("--champion", default="")
+    p.add_argument("--expected-champion", default="")
+    p.add_argument("--mode", default="SHADOW",
+                   choices=["SHADOW", "CANARY", "PRODUCTION"])
+    p.add_argument("--actor", default="")
+    p.add_argument("--reason", default="")
+    p.add_argument("--json", action="store_true", dest="as_json")
+
     p = sub.add_parser("jobs", help="Acquisition scheduler jobs")
     p.add_argument("action",
                    choices=["list", "status", "run", "run-due",
@@ -1528,6 +1657,8 @@ def main() -> int:
             return _cmd_data(db, args)
         if args.command == "research":
             return _cmd_research(db, args)
+        if args.command == "model":
+            return _cmd_model(db, args)
         if args.command == "jobs":
             return _cmd_jobs(db, args)
         if args.command == "current-season":

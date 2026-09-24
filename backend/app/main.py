@@ -22,6 +22,7 @@ from app.api.routes import (
     matches,
     metrics_route,
     mirofish,
+    model_governance,
     monitoring,
     odds,
     player_features,
@@ -92,6 +93,7 @@ app.include_router(prediction_execution.router, prefix=prefix)
 app.include_router(prediction_evaluation.router, prefix=prefix)
 app.include_router(intelligence.router, prefix=prefix)
 app.include_router(monitoring.router, prefix=prefix)
+app.include_router(model_governance.router, prefix=prefix)
 app.include_router(mirofish.router, prefix=prefix)
 app.include_router(match_intelligence.router, prefix=prefix)
 app.include_router(acquisition.router, prefix=prefix)

@@ -24,6 +24,10 @@ import {
   ResearchCandidate,
   ResearchDataset,
   ResearchExperiment,
+  GovernanceArtifact,
+  ChampionView,
+  PromotionRequest,
+  GovernanceEvent,
 } from './types';
 
 export class ApiError extends Error {
@@ -480,5 +484,33 @@ export const apiClient = {
     signal?: AbortSignal
   ): Promise<any> => {
     return request<any>(`/research/experiments/${experimentId}/comparison`, { signal });
+  },
+
+  // Phase 30: Model Governance (mutations guarded server-side)
+  getGovernanceRegistry: async (signal?: AbortSignal): Promise<{ bindings: any[] }> => {
+    return request<{ bindings: any[] }>('/model-governance/registry', { signal });
+  },
+
+  getChampion: async (signal?: AbortSignal): Promise<ChampionView> => {
+    return request<ChampionView>('/model-governance/champion', { signal });
+  },
+
+  getGovernanceArtifact: async (
+    artifactId: string,
+    signal?: AbortSignal
+  ): Promise<GovernanceArtifact> => {
+    return request<GovernanceArtifact>(`/model-governance/artifacts/${artifactId}`, { signal });
+  },
+
+  getArtifactStatus: async (artifactId: string, signal?: AbortSignal): Promise<any> => {
+    return request<any>(`/model-governance/status/${artifactId}`, { signal });
+  },
+
+  getPromotionRequests: async (signal?: AbortSignal): Promise<{ requests: PromotionRequest[] }> => {
+    return request<{ requests: PromotionRequest[] }>('/model-governance/promotion-requests', { signal });
+  },
+
+  getGovernanceAudit: async (signal?: AbortSignal): Promise<{ events: GovernanceEvent[] }> => {
+    return request<{ events: GovernanceEvent[] }>('/model-governance/audit', { signal });
   },
 };

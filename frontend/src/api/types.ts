@@ -768,3 +768,52 @@ export interface ResearchExperiment {
   rerun?: boolean;
   created_at?: string | null;
 }
+
+/** Phase 30: model governance */
+export interface GovernanceArtifact {
+  artifact_id: string;
+  model_id: string;
+  model_version: string;
+  candidate_id?: string | null;
+  experiment_id?: string | null;
+  dataset_id?: string | null;
+  dataset_hash?: string | null;
+  config_fingerprint?: any;
+  feature_contract?: string;
+  prediction_mode?: string;
+  lifecycle_state: string;
+  artifact_hash: string;
+  created_at?: string | null;
+}
+
+export interface ChampionView {
+  role: string;
+  competition?: string | null;
+  season?: string | null;
+  prediction_mode: string;
+  artifact: GovernanceArtifact;
+  registry_id: number;
+  bound_at?: string | null;
+}
+
+export interface PromotionRequest {
+  request_id: string;
+  candidate_artifact_id: string;
+  validation_id: string;
+  champion_artifact_id: string;
+  deployment_mode: string;
+  requester: string;
+  reason: string;
+  state: string;
+  created_at?: string | null;
+}
+
+export interface GovernanceEvent {
+  event_id: string;
+  artifact_id?: string | null;
+  from_state: string;
+  to_state: string;
+  actor: string;
+  reason: string;
+  created_at?: string | null;
+}

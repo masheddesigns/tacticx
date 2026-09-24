@@ -355,3 +355,44 @@ export function useResearchExperiment(experimentId: string) {
     staleTime: 60 * 1000,
   });
 }
+
+export function useGovernanceRegistry() {
+  return useQuery({
+    queryKey: ['governanceRegistry'],
+    queryFn: ({ signal }) => apiClient.getGovernanceRegistry(signal),
+    staleTime: 60 * 1000,
+  });
+}
+
+export function useChampion() {
+  return useQuery({
+    queryKey: ['champion'],
+    queryFn: ({ signal }) => apiClient.getChampion(signal),
+    staleTime: 60 * 1000,
+  });
+}
+
+export function useArtifactStatus(artifactId: string) {
+  return useQuery({
+    queryKey: ['artifactStatus', artifactId],
+    queryFn: ({ signal }) => apiClient.getArtifactStatus(artifactId, signal),
+    enabled: !!artifactId,
+    staleTime: 60 * 1000,
+  });
+}
+
+export function usePromotionRequests() {
+  return useQuery({
+    queryKey: ['promotionRequests'],
+    queryFn: ({ signal }) => apiClient.getPromotionRequests(signal),
+    staleTime: 60 * 1000,
+  });
+}
+
+export function useGovernanceAudit() {
+  return useQuery({
+    queryKey: ['governanceAudit'],
+    queryFn: ({ signal }) => apiClient.getGovernanceAudit(signal),
+    staleTime: 60 * 1000,
+  });
+}
