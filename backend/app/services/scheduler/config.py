@@ -19,6 +19,7 @@ JOB_FRESHNESS_AUDIT = "freshness_audit"
 JOB_QUALIFICATION = "qualification"
 JOB_PRE_MATCH_PREDICTION = "pre_match_prediction"
 JOB_POST_MATCH_EVALUATION = "post_match_evaluation"
+JOB_SHADOW_PREDICTION = "shadow_prediction"
 
 ALL_JOB_TYPES = (
     JOB_FIXTURE_REFRESH,
@@ -29,6 +30,7 @@ ALL_JOB_TYPES = (
     JOB_QUALIFICATION,
     JOB_PRE_MATCH_PREDICTION,
     JOB_POST_MATCH_EVALUATION,
+    JOB_SHADOW_PREDICTION,
 )
 
 # Priority ordering: lower number = higher priority.
@@ -41,6 +43,7 @@ DEFAULT_PRIORITIES = {
     JOB_QUALIFICATION: 80,
     JOB_PRE_MATCH_PREDICTION: 40,
     JOB_POST_MATCH_EVALUATION: 45,
+    JOB_SHADOW_PREDICTION: 55,
 }
 
 DEFAULT_SCHEDULER: dict[str, Any] = {
@@ -157,6 +160,19 @@ DEFAULT_JOBS: dict[str, dict[str, Any]] = {
         "retry_base_seconds": 30.0,
         "timeout_seconds": 120.0,
         "priority": DEFAULT_PRIORITIES[JOB_POST_MATCH_EVALUATION],
+        "lock_ttl_seconds": 300,
+    },
+    JOB_SHADOW_PREDICTION: {
+        "enabled": True,
+        "interval_seconds": 30 * 60,
+        "competitions": ["EPL", "LA_LIGA", "SERIE_A", "BUNDESLIGA", "LIGUE_1"],
+        "seasons": ["current"],
+        "sources": [],
+        "max_concurrency": 1,
+        "retry_max": 1,
+        "retry_base_seconds": 30.0,
+        "timeout_seconds": 120.0,
+        "priority": DEFAULT_PRIORITIES[JOB_SHADOW_PREDICTION],
         "lock_ttl_seconds": 300,
     },
 }

@@ -1493,6 +1493,77 @@ def _cmd_current_season(db, args) -> int:
     return 1
 
 
+def _cmd_shadow(db, args) -> int:
+    """Champion/challenger shadow operations (read-only + explicit runs)."""
+    from app.services.shadow_execution import (
+        ShadowExecutionError,
+        ShadowIneligible,
+        evaluate_shadow_pair,
+        execute_shadow,
+        find_eligible_matches,
+        shadow_comparison,
+        shadow_summary,
+        validate_shadow_pair,
+    )
+    from app.services.shadow_execution.evaluation import ShadowEvaluationError
+
+    action = args.action
+    if action == "status":
+        print(json.dumps(shadow_summary(db), indent=2, default=str))
+        return 0
+    if action == "challengers":
+        print(json.dumps(
+            shadow_summary(db)["by_challenger"], indent=2, default=str))
+        return 0
+    if action == "matches":
+        print(json.dumps(
+            find_eligible_matches(db, competition=args.competition or None),
+            indent=2, default=str))
+        return 0
+    if action == "evaluate":
+        if not args.shadow:
+            print("pass --shadow <shadow_id>")
+            return 1
+        try:
+            print(json.dumps(
+                evaluate_shadow_pair(db, args.shadow),
+                indent=2, default=str))
+            return 0
+        except ShadowEvaluationError as exc:
+            print(f"shadow evaluation failed: {exc.reason}")
+            return 1
+    if action == "compare":
+        if not args.challenger:
+            print("pass --challenger <challenger_artifact_id>")
+            return 1
+        print(json.dumps(
+            shadow_comparison(db, args.challenger),
+            indent=2, default=str))
+        return 0
+    if action == "run":
+        if not args.match or not args.challenger:
+            print("pass --match <match_id> --challenger <artifact_id>")
+            return 1
+        try:
+            print(json.dumps(
+                execute_shadow(db, args.match, args.challenger),
+                indent=2, default=str))
+            return 0
+        except (ShadowExecutionError, ShadowIneligible) as exc:
+            print(f"shadow execution failed: {exc.reason}")
+            return 1
+    if action == "audit":
+        if not args.shadow:
+            print("pass --shadow <shadow_id>")
+            return 1
+        print(json.dumps(
+            validate_shadow_pair(db, args.shadow),
+            indent=2, default=str))
+        return 0
+    print(f"unknown shadow action: {action}")
+    return 1
+
+
 def _cmd_pre_match(db, args) -> int:
     from app.services.acquisition.readiness_gate import (
         evaluate_pre_match_readiness,
@@ -1823,6 +1894,17 @@ def main() -> int:
     p.add_argument("action", choices=["status"], nargs="?", default="status")
     p.add_argument("--json", action="store_true", dest="as_json")
 
+    p = sub.add_parser("shadow", help="Champion/challenger shadow (read-only + explicit runs)")
+    p.add_argument("action",
+                   choices=["status", "challengers", "matches", "evaluate",
+                            "compare", "run", "audit"],
+                   nargs="?", default="status")
+    p.add_argument("--match", type=int, default=0)
+    p.add_argument("--challenger", default="")
+    p.add_argument("--shadow", default="")
+    p.add_argument("--competition", default="")
+    p.add_argument("--json", action="store_true", dest="as_json")
+
     args = ap.parse_args()
     Base.metadata.create_all(get_engine())
     db = get_session_local()()
@@ -1887,6 +1969,8 @@ def main() -> int:
             return _cmd_monitoring(db, args)
         if args.command == "acquisition":
             return _cmd_acquisition(db, args)
+        if args.command == "shadow":
+            return _cmd_shadow(db, args)
         ap.error(f"unknown command: {args.command}")
         return 1
     finally:

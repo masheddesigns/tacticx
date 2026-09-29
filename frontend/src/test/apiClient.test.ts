@@ -274,3 +274,40 @@ describe('Phase 30 governance client', () => {
     expect(audit.events).toEqual([]);
   });
 });
+
+describe('Phase 32 shadow client', () => {
+  beforeEach(() => {
+    vi.restoreAllMocks();
+  });
+
+  it('fetches shadow summary', async () => {
+    global.fetch = vi.fn().mockResolvedValue({
+      ok: true,
+      json: async () => ({ shadow_executions: 2, shadow_evaluations: 1 }),
+    });
+    const res = await apiClient.getShadowSummary();
+    expect(res.shadow_executions).toBe(2);
+  });
+
+  it('executes shadow with challenger', async () => {
+    const fetchMock = vi.fn().mockResolvedValue({
+      ok: true,
+      json: async () => ({ shadow_id: 'shdw_abc', cache_hit: false }),
+    });
+    global.fetch = fetchMock;
+    const res = await apiClient.executeShadow(7, 'art_xyz');
+    expect(res.shadow_id).toBe('shdw_abc');
+    const [url, opts] = fetchMock.mock.calls[0];
+    expect(url).toContain('/shadow/execute/7');
+    expect(opts.method).toBe('POST');
+  });
+
+  it('fetches shadow comparison', async () => {
+    global.fetch = vi.fn().mockResolvedValue({
+      ok: true,
+      json: async () => ({ evaluated_pairs: 1, aggregate: {} }),
+    });
+    const res = await apiClient.getShadowComparison('art_xyz');
+    expect(res.evaluated_pairs).toBe(1);
+  });
+});

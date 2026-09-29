@@ -396,3 +396,37 @@ export function useGovernanceAudit() {
     staleTime: 60 * 1000,
   });
 }
+
+export function useShadowSummary() {
+  return useQuery({
+    queryKey: ['shadowSummary'],
+    queryFn: ({ signal }) => apiClient.getShadowSummary(signal),
+    staleTime: 60 * 1000,
+  });
+}
+
+export function useShadowChallengers() {
+  return useQuery({
+    queryKey: ['shadowChallengers'],
+    queryFn: ({ signal }) => apiClient.getShadowChallengers(signal),
+    staleTime: 60 * 1000,
+  });
+}
+
+export function useShadowMatch(matchId: number) {
+  return useQuery({
+    queryKey: ['shadowMatch', matchId],
+    queryFn: ({ signal }) => apiClient.getShadowMatch(matchId, signal),
+    enabled: !!matchId,
+    staleTime: 60 * 1000,
+  });
+}
+
+export function useShadowComparison(challengerId: string) {
+  return useQuery({
+    queryKey: ['shadowComparison', challengerId],
+    queryFn: ({ signal }) => apiClient.getShadowComparison(challengerId, signal),
+    enabled: !!challengerId,
+    staleTime: 60 * 1000,
+  });
+}

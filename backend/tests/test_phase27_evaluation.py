@@ -475,7 +475,7 @@ class TestSchedulerIntegration:
         from app.services.scheduler.executors import get_executor
 
         assert JOB_POST_MATCH_EVALUATION in ALL_JOB_TYPES
-        assert len(ALL_JOB_TYPES) == 8
+        assert len(ALL_JOB_TYPES) == 9  # Phase 32 adds shadow_prediction
         assert get_job_config(JOB_POST_MATCH_EVALUATION)["enabled"] is True
         assert get_executor(JOB_POST_MATCH_EVALUATION).__name__ == \
             "execute_post_match_evaluation"

@@ -817,3 +817,34 @@ export interface GovernanceEvent {
   reason: string;
   created_at?: string | null;
 }
+
+/** Phase 32: champion/challenger shadow */
+export interface ShadowRecord {
+  shadow_id: string;
+  match_id: number;
+  challenger_artifact_id: string;
+  champion_artifact_id: string;
+  cutoff?: string | null;
+  feature_snapshot_id?: string | null;
+  feature_snapshot_hash?: string | null;
+  production_prediction_id?: string | null;
+  shadow_execution_key?: string | null;
+  evaluation_state?: string | null;
+  champion_output_hash?: string | null;
+  challenger_output_hash?: string | null;
+  created_at?: string | null;
+}
+
+export interface ShadowEvaluation {
+  evaluation_id: string;
+  shadow_id: string;
+  match_id: number;
+  challenger_artifact_id: string;
+  champion_artifact_id: string;
+  outcome_snapshot_id: string;
+  outcome_hash: string;
+  champion_metrics?: any;
+  challenger_metrics?: any;
+  differences?: any;
+  created_at?: string | null;
+}

@@ -28,6 +28,8 @@ import {
   ChampionView,
   PromotionRequest,
   GovernanceEvent,
+  ShadowRecord,
+  ShadowEvaluation,
 } from './types';
 
 export class ApiError extends Error {
@@ -512,5 +514,37 @@ export const apiClient = {
 
   getGovernanceAudit: async (signal?: AbortSignal): Promise<{ events: GovernanceEvent[] }> => {
     return request<{ events: GovernanceEvent[] }>('/model-governance/audit', { signal });
+  },
+
+  // Phase 32: Champion/challenger shadow (execution guarded server-side)
+  getShadowSummary: async (signal?: AbortSignal): Promise<any> => {
+    return request<any>('/shadow/summary', { signal });
+  },
+
+  getShadowChallengers: async (signal?: AbortSignal): Promise<{ challengers: string[] }> => {
+    return request<{ challengers: string[] }>('/shadow/challengers', { signal });
+  },
+
+  getShadowMatches: async (signal?: AbortSignal): Promise<any> => {
+    return request<any>('/shadow/matches', { signal });
+  },
+
+  getShadowMatch: async (matchId: number, signal?: AbortSignal): Promise<{ match_id: number; shadow_count: number; shadows: ShadowRecord[] }> => {
+    return request(`/shadow/matches/${matchId}`, { signal });
+  },
+
+  getShadowEvaluations: async (signal?: AbortSignal): Promise<{ evaluation_count: number; evaluations: ShadowEvaluation[] }> => {
+    return request('/shadow/evaluations', { signal });
+  },
+
+  getShadowComparison: async (challengerId: string, signal?: AbortSignal): Promise<any> => {
+    return request<any>(`/shadow/comparison/${challengerId}`, { signal });
+  },
+
+  executeShadow: async (matchId: number, challengerArtifactId: string): Promise<ShadowRecord> => {
+    return request<ShadowRecord>(`/shadow/execute/${matchId}`, {
+      method: 'POST',
+      body: JSON.stringify({ match_id: matchId, challenger_artifact_id: challengerArtifactId }),
+    });
   },
 };

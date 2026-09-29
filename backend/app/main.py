@@ -31,6 +31,7 @@ from app.api.routes import (
     predictions,
     reconciliation,
     research,
+    shadow,
     sources,
     sync,
     validation,
@@ -88,6 +89,7 @@ app.include_router(validation.router, prefix=prefix)
 app.include_router(lifecycle.router, prefix=prefix)
 app.include_router(reconciliation.router, prefix=prefix)
 app.include_router(research.router, prefix=prefix)
+app.include_router(shadow.router, prefix=prefix)
 app.include_router(player_features.router, prefix=prefix)
 app.include_router(prediction_execution.router, prefix=prefix)
 app.include_router(prediction_evaluation.router, prefix=prefix)

@@ -68,6 +68,7 @@ from app.db.models.governance import (  # noqa: F401
     ModelPromotionRequest,
     ModelRegistry,
     ModelValidationReport,
+    ShadowEvaluationRecord,
     ShadowPredictionSnapshot,
 )
 from app.db.models.research_registry import (  # noqa: F401

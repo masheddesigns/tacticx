@@ -159,10 +159,46 @@ class ShadowPredictionSnapshot(Base):
     cutoff: Mapped[datetime] = mapped_column(DateTime(timezone=True))
     feature_snapshot_hash: Mapped[Optional[str]] = mapped_column(
         String(64), nullable=True)
+    # Phase 32 shared-input bindings (immutable once written).
+    feature_snapshot_id: Mapped[Optional[str]] = mapped_column(
+        String(64), nullable=True, index=True)
+    production_prediction_id: Mapped[Optional[str]] = mapped_column(
+        String(64), nullable=True, index=True)
+    shadow_execution_key: Mapped[Optional[str]] = mapped_column(
+        String(64), nullable=True, unique=True, index=True)
+    evaluation_state: Mapped[str] = mapped_column(String(32), default="PENDING")
     champion_output: Mapped[Dict[str, Any]] = mapped_column(JSON, default=dict)
     challenger_output: Mapped[Dict[str, Any]] = mapped_column(JSON, default=dict)
     champion_output_hash: Mapped[str] = mapped_column(String(64), default="")
     challenger_output_hash: Mapped[str] = mapped_column(String(64), default="")
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), server_default=func.now(), index=True
+    )
+
+
+class ShadowEvaluationRecord(Base):
+    """Immutable challenger-vs-champion scoring for one shadow pair.
+
+    Champion metrics mirror the linked Phase 27 evaluation; challenger
+    metrics use the same scoring implementation against the shared
+    outcome snapshot. Factual differences only — no winner declaration.
+    """
+
+    __tablename__ = "shadow_evaluation_records"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    evaluation_id: Mapped[str] = mapped_column(String(64), unique=True, index=True)
+    shadow_id: Mapped[str] = mapped_column(String(64), index=True)
+    match_id: Mapped[int] = mapped_column(Integer, index=True)
+    challenger_artifact_id: Mapped[str] = mapped_column(String(64), index=True)
+    champion_artifact_id: Mapped[str] = mapped_column(String(64), index=True)
+    outcome_snapshot_id: Mapped[str] = mapped_column(String(64))
+    outcome_hash: Mapped[str] = mapped_column(String(64))
+    champion_metrics: Mapped[Dict[str, Any]] = mapped_column(JSON, default=dict)
+    challenger_metrics: Mapped[Dict[str, Any]] = mapped_column(JSON, default=dict)
+    differences: Mapped[Dict[str, Any]] = mapped_column(JSON, default=dict)
+    sample_note: Mapped[str] = mapped_column(String(256), default="")
+    evaluation_hash: Mapped[str] = mapped_column(String(64), unique=True, index=True)
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), server_default=func.now(), index=True
     )

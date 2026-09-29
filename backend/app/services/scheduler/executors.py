@@ -382,6 +382,78 @@ def execute_post_match_evaluation(db: Session, config: dict[str, Any],
     }
 
 
+def execute_shadow_prediction(
+    db: Session, config: dict[str, Any], dry_run: bool = False
+) -> dict[str, Any]:
+    """Run shadow challenger predictions for eligible real matches.
+
+    Read-only against production: never activates, modifies, requests,
+    or promotes anything. NO_ELIGIBLE_MATCHES (including an unconfigured
+    challenger) is a valid outcome, not a failure.
+    """
+    from app.services.shadow_execution import (
+        ShadowExecutionError,
+        ShadowIneligible,
+        execute_shadow,
+        find_eligible_matches,
+    )
+
+    challenger_id = (config.get("challenger_artifact_id") or "").strip()
+    competitions = config.get("competitions", [])
+    competition = competitions[0] if len(competitions) == 1 else None
+
+    if not challenger_id:
+        return {
+            "status": "skipped",
+            "reason": "no challenger configured "
+                      "(challenger_artifact_id empty)",
+            "due_match_ids": [],
+        }
+
+    scan = find_eligible_matches(db, competition=competition)
+    if scan["state"] == "NO_ELIGIBLE_MATCHES":
+        return {
+            "status": "succeeded",
+            "state": "NO_ELIGIBLE_MATCHES",
+            "due_match_ids": [],
+            "reason": scan.get("reason", ""),
+        }
+    due = scan["eligible"]
+
+    if dry_run:
+        return {
+            "status": "dry_run",
+            "due_match_ids": due,
+            "skipped": scan.get("skipped", []),
+            "note": "no writes performed",
+        }
+
+    executed, errors, skipped = [], [], list(scan.get("skipped", []))
+    for match_id in due:
+        try:
+            result = execute_shadow(db, match_id, challenger_id)
+            executed.append({
+                "match_id": match_id,
+                "shadow_id": result["shadow_id"],
+                "reused": bool(result.get("cache_hit"))})
+        except (ShadowExecutionError, ShadowIneligible) as exc:
+            errors.append({"match_id": match_id, "code": exc.code,
+                           "reason": exc.reason})
+        except Exception as exc:  # noqa: BLE001 — record, don't crash
+            errors.append({"match_id": match_id, "code": "EXECUTOR_ERROR",
+                           "reason": str(exc)})
+
+    status = "succeeded" if not errors else (
+        "partial" if executed else "failed")
+    return {
+        "status": status,
+        "due": len(due),
+        "executed": executed,
+        "skipped": skipped,
+        "errors": errors,
+    }
+
+
 EXECUTORS = {
     "fixture_refresh": execute_fixture_refresh,
     "status_refresh": execute_status_refresh,
@@ -391,6 +463,7 @@ EXECUTORS = {
     "qualification": execute_qualification,
     "pre_match_prediction": execute_pre_match_prediction,
     "post_match_evaluation": execute_post_match_evaluation,
+    "shadow_prediction": execute_shadow_prediction,
 }
 
 
