@@ -488,3 +488,11 @@ export function useValidationDetail(validationId: string) {
     staleTime: 60 * 1000,
   });
 }
+
+export function useSoakSummary(params?: { competition?: string; season?: string }) {
+  return useQuery({
+    queryKey: ['soakSummary', params],
+    queryFn: ({ signal }) => apiClient.getSoakSummary({ ...params, signal }),
+    staleTime: 60 * 1000,
+  });
+}

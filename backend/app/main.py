@@ -26,6 +26,7 @@ from app.api.routes import (
     mirofish,
     model_governance,
     monitoring,
+    operations,
     odds,
     player_features,
     prediction_evaluation,
@@ -105,6 +106,7 @@ app.include_router(match_intelligence.router, prefix=prefix)
 app.include_router(acquisition.router, prefix=prefix)
 app.include_router(sources.router, prefix=prefix)
 app.include_router(jobs.router, prefix=prefix)
+app.include_router(operations.router, prefix=prefix)
 
 
 @app.get("/", include_in_schema=False)

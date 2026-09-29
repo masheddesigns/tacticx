@@ -382,3 +382,18 @@ describe('Phase 34 validation client', () => {
     expect(res.validation_id).toBe('val_1');
   });
 });
+
+describe('Phase 35 operations client', () => {
+  beforeEach(() => {
+    vi.restoreAllMocks();
+  });
+
+  it('fetches soak summary', async () => {
+    global.fetch = vi.fn().mockResolvedValue({
+      ok: true,
+      json: async () => ({ discovered: 0, paired: 0, exclusions: {} }),
+    });
+    const res = await apiClient.getSoakSummary();
+    expect(res.paired).toBe(0);
+  });
+});

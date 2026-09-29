@@ -7,6 +7,7 @@ import {
   useJobAnomalies,
   useJobDue,
   useCleanupLocks,
+  useSoakSummary,
 } from '../api/queries';
 import { LoadingSpinner } from '../components/common/LoadingSpinner';
 import { ErrorCard } from '../components/common/ErrorCard';
@@ -25,6 +26,7 @@ export const OperationsPage: React.FC = () => {
   const { data: alerts, refetch: refetchAlerts } = useJobAlerts();
   const { data: anomalies, refetch: refetchAnomalies } = useJobAnomalies();
   const { data: dueJobs, refetch: refetchDue } = useJobDue();
+  const { data: soak, refetch: refetchSoak } = useSoakSummary();
 
   const cleanupMutation = useCleanupLocks();
 
@@ -34,6 +36,7 @@ export const OperationsPage: React.FC = () => {
     refetchAlerts();
     refetchAnomalies();
     refetchDue();
+    refetchSoak();
   };
 
   const locks = dashboard?.locks || { total: 0, active: 0, stale: 0 };
@@ -141,6 +144,36 @@ export const OperationsPage: React.FC = () => {
 
         <span className="text-slate-400">{jobRecords.length} records shown</span>
       </div>
+
+      {/* Production Soak / Observation Lifecycle (Phase 35) */}
+      <section className="space-y-3">
+        <h2 className="text-sm font-semibold text-slate-100 font-mono">
+          OBSERVATION LIFECYCLE FUNNEL
+        </h2>
+
+        <div className="rounded-xl border border-surface-border bg-surface-card p-4 shadow-sm">
+          {!soak ? (
+            <div className="text-xs font-mono text-slate-400">Loading observation funnel…</div>
+          ) : (
+            <div className="space-y-2">
+              <div className="text-xs font-mono text-slate-300">
+                discovered {soak.discovered} → eligible {soak.eligible} → predicted{' '}
+                {soak.predicted} → shadowed {soak.shadowed} → finished {soak.finished} →{' '}
+                outcomes {soak.outcome_verified} → evaluated {soak.evaluated} → paired{' '}
+                {soak.paired}
+              </div>
+              {Object.keys(soak.exclusions || {}).length > 0 && (
+                <div className="text-[11px] font-mono text-slate-500">
+                  exclusions:{' '}
+                  {Object.entries(soak.exclusions)
+                    .map(([k, v]) => `${k}=${v}`)
+                    .join(' · ')}
+                </div>
+              )}
+            </div>
+          )}
+        </div>
+      </section>
 
       {/* Jobs Audit Table */}
       <section className="space-y-3">

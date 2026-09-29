@@ -608,4 +608,20 @@ export const apiClient = {
       }),
     });
   },
+
+  // Phase 35: Observation lifecycle accounting (read-only)
+  getSoakSummary: async (params?: {
+    competition?: string;
+    season?: string;
+    signal?: AbortSignal;
+  }): Promise<any> => {
+    const query = new URLSearchParams();
+    if (params?.competition) query.set('competition', params.competition);
+    if (params?.season) query.set('season', params.season);
+    const qs = query.toString();
+    return request<any>(
+      `/operations/soak${qs ? `?${qs}` : ''}`,
+      { signal: params?.signal }
+    );
+  },
 };
