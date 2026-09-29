@@ -455,3 +455,36 @@ export function useEvidenceSnapshot(snapshotId: string) {
     staleTime: 60 * 1000,
   });
 }
+
+export function useValidationStatus() {
+  return useQuery({
+    queryKey: ['validationStatus'],
+    queryFn: ({ signal }) => apiClient.getValidationStatus(signal),
+    staleTime: 60 * 1000,
+  });
+}
+
+export function useValidationConfig() {
+  return useQuery({
+    queryKey: ['validationConfig'],
+    queryFn: ({ signal }) => apiClient.getValidationConfig(signal),
+    staleTime: 300 * 1000,
+  });
+}
+
+export function useValidationCandidates() {
+  return useQuery({
+    queryKey: ['validationCandidates'],
+    queryFn: ({ signal }) => apiClient.getValidationCandidates(signal),
+    staleTime: 60 * 1000,
+  });
+}
+
+export function useValidationDetail(validationId: string) {
+  return useQuery({
+    queryKey: ['validationDetail', validationId],
+    queryFn: ({ signal }) => apiClient.getValidation(validationId, signal),
+    enabled: !!validationId,
+    staleTime: 60 * 1000,
+  });
+}

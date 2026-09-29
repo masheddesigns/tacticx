@@ -61,6 +61,9 @@ from app.db.models.reconciliation import (  # noqa: F401
     UnresolvedRecord,
 )
 from app.db.models.prematch import PreMatchReadinessCertificate  # noqa: F401
+from app.db.models.candidate_validation import (  # noqa: F401
+    CandidateValidationReport,
+)
 from app.db.models.evidence import (  # noqa: F401
     EvidenceCohort,
     EvidenceSnapshot,

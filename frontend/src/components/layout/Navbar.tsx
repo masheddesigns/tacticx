@@ -13,6 +13,7 @@ export const Navbar: React.FC = () => {
     { to: '/system', label: 'System & Sources', icon: ShieldCheck },
     { to: '/monitoring', label: 'Monitoring', icon: Activity },
     { to: '/research', label: 'Research', icon: FlaskConical },
+    { to: '/validation', label: 'Validation', icon: ShieldCheck },
     { to: '/evidence', label: 'Evidence', icon: Scale },
     { to: '/shadow', label: 'Shadow', icon: GitCompareArrows },
     { to: '/model-governance', label: 'Governance', icon: ShieldCheck },

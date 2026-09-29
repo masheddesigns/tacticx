@@ -10,6 +10,7 @@ import { MatchIntelligencePage } from './pages/MatchIntelligencePage';
 import { SystemStatusPage } from './pages/SystemStatusPage';
 import { MonitoringPage } from './pages/MonitoringPage';
 import { ResearchPage } from './pages/ResearchPage';
+import { ValidationPage } from './pages/ValidationPage';
 import { EvidencePage } from './pages/EvidencePage';
 import { ShadowPage } from './pages/ShadowPage';
 import { ModelGovernancePage } from './pages/ModelGovernancePage';
@@ -39,6 +40,7 @@ export const App: React.FC = () => {
               <Route path="/system" element={<SystemStatusPage />} />
               <Route path="/monitoring" element={<MonitoringPage />} />
               <Route path="/research" element={<ResearchPage />} />
+              <Route path="/validation" element={<ValidationPage />} />
               <Route path="/evidence" element={<EvidencePage />} />
               <Route path="/shadow" element={<ShadowPage />} />
               <Route path="/model-governance" element={<ModelGovernancePage />} />

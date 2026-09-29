@@ -33,6 +33,7 @@ import {
   EvidenceCohort,
   EvidenceSnapshot,
   EvidenceStatus,
+  CandidateValidation,
 } from './types';
 
 export class ApiError extends Error {
@@ -570,5 +571,41 @@ export const apiClient = {
 
   getEvidenceCompare: async (challengerId: string, signal?: AbortSignal): Promise<any> => {
     return request<any>(`/evidence/compare/${challengerId}`, { signal });
+  },
+
+  // Phase 34: Controlled candidate validation (run guarded server-side)
+  getValidationStatus: async (signal?: AbortSignal): Promise<any> => {
+    return request<any>('/candidate-validation/status', { signal });
+  },
+
+  getValidationConfig: async (signal?: AbortSignal): Promise<any> => {
+    return request<any>('/candidate-validation/config', { signal });
+  },
+
+  getValidationCandidates: async (signal?: AbortSignal): Promise<{ candidates: string[] }> => {
+    return request<{ candidates: string[] }>('/candidate-validation/candidates', { signal });
+  },
+
+  getValidation: async (validationId: string, signal?: AbortSignal): Promise<CandidateValidation> => {
+    return request<CandidateValidation>(`/candidate-validation/${validationId}`, { signal });
+  },
+
+  getValidationRules: async (validationId: string, signal?: AbortSignal): Promise<any> => {
+    return request<any>(`/candidate-validation/${validationId}/rules`, { signal });
+  },
+
+  runValidation: async (params: {
+    candidate_artifact_id: string;
+    evidence_snapshot_id: string;
+    config_id?: string;
+  }): Promise<CandidateValidation> => {
+    return request<CandidateValidation>('/candidate-validation/run', {
+      method: 'POST',
+      body: JSON.stringify({
+        candidate_artifact_id: params.candidate_artifact_id,
+        evidence_snapshot_id: params.evidence_snapshot_id,
+        config_id: params.config_id ?? 'candidate_validation_v1',
+      }),
+    });
   },
 };

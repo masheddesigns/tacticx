@@ -13,6 +13,7 @@ from app.api.middleware import (
 from app.api.routes import (
     acquisition,
     catalog,
+    candidate_validation,
     evidence,
     health,
     intelligence,
@@ -82,6 +83,7 @@ app.include_router(health.router, prefix=prefix)
 app.include_router(version_route.router, prefix=prefix)
 app.include_router(matches.router, prefix=prefix)
 app.include_router(evidence.router, prefix=prefix)
+app.include_router(candidate_validation.router, prefix=prefix)
 app.include_router(catalog.router, prefix=prefix)
 app.include_router(odds.router, prefix=prefix)
 app.include_router(markets.router, prefix=prefix)

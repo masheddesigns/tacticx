@@ -345,3 +345,40 @@ describe('Phase 33 evidence client', () => {
     expect(res.evidence_state).toBe('INSUFFICIENT_REAL_DATA');
   });
 });
+
+describe('Phase 34 validation client', () => {
+  beforeEach(() => {
+    vi.restoreAllMocks();
+  });
+
+  it('fetches validation status', async () => {
+    global.fetch = vi.fn().mockResolvedValue({
+      ok: true,
+      json: async () => ({ validation_count: 0, production_champion: 'ensemble_v1-elo+poisson' }),
+    });
+    const res = await apiClient.getValidationStatus();
+    expect(res.production_champion).toBe('ensemble_v1-elo+poisson');
+  });
+
+  it('runs validation', async () => {
+    const fetchMock = vi.fn().mockResolvedValue({
+      ok: true,
+      json: async () => ({ validation_id: 'val_1', validation_state: 'INSUFFICIENT_DATA' }),
+    });
+    global.fetch = fetchMock;
+    const res = await apiClient.runValidation({ candidate_artifact_id: 'art_x', evidence_snapshot_id: 'evd_y' });
+    expect(res.validation_state).toBe('INSUFFICIENT_DATA');
+    const [url, opts] = fetchMock.mock.calls[0];
+    expect(url).toContain('/candidate-validation/run');
+    expect(opts.method).toBe('POST');
+  });
+
+  it('fetches validation rules', async () => {
+    global.fetch = vi.fn().mockResolvedValue({
+      ok: true,
+      json: async () => ({ validation_id: 'val_1', validation_state: 'BLOCKED', rules: [] }),
+    });
+    const res = await apiClient.getValidation('val_1');
+    expect(res.validation_id).toBe('val_1');
+  });
+});

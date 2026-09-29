@@ -1493,6 +1493,84 @@ def _cmd_current_season(db, args) -> int:
     return 1
 
 
+def _cmd_validation(db, args) -> int:
+    """Controlled candidate validation (read-only + explicit reports)."""
+    from app.services.candidate_validation import (
+        check_staleness,
+        get_config,
+        get_validation,
+        run_validation,
+        validation_to_dict,
+    )
+
+    action = args.action
+    if action == "status":
+        from app.db.models.candidate_validation import (
+            CandidateValidationReport,
+        )
+
+        total = db.query(CandidateValidationReport).count()
+        print(json.dumps({"validation_count": total,
+                          "production_champion": "ensemble_v1-elo+poisson",
+                          "note": "reports evidence readiness; "
+                                  "no automatic promotion exists"},
+                         indent=2))
+        return 0
+    if action == "config":
+        print(json.dumps(get_config(args.config or "candidate_validation_v1"),
+                         indent=2, default=str))
+        return 0
+    if action == "candidates":
+        from app.db.models.candidate_validation import (
+            CandidateValidationReport,
+        )
+
+        rows = db.query(
+            CandidateValidationReport.candidate_artifact_id).distinct().all()
+        print(json.dumps({"candidates": sorted(r[0] for r in rows if r[0])},
+                         indent=2))
+        return 0
+    if action == "run":
+        if not args.candidate or not args.snapshot:
+            print("pass --candidate <artifact_id> --snapshot <snapshot_id>")
+            return 1
+        try:
+            print(json.dumps(
+                run_validation(db, args.candidate, args.snapshot,
+                               config_id=args.config or
+                               "candidate_validation_v1"),
+                indent=2, default=str))
+            return 0
+        except Exception as exc:
+            print(f"validation failed: {exc}")
+            return 1
+    if action == "show":
+        if not args.validation:
+            print("pass --validation <validation_id>")
+            return 1
+        print(json.dumps(
+            validation_to_dict(get_validation(db, args.validation)),
+            indent=2, default=str))
+        return 0
+    if action == "rules":
+        if not args.validation:
+            print("pass --validation <validation_id>")
+            return 1
+        row = get_validation(db, args.validation)
+        print(json.dumps((row.rule_results or {}).get("rules", []),
+                         indent=2, default=str))
+        return 0
+    if action == "refresh":
+        from app.services.evidence import build_cohort, generate_snapshot
+
+        row = build_cohort(db)
+        print(json.dumps(generate_snapshot(db, row.cohort_id),
+                         indent=2, default=str))
+        return 0
+    print(f"unknown validation action: {action}")
+    return 1
+
+
 def _cmd_evidence(db, args) -> int:
     """Real-world performance evidence (read-only + explicit snapshots)."""
     from app.services.evidence import (
@@ -1996,6 +2074,17 @@ def main() -> int:
     p.add_argument("--competition", default="")
     p.add_argument("--json", action="store_true", dest="as_json")
 
+    p = sub.add_parser("validation", help="Controlled candidate validation (read-only + explicit reports)")
+    p.add_argument("action",
+                   choices=["status", "config", "candidates", "run",
+                            "show", "rules", "refresh"],
+                   nargs="?", default="status")
+    p.add_argument("--candidate", default="")
+    p.add_argument("--snapshot", default="")
+    p.add_argument("--validation", default="")
+    p.add_argument("--config", default="")
+    p.add_argument("--json", action="store_true", dest="as_json")
+
     args = ap.parse_args()
     Base.metadata.create_all(get_engine())
     db = get_session_local()()
@@ -2064,6 +2153,8 @@ def main() -> int:
             return _cmd_shadow(db, args)
         if args.command == "evidence":
             return _cmd_evidence(db, args)
+        if args.command == "validation":
+            return _cmd_validation(db, args)
         ap.error(f"unknown command: {args.command}")
         return 1
     finally:

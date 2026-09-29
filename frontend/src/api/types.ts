@@ -890,3 +890,38 @@ export interface EvidenceStatus {
   synthetic_observations: number;
   evidence_snapshots: number;
 }
+
+/** Phase 34: controlled candidate validation */
+export interface ValidationRule {
+  rule_id: string;
+  state: string;
+  result: boolean;
+  explanation: string;
+  measured_value?: any;
+  required_value?: any;
+  evidence_reference?: string | null;
+}
+
+export interface CandidateValidation {
+  validation_id: string;
+  candidate_artifact_id: string;
+  champion_artifact_id: string;
+  evidence_snapshot_id: string;
+  evidence_snapshot_hash: string;
+  validation_config_id: string;
+  validation_config_version: string;
+  validation_state: string;
+  evidence_state?: string | null;
+  rule_results?: any;
+  performance_summary?: any;
+  uncertainty_summary?: any;
+  data_quality_summary?: any;
+  temporal_summary?: any;
+  compatibility_summary?: any;
+  operational_summary?: any;
+  blocking_reasons?: any;
+  warnings?: any;
+  validation_hash: string;
+  rerun?: boolean;
+  created_at?: string | null;
+}
