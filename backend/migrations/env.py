@@ -17,8 +17,15 @@ config = context.config
 if config.config_file_name is not None:
     fileConfig(config.config_file_name)
 
-config.set_main_option("sqlalchemy.url", get_settings().DATABASE_URL)
+db_url = os.environ.get("DATABASE_URL") or get_settings().DATABASE_URL
+if db_url.startswith("postgresql://"):
+    try:
+        import psycopg  # noqa: F401
+    except ImportError:
+        db_url = db_url.replace("postgresql://", "postgresql+psycopg2://", 1)
+config.set_main_option("sqlalchemy.url", db_url)
 target_metadata = Base.metadata
+
 
 
 def run_migrations_offline() -> None:

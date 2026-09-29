@@ -46,8 +46,10 @@ if ! command -v alembic >/dev/null 2>&1; then
     fi
 fi
 
-DATABASE_URL="postgresql+psycopg2://${PG_USER}@${PG_HOST}:${PG_PORT}/${SRC_DB}" \
+PG_PASS="${PGPASSWORD:-${POSTGRES_PASSWORD:-postgres}}"
+DATABASE_URL="postgresql+psycopg2://${PG_USER}:${PG_PASS}@${PG_HOST}:${PG_PORT}/${SRC_DB}" \
   ${ALEMBIC_CMD} -c backend/alembic.ini upgrade head >/dev/null
+
 
 
 # Insert canary record into leagues and teams

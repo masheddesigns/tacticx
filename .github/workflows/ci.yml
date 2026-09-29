@@ -75,18 +75,19 @@ jobs:
 
       - name: Test PostgreSQL Migration (Fresh DB)
         env:
-          DATABASE_URL: postgresql://postgres:postgres@localhost:5432/tacticx_test
+          DATABASE_URL: postgresql+psycopg2://postgres:postgres@localhost:5432/tacticx_test
         run: |
           cd backend
           alembic upgrade head
 
       - name: Test PostgreSQL Migration Downgrade & Re-upgrade Cycle
         env:
-          DATABASE_URL: postgresql://postgres:postgres@localhost:5432/tacticx_test
+          DATABASE_URL: postgresql+psycopg2://postgres:postgres@localhost:5432/tacticx_test
         run: |
           cd backend
           alembic downgrade 0008_training_runs
           alembic upgrade head
+
 
       - name: Run Backend Pytest Suite
         env:

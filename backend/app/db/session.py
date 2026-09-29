@@ -14,11 +14,17 @@ def get_engine():
     global _engine
     if _engine is None:
         url = get_settings().DATABASE_URL
+        if url.startswith("postgresql://"):
+            try:
+                import psycopg  # noqa: F401
+            except ImportError:
+                url = url.replace("postgresql://", "postgresql+psycopg2://", 1)
         kwargs = {"pool_pre_ping": True}
         if url.startswith("sqlite"):
             kwargs = {}
         _engine = create_engine(url, **kwargs)
     return _engine
+
 
 
 def get_session_local():
