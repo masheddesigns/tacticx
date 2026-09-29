@@ -12,8 +12,8 @@ from app.api.middleware import (
 )
 from app.api.routes import (
     acquisition,
-    catalog,
     candidate_validation,
+    catalog,
     evidence,
     health,
     intelligence,
@@ -26,8 +26,8 @@ from app.api.routes import (
     mirofish,
     model_governance,
     monitoring,
-    operations,
     odds,
+    operations,
     player_features,
     prediction_evaluation,
     prediction_execution,

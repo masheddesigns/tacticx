@@ -1107,12 +1107,17 @@ def _cmd_system(db, args) -> int:
     try:
         with get_engine().connect() as conn:
             conn.execute(text("SELECT 1"))
-            version = conn.execute(
-                text("SELECT version_num FROM alembic_version")).fetchone()
-        database = {"reachable": True,
-                    "migration": version[0] if version else "unstamped"}
+        database = {"reachable": True}
     except Exception as exc:  # noqa: BLE001
         database = {"reachable": False, "error": str(exc)[:200]}
+    if database.get("reachable"):
+        try:
+            with get_engine().connect() as conn:
+                version = conn.execute(
+                    text("SELECT version_num FROM alembic_version")).fetchone()
+            database["migration"] = version[0] if version else "unstamped"
+        except Exception:  # noqa: BLE001
+            database["migration"] = "unknown"
     try:
         from app.services.caching.cache import backend_name
 

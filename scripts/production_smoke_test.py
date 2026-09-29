@@ -219,21 +219,55 @@ class SmokeTestRunner:
 
     def test_rate_limiting(self):
         print("\n--- 7. Rate Limiting Protection ---")
-        # Use a non-exempt IP via headers or direct client configuration
-        client = TestClient(app, client=("198.51.100.10", 54321))
-        # Rate limit is 120/min by default; send requests to a non-exempt path
+        # RateLimitingMiddleware exempts 'testclient' by default (exempt_testclient=True).
+        # Temporarily disable the exemption so TestClient requests go through the limiter.
+        from app.api.middleware import RateLimitingMiddleware
+        rate_limiter = next(
+            (m for m in app.middleware_stack.__dict__.get("app", app).__dict__.get("middleware", [])
+             if isinstance(getattr(m, "cls", None), type) and issubclass(getattr(m, "cls", type), RateLimitingMiddleware)),
+            None,
+        )
+        # Locate the middleware instance directly from the app stack
+        stack = app.middleware_stack
+        limiter_instance = None
+        while stack is not None:
+            if isinstance(stack, RateLimitingMiddleware):
+                limiter_instance = stack
+                break
+            stack = getattr(stack, "app", None)
+
         triggered_429 = False
         limit = 120
-        # Trigger rate limit by sending limit + 5 requests
-        for i in range(limit + 5):
-            r = client.get("/api/v1/version")
-            if r.status_code == 429:
-                triggered_429 = True
-                retry_after = r.headers.get("Retry-After")
-                self.report("Rate Limit Enforced (429)", True, f"Triggered on request #{i+1}, Retry-After={retry_after}")
-                break
+
+        if limiter_instance is not None:
+            # Disable testclient exemption temporarily
+            original_exempt = limiter_instance.exempt_testclient
+            limiter_instance.exempt_testclient = False
+            try:
+                for i in range(limit + 5):
+                    r = self.client.get("/api/v1/version")
+                    if r.status_code == 429:
+                        triggered_429 = True
+                        retry_after = r.headers.get("Retry-After")
+                        self.report("Rate Limit Enforced (429)", True, f"Triggered on request #{i+1}, Retry-After={retry_after}")
+                        break
+            finally:
+                limiter_instance.exempt_testclient = original_exempt
+                # Reset request history to avoid polluting other tests
+                limiter_instance._history.clear()
+        else:
+            # Middleware not found in stack — check via response behaviour as fallback
+            for i in range(limit + 5):
+                r = self.client.get("/api/v1/version")
+                if r.status_code == 429:
+                    triggered_429 = True
+                    retry_after = r.headers.get("Retry-After")
+                    self.report("Rate Limit Enforced (429)", True, f"Triggered on request #{i+1}, Retry-After={retry_after}")
+                    break
+
         if not triggered_429:
             self.report("Rate Limit Enforced (429)", False, "429 was not triggered within burst limit")
+
 
     def test_cors_policies(self):
         print("\n--- 8. CORS Policies ---")
