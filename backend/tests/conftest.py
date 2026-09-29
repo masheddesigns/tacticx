@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import os
+import stat
 
 import pytest
 from fastapi.testclient import TestClient
@@ -16,12 +17,24 @@ from app.db.models import Base  # noqa: E402
 from app.main import app  # noqa: E402
 
 TEST_DB = "/tmp/bet_predictor_test.db"
-if os.path.exists(TEST_DB):
-    os.remove(TEST_DB)
 
-engine = create_engine(f"sqlite:///{TEST_DB}")
+# Clean up stale DB and any SQLite sidecar files (WAL, shm) from previous runs.
+# These can be left behind by parallel pytest workers, smoke tests, or aborted runs
+# and cause "disk I/O error" / "attempt to write a readonly database" failures.
+for _ext in ("", "-wal", "-shm", "-journal"):
+    _path = TEST_DB + _ext
+    if os.path.exists(_path):
+        try:
+            # Force writable in case a previous process set it read-only
+            os.chmod(_path, stat.S_IRUSR | stat.S_IWUSR | stat.S_IRGRP | stat.S_IROTH)
+            os.remove(_path)
+        except OSError:
+            pass  # Best-effort; create_all will fail loudly if still broken
+
+engine = create_engine(f"sqlite:///{TEST_DB}", connect_args={"check_same_thread": False})
 TestingSession = sessionmaker(bind=engine, autoflush=False, autocommit=False)
 Base.metadata.create_all(engine)
+
 
 
 def override_get_db():
