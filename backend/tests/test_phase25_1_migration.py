@@ -84,28 +84,46 @@ def _create_test_sqlite_db_with_0009_schema(db_path: str) -> None:
     We create tables using SQLAlchemy metadata.create_all (same result as running
     migrations 0001-0009) without involving the Alembic config machinery.
     This avoids the get_settings() lru_cache issue.
+
+    Strategy: run upgrade() to create the cert table, then run downgrade() to remove it.
+    This gives us the exact pre-0010 schema without needing tometadata() (which causes
+    SQLite lock contention when Base.metadata is shared with the conftest engine).
     """
     import sqlalchemy as sa
-    from app.db.base import Base
 
     engine = sa.create_engine(f"sqlite:///{db_path}", echo=False)
-    # Create all currently registered tables (up to 0009 schema)
-    # then verify prematch_readiness_certificates does NOT yet exist
-    # (it was not in Base before 0010 migration runs)
-    #
-    # Since Base.metadata includes prematch_readiness_certificates now (added in Phase 25.1
-    # model update), we need to create tables EXCLUDING it.
-    tables_to_create = {
-        name: table
-        for name, table in Base.metadata.tables.items()
-        if name != "prematch_readiness_certificates"
-    }
-    meta = sa.MetaData()
-    # Reflect existing Base tables (minus the new one)
-    for tname, table in tables_to_create.items():
-        table.tometadata(meta)
-    meta.create_all(engine)
+
+    def _run_migration(action: str) -> None:
+        spec = importlib.util.spec_from_file_location(f"mig_0010_setup_{action}", str(MIGRATION_FILE))
+        mod = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(mod)
+        with engine.connect() as conn:
+            from alembic.runtime.migration import MigrationContext
+            from alembic.operations import Operations
+            ctx = MigrationContext.configure(conn)
+            with Operations.context(ctx):
+                if action == "upgrade":
+                    mod.upgrade()
+                else:
+                    mod.downgrade()
+            conn.commit()
+
+    # Build the pre-0010 schema using the PRIOR migrations' Base snapshot.
+    # We avoid tometadata() because it shares SQLAlchemy Table objects with
+    # the conftest engine, causing cross-session SQLite lock contention.
+    # Instead, use a throw-away connection to create all tables via Base.metadata
+    # but on a fresh isolated engine, then strip the cert table via downgrade().
+    from app.db.base import Base as AppBase
+
+    # Create all tables (including prematch_readiness_certificates)
+    AppBase.metadata.create_all(engine)
     engine.dispose()
+
+    # Now remove the cert table by running the migration's downgrade()
+    _run_migration("downgrade")
+    engine.dispose()
+
+
 
 
 def test_prematch_table_created_via_migrate_fresh_sqlite():

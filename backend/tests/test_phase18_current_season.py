@@ -16,7 +16,7 @@ from app.services.features.temporal import TemporalMode
 from app.services.freshness import provenance as prov
 from app.services.lifecycle.upcoming import UpcomingMatch
 
-NOW = datetime(2026, 9, 19, 12, 0, tzinfo=timezone.utc)
+NOW = datetime.now(timezone.utc)
 
 
 def _league(db, code="P18"):

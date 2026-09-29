@@ -35,8 +35,20 @@ echo "[STEP 1/5] Initializing source database '${SRC_DB}' with Alembic head..."
 psql -h "${PG_HOST}" -p "${PG_PORT}" -U "${PG_USER}" -d postgres -c "DROP DATABASE IF EXISTS ${SRC_DB};"
 psql -h "${PG_HOST}" -p "${PG_PORT}" -U "${PG_USER}" -d postgres -c "CREATE DATABASE ${SRC_DB};"
 
+ALEMBIC_CMD="alembic"
+if ! command -v alembic >/dev/null 2>&1; then
+    if [[ -x "backend/.venv/bin/alembic" ]]; then
+        ALEMBIC_CMD="backend/.venv/bin/alembic"
+    elif command -v python3 >/dev/null 2>&1; then
+        ALEMBIC_CMD="python3 -m alembic"
+    elif command -v python >/dev/null 2>&1; then
+        ALEMBIC_CMD="python -m alembic"
+    fi
+fi
+
 DATABASE_URL="postgresql+psycopg2://${PG_USER}@${PG_HOST}:${PG_PORT}/${SRC_DB}" \
-  backend/.venv/bin/alembic -c backend/alembic.ini upgrade head >/dev/null
+  ${ALEMBIC_CMD} -c backend/alembic.ini upgrade head >/dev/null
+
 
 # Insert canary record into leagues and teams
 psql -h "${PG_HOST}" -p "${PG_PORT}" -U "${PG_USER}" -d "${SRC_DB}" -c \
