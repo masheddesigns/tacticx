@@ -427,7 +427,7 @@ class TestScheduler:
         from app.services.scheduler.executors import get_executor
 
         assert JOB_SHADOW_PREDICTION in ALL_JOB_TYPES
-        assert len(ALL_JOB_TYPES) == 9
+        assert len(ALL_JOB_TYPES) == 10  # Phase 33 adds performance_evidence_refresh
         assert get_job_config(JOB_SHADOW_PREDICTION)["enabled"] is True
         assert get_executor(JOB_SHADOW_PREDICTION).__name__ == \
             "execute_shadow_prediction"
@@ -780,7 +780,7 @@ class TestMigrationChain:
         assert mod.down_revision == "0014_model_governance"
         assert mod.branch_labels is None
 
-    def test_single_head_is_0015(self):
+    def test_0015_links_into_chain(self):
         import importlib.util
         from pathlib import Path
 
@@ -797,9 +797,13 @@ class TestMigrationChain:
                     revisions[mod.revision] = mod.down_revision
             except Exception:
                 pass
+        # 0015 must chain 0014 -> 0015; head ownership belongs to the
+        # latest phase test (no branch divergence).
+        assert revisions["0015_shadow_execution"] == \
+            "0014_model_governance"
         down_revs = {v for v in revisions.values() if v is not None}
         heads = [r for r in revisions if r not in down_revs]
-        assert heads == ["0015_shadow_execution"]
+        assert len(heads) == 1
 
     def test_tables_exist(self, db):
         from app.db.models.governance import ShadowEvaluationRecord

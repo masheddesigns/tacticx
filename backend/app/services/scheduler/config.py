@@ -20,6 +20,7 @@ JOB_QUALIFICATION = "qualification"
 JOB_PRE_MATCH_PREDICTION = "pre_match_prediction"
 JOB_POST_MATCH_EVALUATION = "post_match_evaluation"
 JOB_SHADOW_PREDICTION = "shadow_prediction"
+JOB_PERFORMANCE_EVIDENCE_REFRESH = "performance_evidence_refresh"
 
 ALL_JOB_TYPES = (
     JOB_FIXTURE_REFRESH,
@@ -31,6 +32,7 @@ ALL_JOB_TYPES = (
     JOB_PRE_MATCH_PREDICTION,
     JOB_POST_MATCH_EVALUATION,
     JOB_SHADOW_PREDICTION,
+    JOB_PERFORMANCE_EVIDENCE_REFRESH,
 )
 
 # Priority ordering: lower number = higher priority.
@@ -44,6 +46,7 @@ DEFAULT_PRIORITIES = {
     JOB_PRE_MATCH_PREDICTION: 40,
     JOB_POST_MATCH_EVALUATION: 45,
     JOB_SHADOW_PREDICTION: 55,
+    JOB_PERFORMANCE_EVIDENCE_REFRESH: 70,
 }
 
 DEFAULT_SCHEDULER: dict[str, Any] = {
@@ -173,6 +176,19 @@ DEFAULT_JOBS: dict[str, dict[str, Any]] = {
         "retry_base_seconds": 30.0,
         "timeout_seconds": 120.0,
         "priority": DEFAULT_PRIORITIES[JOB_SHADOW_PREDICTION],
+        "lock_ttl_seconds": 300,
+    },
+    JOB_PERFORMANCE_EVIDENCE_REFRESH: {
+        "enabled": True,
+        "interval_seconds": 6 * 3600,
+        "competitions": [],
+        "seasons": [],
+        "sources": [],
+        "max_concurrency": 1,
+        "retry_max": 1,
+        "retry_base_seconds": 30.0,
+        "timeout_seconds": 300.0,
+        "priority": DEFAULT_PRIORITIES[JOB_PERFORMANCE_EVIDENCE_REFRESH],
         "lock_ttl_seconds": 300,
     },
 }

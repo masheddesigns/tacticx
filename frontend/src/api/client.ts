@@ -30,6 +30,9 @@ import {
   GovernanceEvent,
   ShadowRecord,
   ShadowEvaluation,
+  EvidenceCohort,
+  EvidenceSnapshot,
+  EvidenceStatus,
 } from './types';
 
 export class ApiError extends Error {
@@ -546,5 +549,26 @@ export const apiClient = {
       method: 'POST',
       body: JSON.stringify({ match_id: matchId, challenger_artifact_id: challengerArtifactId }),
     });
+  },
+
+  // Phase 33: Real-world performance evidence (generation guarded server-side)
+  getEvidenceStatus: async (signal?: AbortSignal): Promise<EvidenceStatus> => {
+    return request<EvidenceStatus>('/evidence/status', { signal });
+  },
+
+  getEvidenceCohorts: async (signal?: AbortSignal): Promise<{ cohorts: EvidenceCohort[] }> => {
+    return request<{ cohorts: EvidenceCohort[] }>('/evidence/cohorts', { signal });
+  },
+
+  getEvidenceSnapshots: async (signal?: AbortSignal): Promise<{ snapshots: EvidenceSnapshot[] }> => {
+    return request<{ snapshots: EvidenceSnapshot[] }>('/evidence/snapshots', { signal });
+  },
+
+  getEvidenceSnapshot: async (snapshotId: string, signal?: AbortSignal): Promise<EvidenceSnapshot> => {
+    return request<EvidenceSnapshot>(`/evidence/snapshots/${snapshotId}`, { signal });
+  },
+
+  getEvidenceCompare: async (challengerId: string, signal?: AbortSignal): Promise<any> => {
+    return request<any>(`/evidence/compare/${challengerId}`, { signal });
   },
 };

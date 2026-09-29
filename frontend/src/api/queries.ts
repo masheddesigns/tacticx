@@ -430,3 +430,28 @@ export function useShadowComparison(challengerId: string) {
     staleTime: 60 * 1000,
   });
 }
+
+export function useEvidenceStatus() {
+  return useQuery({
+    queryKey: ['evidenceStatus'],
+    queryFn: ({ signal }) => apiClient.getEvidenceStatus(signal),
+    staleTime: 60 * 1000,
+  });
+}
+
+export function useEvidenceSnapshots() {
+  return useQuery({
+    queryKey: ['evidenceSnapshots'],
+    queryFn: ({ signal }) => apiClient.getEvidenceSnapshots(signal),
+    staleTime: 60 * 1000,
+  });
+}
+
+export function useEvidenceSnapshot(snapshotId: string) {
+  return useQuery({
+    queryKey: ['evidenceSnapshot', snapshotId],
+    queryFn: ({ signal }) => apiClient.getEvidenceSnapshot(snapshotId, signal),
+    enabled: !!snapshotId,
+    staleTime: 60 * 1000,
+  });
+}

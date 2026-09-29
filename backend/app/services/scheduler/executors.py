@@ -454,6 +454,48 @@ def execute_shadow_prediction(
     }
 
 
+def execute_performance_evidence_refresh(
+    db: Session, config: dict[str, Any], dry_run: bool = False
+) -> dict[str, Any]:
+    """Refresh the real-world evidence snapshot (read-only + append-only).
+
+    Never touches models, champion, challenger, promotion, approval, or
+    rollback. Without a configured challenger the job reports skipped.
+    """
+    from app.services.evidence import build_cohort, generate_snapshot
+
+    challenger_id = (config.get("challenger_artifact_id") or "").strip()
+    if not challenger_id:
+        return {
+            "status": "skipped",
+            "reason": "no challenger configured "
+                      "(challenger_artifact_id empty)",
+        }
+
+    if dry_run:
+        cohort = build_cohort(db, challenger_artifact_id=challenger_id)
+        return {
+            "status": "dry_run",
+            "cohort_id": cohort.cohort_id,
+            "note": "no writes performed",
+        }
+
+    try:
+        cohort = build_cohort(db, challenger_artifact_id=challenger_id)
+        result = generate_snapshot(db, cohort.cohort_id)
+    except Exception as exc:  # noqa: BLE001 — record, don't crash
+        return {"status": "failed", "code": "EXECUTOR_ERROR",
+                "reason": str(exc)[:300]}
+    return {
+        "status": "succeeded",
+        "cohort_id": cohort.cohort_id,
+        "snapshot_id": result["snapshot_id"],
+        "evidence_state": result["evidence_state"],
+        "paired_count": result["paired_count"],
+        "rerun": bool(result.get("rerun")),
+    }
+
+
 EXECUTORS = {
     "fixture_refresh": execute_fixture_refresh,
     "status_refresh": execute_status_refresh,
@@ -464,6 +506,7 @@ EXECUTORS = {
     "pre_match_prediction": execute_pre_match_prediction,
     "post_match_evaluation": execute_post_match_evaluation,
     "shadow_prediction": execute_shadow_prediction,
+    "performance_evidence_refresh": execute_performance_evidence_refresh,
 }
 
 

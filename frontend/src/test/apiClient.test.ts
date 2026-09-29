@@ -311,3 +311,37 @@ describe('Phase 32 shadow client', () => {
     expect(res.evaluated_pairs).toBe(1);
   });
 });
+
+describe('Phase 33 evidence client', () => {
+  beforeEach(() => {
+    vi.restoreAllMocks();
+  });
+
+  it('fetches evidence status', async () => {
+    global.fetch = vi.fn().mockResolvedValue({
+      ok: true,
+      json: async () => ({ state: 'NO_DATA', champion_evaluations: 0, synthetic_observations: 0 }),
+    });
+    const res = await apiClient.getEvidenceStatus();
+    expect(res.state).toBe('NO_DATA');
+    expect(res.synthetic_observations).toBe(0);
+  });
+
+  it('fetches evidence snapshots', async () => {
+    global.fetch = vi.fn().mockResolvedValue({
+      ok: true,
+      json: async () => ({ snapshots: [] }),
+    });
+    const res = await apiClient.getEvidenceSnapshots();
+    expect(res.snapshots).toEqual([]);
+  });
+
+  it('fetches evidence compare', async () => {
+    global.fetch = vi.fn().mockResolvedValue({
+      ok: true,
+      json: async () => ({ paired_count: 0, evidence_state: 'INSUFFICIENT_REAL_DATA' }),
+    });
+    const res = await apiClient.getEvidenceCompare('art_x');
+    expect(res.evidence_state).toBe('INSUFFICIENT_REAL_DATA');
+  });
+});

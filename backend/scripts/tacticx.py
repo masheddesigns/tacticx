@@ -1493,6 +1493,87 @@ def _cmd_current_season(db, args) -> int:
     return 1
 
 
+def _cmd_evidence(db, args) -> int:
+    """Real-world performance evidence (read-only + explicit snapshots)."""
+    from app.services.evidence import (
+        build_cohort,
+        compute_evidence,
+        generate_snapshot,
+        get_snapshot,
+        snapshot_to_dict,
+    )
+
+    action = args.action
+    if action == "status":
+        from app.db.models.evaluation_records import PredictionEvaluationRecord
+        from app.db.models.governance import ShadowEvaluationRecord
+
+        champion_evals = db.query(PredictionEvaluationRecord).count()
+        challenger_evals = db.query(ShadowEvaluationRecord).count()
+        if champion_evals == 0 and challenger_evals == 0:
+            state = "NO_DATA"
+        elif challenger_evals == 0:
+            state = "INSUFFICIENT_REAL_DATA"
+        else:
+            state = "AVAILABLE"
+        print(json.dumps({
+            "state": state,
+            "champion_evaluations": champion_evals,
+            "challenger_evaluations": challenger_evals,
+            "paired_observations": challenger_evals,
+            "real_shadow_predictions": challenger_evals,
+            "synthetic_observations": 0}, indent=2))
+        return 0
+    if action == "cohorts":
+        from app.db.models.evidence import EvidenceCohort
+
+        rows = db.query(EvidenceCohort).order_by(
+            EvidenceCohort.id.desc()).limit(50).all()
+        print(json.dumps(
+            [{"cohort_id": r.cohort_id, "cohort_hash": r.cohort_hash}
+             for r in rows], indent=2))
+        return 0
+    if action == "generate":
+        row = build_cohort(
+            db, challenger_artifact_id=args.challenger or None,
+            competitions=args.competition.split(",")
+            if args.competition else None)
+        print(json.dumps(
+            generate_snapshot(db, row.cohort_id), indent=2, default=str))
+        return 0
+    if action == "compare":
+        if not args.challenger:
+            print("pass --challenger <challenger_artifact_id>")
+            return 1
+        row = build_cohort(db, challenger_artifact_id=args.challenger,
+                           persist=False)
+        print(json.dumps(compute_evidence(db, row), indent=2, default=str))
+        return 0
+    if action == "breakdown":
+        if not args.challenger:
+            print("pass --challenger <challenger_artifact_id>")
+            return 1
+        from app.services.production_monitoring.breakdown import breakdown
+
+        print(json.dumps(breakdown(db, by="competition_season"),
+                         indent=2, default=str))
+        return 0
+    if action == "show":
+        if not args.snapshot:
+            print("pass --snapshot <snapshot_id>")
+            return 1
+        print(json.dumps(snapshot_to_dict(get_snapshot(db, args.snapshot)),
+                         indent=2, default=str))
+        return 0
+    if action == "refresh":
+        row = build_cohort(db, challenger_artifact_id=args.challenger or None)
+        print(json.dumps(generate_snapshot(db, row.cohort_id),
+                         indent=2, default=str))
+        return 0
+    print(f"unknown evidence action: {action}")
+    return 1
+
+
 def _cmd_shadow(db, args) -> int:
     """Champion/challenger shadow operations (read-only + explicit runs)."""
     from app.services.shadow_execution import (
@@ -1905,6 +1986,16 @@ def main() -> int:
     p.add_argument("--competition", default="")
     p.add_argument("--json", action="store_true", dest="as_json")
 
+    p = sub.add_parser("evidence", help="Real-world performance evidence (read-only + explicit snapshots)")
+    p.add_argument("action",
+                   choices=["status", "cohorts", "generate", "compare",
+                            "breakdown", "show", "refresh"],
+                   nargs="?", default="status")
+    p.add_argument("--challenger", default="")
+    p.add_argument("--snapshot", default="")
+    p.add_argument("--competition", default="")
+    p.add_argument("--json", action="store_true", dest="as_json")
+
     args = ap.parse_args()
     Base.metadata.create_all(get_engine())
     db = get_session_local()()
@@ -1971,6 +2062,8 @@ def main() -> int:
             return _cmd_acquisition(db, args)
         if args.command == "shadow":
             return _cmd_shadow(db, args)
+        if args.command == "evidence":
+            return _cmd_evidence(db, args)
         ap.error(f"unknown command: {args.command}")
         return 1
     finally:

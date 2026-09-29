@@ -848,3 +848,45 @@ export interface ShadowEvaluation {
   differences?: any;
   created_at?: string | null;
 }
+
+/** Phase 33: real-world performance evidence */
+export interface EvidenceCohort {
+  cohort_id: string;
+  champion_artifact_id?: string | null;
+  challenger_artifact_id?: string | null;
+  competitions?: any;
+  seasons?: any;
+  cohort_hash: string;
+  created_at?: string | null;
+}
+
+export interface EvidenceSnapshot {
+  snapshot_id: string;
+  cohort_id: string;
+  cohort_hash: string;
+  calculation_version: string;
+  observation_count: number;
+  paired_count: number;
+  excluded_count: number;
+  champion_metrics?: any;
+  challenger_metrics?: any;
+  differences?: any;
+  uncertainty?: any;
+  calibration?: any;
+  data_quality?: any;
+  temporal_audit?: any;
+  evidence_state: string;
+  snapshot_hash: string;
+  rerun?: boolean;
+  created_at?: string | null;
+}
+
+export interface EvidenceStatus {
+  state: string;
+  champion_evaluations: number;
+  challenger_evaluations: number;
+  paired_observations: number;
+  real_shadow_predictions: number;
+  synthetic_observations: number;
+  evidence_snapshots: number;
+}

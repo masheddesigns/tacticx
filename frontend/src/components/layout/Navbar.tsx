@@ -1,6 +1,6 @@
 import React from 'react';
 import { NavLink } from 'react-router-dom';
-import { Activity, Database, Cpu, BarChart2, ShieldCheck, Terminal, FlaskConical, GitCompareArrows } from 'lucide-react';
+import { Activity, Database, Cpu, BarChart2, ShieldCheck, Terminal, FlaskConical, GitCompareArrows, Scale } from 'lucide-react';
 import { useReadyProbe } from '../../api/queries';
 
 export const Navbar: React.FC = () => {
@@ -13,6 +13,7 @@ export const Navbar: React.FC = () => {
     { to: '/system', label: 'System & Sources', icon: ShieldCheck },
     { to: '/monitoring', label: 'Monitoring', icon: Activity },
     { to: '/research', label: 'Research', icon: FlaskConical },
+    { to: '/evidence', label: 'Evidence', icon: Scale },
     { to: '/shadow', label: 'Shadow', icon: GitCompareArrows },
     { to: '/model-governance', label: 'Governance', icon: ShieldCheck },
     { to: '/operations', label: 'Job Operations', icon: Terminal },
