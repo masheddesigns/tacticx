@@ -35,6 +35,20 @@ def health_ready(response: Response) -> dict:
         checks["database"] = f"error: {exc}"
         db_ok = False
 
+    # 1b. Migration compatibility (NON-FATAL, additive): report the
+    # Alembic version stamped on the database without failing readiness.
+    # Third-party provider availability never affects API health.
+    try:
+        from app.db.session import get_engine
+        from sqlalchemy import text
+
+        with get_engine().connect() as conn:
+            row = conn.execute(
+                text("SELECT version_num FROM alembic_version")).fetchone()
+        checks["migrations"] = row[0] if row else "unstamped"
+    except Exception:  # noqa: BLE001
+        checks["migrations"] = "unknown"
+
     # 2. Cache check (NON-FATAL)
     try:
         from app.services.caching.cache import backend_name, cache_get, cache_set

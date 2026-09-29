@@ -1096,6 +1096,162 @@ def _cmd_model(db, args) -> int:
     return 1
 
 
+def _cmd_system(db, args) -> int:
+    """Local production system status (read-only)."""
+    from sqlalchemy import text
+
+    from app.config import get_settings
+    from app.db.session import get_engine
+
+    settings = get_settings()
+    try:
+        with get_engine().connect() as conn:
+            conn.execute(text("SELECT 1"))
+            version = conn.execute(
+                text("SELECT version_num FROM alembic_version")).fetchone()
+        database = {"reachable": True,
+                    "migration": version[0] if version else "unstamped"}
+    except Exception as exc:  # noqa: BLE001
+        database = {"reachable": False, "error": str(exc)[:200]}
+    try:
+        from app.services.caching.cache import backend_name
+
+        cache = {"backend": backend_name()}
+    except Exception as exc:  # noqa: BLE001
+        cache = {"backend": f"error: {exc}"[:200]}
+    from app.services.scheduler import scheduler_status
+
+    try:
+        sched = scheduler_status(db)
+        scheduler = {"recent_runs": len(sched.get("recent_runs", [])),
+                     "locks": sched.get("locks", {})}
+    except Exception as exc:  # noqa: BLE001
+        scheduler = {"error": str(exc)[:200]}
+    view = {"tacticx_env": settings.deployment_flavor(),
+            "scheduler_enabled": settings.SCHEDULER_ENABLED,
+            "prediction_enabled": settings.PREDICTION_ENABLED,
+            "evaluation_enabled": settings.EVALUATION_ENABLED,
+            "database": database, "cache": cache, "scheduler": scheduler,
+            "diagnose": settings.diagnose()}
+    print(json.dumps(view, indent=2, default=str))
+    return 0
+
+
+def _cmd_providers(db, args) -> int:
+    """Provider status/qualification (read-only, honest states)."""
+    from app.services.acquisition.activation import get_activation_state
+    from app.services.freshness import registry as registry_svc
+    from app.services.provider_qualification import registry as qual_registry
+
+    if args.action == "qualification":
+        view = qual_registry.get_registry().describe()
+        print(json.dumps(view, indent=2, default=str))
+        return 0
+    view = registry_svc.registry_view(db)
+    competitions = [c.strip() for c in args.competition.split(",")
+                    if c.strip()] or ["EPL", "LA_LIGA", "SERIE_A",
+                                      "BUNDESLIGA", "LIGUE_1"]
+    out = []
+    for entry in view:
+        source = entry.get("source", "?")
+        item = {"source": source,
+                "health": (entry.get("health") or {}).get("state"),
+                "activation": {
+                    comp: get_activation_state(db, source, comp, args.season or None)
+                    for comp in competitions}}
+        out.append(item)
+        if not args.as_json:
+            states = ", ".join(f"{c}={s}" for c, s in item["activation"].items())
+            print(f"{source}: health={item['health']} | {states}")
+    if args.as_json:
+        print(json.dumps(out, indent=2, default=str))
+    return 0
+
+
+def _cmd_prediction(db, args) -> int:
+    """Prediction execution status (read-only aggregates)."""
+    from app.db.models.prediction_snapshots import PreMatchPredictionSnapshot
+
+    total = db.query(PreMatchPredictionSnapshot).count()
+    by_state = {}
+    for state, in db.query(
+            PreMatchPredictionSnapshot.readiness_state).distinct().all():
+        by_state[state or "unknown"] = db.query(
+            PreMatchPredictionSnapshot).filter_by(
+            readiness_state=state).count()
+    latest = db.query(PreMatchPredictionSnapshot).order_by(
+        PreMatchPredictionSnapshot.id.desc()).first()
+    view = {"prediction_count": total, "by_readiness_state": by_state,
+            "latest_prediction_id": latest.prediction_id if latest else None,
+            "latest_created_at": str(latest.created_at) if latest else None}
+    print(json.dumps(view, indent=2, default=str))
+    return 0
+
+
+def _cmd_evaluation(db, args) -> int:
+    """Evaluation status (read-only aggregates)."""
+    from app.db.models.evaluation_records import PredictionEvaluationRecord
+    from app.services.production_monitoring.data_quality import outcome_gaps
+
+    total = db.query(PredictionEvaluationRecord).count()
+    gaps = outcome_gaps(db)
+    view = {"evaluation_count": total,
+            "finished_predicted": gaps["finished_predicted_count"],
+            "missing_outcomes": gaps["missing_outcomes"],
+            "evaluation_state": gaps["state"]}
+    print(json.dumps(view, indent=2, default=str))
+    return 0
+
+
+def _cmd_monitoring(db, args) -> int:
+    """Monitoring summary (read-only, same paths as the API)."""
+    from app.services.production_monitoring import (
+        coverage_funnel,
+        data_quality_report,
+        detect_anomalies,
+        performance_overview,
+    )
+
+    perf = performance_overview(db)
+    cov = coverage_funnel(db)
+    quality = data_quality_report(db)
+    anomalies = detect_anomalies(db)
+    view = {"evaluation_count": perf["metrics"].get("sample_count", 0),
+            "accuracy_1x2": perf["metrics"].get("accuracy_1x2"),
+            "log_loss_1x2": perf["metrics"].get("log_loss_1x2"),
+            "brier_1x2": perf["metrics"].get("brier_1x2"),
+            "coverage": {
+                "eligible": cov["eligible_count"],
+                "ready": cov["ready_count"],
+                "predicted": cov["predicted_count"],
+                "completed": cov["completed_count"],
+                "evaluated": cov["evaluated_count"]},
+            "data_quality_state": quality.get("state"),
+            "anomaly_count": anomalies.get("anomaly_count", 0)}
+    print(json.dumps(view, indent=2, default=str))
+    return 0
+
+
+def _cmd_acquisition(db, args) -> int:
+    """Acquisition status (read-only, same paths as scheduled jobs)."""
+    from app.services.acquisition.readiness_gate import (
+        get_current_season_prematch_summary,
+    )
+    from app.services.scheduler import scheduler_status
+
+    summary = get_current_season_prematch_summary(db)
+    sched = scheduler_status(db)
+    view = {"season": summary.get("season"),
+            "operational_mode": summary.get("operational_mode"),
+            "provider_state": summary.get("provider_state"),
+            "fixture_count": summary.get("fixture_count"),
+            "prediction_ready_count": summary.get("prediction_ready_count"),
+            "blocked_count": summary.get("blocked_count"),
+            "recent_runs": len(sched.get("recent_runs", []))}
+    print(json.dumps(view, indent=2, default=str))
+    return 0
+
+
 def _cmd_jobs(db, args) -> int:
     from app.services.scheduler import (
         ALL_JOB_TYPES, get_job_config, recent_records, find_due_jobs,
@@ -1174,6 +1330,28 @@ def _cmd_jobs(db, args) -> int:
         return 0 if status in ("succeeded", "partial", "dry_run", "skipped") else 1
 
     if action == "run-due":
+        if getattr(args, "loop", False):
+            import time
+
+            from app.config import get_settings
+
+            interval = getattr(args, "interval_seconds", 0) or \
+                get_settings().SCHEDULER_LOOP_INTERVAL_SECONDS
+            cycle = 0
+            print(f"scheduler loop started (interval={interval}s) — Ctrl-C to stop")
+            try:
+                while True:
+                    cycle += 1
+                    results = run_due(db, dry_run=args.dry_run)
+                    print(f"[cycle {cycle}] executed={len(results)}")
+                    for r in results:
+                        print(f"  {r.get('job_type', '?')} "
+                              f"({r.get('competition', '')}) -> "
+                              f"{r.get('status', '?')}")
+                    time.sleep(interval)
+            except KeyboardInterrupt:
+                print(f"scheduler loop stopped after {cycle} cycles")
+                return 0
         results = run_due(db, dry_run=args.dry_run)
         if as_json:
             print(json.dumps(results, indent=2, default=str))
@@ -1590,6 +1768,10 @@ def main() -> int:
     p.add_argument("--season", default="")
     p.add_argument("--source", default="")
     p.add_argument("--dry-run", action="store_true")
+    p.add_argument("--loop", action="store_true",
+                   help="run-due continuously until interrupted")
+    p.add_argument("--interval-seconds", type=int, default=0,
+                   help="loop interval override (0 = SCHEDULER_LOOP_INTERVAL_SECONDS)")
     p.add_argument("--json", action="store_true", dest="as_json")
 
     p = sub.add_parser("current-season", help="Controlled current-season data activation")
@@ -1611,6 +1793,34 @@ def main() -> int:
     p.add_argument("--mode", default="PRE_MATCH", choices=["PRE_MATCH", "POST_MATCH", "EVALUATION"])
     p.add_argument("--persist", action="store_true", help="persist immutable readiness certificate")
     p.add_argument("--season", default="current", help="season code or 'current'")
+    p.add_argument("--json", action="store_true", dest="as_json")
+
+    p = sub.add_parser("system", help="Local production system status (read-only)")
+    p.add_argument("action", choices=["status"], nargs="?", default="status")
+    p.add_argument("--json", action="store_true", dest="as_json")
+
+    p = sub.add_parser("providers", help="Provider status & qualification (read-only)")
+    p.add_argument("action", choices=["status", "qualification"],
+                   nargs="?", default="status")
+    p.add_argument("--competition", default="",
+                   help="comma-separated competition codes (default: big five)")
+    p.add_argument("--season", default="")
+    p.add_argument("--json", action="store_true", dest="as_json")
+
+    p = sub.add_parser("prediction", help="Prediction execution status (read-only)")
+    p.add_argument("action", choices=["status"], nargs="?", default="status")
+    p.add_argument("--json", action="store_true", dest="as_json")
+
+    p = sub.add_parser("evaluation", help="Evaluation status (read-only)")
+    p.add_argument("action", choices=["status"], nargs="?", default="status")
+    p.add_argument("--json", action="store_true", dest="as_json")
+
+    p = sub.add_parser("monitoring", help="Monitoring summary (read-only)")
+    p.add_argument("action", choices=["summary"], nargs="?", default="summary")
+    p.add_argument("--json", action="store_true", dest="as_json")
+
+    p = sub.add_parser("acquisition", help="Acquisition status (read-only)")
+    p.add_argument("action", choices=["status"], nargs="?", default="status")
     p.add_argument("--json", action="store_true", dest="as_json")
 
     args = ap.parse_args()
@@ -1665,6 +1875,18 @@ def main() -> int:
             return _cmd_current_season(db, args)
         if args.command == "pre-match":
             return _cmd_pre_match(db, args)
+        if args.command == "system":
+            return _cmd_system(db, args)
+        if args.command == "providers":
+            return _cmd_providers(db, args)
+        if args.command == "prediction":
+            return _cmd_prediction(db, args)
+        if args.command == "evaluation":
+            return _cmd_evaluation(db, args)
+        if args.command == "monitoring":
+            return _cmd_monitoring(db, args)
+        if args.command == "acquisition":
+            return _cmd_acquisition(db, args)
         ap.error(f"unknown command: {args.command}")
         return 1
     finally:

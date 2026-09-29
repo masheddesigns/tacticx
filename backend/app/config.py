@@ -12,12 +12,22 @@ class Settings(BaseSettings):
     REDIS_URL: str = "redis://localhost:6379/0"
 
     ENVIRONMENT: str = "development"
+    # Phase 31: explicit deployment flavor. Defaults to ENVIRONMENT for
+    # backward compatibility; set TACTICX_ENV=local-production for the
+    # continuous local runtime.
+    TACTICX_ENV: str = ""
     LOG_LEVEL: str = "INFO"
     LOG_FORMAT: str = "console"  # console | json
     API_V1_PREFIX: str = "/api/v1"
     CORS_ORIGINS: str = "http://localhost:3000"
     SECRET_KEY: str = "dev-secret-key-change-in-production"
     ENABLE_OPERATIONAL_ENDPOINTS: Optional[bool] = None
+    # Phase 31: continuous-operation switches (safe defaults: everything on
+    # except destructive behavior, which does not exist in this phase).
+    SCHEDULER_ENABLED: bool = True
+    PREDICTION_ENABLED: bool = True
+    EVALUATION_ENABLED: bool = True
+    SCHEDULER_LOOP_INTERVAL_SECONDS: int = 300
     RATE_LIMIT_PER_MINUTE: int = 120
     METRICS_ENABLED: bool = True
     METRICS_INTERNAL_ONLY: bool = True
@@ -215,6 +225,10 @@ class Settings(BaseSettings):
             "football_provider": self.FOOTBALL_PROVIDER,
             "odds_provider": self.ODDS_PROVIDER,
             "environment": self.ENVIRONMENT,
+            "tacticx_env": self.deployment_flavor(),
+            "scheduler_enabled": self.SCHEDULER_ENABLED,
+            "prediction_enabled": self.PREDICTION_ENABLED,
+            "evaluation_enabled": self.EVALUATION_ENABLED,
         }
 
     def supported_leagues_parsed(self) -> list[dict]:
@@ -257,6 +271,14 @@ class Settings(BaseSettings):
         if self.ENABLE_OPERATIONAL_ENDPOINTS is not None:
             return bool(self.ENABLE_OPERATIONAL_ENDPOINTS)
         return self.ENVIRONMENT.lower() != "production"
+
+    def deployment_flavor(self) -> str:
+        """Effective deployment flavor: explicit TACTICX_ENV wins,
+        otherwise ENVIRONMENT. Unknown values fail closed to development."""
+        flavor = (self.TACTICX_ENV or self.ENVIRONMENT or "development").lower()
+        if flavor not in ("development", "test", "local-production", "production"):
+            raise ValueError(f"unknown deployment flavor: {flavor!r}")
+        return flavor
 
     def validate_production(self) -> None:
         """Fail fast if critical production settings are missing, default, or unsafe."""
