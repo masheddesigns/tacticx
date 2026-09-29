@@ -4,7 +4,7 @@
 READY (with carried Docker/soak boundary; see §19)
 
 ## 2. Commit
-(to be filled after commit)
+b30b205
 
 ## 3. Existing Phase 30 functionality reused
 `ShadowPredictionSnapshot` table, `start_shadow` (approval gate),
