@@ -4,7 +4,7 @@
 READY (with carried Docker boundary; see §21)
 
 ## 2. Commit
-(to be filled after commit)
+4858794
 
 ## 3. Design audit
 docs/PHASE34_DESIGN_AUDIT.md: reuse inventory, threshold rationale,
