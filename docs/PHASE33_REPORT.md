@@ -4,7 +4,7 @@
 READY (with carried Docker boundary; see §20)
 
 ## 2. Commit
-(to be filled after commit)
+470ee37
 
 ## 3. Design audit
 docs/PHASE33_DESIGN_AUDIT.md: reuse inventory (Phase 2/27 metrics,
