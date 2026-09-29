@@ -4,7 +4,7 @@
 READY (with documented runtime-verification limits; see §18)
 
 ## 2. Commit
-(to be filled after commit)
+b86936c
 
 ## 3. Architecture
 Reused full lifecycle (acquire → activation → readiness → prediction →
