@@ -28,16 +28,9 @@ export const DashboardPage: React.FC = () => {
     return <LoadingSpinner label="Loading TacticX System Dashboard..." />;
   }
 
-  if (dashError) {
-    return (
-      <div className="max-w-7xl mx-auto px-4 py-8">
-        <ErrorCard error={dashError as Error} title="Dashboard Telemetry Unavailable" />
-      </div>
-    );
-  }
-
-  // Competitions data extraction
+  // Non-blocking telemetry fallback
   const competitionsMap = dashboard?.competitions || {};
+
   const primaryCompetitions: CompetitionData[] = [
     {
       code: 'EPL',
@@ -93,7 +86,11 @@ export const DashboardPage: React.FC = () => {
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
+      {dashError && (
+        <ErrorCard error={dashError as Error} title="Dashboard Telemetry Degraded" />
+      )}
       {/* Top Welcome & KPI Summary */}
+
       <div className="space-y-4">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
