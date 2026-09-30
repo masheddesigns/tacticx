@@ -1,5 +1,7 @@
 # PHASE 38 FINAL REPORT — Production Runtime Acceptance & First Real Observation
 
+**Commit:** `fd7502b`
+
 ## 1. Starting State
 
 - HEAD: `965b254` (verified before any work; matched spec gate).
