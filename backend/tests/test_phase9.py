@@ -350,9 +350,12 @@ def test_api_player_endpoints(client, db):
 
 def test_prediction_engine_untouched():
     import subprocess
+    from pathlib import Path
 
+    repo_root = Path(__file__).resolve().parents[2]
     result = subprocess.run(
         ["git", "status", "--porcelain", "backend/app/services/predictions/",
          "backend/app/services/intelligence/", "backend/app/services/evaluation/"],
-        capture_output=True, text=True, cwd="/Users/sivek/Documents/Bet Predictor")
+        capture_output=True, text=True, cwd=repo_root)
     assert result.stdout.strip() == "", result.stdout
+

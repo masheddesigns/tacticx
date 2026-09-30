@@ -152,6 +152,9 @@ def test_future_rows_excluded_from_dataset(db):
 def test_phase14_production_files_untouched():
     import subprocess
 
+    from pathlib import Path
+
+    repo_root = Path(__file__).resolve().parents[2]
     result = subprocess.run(
         ["git", "status", "--porcelain",
          "backend/app/services/predictions/",
@@ -165,5 +168,6 @@ def test_phase14_production_files_untouched():
          "backend/app/services/freshness/",
          "backend/app/services/acquisition/",
          "backend/app/services/data_expansion/"],
-        capture_output=True, text=True, cwd="/Users/sivek/Documents/Bet Predictor")
+        capture_output=True, text=True, cwd=repo_root)
     assert result.stdout.strip() == "", result.stdout
+

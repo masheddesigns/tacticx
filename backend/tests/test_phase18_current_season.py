@@ -455,15 +455,18 @@ def test_api_current_and_acquisition_status(client, db):
 
 
 def test_no_secrets_or_arbitrary_urls():
+    from pathlib import Path
     import subprocess
 
+    repo_root = Path(__file__).resolve().parents[2]
     result = subprocess.run(
         ["grep", "-rn", "MIROFISH_API_KEY\\|ODDS_API_KEY\\|FOOTBALL_API_KEY",
          "backend/app/services/acquisition/current_season.py",
          "backend/app/api/routes/acquisition.py",
          "backend/app/api/routes/matches.py"],
-        capture_output=True, text=True, cwd="/Users/sivek/Documents/Bet Predictor")
+        capture_output=True, text=True, cwd=repo_root)
     assert result.stdout.strip() == "", result.stdout
     # CLI source allowlist rejects arbitrary providers.
-    cli = open("/Users/sivek/Documents/Bet Predictor/backend/scripts/tacticx.py").read()
+    cli = (repo_root / "backend" / "scripts" / "tacticx.py").read_text(encoding="utf-8")
     assert "unknown source" in cli
+

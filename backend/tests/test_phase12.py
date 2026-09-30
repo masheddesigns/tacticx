@@ -271,6 +271,9 @@ def test_ablation_plans_and_skips():
 def test_phase12_production_files_untouched():
     import subprocess
 
+    from pathlib import Path
+
+    repo_root = Path(__file__).resolve().parents[2]
     result = subprocess.run(
         ["git", "status", "--porcelain",
          "backend/app/services/predictions/",
@@ -283,5 +286,6 @@ def test_phase12_production_files_untouched():
          "backend/app/services/reconciliation/",
          "backend/app/services/freshness/",
          "backend/app/services/acquisition/"],
-        capture_output=True, text=True, cwd="/Users/sivek/Documents/Bet Predictor")
+        capture_output=True, text=True, cwd=repo_root)
     assert result.stdout.strip() == "", result.stdout
+

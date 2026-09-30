@@ -7,6 +7,7 @@ from __future__ import annotations
 
 import math
 import subprocess
+from pathlib import Path
 
 import pytest
 
@@ -107,18 +108,22 @@ def test_prediction_codebase_integrity():
         "backend/app/services/intelligence_v2/",
         "backend/app/services/features/",
         "backend/app/services/evaluation/",
+
         "backend/app/services/backtesting/",
         "backend/app/services/model_research/",
         "backend/app/services/mirofish/",
     ]
+    repo_root = Path(__file__).resolve().parents[2]
     res = subprocess.run(
         ["git", "diff", "--exit-code", "HEAD", "--"] + critical_dirs,
         capture_output=True,
         text=True,
-        cwd="/Users/sivek/Documents/Bet Predictor",
+        cwd=repo_root,
         check=False,
     )
+
     assert res.returncode == 0, f"Critical prediction files were modified:\n{res.stdout}"
+
 
 
 def test_version_endpoint_safety(client):

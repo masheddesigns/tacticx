@@ -263,6 +263,9 @@ def test_upcoming_readiness_end_to_end(db):
 def test_phase10_model_files_untouched():
     import subprocess
 
+    from pathlib import Path
+
+    repo_root = Path(__file__).resolve().parents[2]
     result = subprocess.run(
         ["git", "status", "--porcelain",
          "backend/app/services/predictions/",
@@ -271,8 +274,9 @@ def test_phase10_model_files_untouched():
          "backend/app/services/backtesting/",
          "backend/app/services/features/",
          "backend/app/services/player_intelligence/"],
-        capture_output=True, text=True, cwd="/Users/sivek/Documents/Bet Predictor")
+        capture_output=True, text=True, cwd=repo_root)
     assert result.stdout.strip() == "", result.stdout
+
 
 
 def test_future_injection_leaves_eligibility_unchanged(db):

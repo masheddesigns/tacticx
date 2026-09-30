@@ -180,6 +180,9 @@ def test_cross_league_rid_isolation(db):
 def test_phase13_production_files_untouched():
     import subprocess
 
+    from pathlib import Path
+
+    repo_root = Path(__file__).resolve().parents[2]
     result = subprocess.run(
         ["git", "status", "--porcelain",
          "backend/app/services/predictions/",
@@ -193,7 +196,8 @@ def test_phase13_production_files_untouched():
          "backend/app/services/freshness/",
          "backend/app/services/acquisition/",
          "backend/app/services/model_research/"],
-        capture_output=True, text=True, cwd="/Users/sivek/Documents/Bet Predictor")
+        capture_output=True, text=True, cwd=repo_root)
+
     allowed = [line for line in result.stdout.strip().splitlines() if line.strip()]
     # Only the intended Phase 13 pipeline idempotency fix may touch sources;
     # Phase 14 research-framework evolution may touch model_research.
