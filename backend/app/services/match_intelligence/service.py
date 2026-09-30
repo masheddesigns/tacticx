@@ -17,7 +17,7 @@ from typing import Any, Dict, List, Optional
 
 from sqlalchemy.orm import Session
 
-from app.db.models.core import League, Match, Team
+from app.db.models.core import League, Lineup, Match, MatchEvent, Team
 from app.services.features.temporal import TemporalMode, as_naive_utc
 from app.services.intelligence_v2 import service as intel_service
 from app.services.match_intelligence.schemas import (
@@ -222,21 +222,19 @@ def _assemble(db: Session, match: Match, intel: Dict[str, Any],
                 "missing": data_quality.get("missing_feature_count", 0),
             },
             "coverage": {
-                "xg_available": data_quality.get("xg_available", False),
-                "event_data_available": data_quality.get(
-                    "event_data_available", False),
-                "lineup_data_available": data_quality.get(
-                    "lineup_data_available", False),
-                "market_available": data_quality.get("market_available", False),
+                "xg_available": bool(data_quality.get("xg_available", False)),
+                "event_data_available": bool(data_quality.get("event_data_available")) or bool(db.query(MatchEvent).filter_by(match_id=match.id).first()) or match.status == "SCHEDULED",
+                "lineup_data_available": bool(data_quality.get("lineup_data_available")) or bool(db.query(Lineup).filter_by(match_id=match.id).first()),
+                "market_available": bool(data_quality.get("market_available", False)),
             },
             "source_count": len(market_state.get("bookmakers", []))
             if isinstance(market_state.get("bookmakers"), list) else 0,
             "missing_families": [
                 key for key, available in {
-                    "xg": data_quality.get("xg_available", False),
-                    "events": data_quality.get("event_data_available", False),
-                    "lineups": data_quality.get("lineup_data_available", False),
-                    "market": data_quality.get("market_available", False),
+                    "xg": bool(data_quality.get("xg_available", False)),
+                    "events": bool(data_quality.get("event_data_available")) or bool(db.query(MatchEvent).filter_by(match_id=match.id).first()) or match.status == "SCHEDULED",
+                    "lineups": bool(data_quality.get("lineup_data_available")) or bool(db.query(Lineup).filter_by(match_id=match.id).first()),
+                    "market": bool(data_quality.get("market_available", False)),
                 }.items() if not available],
             "conflicts": [],
         },

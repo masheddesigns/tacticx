@@ -477,3 +477,18 @@ def test_cli_mirofish_reports_status(db, capsys):
                                                target.kickoff_at, "baseline")
     assert result["status"] == "unavailable"
     assert "provider" in result["provenance"]
+
+
+def test_local_simulation_provider(db):
+    _, _, target = _history(db, code="P16LOC")
+    local_prov = adapter.LocalSimulationProvider()
+    result = service.run_mirofish_scenario(
+        db, target.id, target.kickoff_at, "baseline", provider=local_prov)
+    assert result["status"] == "ok"
+    assert result["contract_version"] == "mirofish_contract_v1"
+    assert result["provider"] == "local"
+    assert len(result["structured_observations"]) >= 2
+    assert result["narrative_safety"]["label"].startswith("simulated")
+    assert result["narrative_safety"]["scenario_framed"] is True
+    assert not result["narrative_safety"]["certainty_phrases"]
+

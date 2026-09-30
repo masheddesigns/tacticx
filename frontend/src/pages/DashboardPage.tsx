@@ -72,6 +72,30 @@ export const DashboardPage: React.FC = () => {
       upcomingCount: competitionsMap['LIGUE_1']?.upcoming || 0,
       latestObservation: competitionsMap['LIGUE_1']?.latest_observation,
     },
+    {
+      code: 'UCL',
+      name: 'UEFA Champions League',
+      season: '2024/25 Season',
+      fixtureCount: competitionsMap['UCL']?.fixture_count || 0,
+      upcomingCount: competitionsMap['UCL']?.upcoming || 0,
+      latestObservation: competitionsMap['UCL']?.latest_observation,
+    },
+    {
+      code: 'NATIONS_LEAGUE',
+      name: 'UEFA Nations League',
+      season: '2024/25 Season',
+      fixtureCount: competitionsMap['NATIONS_LEAGUE']?.fixture_count || 0,
+      upcomingCount: competitionsMap['NATIONS_LEAGUE']?.upcoming || 0,
+      latestObservation: competitionsMap['NATIONS_LEAGUE']?.latest_observation,
+    },
+    {
+      code: 'FRIENDLIES',
+      name: 'International Friendlies',
+      season: '2024/25 Season',
+      fixtureCount: competitionsMap['FRIENDLIES']?.fixture_count || 0,
+      upcomingCount: competitionsMap['FRIENDLIES']?.upcoming || 0,
+      latestObservation: competitionsMap['FRIENDLIES']?.latest_observation,
+    },
   ];
 
   const totalFixtures = Object.values(competitionsMap).reduce(
