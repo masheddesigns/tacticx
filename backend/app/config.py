@@ -46,7 +46,8 @@ class Settings(BaseSettings):
 
     SUPPORTED_LEAGUES: str = (
         "EPL:39:2024,LA_LIGA:140:2024,SERIE_A:135:2024,"
-        "BUNDESLIGA:78:2024,LIGUE_1:61:2024,UCL:2:2024"
+        "BUNDESLIGA:78:2024,LIGUE_1:61:2024,UCL:2:2024,"
+        "NATIONS_LEAGUE:5:2024,FRIENDLIES:10:2024"
     )
 
     # Cache TTLs (seconds)

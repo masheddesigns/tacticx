@@ -19,6 +19,8 @@ export const MatchExplorerPage: React.FC = () => {
     'BUNDESLIGA',
     'LIGUE_1',
     'UCL',
+    'NATIONS_LEAGUE',
+    'FRIENDLIES',
   ];
 
   const { data, isLoading, error, refetch, isFetching } = useMatches({

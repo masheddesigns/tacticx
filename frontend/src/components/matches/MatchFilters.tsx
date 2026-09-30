@@ -17,7 +17,7 @@ export interface MatchFiltersProps {
 export const MatchFilters: React.FC<MatchFiltersProps> = ({
   filters,
   onFilterChange,
-  availableLeagues = ['EPL', 'LA_LIGA', 'SERIE_A', 'BUNDESLIGA', 'LIGUE_1', 'UCL'],
+  availableLeagues = ['EPL', 'LA_LIGA', 'SERIE_A', 'BUNDESLIGA', 'LIGUE_1', 'UCL', 'NATIONS_LEAGUE', 'FRIENDLIES'],
 }) => {
   const handleChange = (key: keyof MatchFiltersState, value: string) => {
     onFilterChange({

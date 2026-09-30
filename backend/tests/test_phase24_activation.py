@@ -427,11 +427,12 @@ def test_readiness_report_telemetry(db: Session):
 
     report = get_current_season_readiness_report(db, season="2026/27")
     assert report["season"] == "2026/27"
-    assert len(report["items"]) == 5
+    # Phase 39: 5 domestic + Nations League + Friendlies.
+    assert len(report["items"]) == 7
     summary = report["summary"]
-    assert summary["total_competitions"] == 5
+    assert summary["total_competitions"] == 7
     assert summary["active_competitions"] == 0
-    assert summary["unavailable_competitions"] == 5
+    assert summary["unavailable_competitions"] == 7
 
     for item in report["items"]:
         assert item["fixture_count"] is None

@@ -40,7 +40,8 @@ ALL_ACTIVATION_STATES = set(s.value for s in ActivationState) | {
     STATE_CANDIDATE, STATE_VALIDATED, STATE_ACTIVE, STATE_DEGRADED, STATE_DISABLED
 }
 
-TARGET_LEAGUES = ("EPL", "LA_LIGA", "SERIE_A", "BUNDESLIGA", "LIGUE_1")
+TARGET_LEAGUES = ("EPL", "LA_LIGA", "SERIE_A", "BUNDESLIGA", "LIGUE_1",
+                  "NATIONS_LEAGUE", "FRIENDLIES")
 MIN_HISTORICAL_MATCHES = 5  # Minimum historical match context required for feature eligibility
 
 GATE_CHECKS = ("identity", "fixture", "timestamp", "duplicate", "season",

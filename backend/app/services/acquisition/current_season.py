@@ -41,9 +41,25 @@ SEASON_MAP = [
     {"provider": "api_football", "provider_season": "2026",
      "canonical_season": "2026/27", "competition": "LIGUE_1",
      "valid_from": "2026-08-01", "valid_to": "2027-07-31"},
+    # Phase 39: international competitions. Provider season labels follow
+    # the competition cycle (Nations League edition year, FIFA calendar
+    # year for friendlies); canonical labels preserve that provenance.
+    {"provider": "api_football", "provider_season": "2024",
+     "canonical_season": "2024", "competition": "NATIONS_LEAGUE",
+     "valid_from": "2024-09-01", "valid_to": "2025-06-30"},
+    {"provider": "api_football", "provider_season": "2024",
+     "canonical_season": "2024", "competition": "FRIENDLIES",
+     "valid_from": "2024-01-01", "valid_to": "2024-12-31"},
+    {"provider": "api_football", "provider_season": "2026",
+     "canonical_season": "2026/27", "competition": "NATIONS_LEAGUE",
+     "valid_from": "2026-09-01", "valid_to": "2027-06-30"},
+    {"provider": "api_football", "provider_season": "2026",
+     "canonical_season": "2026", "competition": "FRIENDLIES",
+     "valid_from": "2026-01-01", "valid_to": "2026-12-31"},
 ]
 
-TARGET_LEAGUES = ("EPL", "LA_LIGA", "SERIE_A", "BUNDESLIGA", "LIGUE_1")
+TARGET_LEAGUES = ("EPL", "LA_LIGA", "SERIE_A", "BUNDESLIGA", "LIGUE_1",
+                  "NATIONS_LEAGUE", "FRIENDLIES")
 
 # Canonical status taxonomy. Provider-native values map per source below;
 # unmapped values become "unknown", never forced into "scheduled".

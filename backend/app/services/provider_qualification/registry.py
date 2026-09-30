@@ -124,7 +124,7 @@ def _default_entries() -> None:
             kickoff_time="documented", historical_access="documented",
             current_season_access="unavailable"),
         supported_competitions=["EPL", "LA_LIGA", "SERIE_A", "BUNDESLIGA",
-                                "LIGUE_1"],
+                                "LIGUE_1", "NATIONS_LEAGUE", "FRIENDLIES"],
         supported_seasons=["2024"],
         field_authority={"fixture_identity": 10, "kickoff": 10,
                          "status": 10, "result": 10},
