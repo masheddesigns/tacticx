@@ -35,7 +35,7 @@ export const DashboardPage: React.FC = () => {
     {
       code: 'EPL',
       name: 'Premier League',
-      season: '2023/24 Historical',
+      season: '2026/27 Season',
       fixtureCount: competitionsMap['EPL']?.fixture_count || 0,
       upcomingCount: competitionsMap['EPL']?.upcoming || 0,
       latestObservation: competitionsMap['EPL']?.latest_observation,
@@ -43,7 +43,7 @@ export const DashboardPage: React.FC = () => {
     {
       code: 'LA_LIGA',
       name: 'La Liga',
-      season: '2023/24 Historical',
+      season: '2023/24 Completed',
       fixtureCount: competitionsMap['LA_LIGA']?.fixture_count || 0,
       upcomingCount: competitionsMap['LA_LIGA']?.upcoming || 0,
       latestObservation: competitionsMap['LA_LIGA']?.latest_observation,
@@ -51,7 +51,7 @@ export const DashboardPage: React.FC = () => {
     {
       code: 'SERIE_A',
       name: 'Serie A',
-      season: '2023/24 Historical',
+      season: '2023/24 Completed',
       fixtureCount: competitionsMap['SERIE_A']?.fixture_count || 0,
       upcomingCount: competitionsMap['SERIE_A']?.upcoming || 0,
       latestObservation: competitionsMap['SERIE_A']?.latest_observation,
@@ -59,7 +59,7 @@ export const DashboardPage: React.FC = () => {
     {
       code: 'BUNDESLIGA',
       name: 'Bundesliga',
-      season: '2023/24 Historical',
+      season: '2023/24 Completed',
       fixtureCount: competitionsMap['BUNDESLIGA']?.fixture_count || 0,
       upcomingCount: competitionsMap['BUNDESLIGA']?.upcoming || 0,
       latestObservation: competitionsMap['BUNDESLIGA']?.latest_observation,
@@ -67,7 +67,7 @@ export const DashboardPage: React.FC = () => {
     {
       code: 'LIGUE_1',
       name: 'Ligue 1',
-      season: '2023/24 Historical',
+      season: '2023/24 Completed',
       fixtureCount: competitionsMap['LIGUE_1']?.fixture_count || 0,
       upcomingCount: competitionsMap['LIGUE_1']?.upcoming || 0,
       latestObservation: competitionsMap['LIGUE_1']?.latest_observation,
@@ -75,7 +75,7 @@ export const DashboardPage: React.FC = () => {
     {
       code: 'UCL',
       name: 'UEFA Champions League',
-      season: '2024/25 Season',
+      season: '2024/25 Completed',
       fixtureCount: competitionsMap['UCL']?.fixture_count || 0,
       upcomingCount: competitionsMap['UCL']?.upcoming || 0,
       latestObservation: competitionsMap['UCL']?.latest_observation,
@@ -83,7 +83,7 @@ export const DashboardPage: React.FC = () => {
     {
       code: 'NATIONS_LEAGUE',
       name: 'UEFA Nations League',
-      season: '2024/25 Season',
+      season: '2026/27 Active Matchday',
       fixtureCount: competitionsMap['NATIONS_LEAGUE']?.fixture_count || 0,
       upcomingCount: competitionsMap['NATIONS_LEAGUE']?.upcoming || 0,
       latestObservation: competitionsMap['NATIONS_LEAGUE']?.latest_observation,
@@ -91,7 +91,7 @@ export const DashboardPage: React.FC = () => {
     {
       code: 'FRIENDLIES',
       name: 'International Friendlies',
-      season: '2024/25 Season',
+      season: '2026 Active Window',
       fixtureCount: competitionsMap['FRIENDLIES']?.fixture_count || 0,
       upcomingCount: competitionsMap['FRIENDLIES']?.upcoming || 0,
       latestObservation: competitionsMap['FRIENDLIES']?.latest_observation,
@@ -183,7 +183,7 @@ export const DashboardPage: React.FC = () => {
             <Database className="w-4 h-4 text-emerald-400" />
             <span>Supported Competitions Overview</span>
           </h2>
-          <span className="text-xs font-mono text-slate-400">5 Top European Leagues</span>
+          <span className="text-xs font-mono text-slate-400">8 Supported Competitions</span>
         </div>
 
         <CompetitionCards competitions={primaryCompetitions} />
