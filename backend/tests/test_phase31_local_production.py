@@ -7,6 +7,7 @@ integration, recovery, backup/restore mechanics, golden regression.
 """
 from __future__ import annotations
 
+import re
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
@@ -116,6 +117,22 @@ class TestComposeContracts:
         cmd = " ".join(
             _local_compose()["services"]["tacticx-scheduler"]["command"])
         assert "jobs" in cmd and "run-due" in cmd and "--loop" in cmd
+
+    def test_scheduler_healthcheck_needs_no_procps(self):
+        # python:slim images ship neither pgrep nor ps; the healthcheck
+        # must only use tools present in the image (verified at runtime).
+        check = str(_local_compose()["services"]["tacticx-scheduler"]
+                    .get("healthcheck", {}).get("test", ""))
+        assert "pgrep" not in check
+        assert re.search(r"(^|\s)ps(\s|$)", check) is None
+
+    def test_frontend_healthcheck_avoids_localhost(self):
+        # Minimal images may not listen on ::1; wget tries IPv6 first for
+        # "localhost" and fails. 127.0.0.1 is deterministic.
+        check = str(_local_compose()["services"]["tacticx-frontend"]
+                    .get("healthcheck", {}).get("test", ""))
+        assert "127.0.0.1" in check
+        assert "http://localhost/" not in check
 
     def test_existing_stacks_untouched(self):
         dev = yaml.safe_load(
