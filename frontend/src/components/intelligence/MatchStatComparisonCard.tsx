@@ -51,6 +51,7 @@ export const MatchStatComparisonCard: React.FC<MatchStatComparisonCardProps> = (
 
   const {
     is_finished,
+    is_live,
     has_score,
     actual_score,
     actual_possession,
@@ -58,6 +59,7 @@ export const MatchStatComparisonCard: React.FC<MatchStatComparisonCardProps> = (
     mirofish_summary,
     comparisons = [],
   } = comparison;
+
 
   const home = homeTeamName || comparison.home_team?.name || 'Home';
   const away = awayTeamName || comparison.away_team?.name || 'Away';
@@ -242,6 +244,31 @@ export const MatchStatComparisonCard: React.FC<MatchStatComparisonCardProps> = (
 
       {/* 3. Search and Category Filter Tabs */}
       <div className="space-y-2.5 border-b border-surface-border/50 pb-2">
+        {/* User Guide Card for Normal Users */}
+        <div className="bg-slate-950/70 border border-slate-800 rounded-lg p-3 text-xs flex flex-wrap items-center justify-between gap-3 font-mono">
+          <div className="flex items-center gap-2 text-slate-300">
+            <Info className="w-4 h-4 text-emerald-400 shrink-0" />
+            <span>
+              <strong className="text-white">How to read this table:</strong> Look at{' '}
+              <span className="text-emerald-400 font-bold">What To Choose</span> for clear picks.
+            </span>
+          </div>
+          <div className="flex flex-wrap items-center gap-2 text-[11px]">
+            <span className="inline-flex items-center px-1.5 py-0.5 rounded bg-emerald-950 text-emerald-300 border border-emerald-700">
+              Strong Yes (&gt;65%)
+            </span>
+            <span className="inline-flex items-center px-1.5 py-0.5 rounded bg-blue-950 text-blue-300 border border-blue-700">
+              Favored (&gt;50%)
+            </span>
+            <span className="inline-flex items-center px-1.5 py-0.5 rounded bg-amber-950 text-amber-300 border border-amber-700">
+              Close Call (~45%)
+            </span>
+            <span className="inline-flex items-center px-1.5 py-0.5 rounded bg-rose-950 text-rose-300 border border-rose-800">
+              Unlikely (&lt;40%)
+            </span>
+          </div>
+        </div>
+
         <div className="flex items-center gap-2">
           <input
             type="text"
@@ -281,85 +308,130 @@ export const MatchStatComparisonCard: React.FC<MatchStatComparisonCardProps> = (
       </div>
 
 
-      {/* 4. Side-by-Side Comparison Table */}
+
+      {/* 4. Side-by-Side Comparison Table with Intuitive Probability & Choice Badges */}
       <div className="overflow-x-auto rounded-xl border border-surface-border">
         <table className="w-full text-left border-collapse text-xs">
           <thead>
-            <tr className="bg-slate-900/80 text-slate-400 font-mono text-[11px] border-b border-surface-border">
+            <tr className="bg-slate-900/90 text-slate-400 font-mono text-[11px] border-b border-surface-border">
               <th className="py-3 px-4">Metric & Market</th>
-              <th className="py-3 px-4 text-emerald-400">Match Original Data (Actual)</th>
-              <th className="py-3 px-4 text-blue-400">Predictive Engine Model</th>
-              <th className="py-3 px-4 text-amber-400">MiroFish AI Forecast</th>
-              <th className="py-3 px-4">Delta / Variance</th>
+              <th className="py-3 px-4 text-blue-400">Model Probability & Odds</th>
+              <th className="py-3 px-4 text-emerald-400">What To Choose (Signal)</th>
+              <th className="py-3 px-4 text-slate-300">Match Original Data (Actual)</th>
+              <th className="py-3 px-4 text-amber-400">MiroFish AI Take</th>
               <th className="py-3 px-4 text-right">Verification</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-surface-border/60">
-            {filteredComparisons.map((item, idx) => (
-              <tr
-                key={idx}
-                className="hover:bg-slate-800/30 transition-colors"
-              >
-                {/* Metric */}
-                <td className="py-3.5 px-4">
-                  <div className="font-semibold text-white flex items-center gap-1.5">
-                    {item.metric}
-                  </div>
-                  <div className="text-[10px] font-mono text-slate-500 uppercase mt-0.5">
-                    {item.category} • {item.notes}
-                  </div>
-                </td>
+            {filteredComparisons.map((item, idx) => {
+              const prob = item.probability_pct;
+              const rec = item.recommendation;
 
-                {/* Match Original Data (Actual) */}
-                <td className="py-3.5 px-4 font-mono font-medium">
-                  <span className={`px-2 py-1 rounded ${
-                    is_finished
-                      ? 'bg-slate-900 text-slate-100 font-bold border border-slate-800'
-                      : 'text-slate-500 italic'
-                  }`}>
-                    {item.actual}
-                  </span>
-                </td>
+              return (
+                <tr
+                  key={idx}
+                  className="hover:bg-slate-800/30 transition-colors"
+                >
+                  {/* Metric */}
+                  <td className="py-3.5 px-4">
+                    <div className="font-semibold text-white flex items-center gap-1.5">
+                      {item.metric}
+                    </div>
+                    <div className="text-[10px] font-mono text-slate-500 uppercase mt-0.5">
+                      {item.category} • {item.notes}
+                    </div>
+                  </td>
 
-                {/* Engine Predicted */}
-                <td className="py-3.5 px-4 font-mono font-medium text-slate-200">
-                  <div className="bg-slate-900/80 px-2 py-1 rounded border border-slate-800 inline-block">
-                    {item.engine_predicted}
-                  </div>
-                </td>
+                  {/* Engine Predicted (Probability & European Decimal Odds) */}
+                  <td className="py-3.5 px-4 font-mono font-medium text-slate-200">
+                    <div className="space-y-1">
+                      <div className="flex items-center justify-between gap-2">
+                        <span className="font-bold text-slate-100">
+                          {prob !== undefined ? `${prob}%` : item.engine_predicted}
+                        </span>
+                        {item.decimal_odds && (
+                          <span className="text-[11px] text-amber-400 font-semibold">
+                            Odds: {item.decimal_odds.toFixed(2)}
+                          </span>
+                        )}
+                      </div>
+                      {prob !== undefined && (
+                        <div className="w-28 h-1.5 bg-slate-800 rounded-full overflow-hidden">
+                          <div
+                            className={`h-full rounded-full ${
+                              prob >= 65
+                                ? 'bg-emerald-400'
+                                : prob >= 50
+                                ? 'bg-blue-400'
+                                : prob >= 40
+                                ? 'bg-amber-400'
+                                : 'bg-rose-400'
+                            }`}
+                            style={{ width: `${Math.min(100, prob)}%` }}
+                          />
+                        </div>
+                      )}
+                    </div>
+                  </td>
 
-                {/* MiroFish AI Predicted */}
-                <td className="py-3.5 px-4 text-slate-300">
-                  <div className="flex items-center gap-1 text-[11px]">
-                    <Sparkles className="w-3 h-3 text-amber-400 flex-shrink-0" />
-                    <span>{item.mirofish_predicted || 'Simulated flow'}</span>
-                  </div>
-                </td>
+                  {/* What to Choose (Recommendation / Signal) */}
+                  <td className="py-3.5 px-4 font-mono">
+                    <span
+                      className={`inline-flex items-center px-2 py-0.5 rounded text-[11px] font-bold border ${
+                        rec === 'HIGH_CONFIDENCE'
+                          ? 'bg-emerald-950/90 text-emerald-300 border-emerald-700/80'
+                          : rec === 'LEAN_YES'
+                          ? 'bg-blue-950/90 text-blue-300 border-blue-700/80'
+                          : rec === 'TOSS_UP'
+                          ? 'bg-amber-950/90 text-amber-300 border-amber-700/80'
+                          : rec === 'LEAN_NO'
+                          ? 'bg-rose-950/80 text-rose-300 border-rose-800/80'
+                          : 'bg-slate-900 text-slate-400 border-slate-800'
+                      }`}
+                    >
+                      {item.user_choice || (prob && prob >= 50 ? 'Favored' : 'Unlikely')}
+                    </span>
+                  </td>
 
-                {/* Delta / Difference */}
-                <td className="py-3.5 px-4 font-mono text-slate-400">
-                  <span className={`text-[11px] ${
-                    item.status === 'HIT'
-                      ? 'text-emerald-400 font-semibold'
-                      : item.status === 'CLOSE'
-                      ? 'text-amber-400'
-                      : item.status === 'MISS'
-                      ? 'text-rose-400'
-                      : 'text-slate-500'
-                  }`}>
-                    {item.delta}
-                  </span>
-                </td>
+                  {/* Match Original Data (Actual) */}
+                  <td className="py-3.5 px-4 font-mono font-medium">
+                    <span
+                      className={`px-2 py-1 rounded inline-block ${
+                        is_finished || is_live
+                          ? 'bg-slate-900 text-slate-100 font-bold border border-slate-800'
+                          : 'text-slate-500 italic'
+                      }`}
+                    >
+                      {item.actual}
+                    </span>
+                  </td>
 
-                {/* Verification Status */}
-                <td className="py-3.5 px-4 text-right">
-                  {getStatusBadge(item.status)}
-                </td>
-              </tr>
-            ))}
+                  {/* MiroFish AI Predicted */}
+                  <td className="py-3.5 px-4 text-slate-300">
+                    <div className="flex items-center gap-1 text-[11px]">
+                      <Sparkles className="w-3 h-3 text-amber-400 flex-shrink-0" />
+                      <span>{item.mirofish_predicted || 'Simulated scenario'}</span>
+                    </div>
+                  </td>
+
+                  {/* Verification Status & Delta */}
+                  <td className="py-3.5 px-4 text-right">
+                    <div className="flex flex-col items-end gap-1">
+                      {getStatusBadge(item.status)}
+                      {item.delta && item.delta !== '-' && (
+                        <span className="text-[10px] font-mono text-slate-400">
+                          {item.delta}
+                        </span>
+                      )}
+                    </div>
+                  </td>
+                </tr>
+              );
+            })}
           </tbody>
         </table>
       </div>
+
 
       {/* 5. MiroFish Qualitative Simulation Takeaway */}
       {mirofish_summary && mirofish_summary.narrative && (

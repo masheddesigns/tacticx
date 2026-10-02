@@ -226,18 +226,38 @@ def generate_market_comparisons(
                 else:
                     status = "MISS"
                     delta = "Variance"
-            actual_str = f"{actual_val}"
+        prob_pct = round(prob * 100, 1)
+        decimal_odds = round(1.0 / max(prob, 0.001), 2)
+
+        # User-friendly recommendation based on mathematical threshold
+        if prob_pct >= 65.0:
+            user_choice = f"Strong Yes ({prob_pct}%)"
+            recommendation = "HIGH_CONFIDENCE"
+        elif prob_pct >= 50.0:
+            user_choice = f"Favored ({prob_pct}%)"
+            recommendation = "LEAN_YES"
+        elif prob_pct >= 40.0:
+            user_choice = f"Close Call ({prob_pct}%)"
+            recommendation = "TOSS_UP"
+        else:
+            user_choice = f"Unlikely ({prob_pct}%)"
+            recommendation = "LEAN_NO"
 
         comparisons.append({
             "category": category,
             "metric": metric,
             "actual": actual_str,
+            "probability_pct": prob_pct,
+            "decimal_odds": decimal_odds,
+            "user_choice": user_choice,
+            "recommendation": recommendation,
             "engine_predicted": formatted_pred,
             "mirofish_predicted": miro_hint,
             "status": status,
             "delta": delta,
             "notes": notes,
         })
+
 
     # --- 1X2 & Double Chance Markets ---
     # Clear human wording based on match state

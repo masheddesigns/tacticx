@@ -967,16 +967,23 @@ export interface ComparisonItem {
   metric: string;
   actual: string;
   engine_predicted: string;
+  probability_pct?: number;
+  decimal_odds?: number;
+  user_choice?: string;
+  recommendation?: 'HIGH_CONFIDENCE' | 'LEAN_YES' | 'TOSS_UP' | 'LEAN_NO' | string;
   mirofish_predicted?: string;
   status: 'HIT' | 'MISS' | 'CLOSE' | 'PENDING' | 'AWAITING_SYNC';
   delta?: string;
   notes?: string;
 }
 
+
 export interface MatchStatComparisonResponse {
   match_id: number;
   is_finished: boolean;
+  is_live?: boolean;
   has_score: boolean;
+
   home_team: { id?: number; name: string };
   away_team: { id?: number; name: string };
   actual_score?: { home: number; away: number } | null;
