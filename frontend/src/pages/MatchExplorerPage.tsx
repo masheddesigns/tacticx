@@ -166,7 +166,7 @@ export const MatchExplorerPage: React.FC = () => {
       />
 
       {/* Fixtures List with FotMob-style Date Sections */}
-      <div className="rounded-xl border border-surface-border bg-surface-card overflow-hidden shadow-sm">
+      <div className="rounded-xl border border-[#242938] bg-[#161922] overflow-hidden shadow-sm">
         {isLoading ? (
           <LoadingSpinner label="Fetching fixtures from canonical store..." />
         ) : error ? (
@@ -176,13 +176,13 @@ export const MatchExplorerPage: React.FC = () => {
         ) : matches.length === 0 ? (
           <div className="p-12 text-center space-y-2">
             <AlertCircle className="w-8 h-8 text-slate-500 mx-auto" />
-            <h3 className="font-semibold text-sm text-slate-200">No Matching Fixtures Found</h3>
+            <h3 className="font-semibold text-sm text-slate-200 font-sans">No Matching Fixtures Found</h3>
             <p className="text-xs text-slate-400 font-sans max-w-sm mx-auto">
               No matches matched the current filter criteria. Try clicking "Today", "Tomorrow", or resetting filters.
             </p>
           </div>
         ) : (
-          <div className="divide-y divide-surface-border">
+          <div className="divide-y divide-[#242938]">
             {Object.entries(groupedMatches).map(([dateLabel, dayMatches]) => {
               // Sub-group dayMatches by league
               const leagueGroups = dayMatches.reduce<Record<string, typeof dayMatches>>((acc, m) => {
@@ -193,19 +193,19 @@ export const MatchExplorerPage: React.FC = () => {
               }, {});
 
               return (
-                <div key={dateLabel} className="border-b border-surface-border last:border-b-0">
+                <div key={dateLabel} className="border-b border-[#242938] last:border-b-0">
                   {/* FotMob-style Date Group Header Ribbon */}
-                  <div className="bg-slate-900/90 px-4 py-2.5 border-b border-surface-border flex items-center justify-between">
+                  <div className="bg-[#0e1015] px-4 py-2.5 border-b border-[#242938] flex items-center justify-between">
                     <div className="flex items-center gap-2">
                       <span
-                        className={`text-xs font-mono font-bold uppercase tracking-wider px-2 py-0.5 rounded ${
+                        className={`text-xs font-mono font-bold uppercase tracking-wider px-2 py-0.5 rounded-md ${
                           dateLabel === 'Today'
-                            ? 'bg-emerald-950 text-emerald-400 border border-emerald-800'
+                            ? 'bg-[#21e786]/10 text-[#21e786] border border-[#21e786]/30'
                             : dateLabel === 'Tomorrow'
-                            ? 'bg-blue-950 text-blue-400 border border-blue-800'
+                            ? 'bg-blue-500/10 text-blue-400 border border-blue-500/30'
                             : dateLabel === 'Yesterday'
-                            ? 'bg-amber-950 text-amber-400 border border-amber-800'
-                            : 'bg-slate-950 text-slate-300 border border-slate-800'
+                            ? 'bg-amber-500/10 text-amber-400 border border-amber-500/30'
+                            : 'bg-[#1e222e] text-slate-300 border border-[#242938]'
                         }`}
                       >
                         {dateLabel}
@@ -220,25 +220,25 @@ export const MatchExplorerPage: React.FC = () => {
                   </div>
 
                   {/* FotMob League Sections */}
-                  <div className="divide-y divide-surface-border/70">
+                  <div className="divide-y divide-[#242938]">
                     {Object.entries(leagueGroups).map(([leagueKey, leagueMatches]) => {
                       const lMeta = getLeagueMeta(leagueKey);
                       return (
-                        <div key={leagueKey} className="bg-surface-card">
+                        <div key={leagueKey} className="bg-[#161922]">
                           {/* FotMob League Banner Header */}
-                          <div className="px-4 py-2 bg-slate-950/70 border-b border-surface-border/50 flex items-center justify-between">
+                          <div className="px-4 py-2 bg-[#12151d] border-b border-[#242938] flex items-center justify-between">
                             <div className="flex items-center gap-2.5">
                               <span className="text-base select-none">{lMeta.flag}</span>
                               <div className="flex items-center gap-2">
-                                <span className="text-xs font-bold text-slate-200 tracking-wide font-sans">
+                                <span className="text-xs font-bold text-white tracking-wide font-sans">
                                   {lMeta.name}
                                 </span>
-                                <span className="text-[10px] text-slate-400 font-mono">
+                                <span className="text-[10px] text-slate-400 font-sans">
                                   • {lMeta.country}
                                 </span>
                               </div>
                             </div>
-                            <span className="text-[10px] font-mono text-slate-400 bg-slate-900 px-2 py-0.5 rounded border border-slate-800">
+                            <span className="text-[10px] font-mono text-slate-400 bg-[#0e1015] px-2 py-0.5 rounded-md border border-[#242938]">
                               {leagueMatches.length} {leagueMatches.length === 1 ? 'fixture' : 'fixtures'}
                             </span>
                           </div>

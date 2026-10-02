@@ -48,9 +48,9 @@ export const MatchHeader: React.FC<MatchHeaderProps> = ({ match, cutoff, onShare
   const awayInitials = getTeamInitials(awayName);
 
   return (
-    <div className="rounded-2xl border border-surface-border bg-gradient-to-b from-slate-900 via-surface-card to-slate-950 p-6 shadow-lg space-y-6">
+    <div className="rounded-2xl border border-[#242938] bg-[#161922] p-6 shadow-xl space-y-6">
       {/* Top bar: Competition, Season, Status */}
-      <div className="flex flex-wrap items-center justify-between gap-3 pb-4 border-b border-surface-border/80">
+      <div className="flex flex-wrap items-center justify-between gap-3 pb-4 border-b border-[#242938]">
         <div className="flex items-center gap-2.5">
           <Badge variant="purple" size="md">
             {compName}
@@ -66,7 +66,7 @@ export const MatchHeader: React.FC<MatchHeaderProps> = ({ match, cutoff, onShare
           {onShare && (
             <button
               onClick={onShare}
-              className="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg text-xs font-mono font-semibold bg-emerald-600/20 hover:bg-emerald-600 text-emerald-300 hover:text-white border border-emerald-500/40 transition-all shadow-sm"
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-sans font-semibold bg-[#21e786]/10 hover:bg-[#21e786] text-[#21e786] hover:text-[#0e1015] border border-[#21e786]/30 transition-all shadow-sm"
               title="Share Match Prediction Snapshot"
             >
               <Share2 className="w-3.5 h-3.5" />
@@ -75,8 +75,8 @@ export const MatchHeader: React.FC<MatchHeaderProps> = ({ match, cutoff, onShare
           )}
 
           {isLive ? (
-            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold font-mono bg-rose-950/90 text-rose-300 border border-rose-700 animate-pulse">
-              <span className="w-2 h-2 rounded-full bg-rose-500 animate-ping inline-block" />
+            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold font-mono bg-[#ff4b4b]/10 text-[#ff4b4b] border border-[#ff4b4b]/30 animate-pulse">
+              <span className="w-2 h-2 rounded-full bg-[#ff4b4b] animate-ping inline-block" />
               LIVE
             </span>
           ) : (
@@ -101,7 +101,7 @@ export const MatchHeader: React.FC<MatchHeaderProps> = ({ match, cutoff, onShare
             <span className="text-[11px] uppercase tracking-wider font-mono text-slate-400 block mb-0.5">
               Home
             </span>
-            <h1 className="text-xl sm:text-2xl lg:text-3xl font-extrabold tracking-tight text-white truncate" title={homeName}>
+            <h1 className="text-xl sm:text-2xl lg:text-3xl font-extrabold tracking-tight text-white truncate font-sans" title={homeName}>
               {homeName}
             </h1>
           </div>
@@ -119,22 +119,22 @@ export const MatchHeader: React.FC<MatchHeaderProps> = ({ match, cutoff, onShare
         <div className="md:col-span-1 flex flex-col items-center justify-center shrink-0 order-3 md:order-2">
           {isLive ? (
             <div className="text-center space-y-1">
-              <div className="px-3 py-1 rounded-full bg-rose-950/80 border border-rose-800 text-[11px] font-mono font-bold text-rose-400 inline-flex items-center gap-1 animate-pulse">
-                <span className="w-1.5 h-1.5 rounded-full bg-rose-500" />
+              <div className="px-3 py-1 rounded-full bg-[#ff4b4b]/10 border border-[#ff4b4b]/30 text-[11px] font-mono font-bold text-[#ff4b4b] inline-flex items-center gap-1 animate-pulse">
+                <span className="w-1.5 h-1.5 rounded-full bg-[#ff4b4b]" />
                 Live In-Play
               </div>
               <div className="text-xs font-mono text-slate-400">{kickoff.time}</div>
             </div>
           ) : isFinished ? (
             <div className="text-center space-y-1">
-              <span className="text-xs font-mono font-bold text-slate-300 uppercase tracking-wider px-2.5 py-0.5 rounded bg-slate-900 border border-slate-800">
+              <span className="text-xs font-mono font-bold text-slate-300 uppercase tracking-wider px-2.5 py-0.5 rounded-md bg-[#0e1015] border border-[#242938]">
                 Full Time
               </span>
               <div className="text-[11px] font-mono text-slate-400">{kickoff.date}</div>
             </div>
           ) : (
             <div className="text-center space-y-1">
-              <span className="text-xs font-mono font-bold text-emerald-400 uppercase tracking-widest px-3 py-1 rounded bg-slate-900 border border-slate-800">
+              <span className="text-xs font-mono font-bold text-[#21e786] uppercase tracking-widest px-3 py-1 rounded-md bg-[#0e1015] border border-[#242938]">
                 VS
               </span>
               <div className="text-xs font-mono text-slate-300 font-semibold">{kickoff.time}</div>
@@ -157,7 +157,7 @@ export const MatchHeader: React.FC<MatchHeaderProps> = ({ match, cutoff, onShare
             <span className="text-[11px] uppercase tracking-wider font-mono text-slate-400 block mb-0.5">
               Away
             </span>
-            <h1 className="text-xl sm:text-2xl lg:text-3xl font-extrabold tracking-tight text-white truncate" title={awayName}>
+            <h1 className="text-xl sm:text-2xl lg:text-3xl font-extrabold tracking-tight text-white truncate font-sans" title={awayName}>
               {awayName}
             </h1>
           </div>

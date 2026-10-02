@@ -186,33 +186,33 @@ export const DashboardPage: React.FC = () => {
       {dashError && <ErrorCard error={dashError as Error} title="Dashboard Telemetry Degraded" />}
 
       {/* 1. FotMob Top Match Header & KPI Bar */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-2 border-b border-surface-border/70">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-2 border-b border-[#242938]">
         <div>
           <div className="flex items-center gap-2.5">
-            <Trophy className="w-6 h-6 text-emerald-400" />
-            <h1 className="text-2xl font-black tracking-tight text-white font-sans">
+            <Trophy className="w-6 h-6 text-[#21e786]" />
+            <h1 className="text-2xl font-extrabold tracking-tight text-white font-sans">
               Matches & Live Scores
             </h1>
             <Badge variant={isEngineReady ? 'success' : 'warning'} size="sm">
-              {isEngineReady ? 'Live Level-A Sync' : 'Degraded'}
+              {isEngineReady ? 'FotMob Live Feed' : 'Degraded'}
             </Badge>
           </div>
-          <p className="text-xs text-slate-400 mt-0.5 font-sans">
-            FotMob fixture center with real-time minutes, scores, mathematical market probabilities & MiroFish AI.
+          <p className="text-xs text-slate-400 mt-1 font-sans">
+            Real-time live fixtures, minutes, scores, mathematical market probabilities & MiroFish AI.
           </p>
         </div>
 
         {/* Quick Stats Badges */}
         <div className="flex items-center gap-2.5 flex-wrap">
-          <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-slate-900 border border-slate-800 text-xs font-mono">
-            <span className="w-2 h-2 rounded-full bg-rose-500 animate-ping" />
-            <span className="text-rose-400 font-bold">{liveMatches.length}</span>
-            <span className="text-slate-400">Live In-Play</span>
+          <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#161922] border border-[#242938] text-xs font-mono">
+            <span className="w-2 h-2 rounded-full bg-[#ff4b4b] animate-ping" />
+            <span className="text-[#ff4b4b] font-bold">{liveMatches.length}</span>
+            <span className="text-slate-400 font-sans">Live In-Play</span>
           </div>
 
-          <div className="px-3 py-1.5 rounded-lg bg-slate-900 border border-slate-800 text-xs font-mono">
-            <span className="text-emerald-400 font-bold">{totalFixtures}</span>
-            <span className="text-slate-400 ml-1.5">Fixtures</span>
+          <div className="px-3 py-1.5 rounded-lg bg-[#161922] border border-[#242938] text-xs font-mono">
+            <span className="text-[#21e786] font-bold">{totalFixtures}</span>
+            <span className="text-slate-400 ml-1.5 font-sans">Fixtures</span>
           </div>
 
           <button
@@ -221,37 +221,37 @@ export const DashboardPage: React.FC = () => {
               refetchMatches();
             }}
             disabled={isMatchesFetching}
-            className="p-2 rounded-lg border border-slate-700 bg-slate-800 text-slate-300 hover:text-white transition-colors disabled:opacity-50"
+            className="p-2 rounded-lg border border-[#242938] bg-[#161922] text-slate-300 hover:text-white hover:border-[#21e786]/50 transition-colors disabled:opacity-50"
             title="Refresh Live Scores"
           >
-            <RefreshCw className={`w-3.5 h-3.5 ${isMatchesFetching ? 'animate-spin text-emerald-400' : ''}`} />
+            <RefreshCw className={`w-3.5 h-3.5 ${isMatchesFetching ? 'animate-spin text-[#21e786]' : ''}`} />
           </button>
         </div>
       </div>
 
       {/* 2. FotMob Date Ribbon & Filter Navigator */}
-      <div className="rounded-2xl border border-surface-border bg-surface-card p-4 space-y-3.5 shadow-sm">
-        <div className="flex flex-wrap items-center justify-between gap-3 pb-3 border-b border-surface-border/80">
+      <div className="rounded-2xl border border-[#242938] bg-[#161922] p-4 space-y-3.5 shadow-sm">
+        <div className="flex flex-wrap items-center justify-between gap-3 pb-3 border-b border-[#242938]">
           {/* Day Navigation Tabs */}
           <div className="flex flex-wrap items-center gap-1.5">
             <button
               onClick={handleSelectLive}
-              className={`px-3 py-1.5 rounded-lg text-xs font-mono transition-all flex items-center gap-1.5 shadow-sm ${
+              className={`px-3 py-1.5 rounded-lg text-xs font-sans font-semibold transition-all flex items-center gap-1.5 shadow-sm ${
                 selectedStatus === 'LIVE' && !selectedDate
-                  ? 'bg-rose-600 text-white font-bold animate-pulse'
-                  : 'bg-rose-950/80 text-rose-300 hover:bg-rose-900 border border-rose-800/70'
+                  ? 'bg-[#ff4b4b] text-white font-bold animate-pulse'
+                  : 'bg-[#ff4b4b]/10 text-[#ff4b4b] hover:bg-[#ff4b4b]/20 border border-[#ff4b4b]/30'
               }`}
             >
-              <span className="w-2 h-2 rounded-full bg-rose-400 animate-ping inline-block" />
+              <span className="w-2 h-2 rounded-full bg-[#ff4b4b] animate-ping inline-block" />
               <span>Live ({liveMatches.length})</span>
             </button>
 
             <button
               onClick={() => handleSelectDay('2026-10-01')}
-              className={`px-3 py-1.5 rounded-lg text-xs font-mono transition-colors ${
+              className={`px-3 py-1.5 rounded-lg text-xs font-sans font-medium transition-colors ${
                 selectedDate === '2026-10-01'
-                  ? 'bg-emerald-600 text-white font-bold shadow-sm'
-                  : 'bg-slate-800/90 text-slate-300 hover:bg-slate-700'
+                  ? 'bg-[#21e786] text-[#0e1015] font-bold shadow-sm'
+                  : 'bg-[#1e222e] text-slate-300 hover:bg-[#242938]'
               }`}
             >
               Yesterday (Oct 1)
@@ -259,10 +259,10 @@ export const DashboardPage: React.FC = () => {
 
             <button
               onClick={() => handleSelectDay('2026-10-02')}
-              className={`px-3 py-1.5 rounded-lg text-xs font-mono transition-colors ${
+              className={`px-3 py-1.5 rounded-lg text-xs font-sans font-medium transition-colors ${
                 selectedDate === '2026-10-02'
-                  ? 'bg-emerald-600 text-white font-bold shadow-sm'
-                  : 'bg-slate-800/90 text-slate-300 hover:bg-slate-700'
+                  ? 'bg-[#21e786] text-[#0e1015] font-bold shadow-sm'
+                  : 'bg-[#1e222e] text-slate-300 hover:bg-[#242938]'
               }`}
             >
               Today (Oct 2)
@@ -270,10 +270,10 @@ export const DashboardPage: React.FC = () => {
 
             <button
               onClick={() => handleSelectDay('2026-10-03')}
-              className={`px-3 py-1.5 rounded-lg text-xs font-mono transition-colors ${
+              className={`px-3 py-1.5 rounded-lg text-xs font-sans font-medium transition-colors ${
                 selectedDate === '2026-10-03'
-                  ? 'bg-emerald-600 text-white font-bold shadow-sm'
-                  : 'bg-slate-800/90 text-slate-300 hover:bg-slate-700'
+                  ? 'bg-[#21e786] text-[#0e1015] font-bold shadow-sm'
+                  : 'bg-[#1e222e] text-slate-300 hover:bg-[#242938]'
               }`}
             >
               Tomorrow (Oct 3)
@@ -284,10 +284,10 @@ export const DashboardPage: React.FC = () => {
                 setSelectedStatus('SCHEDULED');
                 setSelectedDate(undefined);
               }}
-              className={`px-3 py-1.5 rounded-lg text-xs font-mono transition-colors ${
+              className={`px-3 py-1.5 rounded-lg text-xs font-sans font-medium transition-colors ${
                 selectedStatus === 'SCHEDULED' && !selectedDate
-                  ? 'bg-emerald-600 text-white font-bold shadow-sm'
-                  : 'bg-slate-800/90 text-slate-300 hover:bg-slate-700'
+                  ? 'bg-[#21e786] text-[#0e1015] font-bold shadow-sm'
+                  : 'bg-[#1e222e] text-slate-300 hover:bg-[#242938]'
               }`}
             >
               All Upcoming
@@ -296,29 +296,25 @@ export const DashboardPage: React.FC = () => {
 
           {/* Timezone & Reset */}
           <div className="flex items-center gap-2">
-            <div className="flex items-center gap-1 text-xs font-mono bg-slate-900 px-2 py-1 rounded-lg border border-slate-800">
+            <div className="flex items-center gap-1 text-xs font-mono bg-[#161922] px-2.5 py-1 rounded-lg border border-[#242938]">
               <span className="text-slate-400">TZ:</span>
               <button
-                onClick={() => setTimeZone('UTC')}
-                className={`px-1.5 py-0.5 rounded ${timeZone === 'UTC' ? 'bg-slate-800 text-emerald-400 font-bold' : 'text-slate-400'}`}
+                onClick={() => setTimeZone(timeZone === 'UTC' ? 'local' : 'UTC')}
+                className="text-[#21e786] hover:underline font-semibold"
               >
-                UTC
-              </button>
-              <button
-                onClick={() => setTimeZone('local')}
-                className={`px-1.5 py-0.5 rounded ${timeZone === 'local' ? 'bg-slate-800 text-emerald-400 font-bold' : 'text-slate-400'}`}
-              >
-                Local
+                {timeZone === 'UTC' ? 'UTC' : 'Local'}
               </button>
             </div>
 
-            <button
-              onClick={handleResetFilters}
-              className="inline-flex items-center gap-1 text-xs font-mono text-slate-400 hover:text-slate-200 transition-colors px-2 py-1"
-            >
-              <RotateCcw className="w-3 h-3" />
-              <span>Reset</span>
-            </button>
+            {(selectedStatus || selectedDate !== '2026-10-02' || selectedLeague || searchQuery) && (
+              <button
+                onClick={handleResetFilters}
+                className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-sans text-slate-400 hover:text-white bg-[#1e222e] border border-[#242938] transition-colors"
+              >
+                <RotateCcw className="w-3 h-3" />
+                <span>Reset</span>
+              </button>
+            )}
           </div>
         </div>
 

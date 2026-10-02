@@ -154,56 +154,56 @@ export const MatchIntelligencePage: React.FC = () => {
       {intel.warnings?.length > 0 && <WarningsSection warnings={intel.warnings} />}
 
       {/* Navigation Tabs */}
-      <div className="border-b border-surface-border">
+      <div className="border-b border-[#242938]">
         <nav className="flex space-x-6 overflow-x-auto" aria-label="Tabs">
           <button
             onClick={() => setActiveTab('markets')}
-            className={`py-3 px-1 border-b-2 font-medium text-xs font-mono flex items-center gap-2 whitespace-nowrap transition-colors ${
+            className={`py-3 px-1 border-b-2 font-semibold text-xs font-sans flex items-center gap-2 whitespace-nowrap transition-colors ${
               activeTab === 'markets'
-                ? 'border-emerald-500 text-emerald-400 font-bold'
-                : 'border-transparent text-slate-400 hover:text-slate-200 hover:border-slate-700'
+                ? 'border-[#21e786] text-[#21e786]'
+                : 'border-transparent text-slate-400 hover:text-white hover:border-slate-700'
             }`}
           >
             <span>Core Predictions & Markets</span>
-            <span className="px-1.5 py-0.2 rounded bg-slate-800 text-[10px] text-slate-300 font-mono">1X2 / xG / Scores</span>
+            <span className="px-1.5 py-0.5 rounded-md bg-[#1e222e] text-[10px] text-slate-300 font-mono border border-[#242938]">1X2 / xG / Scores</span>
           </button>
 
           <button
             onClick={() => setActiveTab('comparison')}
-            className={`py-3 px-1 border-b-2 font-medium text-xs font-mono flex items-center gap-2 whitespace-nowrap transition-colors ${
+            className={`py-3 px-1 border-b-2 font-semibold text-xs font-sans flex items-center gap-2 whitespace-nowrap transition-colors ${
               activeTab === 'comparison'
-                ? 'border-emerald-500 text-emerald-400 font-bold'
-                : 'border-transparent text-slate-400 hover:text-slate-200 hover:border-slate-700'
+                ? 'border-[#21e786] text-[#21e786]'
+                : 'border-transparent text-slate-400 hover:text-white hover:border-slate-700'
             }`}
           >
             <span>Match Results vs Model</span>
-            <span className="px-1.5 py-0.2 rounded bg-emerald-950 text-emerald-400 text-[10px] font-mono border border-emerald-900/50">
+            <span className="px-1.5 py-0.5 rounded-md bg-[#21e786]/10 text-[#21e786] text-[10px] font-mono border border-[#21e786]/30">
               {statComparison?.is_finished ? 'Verified Actuals' : 'Projections Ready'}
             </span>
           </button>
 
           <button
             onClick={() => setActiveTab('analysis')}
-            className={`py-3 px-1 border-b-2 font-medium text-xs font-mono flex items-center gap-2 whitespace-nowrap transition-colors ${
+            className={`py-3 px-1 border-b-2 font-semibold text-xs font-sans flex items-center gap-2 whitespace-nowrap transition-colors ${
               activeTab === 'analysis'
-                ? 'border-emerald-500 text-emerald-400 font-bold'
-                : 'border-transparent text-slate-400 hover:text-slate-200 hover:border-slate-700'
+                ? 'border-[#21e786] text-[#21e786]'
+                : 'border-transparent text-slate-400 hover:text-white hover:border-slate-700'
             }`}
           >
             <span>MiroFish & Scenarios</span>
-            <span className="px-1.5 py-0.2 rounded bg-amber-950 text-amber-400 text-[10px] font-mono border border-amber-900/50">Qualitative AI</span>
+            <span className="px-1.5 py-0.5 rounded-md bg-amber-500/10 text-amber-400 text-[10px] font-mono border border-amber-500/20">Qualitative AI</span>
           </button>
 
           <button
             onClick={() => setActiveTab('telemetry')}
-            className={`py-3 px-1 border-b-2 font-medium text-xs font-mono flex items-center gap-2 whitespace-nowrap transition-colors ${
+            className={`py-3 px-1 border-b-2 font-semibold text-xs font-sans flex items-center gap-2 whitespace-nowrap transition-colors ${
               activeTab === 'telemetry'
-                ? 'border-emerald-500 text-emerald-400 font-bold'
-                : 'border-transparent text-slate-400 hover:text-slate-200 hover:border-slate-700'
+                ? 'border-[#21e786] text-[#21e786]'
+                : 'border-transparent text-slate-400 hover:text-white hover:border-slate-700'
             }`}
           >
             <span>Audit & Cryptographic Telemetry</span>
-            <span className="px-1.5 py-0.2 rounded bg-slate-800 text-[10px] text-slate-300 font-mono">Provenance & Quality</span>
+            <span className="px-1.5 py-0.5 rounded-md bg-[#1e222e] text-[10px] text-slate-300 font-mono border border-[#242938]">Provenance & Quality</span>
           </button>
         </nav>
       </div>

@@ -220,19 +220,19 @@ export const SharePredictionModal: React.FC<SharePredictionModalProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm overflow-y-auto">
-      <div className="relative w-full max-w-xl bg-surface-card border border-surface-border rounded-2xl shadow-2xl p-5 sm:p-6 space-y-5 my-8">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/85 backdrop-blur-md overflow-y-auto">
+      <div className="relative w-full max-w-xl bg-[#161922] border border-[#242938] rounded-2xl shadow-2xl p-5 sm:p-6 space-y-5 my-8">
         {/* Header */}
-        <div className="flex items-center justify-between pb-3 border-b border-surface-border">
+        <div className="flex items-center justify-between pb-3 border-b border-[#242938]">
           <div className="flex items-center gap-2">
-            <Share2 className="w-4 h-4 text-emerald-400" />
-            <h3 className="text-base font-bold text-white tracking-tight">
+            <Share2 className="w-4 h-4 text-[#21e786]" />
+            <h3 className="text-base font-bold text-white tracking-tight font-sans">
               Share Match Prediction & Stats Snapshot
             </h3>
           </div>
           <button
             onClick={onClose}
-            className="p-1 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition-colors"
+            className="p-1 rounded-lg text-slate-400 hover:text-white hover:bg-[#1e222e] transition-colors"
           >
             <X className="w-5 h-5" />
           </button>
@@ -240,33 +240,33 @@ export const SharePredictionModal: React.FC<SharePredictionModalProps> = ({
 
         {/* Status Toast */}
         {statusMessage && (
-          <div className="px-3 py-2 rounded-lg bg-emerald-950/90 border border-emerald-700 text-xs font-mono text-emerald-300 flex items-center gap-2">
-            <Check className="w-4 h-4 text-emerald-400 shrink-0" />
+          <div className="px-3 py-2 rounded-lg bg-[#21e786]/10 border border-[#21e786]/30 text-xs font-sans font-medium text-[#21e786] flex items-center gap-2">
+            <Check className="w-4 h-4 text-[#21e786] shrink-0" />
             <span>{statusMessage}</span>
           </div>
         )}
 
         {/* The Captureable Graphic Card Preview */}
-        <div className="rounded-xl overflow-hidden shadow-2xl border border-slate-700/80 bg-slate-950">
+        <div className="rounded-xl overflow-hidden shadow-2xl border border-[#242938] bg-[#0e1015]">
           <div
             ref={cardRef}
-            className="p-5 sm:p-6 bg-gradient-to-b from-[#0e1626] via-[#090d16] to-[#04060a] text-slate-100 space-y-4"
+            className="p-5 sm:p-6 bg-[#0e1015] text-slate-100 space-y-4"
           >
             {/* Top Brand Bar */}
-            <div className="flex items-center justify-between pb-3 border-b border-slate-800/80">
+            <div className="flex items-center justify-between pb-3 border-b border-[#242938]">
               <div className="flex items-center gap-2">
-                <div className="w-6 h-6 rounded bg-emerald-500/20 border border-emerald-500/50 flex items-center justify-center text-emerald-400 font-mono font-black text-xs">
+                <div className="w-6 h-6 rounded-lg bg-[#21e786]/10 border border-[#21e786]/30 flex items-center justify-center text-[#21e786] font-black text-xs font-sans">
                   TX
                 </div>
                 <span className="font-extrabold text-xs tracking-tight text-white font-sans">
                   TACTICX
-                  <span className="text-[10px] text-emerald-400 font-mono font-medium ml-1">
+                  <span className="text-[10px] text-[#21e786] font-sans font-semibold ml-1">
                     INTELLIGENCE
                   </span>
                 </span>
               </div>
 
-              <div className="flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-slate-900 border border-slate-800 text-[10px] font-mono text-slate-300">
+              <div className="flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-[#161922] border border-[#242938] text-[10px] font-mono text-slate-300">
                 <Trophy className="w-3 h-3 text-amber-400" />
                 <span>{compName}</span>
               </div>

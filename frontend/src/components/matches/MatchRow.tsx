@@ -66,14 +66,14 @@ export const MatchRow: React.FC<MatchRowProps> = ({ match, timeZone = 'UTC' }) =
   const awayInitials = getTeamInitials(match.away_team_name);
 
   return (
-    <div className="group flex flex-col sm:flex-row items-stretch sm:items-center justify-between p-3.5 sm:px-4 sm:py-3 bg-surface-card hover:bg-slate-800/70 border-b border-surface-border transition-colors gap-3">
+    <div className="group flex flex-col sm:flex-row items-stretch sm:items-center justify-between p-3.5 sm:px-4 sm:py-3 bg-[#161922] hover:bg-[#1e222e] border-b border-[#242938] transition-colors gap-3">
       {/* Left: FotMob Status & Kickoff Time Column */}
       <div className="flex items-center gap-3 shrink-0">
         <div className="flex flex-col items-center justify-center w-16 text-center">
           {isLive ? (
             <div className="flex flex-col items-center">
-              <span className="inline-flex items-center gap-1 text-[11px] font-bold font-mono text-rose-400 bg-rose-950/80 border border-rose-800/70 px-2 py-0.5 rounded-full animate-pulse">
-                <span className="w-1.5 h-1.5 rounded-full bg-rose-500 animate-ping inline-block" />
+              <span className="inline-flex items-center gap-1 text-[11px] font-bold font-mono text-[#ff4b4b] bg-[#ff4b4b]/10 border border-[#ff4b4b]/30 px-2 py-0.5 rounded-full animate-pulse">
+                <span className="w-1.5 h-1.5 rounded-full bg-[#ff4b4b] animate-ping inline-block" />
                 {match.minute ? `${match.minute}'` : 'LIVE'}
               </span>
               <span className="sr-only">LIVE</span>
@@ -90,7 +90,7 @@ export const MatchRow: React.FC<MatchRowProps> = ({ match, timeZone = 'UTC' }) =
           </div>
         </div>
 
-        <div className="h-8 w-px bg-slate-800 hidden sm:block" />
+        <div className="h-8 w-px bg-[#242938] hidden sm:block" />
       </div>
 
       {/* Center: FotMob Teams and Score */}
@@ -108,7 +108,7 @@ export const MatchRow: React.FC<MatchRowProps> = ({ match, timeZone = 'UTC' }) =
                 {homeInitials}
               </span>
               <span
-                className={`truncate text-xs sm:text-sm ${
+                className={`truncate text-xs sm:text-sm font-sans ${
                   isHomeWinner ? 'font-bold text-white' : isFinished ? 'text-slate-300 font-medium' : 'text-slate-100 font-medium'
                 }`}
                 title={match.home_team_name || 'Home'}
@@ -127,7 +127,7 @@ export const MatchRow: React.FC<MatchRowProps> = ({ match, timeZone = 'UTC' }) =
                 {awayInitials}
               </span>
               <span
-                className={`truncate text-xs sm:text-sm ${
+                className={`truncate text-xs sm:text-sm font-sans ${
                   isAwayWinner ? 'font-bold text-white' : isFinished ? 'text-slate-300 font-medium' : 'text-slate-100 font-medium'
                 }`}
                 title={match.away_team_name || 'Away'}
@@ -140,11 +140,11 @@ export const MatchRow: React.FC<MatchRowProps> = ({ match, timeZone = 'UTC' }) =
           {/* FotMob Score Box */}
           <div className="shrink-0 flex flex-col items-center justify-center px-3">
             {hasScore ? (
-              <span className="px-2.5 py-1 rounded-lg bg-slate-900 border border-slate-700/80 font-mono text-sm sm:text-base font-bold text-emerald-400 tracking-wider shadow-inner">
+              <span className="px-2.5 py-1 rounded-lg bg-[#0e1015] border border-[#242938] font-mono text-sm sm:text-base font-bold text-[#21e786] tracking-wider shadow-inner">
                 {match.home_score} - {match.away_score}
               </span>
             ) : (
-              <span className="text-xs text-slate-500 font-mono font-medium px-2 py-1 rounded bg-slate-900/50">
+              <span className="text-xs text-slate-500 font-mono font-medium px-2 py-1 rounded bg-[#0e1015]/60">
                 vs
               </span>
             )}
@@ -153,15 +153,15 @@ export const MatchRow: React.FC<MatchRowProps> = ({ match, timeZone = 'UTC' }) =
       </div>
 
       {/* Right: Intel Pill & Analyze Link */}
-      <div className="flex items-center gap-3 justify-between sm:justify-end shrink-0 pt-2 sm:pt-0 border-t sm:border-t-0 border-slate-800/80">
+      <div className="flex items-center gap-3 justify-between sm:justify-end shrink-0 pt-2 sm:pt-0 border-t sm:border-t-0 border-[#242938]">
         <div className="flex items-center gap-2">
           {match.prediction_eligible !== false ? (
-            <span className="inline-flex items-center gap-1 text-[11px] font-mono text-emerald-400 bg-emerald-950/40 border border-emerald-800/50 px-2 py-0.5 rounded">
+            <span className="inline-flex items-center gap-1 text-[11px] font-sans font-medium text-[#21e786] bg-[#21e786]/10 border border-[#21e786]/20 px-2 py-0.5 rounded-md">
               <CheckCircle2 className="w-3 h-3" />
               Intelligence Ready
             </span>
           ) : (
-            <span className="inline-flex items-center gap-1 text-[11px] font-mono text-slate-400 bg-slate-900 px-2 py-0.5 rounded">
+            <span className="inline-flex items-center gap-1 text-[11px] font-sans text-slate-400 bg-[#1e222e] px-2 py-0.5 rounded-md border border-[#242938]">
               <Shield className="w-3 h-3" />
               Audit Complete
             </span>
@@ -170,7 +170,7 @@ export const MatchRow: React.FC<MatchRowProps> = ({ match, timeZone = 'UTC' }) =
 
         <Link
           to={`/matches/${match.id}`}
-          className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-mono font-medium text-slate-200 bg-slate-800/90 hover:bg-emerald-600 hover:text-white border border-slate-700 hover:border-emerald-500 transition-all shadow-sm"
+          className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-sans font-semibold text-slate-200 bg-[#1e222e] hover:bg-[#21e786] hover:text-[#0e1015] border border-[#242938] hover:border-[#21e786] transition-all shadow-sm"
         >
           <span>Analyze</span>
           <ChevronRight className="w-3.5 h-3.5 group-hover:translate-x-0.5 transition-transform" />
