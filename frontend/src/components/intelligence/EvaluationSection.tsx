@@ -43,22 +43,31 @@ export const EvaluationSection: React.FC<EvaluationSectionProps> = ({
     >
       <div className="flex flex-wrap items-center justify-between gap-3 pb-3 border-b border-surface-border">
         <div className="flex items-center gap-2">
-          <div className="p-1.5 rounded bg-teal-500/10 border border-teal-500/20 text-teal-400">
+          <div className="p-1.5 rounded bg-emerald-500/10 border border-emerald-500/20 text-emerald-400">
             <Target className="w-4 h-4" />
           </div>
           <div>
-            <h2 id="evaluation-heading" className="font-semibold text-sm text-slate-100">
-              Post-Match Evaluation
-            </h2>
+            <div className="flex items-center gap-2">
+              <h2 id="evaluation-heading" className="font-semibold text-sm text-slate-100">
+                Match Result & Prediction Evaluation
+              </h2>
+              <span className={`text-[10px] uppercase font-mono font-bold px-2 py-0.5 rounded border ${
+                hit ? 'bg-emerald-950 text-emerald-400 border-emerald-800' : 'bg-rose-950 text-rose-400 border-rose-800'
+              }`}>
+                {hit ? '1X2 PREDICTION CORRECT' : '1X2 OUTCOME MISSED'}
+              </span>
+            </div>
             <span className="text-[11px] font-mono text-slate-400">
-              Phase 27 immutable scoring · prediction snapshot untouched
+              Verified final score compared against frozen pre-match model probabilities
             </span>
           </div>
         </div>
-        <div className={`flex items-center gap-1.5 ${hit ? 'text-emerald-400' : 'text-red-400'}`}>
+        <div className={`flex items-center gap-1.5 px-3 py-1 rounded-lg border ${
+          hit ? 'bg-emerald-950/60 border-emerald-800/80 text-emerald-400' : 'bg-rose-950/60 border-rose-800/80 text-rose-400'
+        }`}>
           {hit ? <CheckCircle2 className="w-4 h-4" /> : <XCircle className="w-4 h-4" />}
-          <span className="text-xs font-mono font-semibold">
-            1X2 {hit ? 'Hit' : 'Miss'}
+          <span className="text-xs font-mono font-bold">
+            {hit ? 'Match Result Hit' : 'Prediction Miss'}
           </span>
         </div>
       </div>

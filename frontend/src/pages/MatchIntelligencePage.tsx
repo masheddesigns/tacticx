@@ -158,6 +158,17 @@ export const MatchIntelligencePage: React.FC = () => {
       {/* TAB 1: Core Predictions & Markets */}
       {activeTab === 'markets' && (
         <div className="space-y-6">
+          {/* Post-Match Actual Score & Prediction Comparison Banner (When Match is Completed) */}
+          {matchEvaluation && matchEvaluation.outcome && (
+            <EvaluationSection
+              evaluation={matchEvaluation}
+              isLoading={evaluationLoading}
+              predictedHome={intel.core_prediction?.home}
+              predictedDraw={intel.core_prediction?.draw}
+              predictedAway={intel.core_prediction?.away}
+            />
+          )}
+
           {/* 2. Core 1X2 Prediction & 3. Expected Goals */}
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
             <div className="lg:col-span-7">
