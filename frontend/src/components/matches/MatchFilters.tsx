@@ -48,7 +48,18 @@ export const MatchFilters: React.FC<MatchFiltersProps> = ({
       {/* Top Filter Bar with Quick Day Chips and Timezone */}
       <div className="flex flex-wrap items-center justify-between gap-3 pb-3 border-b border-surface-border/80">
         <div className="flex flex-wrap items-center gap-1.5">
-          <span className="text-[11px] font-mono text-slate-400 font-semibold mr-1">Days:</span>
+          <span className="text-[11px] font-mono text-slate-400 font-semibold mr-1">Quick:</span>
+          <button
+            onClick={() => onFilterChange({ ...filters, status: 'LIVE', date: undefined })}
+            className={`px-2.5 py-1 rounded text-xs font-mono transition-colors flex items-center gap-1.5 ${
+              filters.status === 'LIVE' && !filters.date
+                ? 'bg-rose-600 text-white font-bold animate-pulse'
+                : 'bg-rose-950/80 text-rose-300 hover:bg-rose-900 border border-rose-800/60'
+            }`}
+          >
+            <span className="w-2 h-2 rounded-full bg-rose-400 animate-ping inline-block" />
+            Live Now
+          </button>
           <button
             onClick={() => handleQuickDay('2026-10-01')}
             className={`px-2.5 py-1 rounded text-xs font-mono transition-colors ${
@@ -90,6 +101,7 @@ export const MatchFilters: React.FC<MatchFiltersProps> = ({
             All Upcoming
           </button>
         </div>
+
 
         {/* Timezone & Reset Controls */}
         <div className="flex items-center gap-2">

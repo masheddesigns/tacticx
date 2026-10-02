@@ -49,6 +49,52 @@ def _filtered_query(db: Session, league: Optional[str], team: Optional[str], sta
     return q, None
 
 
+_last_live_sync_at = 0.0
+
+
+def _refresh_live_matches_if_needed(db: Session, max_age_seconds: int = 45):
+    """Sync live scores, elapsed minute, and status on-demand from API-Football."""
+    global _last_live_sync_at
+    import time
+    now_ts = time.time()
+    if now_ts - _last_live_sync_at < max_age_seconds:
+        return
+    _last_live_sync_at = now_ts
+    try:
+        import urllib.request, json
+        url = "https://v3.football.api-sports.io/fixtures?live=all"
+        headers = {"x-apisports-key": "f1da5a48dd4965ed81ed9444e8191ce4"}
+        req = urllib.request.Request(url, headers=headers)
+        with urllib.request.urlopen(req, timeout=3) as resp:
+            data = json.loads(resp.read().decode())
+            live_items = data.get("response", [])
+            for it in live_items:
+                fid = str(it.get("fixture", {}).get("id"))
+                status_short = it.get("fixture", {}).get("status", {}).get("short")
+                elapsed = it.get("fixture", {}).get("status", {}).get("elapsed")
+                goals = it.get("goals", {})
+                h_score = goals.get("home")
+                a_score = goals.get("away")
+
+                m = db.query(Match).filter_by(provider_match_id=fid).first()
+                if m:
+                    if status_short in ("FT", "AET", "PEN"):
+                        m.status = MatchStatus.FINISHED.value
+                        m.minute = 90
+                    elif status_short == "HT":
+                        m.status = MatchStatus.HALFTIME.value
+                        m.minute = 45
+                    elif status_short in ("1H", "2H", "ET", "LIVE"):
+                        m.status = MatchStatus.LIVE.value
+                        m.minute = elapsed
+                    if h_score is not None and a_score is not None:
+                        m.home_score = h_score
+                        m.away_score = a_score
+            db.commit()
+    except Exception:
+        pass
+
+
 @router.get("", summary="List matches (filters: league, date, team, status; paginated)")
 def list_matches(
     db: Session = Depends(get_db),
@@ -60,6 +106,9 @@ def list_matches(
     page_size: int = Query(20, ge=1, le=100),
     sort_order: str = Query("asc", description="Sort order by kickoff_at: asc | desc"),
 ):
+    if not status or status.upper() in ("LIVE", "HALFTIME"):
+        _refresh_live_matches_if_needed(db)
+
     q, err = _filtered_query(db, league, team, status)
     if err:
         raise HTTPException(400, err)
@@ -93,12 +142,14 @@ def upcoming_matches(db: Session = Depends(get_db), hours: int = Query(24, ge=1,
 
 @router.get("/live", summary="Currently live matches")
 def live_matches(db: Session = Depends(get_db)):
+    _refresh_live_matches_if_needed(db)
     rows = (
         db.query(Match)
         .filter(Match.status.in_([MatchStatus.LIVE.value, MatchStatus.HALFTIME.value]))
         .order_by(Match.minute.desc()).all()
     )
     return {"data": [_match_out(m, db) for m in rows]}
+
 
 
 @router.get("/current", summary="Current-season universe (read-only)")
