@@ -226,6 +226,7 @@ def generate_market_comparisons(
                 else:
                     status = "MISS"
                     delta = "Variance"
+            actual_str = str(actual_val)
         prob_pct = round(prob * 100, 1)
         decimal_odds = round(1.0 / max(prob, 0.001), 2)
 
@@ -736,6 +737,16 @@ def generate_market_comparisons(
     poss_h = actual_stats.get("possession", {}).get("home")
     poss_a = actual_stats.get("possession", {}).get("away")
 
+    detailed_stats = {
+        "possession": {"home": poss_h, "away": poss_a},
+        "shots_total": {"home": _get_num("shots_total", "home"), "away": _get_num("shots_total", "away")},
+        "shots_on_target": {"home": sot_h, "away": sot_a},
+        "corners": {"home": c_h, "away": c_a},
+        "fouls": {"home": _get_num("fouls", "home"), "away": _get_num("fouls", "away")},
+        "yellow_cards": {"home": _get_num("yellow_cards", "home"), "away": _get_num("yellow_cards", "away")},
+        "red_cards": {"home": _get_num("red_cards", "home"), "away": _get_num("red_cards", "away")},
+    }
+
     return {
         "match_id": m.id,
         "is_finished": is_finished,
@@ -745,6 +756,7 @@ def generate_market_comparisons(
         "away_team": {"id": m.away_team_id, "name": away_name},
         "actual_score": {"home": m.home_score, "away": m.away_score} if has_score else None,
         "actual_possession": {"home": poss_h, "away": poss_a} if (poss_h or poss_a) else None,
+        "detailed_stats": detailed_stats,
         "accuracy_summary": {
             "total_evaluated": total_evaluated,
             "correct_hits": correct_hits,

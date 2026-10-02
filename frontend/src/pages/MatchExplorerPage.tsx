@@ -8,6 +8,42 @@ import { getRelativeDateLabel } from '../lib/utils';
 import { LoadingSpinner } from '../components/common/LoadingSpinner';
 import { ErrorCard } from '../components/common/ErrorCard';
 
+export interface LeagueInfo {
+  name: string;
+  country: string;
+  flag: string;
+}
+
+export function getLeagueMeta(leagueKey?: string | null): LeagueInfo {
+  if (!leagueKey) return { name: 'Other Competitions', country: 'Global', flag: '⚽' };
+  const upper = leagueKey.toUpperCase().replace(/\s+/g, '_');
+  if (upper.includes('EPL') || upper.includes('PREMIER_LEAGUE')) {
+    return { name: 'Premier League', country: 'England', flag: '🏴󠁧󠁢󠁥󠁮󠁧󠁿' };
+  }
+  if (upper.includes('LA_LIGA') || upper.includes('LALIGA') || upper.includes('PRIMERA')) {
+    return { name: 'La Liga', country: 'Spain', flag: '🇪🇸' };
+  }
+  if (upper.includes('SERIE_A')) {
+    return { name: 'Serie A', country: 'Italy', flag: '🇮🇹' };
+  }
+  if (upper.includes('BUNDESLIGA')) {
+    return { name: 'Bundesliga', country: 'Germany', flag: '🇩🇪' };
+  }
+  if (upper.includes('LIGUE_1') || upper.includes('LIGUE1')) {
+    return { name: 'Ligue 1', country: 'France', flag: '🇫🇷' };
+  }
+  if (upper.includes('UCL') || upper.includes('CHAMPIONS_LEAGUE')) {
+    return { name: 'UEFA Champions League', country: 'Europe', flag: '🏆' };
+  }
+  if (upper.includes('NATIONS_LEAGUE')) {
+    return { name: 'UEFA Nations League', country: 'Europe', flag: '🇪🇺' };
+  }
+  if (upper.includes('FRIENDLIES') || upper.includes('FRIENDLY')) {
+    return { name: 'Club Friendlies', country: 'International', flag: '🌍' };
+  }
+  return { name: leagueKey.replace(/_/g, ' '), country: 'Football', flag: '⚽' };
+}
+
 export const MatchExplorerPage: React.FC = () => {
   const [searchParams, setSearchParams] = useSearchParams();
   const [page, setPage] = useState<number>(1);
@@ -147,40 +183,79 @@ export const MatchExplorerPage: React.FC = () => {
           </div>
         ) : (
           <div className="divide-y divide-surface-border">
-            {Object.entries(groupedMatches).map(([dateLabel, dayMatches]) => (
-              <div key={dateLabel} className="border-b border-surface-border last:border-b-0">
-                {/* FotMob-style Date Group Header */}
-                <div className="bg-slate-900 px-4 py-2.5 border-b border-surface-border flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <span className={`text-xs font-mono font-bold uppercase tracking-wider px-2 py-0.5 rounded ${
-                      dateLabel === 'Today'
-                        ? 'bg-emerald-950 text-emerald-400 border border-emerald-800'
-                        : dateLabel === 'Tomorrow'
-                        ? 'bg-blue-950 text-blue-400 border border-blue-800'
-                        : dateLabel === 'Yesterday'
-                        ? 'bg-amber-950 text-amber-400 border border-amber-800'
-                        : 'bg-slate-950 text-slate-300 border border-slate-800'
-                    }`}>
-                      {dateLabel}
-                    </span>
-                    <span className="text-[11px] font-mono text-slate-400">
-                      ({dayMatches.length} {dayMatches.length === 1 ? 'match' : 'matches'})
+            {Object.entries(groupedMatches).map(([dateLabel, dayMatches]) => {
+              // Sub-group dayMatches by league
+              const leagueGroups = dayMatches.reduce<Record<string, typeof dayMatches>>((acc, m) => {
+                const lKey = m.league_name || m.league_code || 'Other Competitions';
+                if (!acc[lKey]) acc[lKey] = [];
+                acc[lKey].push(m);
+                return acc;
+              }, {});
+
+              return (
+                <div key={dateLabel} className="border-b border-surface-border last:border-b-0">
+                  {/* FotMob-style Date Group Header Ribbon */}
+                  <div className="bg-slate-900/90 px-4 py-2.5 border-b border-surface-border flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <span
+                        className={`text-xs font-mono font-bold uppercase tracking-wider px-2 py-0.5 rounded ${
+                          dateLabel === 'Today'
+                            ? 'bg-emerald-950 text-emerald-400 border border-emerald-800'
+                            : dateLabel === 'Tomorrow'
+                            ? 'bg-blue-950 text-blue-400 border border-blue-800'
+                            : dateLabel === 'Yesterday'
+                            ? 'bg-amber-950 text-amber-400 border border-amber-800'
+                            : 'bg-slate-950 text-slate-300 border border-slate-800'
+                        }`}
+                      >
+                        {dateLabel}
+                      </span>
+                      <span className="text-[11px] font-mono text-slate-400">
+                        ({dayMatches.length} {dayMatches.length === 1 ? 'match' : 'matches'})
+                      </span>
+                    </div>
+                    <span className="text-[10px] font-mono text-slate-400">
+                      Showing in {timeZone === 'local' ? 'Local Browser Time' : 'UTC'}
                     </span>
                   </div>
-                  <span className="text-[10px] font-mono text-slate-400">
-                    Showing in {timeZone === 'local' ? 'Local Browser Time' : 'UTC'}
-                  </span>
-                </div>
 
+                  {/* FotMob League Sections */}
+                  <div className="divide-y divide-surface-border/70">
+                    {Object.entries(leagueGroups).map(([leagueKey, leagueMatches]) => {
+                      const lMeta = getLeagueMeta(leagueKey);
+                      return (
+                        <div key={leagueKey} className="bg-surface-card">
+                          {/* FotMob League Banner Header */}
+                          <div className="px-4 py-2 bg-slate-950/70 border-b border-surface-border/50 flex items-center justify-between">
+                            <div className="flex items-center gap-2.5">
+                              <span className="text-base select-none">{lMeta.flag}</span>
+                              <div className="flex items-center gap-2">
+                                <span className="text-xs font-bold text-slate-200 tracking-wide font-sans">
+                                  {lMeta.name}
+                                </span>
+                                <span className="text-[10px] text-slate-400 font-mono">
+                                  • {lMeta.country}
+                                </span>
+                              </div>
+                            </div>
+                            <span className="text-[10px] font-mono text-slate-400 bg-slate-900 px-2 py-0.5 rounded border border-slate-800">
+                              {leagueMatches.length} {leagueMatches.length === 1 ? 'fixture' : 'fixtures'}
+                            </span>
+                          </div>
 
-                {/* Match Rows for this Day */}
-                <div className="divide-y divide-surface-border">
-                  {dayMatches.map((m) => (
-                    <MatchRow key={m.id} match={m} timeZone={timeZone} />
-                  ))}
+                          {/* Match Rows for this League */}
+                          <div className="divide-y divide-surface-border/60">
+                            {leagueMatches.map((m) => (
+                              <MatchRow key={m.id} match={m} timeZone={timeZone} />
+                            ))}
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
                 </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         )}
 

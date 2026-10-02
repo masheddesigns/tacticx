@@ -988,6 +988,15 @@ export interface MatchStatComparisonResponse {
   away_team: { id?: number; name: string };
   actual_score?: { home: number; away: number } | null;
   actual_possession?: { home?: string; away?: string } | null;
+  detailed_stats?: {
+    possession?: { home?: string | number | null; away?: string | number | null } | null;
+    shots_total?: { home?: number | null; away?: number | null } | null;
+    shots_on_target?: { home?: number | null; away?: number | null } | null;
+    corners?: { home?: number | null; away?: number | null } | null;
+    fouls?: { home?: number | null; away?: number | null } | null;
+    yellow_cards?: { home?: number | null; away?: number | null } | null;
+    red_cards?: { home?: number | null; away?: number | null } | null;
+  } | null;
   accuracy_summary: {
     total_evaluated: number;
     correct_hits: number;
