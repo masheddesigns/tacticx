@@ -339,12 +339,19 @@ def sync_real_fixtures() -> None:
         fr_league.season = "2026"
         db.commit()
 
-    # Step 3: Fetch real API-Football fixtures for tomorrow (2026-10-01)
-    raw_fixtures = fetch_api_football_fixtures("2026-10-01")
+    # Step 3: Fetch real API-Football fixtures across active window (2026-10-01, 2026-10-02, 2026-10-03)
+    target_dates = ["2026-10-01", "2026-10-02", "2026-10-03"]
+    raw_fixtures = []
+    for d in target_dates:
+        raw_fixtures.extend(fetch_api_football_fixtures(d))
 
-    # Filter to Nations League (id: 5) and Friendlies (id: 10)
-    target_fixtures = [f for f in raw_fixtures if f["league"]["id"] in (5, 10)]
-    print(f"Ingesting {len(target_fixtures)} genuine international fixtures...")
+    # Filter to Nations League (id: 5) and Friendlies (id: 10), skipping cancelled fixtures
+    target_fixtures = [
+        f for f in raw_fixtures
+        if f.get("league", {}).get("id") in (5, 10)
+        and f.get("fixture", {}).get("status", {}).get("short") not in ("CANC", "PST")
+    ]
+    print(f"Ingesting {len(target_fixtures)} genuine international fixtures across {target_dates}...")
 
     ingested_matches = []
     for item in target_fixtures:

@@ -27,6 +27,7 @@ export const MatchIntelligencePage: React.FC = () => {
   const idNum = parseInt(matchId || '0', 10);
 
   const [temporalMode, setTemporalMode] = useState<string>('strict_prematch');
+  const [activeTab, setActiveTab] = useState<'markets' | 'analysis' | 'telemetry'>('markets');
 
   const { data: matchFallback } = useMatch(idNum);
   const { data: execution, isLoading: executionLoading } = usePredictionSnapshots(idNum);
@@ -111,100 +112,156 @@ export const MatchIntelligencePage: React.FC = () => {
       {/* Warnings (if present) */}
       {intel.warnings?.length > 0 && <WarningsSection warnings={intel.warnings} />}
 
-      {/* 2. Core 1X2 Prediction & 3. Expected Goals */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-        <div className="lg:col-span-7">
-          <CorePredictionCard
-            prediction={intel.core_prediction}
-            cutoff={intel.cutoff}
-            homeTeamName={homeName}
-            awayTeamName={awayName}
-          />
-        </div>
-        <div className="lg:col-span-5">
-          <ExpectedGoalsCard
-            goals={intel.expected_goals}
-            homeTeamName={homeName}
-            awayTeamName={awayName}
-          />
-        </div>
+      {/* Navigation Tabs */}
+      <div className="border-b border-surface-border">
+        <nav className="flex space-x-6 overflow-x-auto" aria-label="Tabs">
+          <button
+            onClick={() => setActiveTab('markets')}
+            className={`py-3 px-1 border-b-2 font-medium text-xs font-mono flex items-center gap-2 whitespace-nowrap transition-colors ${
+              activeTab === 'markets'
+                ? 'border-emerald-500 text-emerald-400 font-bold'
+                : 'border-transparent text-slate-400 hover:text-slate-200 hover:border-slate-700'
+            }`}
+          >
+            <span>Core Predictions & Markets</span>
+            <span className="px-1.5 py-0.2 rounded bg-slate-800 text-[10px] text-slate-300 font-mono">1X2 / xG / Scores</span>
+          </button>
+
+          <button
+            onClick={() => setActiveTab('analysis')}
+            className={`py-3 px-1 border-b-2 font-medium text-xs font-mono flex items-center gap-2 whitespace-nowrap transition-colors ${
+              activeTab === 'analysis'
+                ? 'border-emerald-500 text-emerald-400 font-bold'
+                : 'border-transparent text-slate-400 hover:text-slate-200 hover:border-slate-700'
+            }`}
+          >
+            <span>MiroFish & Scenarios</span>
+            <span className="px-1.5 py-0.2 rounded bg-amber-950 text-amber-400 text-[10px] font-mono border border-amber-900/50">Qualitative AI</span>
+          </button>
+
+          <button
+            onClick={() => setActiveTab('telemetry')}
+            className={`py-3 px-1 border-b-2 font-medium text-xs font-mono flex items-center gap-2 whitespace-nowrap transition-colors ${
+              activeTab === 'telemetry'
+                ? 'border-emerald-500 text-emerald-400 font-bold'
+                : 'border-transparent text-slate-400 hover:text-slate-200 hover:border-slate-700'
+            }`}
+          >
+            <span>Audit & Cryptographic Telemetry</span>
+            <span className="px-1.5 py-0.2 rounded bg-slate-800 text-[10px] text-slate-300 font-mono">Provenance & Quality</span>
+          </button>
+        </nav>
       </div>
 
-      {/* 4. Derived Markets */}
-      <DerivedMarketsCard
-        markets={intel.derived_markets}
-        homeTeamName={homeName}
-        awayTeamName={awayName}
-      />
+      {/* TAB 1: Core Predictions & Markets */}
+      {activeTab === 'markets' && (
+        <div className="space-y-6">
+          {/* 2. Core 1X2 Prediction & 3. Expected Goals */}
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+            <div className="lg:col-span-7">
+              <CorePredictionCard
+                prediction={intel.core_prediction}
+                cutoff={intel.cutoff}
+                homeTeamName={homeName}
+                awayTeamName={awayName}
+              />
+            </div>
+            <div className="lg:col-span-5">
+              <ExpectedGoalsCard
+                goals={intel.expected_goals}
+                homeTeamName={homeName}
+                awayTeamName={awayName}
+              />
+            </div>
+          </div>
 
-      {/* 5. Correct Score Heatmap & Rankings */}
-      <CorrectScoreGrid
-        correctScore={intel.correct_score}
-        homeTeamName={homeName}
-        awayTeamName={awayName}
-      />
+          {/* 4. Derived Markets */}
+          <DerivedMarketsCard
+            markets={intel.derived_markets}
+            homeTeamName={homeName}
+            awayTeamName={awayName}
+          />
 
-      {/* 6. Uncertainty Diagnostics */}
-      <UncertaintySection
-        uncertainty={intel.uncertainty}
-        temporalQuality={intel.temporal_quality}
-      />
+          {/* 5. Correct Score Heatmap & Rankings */}
+          <CorrectScoreGrid
+            correctScore={intel.correct_score}
+            homeTeamName={homeName}
+            awayTeamName={awayName}
+          />
 
-      {/* 7. Model Agreement Matrix */}
-      <ModelAgreementTable
-        disagreement={intel.model_disagreement}
-        homeTeamName={homeName}
-        awayTeamName={awayName}
-      />
+          {/* 8. Market Comparison */}
+          <MarketComparisonCard
+            market={intel.market}
+            homeTeamName={homeName}
+            awayTeamName={awayName}
+          />
 
-      {/* 8. Market Comparison */}
-      <MarketComparisonCard
-        market={intel.market}
-        homeTeamName={homeName}
-        awayTeamName={awayName}
-      />
-
-      {/* 9. Scenario Sensitivity Analysis */}
-      {intel.scenarios?.length > 0 && (
-        <ScenarioAnalysisCard
-          scenarios={intel.scenarios}
-          homeTeamName={homeName}
-          awayTeamName={awayName}
-        />
+          {/* 12. Explanation Breakdown */}
+          <ExplanationSection explanation={intel.explanation} />
+        </div>
       )}
 
-      {/* 10. Historical Analogues */}
-      <HistoricalAnaloguesCard analogues={intel.analogues} />
+      {/* TAB 2: Simulations & Scenario Analysis */}
+      {activeTab === 'analysis' && (
+        <div className="space-y-6">
+          {/* 11. MiroFish Qualitative Simulation */}
+          <MiroFishSection mirofish={intel.mirofish} />
 
-      {/* 11. MiroFish Qualitative Simulation */}
-      <MiroFishSection mirofish={intel.mirofish} />
+          {/* 9. Scenario Sensitivity Analysis */}
+          {intel.scenarios?.length > 0 && (
+            <ScenarioAnalysisCard
+              scenarios={intel.scenarios}
+              homeTeamName={homeName}
+              awayTeamName={awayName}
+            />
+          )}
 
-      {/* 12. Explanation Breakdown */}
-      <ExplanationSection explanation={intel.explanation} />
+          {/* 10. Historical Analogues */}
+          <HistoricalAnaloguesCard analogues={intel.analogues} />
 
-      {/* 13. Data Quality & Feature Telemetry */}
-      <DataQualitySection
-        dataQuality={intel.data_quality}
-        temporalQuality={intel.temporal_quality}
-      />
+          {/* 7. Model Agreement Matrix */}
+          <ModelAgreementTable
+            disagreement={intel.model_disagreement}
+            homeTeamName={homeName}
+            awayTeamName={awayName}
+          />
 
-      {/* 14. Pre-Match Prediction Execution (Phase 26) */}
-      <PredictionExecutionSection
-        execution={execution}
-        isLoading={executionLoading}
-      />
+          {/* 6. Uncertainty Diagnostics */}
+          <UncertaintySection
+            uncertainty={intel.uncertainty}
+            temporalQuality={intel.temporal_quality}
+          />
+        </div>
+      )}
 
-      {/* 15. Post-Match Evaluation (Phase 27, completed matches only) */}
-      <EvaluationSection
-        evaluation={matchEvaluation}
-        isLoading={evaluationLoading}
-        predictedHome={intel.core_prediction?.home}
-        predictedDraw={intel.core_prediction?.draw}
-        predictedAway={intel.core_prediction?.away}
-      />
+      {/* TAB 3: Audit, Provenance & Telemetry */}
+      {activeTab === 'telemetry' && (
+        <div className="space-y-6">
+          {/* 14. Pre-Match Prediction Execution (Phase 26) */}
+          <PredictionExecutionSection
+            execution={execution}
+            isLoading={executionLoading}
+          />
 
-      {/* 16. Cryptographic Provenance */}
-      <ProvenanceSection provenance={intel.provenance} rawJson={intel} />
+          {/* 15. Post-Match Evaluation (Phase 27, completed matches only) */}
+          <EvaluationSection
+            evaluation={matchEvaluation}
+            isLoading={evaluationLoading}
+            predictedHome={intel.core_prediction?.home}
+            predictedDraw={intel.core_prediction?.draw}
+            predictedAway={intel.core_prediction?.away}
+          />
+
+          {/* 13. Data Quality & Feature Telemetry */}
+          <DataQualitySection
+            dataQuality={intel.data_quality}
+            temporalQuality={intel.temporal_quality}
+          />
+
+          {/* 16. Cryptographic Provenance */}
+          <ProvenanceSection provenance={intel.provenance} rawJson={intel} />
+        </div>
+      )}
     </div>
   );
 };

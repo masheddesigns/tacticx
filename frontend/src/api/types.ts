@@ -24,6 +24,8 @@ export interface MatchListItem {
   away_score?: number | null;
   canonical_season?: string;
   prediction_eligible?: boolean;
+  league_code?: string | null;
+  league_name?: string | null;
 }
 
 export interface PaginatedMatchesResponse {

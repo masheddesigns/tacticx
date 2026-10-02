@@ -19,11 +19,14 @@ router = APIRouter(prefix="/matches", tags=["matches"])
 def _match_out(m: Match, db: Session) -> MatchOut:
     home = db.get(Team, m.home_team_id) if m.home_team_id else None
     away = db.get(Team, m.away_team_id) if m.away_team_id else None
+    league = db.get(League, m.league_id) if m.league_id else None
     return MatchOut(
         id=m.id, league_id=m.league_id, home_team_id=m.home_team_id, away_team_id=m.away_team_id,
         home_team_name=home.name if home else None, away_team_name=away.name if away else None,
         kickoff_at=m.kickoff_at, status=m.status, minute=m.minute,
         home_score=m.home_score, away_score=m.away_score,
+        league_code=league.code if league else None,
+        league_name=league.name if league else None,
     )
 
 

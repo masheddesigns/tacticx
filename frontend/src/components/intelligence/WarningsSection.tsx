@@ -62,11 +62,26 @@ export const WarningsSection: React.FC<WarningsSectionProps> = ({ warnings }) =>
                 <div className="pt-2 border-t border-slate-800/80 text-[11px] text-slate-400 font-mono">
                   <span className="font-semibold text-slate-400 block mb-1">Audit Evidence:</span>
                   <div className="flex flex-wrap gap-2">
-                    {Object.entries(w.evidence).map(([key, val]) => (
-                      <span key={key} className="px-1.5 py-0.5 rounded bg-slate-950 border border-slate-800">
-                        {key}: {Array.isArray(val) ? val.join(', ') : String(val)}
-                      </span>
-                    ))}
+                    {Object.entries(w.evidence).map(([key, val]) => {
+                      let display: string;
+                      if (val == null) {
+                        display = 'null';
+                      } else if (Array.isArray(val)) {
+                        display = val.join(', ');
+                      } else if (typeof val === 'object') {
+                        // Render nested objects as readable key: value pairs
+                        display = Object.entries(val as Record<string, unknown>)
+                          .map(([k, v]) => `${k}: ${typeof v === 'number' ? (v as number).toFixed(3) : String(v)}`)
+                          .join(', ');
+                      } else {
+                        display = String(val);
+                      }
+                      return (
+                        <span key={key} className="px-1.5 py-0.5 rounded bg-slate-950 border border-slate-800">
+                          {key}: {display}
+                        </span>
+                      );
+                    })}
                   </div>
                 </div>
               )}

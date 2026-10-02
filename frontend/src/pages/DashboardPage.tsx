@@ -149,9 +149,9 @@ export const DashboardPage: React.FC = () => {
           </div>
 
           <div className="p-4 rounded-xl border border-surface-border bg-surface-card space-y-1">
-            <span className="text-[11px] font-mono text-slate-400 block">Current-Season Fixtures</span>
-            <div className="text-2xl font-mono font-bold text-amber-400">0</div>
-            <span className="text-[10px] text-slate-400 font-sans block">Level-A source unavailable</span>
+            <span className="text-[11px] font-mono text-slate-400 block">Upcoming Active Fixtures</span>
+            <div className="text-2xl font-mono font-bold text-emerald-400">{upcomingMatches.length}</div>
+            <span className="text-[10px] text-slate-400 font-sans block">Genuine international window</span>
           </div>
 
           <div className="p-4 rounded-xl border border-surface-border bg-surface-card space-y-1">
@@ -198,7 +198,17 @@ export const DashboardPage: React.FC = () => {
               <Clock className="w-4 h-4 text-emerald-400" />
               <span>Upcoming Fixtures (Next 7 Days)</span>
             </h2>
-            <span className="text-xs font-mono text-slate-400">{upcomingMatches.length} available</span>
+            <div className="flex items-center gap-2">
+              <span className="text-xs font-mono text-slate-400">{upcomingMatches.length} available</span>
+              {upcomingMatches.length > 0 && (
+                <Link
+                  to="/matches?status=SCHEDULED"
+                  className="text-xs font-mono text-emerald-400 hover:text-emerald-300 font-medium ml-2"
+                >
+                  View All &rarr;
+                </Link>
+              )}
+            </div>
           </div>
 
           <div className="rounded-xl border border-surface-border bg-surface-card overflow-hidden">
@@ -208,12 +218,12 @@ export const DashboardPage: React.FC = () => {
                   No upcoming fixtures within the 168-hour window.
                 </p>
                 <p className="text-[11px] text-slate-400 font-sans max-w-sm mx-auto">
-                  Because current-season coverage is currently 0, all analytical operations draw from completed historical seasons.
+                  Historical match intelligence remains available across all 8 supported leagues.
                 </p>
               </div>
             ) : (
-              <div className="divide-y divide-surface-border">
-                {upcomingMatches.slice(0, 4).map((m) => (
+              <div className="divide-y divide-surface-border max-h-[500px] overflow-y-auto">
+                {upcomingMatches.slice(0, 10).map((m) => (
                   <MatchRow key={m.id} match={m} />
                 ))}
               </div>

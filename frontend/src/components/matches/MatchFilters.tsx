@@ -37,13 +37,45 @@ export const MatchFilters: React.FC<MatchFiltersProps> = ({
           <Filter className="w-3.5 h-3.5 text-emerald-400" />
           <span>MATCH REGISTRY FILTERS</span>
         </div>
-        <button
-          onClick={handleReset}
-          className="inline-flex items-center gap-1 text-[11px] font-mono text-slate-400 hover:text-slate-200 transition-colors"
-        >
-          <RotateCcw className="w-3 h-3" />
-          Reset
-        </button>
+        <div className="flex items-center gap-2">
+          <button
+            onClick={() => onFilterChange({ status: 'SCHEDULED' })}
+            className={`px-2 py-1 rounded text-[11px] font-mono transition-colors ${
+              filters.status === 'SCHEDULED' && !filters.league
+                ? 'bg-emerald-600 text-white font-bold'
+                : 'bg-slate-800 text-slate-300 hover:bg-slate-700'
+            }`}
+          >
+            All Upcoming
+          </button>
+          <button
+            onClick={() => onFilterChange({ league: 'NATIONS_LEAGUE', status: 'SCHEDULED' })}
+            className={`px-2 py-1 rounded text-[11px] font-mono transition-colors ${
+              filters.league === 'NATIONS_LEAGUE'
+                ? 'bg-emerald-600 text-white font-bold'
+                : 'bg-slate-800 text-slate-300 hover:bg-slate-700'
+            }`}
+          >
+            Nations League
+          </button>
+          <button
+            onClick={() => onFilterChange({ league: 'FRIENDLIES', status: 'SCHEDULED' })}
+            className={`px-2 py-1 rounded text-[11px] font-mono transition-colors ${
+              filters.league === 'FRIENDLIES'
+                ? 'bg-emerald-600 text-white font-bold'
+                : 'bg-slate-800 text-slate-300 hover:bg-slate-700'
+            }`}
+          >
+            Friendlies
+          </button>
+          <button
+            onClick={handleReset}
+            className="inline-flex items-center gap-1 text-[11px] font-mono text-slate-400 hover:text-slate-200 transition-colors ml-1"
+          >
+            <RotateCcw className="w-3 h-3" />
+            Reset
+          </button>
+        </div>
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">

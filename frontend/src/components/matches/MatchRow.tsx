@@ -43,7 +43,12 @@ export const MatchRow: React.FC<MatchRowProps> = ({ match }) => {
         </div>
 
         <div className="flex-1 min-w-0">
-          <div className="flex items-center gap-2 mb-1">
+          <div className="flex flex-wrap items-center gap-2 mb-1">
+            {match.league_name && (
+              <span className="text-[10px] font-mono font-bold uppercase tracking-wider px-1.5 py-0.5 rounded bg-emerald-950/60 text-emerald-400 border border-emerald-800/60">
+                {match.league_name}
+              </span>
+            )}
             <span className="text-[11px] font-mono text-slate-400">Match #{match.id}</span>
             <span className="text-slate-600">•</span>
             <span className="text-[11px] font-mono text-emerald-400/90 flex items-center gap-1">

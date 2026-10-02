@@ -40,6 +40,8 @@ class MatchOut(BaseModel):
     minute: Optional[int] = None
     home_score: Optional[int] = None
     away_score: Optional[int] = None
+    league_code: Optional[str] = None
+    league_name: Optional[str] = None
 
 
 class StatOut(BaseModel):

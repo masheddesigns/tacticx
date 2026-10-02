@@ -74,14 +74,47 @@ export const MiroFishSection: React.FC<MiroFishSectionProps> = ({ mirofish }) =>
                 <span className="text-xs font-mono font-semibold text-slate-300">
                   Key Qualitative Observations:
                 </span>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                  {Object.entries(scenario.structured_observations).map(([k, v]) => (
-                    <div key={k} className="p-2.5 rounded bg-slate-950 border border-slate-800 text-xs font-mono">
-                      <span className="text-slate-400 block">{k.replace(/_/g, ' ')}:</span>
-                      <span className="text-slate-200 font-semibold">{String(v)}</span>
-                    </div>
-                  ))}
-                </div>
+                {Array.isArray(scenario.structured_observations) ? (
+                  <div className="grid grid-cols-1 gap-2">
+                    {scenario.structured_observations.map((obs: { kind?: string; statement?: string; detail?: Record<string, unknown> }, idx: number) => (
+                      <div key={idx} className="p-3 rounded bg-slate-950 border border-slate-800 text-xs space-y-1.5">
+                        {obs.kind && (
+                          <span className={`inline-block px-1.5 py-0.5 rounded font-mono font-bold text-[10px] uppercase ${
+                            obs.kind === 'sensitivity' ? 'bg-blue-950 text-blue-400 border border-blue-800' :
+                            obs.kind === 'divergence' ? 'bg-amber-950 text-amber-400 border border-amber-800' :
+                            obs.kind === 'caveat' ? 'bg-red-950 text-red-400 border border-red-800' :
+                            'bg-slate-800 text-slate-300 border border-slate-700'
+                          }`}>
+                            {obs.kind}
+                          </span>
+                        )}
+                        {obs.statement && (
+                          <p className="text-slate-200 font-sans leading-relaxed">
+                            {obs.statement}
+                          </p>
+                        )}
+                        {obs.detail && Object.keys(obs.detail).length > 0 && (
+                          <div className="flex flex-wrap gap-1.5 pt-1">
+                            {Object.entries(obs.detail).map(([dk, dv]) => (
+                              <span key={dk} className="text-[10px] font-mono text-slate-500">
+                                {dk}: <span className="text-slate-400">{typeof dv === 'object' ? JSON.stringify(dv) : String(dv)}</span>
+                              </span>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                    {Object.entries(scenario.structured_observations).map(([k, v]) => (
+                      <div key={k} className="p-2.5 rounded bg-slate-950 border border-slate-800 text-xs font-mono">
+                        <span className="text-slate-400 block">{k.replace(/_/g, ' ')}:</span>
+                        <span className="text-slate-200 font-semibold">{typeof v === 'object' ? JSON.stringify(v) : String(v)}</span>
+                      </div>
+                    ))}
+                  </div>
+                )}
               </div>
             )}
           </div>
