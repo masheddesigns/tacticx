@@ -19,6 +19,7 @@ import { DataQualitySection } from '../components/intelligence/DataQualitySectio
 import { WarningsSection } from '../components/intelligence/WarningsSection';
 import { ProvenanceSection } from '../components/intelligence/ProvenanceSection';
 import { MatchStatComparisonCard } from '../components/intelligence/MatchStatComparisonCard';
+import { SharePredictionModal } from '../components/intelligence/SharePredictionModal';
 import { MatchIntelligence } from '../api/types';
 
 const intel = mockData as unknown as MatchIntelligence;
@@ -304,5 +305,28 @@ describe('Match Intelligence Components — Analytical & Statistical Integrity',
     expect(screen.getByText('Corners (Total & Teams)')).toBeInTheDocument();
     expect(screen.getAllByText('Hit').length).toBeGreaterThanOrEqual(2);
   });
+
+  it('renders share prediction modal with export controls and screenshot preview', () => {
+    render(
+      <SharePredictionModal
+        isOpen={true}
+        onClose={() => {}}
+        intel={intel}
+        homeTeamName="Arsenal"
+        awayTeamName="Chelsea"
+      />
+    );
+
+    // Verify Title & Teams
+    expect(screen.getByText(/Share Match Prediction Snapshot/i)).toBeInTheDocument();
+    expect(screen.getAllByText('Arsenal').length).toBeGreaterThanOrEqual(1);
+    expect(screen.getAllByText('Chelsea').length).toBeGreaterThanOrEqual(1);
+
+    // Verify Action Buttons
+    expect(screen.getByText(/Download PNG/i)).toBeInTheDocument();
+    expect(screen.getByText(/Copy Image/i)).toBeInTheDocument();
+    expect(screen.getByText(/Copy Match Link/i)).toBeInTheDocument();
+  });
 });
+
 

@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { ArrowLeft, RefreshCw, Layers, ShieldCheck, AlertCircle } from 'lucide-react';
+import { ArrowLeft, RefreshCw, Layers, ShieldCheck, AlertCircle, Share2 } from 'lucide-react';
 import { useMatchIntelligence, useMatch, usePredictionSnapshots, useMatchEvaluation, useStatProjections, useMatchStatComparison } from '../api/queries';
 import { MatchHeader } from '../components/intelligence/MatchHeader';
+import { SharePredictionModal } from '../components/intelligence/SharePredictionModal';
 import { CorePredictionCard } from '../components/intelligence/CorePredictionCard';
 import { ExpectedGoalsCard } from '../components/intelligence/ExpectedGoalsCard';
 import { DerivedMarketsCard } from '../components/intelligence/DerivedMarketsCard';
@@ -30,6 +31,7 @@ export const MatchIntelligencePage: React.FC = () => {
 
   const [temporalMode, setTemporalMode] = useState<string>('strict_prematch');
   const [activeTab, setActiveTab] = useState<'markets' | 'comparison' | 'analysis' | 'telemetry'>('markets');
+  const [shareOpen, setShareOpen] = useState<boolean>(false);
 
   const { data: matchFallback } = useMatch(idNum);
   const { data: execution, isLoading: executionLoading } = usePredictionSnapshots(idNum);
@@ -86,7 +88,16 @@ export const MatchIntelligencePage: React.FC = () => {
           <span>Return to Explorer</span>
         </Link>
 
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2.5">
+          <button
+            onClick={() => setShareOpen(true)}
+            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-mono font-semibold bg-emerald-600 hover:bg-emerald-500 text-white shadow-sm transition-all"
+            title="Share Match Prediction Snapshot"
+          >
+            <Share2 className="w-3.5 h-3.5" />
+            <span>Share Prediction</span>
+          </button>
+
           <div className="flex items-center gap-2 text-xs font-mono bg-slate-900 px-3 py-1.5 rounded-lg border border-slate-800">
             <span className="text-slate-400">Mode:</span>
             <select
@@ -111,7 +122,21 @@ export const MatchIntelligencePage: React.FC = () => {
       </div>
 
       {/* 1. Hero Match Header */}
-      <MatchHeader match={matchSection} cutoff={intel.cutoff} />
+      <MatchHeader
+        match={matchSection}
+        cutoff={intel.cutoff}
+        onShare={() => setShareOpen(true)}
+      />
+
+      {/* Share Prediction Screenshot Modal */}
+      <SharePredictionModal
+        isOpen={shareOpen}
+        onClose={() => setShareOpen(false)}
+        intel={intel}
+        homeTeamName={homeName}
+        awayTeamName={awayName}
+        statComparison={statComparison}
+      />
 
       {/* Warnings (if present) */}
       {intel.warnings?.length > 0 && <WarningsSection warnings={intel.warnings} />}

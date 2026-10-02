@@ -1,5 +1,5 @@
 import React from 'react';
-import { Shield, Clock, MapPin, Layers } from 'lucide-react';
+import { Shield, Clock, MapPin, Layers, Share2 } from 'lucide-react';
 import { MatchSection, CutoffSection } from '../../api/types';
 import { formatDateTime } from '../../lib/utils';
 import { Badge } from '../common/Badge';
@@ -7,6 +7,7 @@ import { Badge } from '../common/Badge';
 export interface MatchHeaderProps {
   match: MatchSection;
   cutoff?: CutoffSection;
+  onShare?: () => void;
 }
 
 const getTeamInitials = (name?: string | null): string => {
@@ -34,7 +35,7 @@ const getTeamColorStyle = (name?: string | null): string => {
   return colors[Math.abs(hash) % colors.length];
 };
 
-export const MatchHeader: React.FC<MatchHeaderProps> = ({ match, cutoff }) => {
+export const MatchHeader: React.FC<MatchHeaderProps> = ({ match, cutoff, onShare }) => {
   const kickoff = formatDateTime(match.kickoff);
   const homeName = match.home_team?.name || 'Home Team';
   const awayName = match.away_team?.name || 'Away Team';
@@ -62,6 +63,17 @@ export const MatchHeader: React.FC<MatchHeaderProps> = ({ match, cutoff }) => {
         </div>
 
         <div className="flex items-center gap-2.5">
+          {onShare && (
+            <button
+              onClick={onShare}
+              className="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg text-xs font-mono font-semibold bg-emerald-600/20 hover:bg-emerald-600 text-emerald-300 hover:text-white border border-emerald-500/40 transition-all shadow-sm"
+              title="Share Match Prediction Snapshot"
+            >
+              <Share2 className="w-3.5 h-3.5" />
+              <span>Share Snapshot</span>
+            </button>
+          )}
+
           {isLive ? (
             <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold font-mono bg-rose-950/90 text-rose-300 border border-rose-700 animate-pulse">
               <span className="w-2 h-2 rounded-full bg-rose-500 animate-ping inline-block" />
