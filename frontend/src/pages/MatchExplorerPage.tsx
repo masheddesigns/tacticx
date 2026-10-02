@@ -3,6 +3,7 @@ import { Database, ChevronLeft, ChevronRight, AlertCircle, RefreshCw } from 'luc
 import { useMatches, useLeagues } from '../api/queries';
 import { MatchRow } from '../components/matches/MatchRow';
 import { MatchFilters, MatchFiltersState } from '../components/matches/MatchFilters';
+import { getRelativeDateLabel } from '../lib/utils';
 import { LoadingSpinner } from '../components/common/LoadingSpinner';
 import { ErrorCard } from '../components/common/ErrorCard';
 
@@ -23,6 +24,8 @@ export const MatchExplorerPage: React.FC = () => {
     'FRIENDLIES',
   ];
 
+  const [timeZone, setTimeZone] = useState<'UTC' | 'local'>('UTC');
+
   const { data, isLoading, error, refetch, isFetching } = useMatches({
     page,
     page_size: pageSize,
@@ -30,6 +33,7 @@ export const MatchExplorerPage: React.FC = () => {
     status: filters.status,
     date: filters.date,
     team: filters.team,
+    sort_order: filters.sort_order || 'asc',
   });
 
   const matches = data?.data || [];
@@ -41,6 +45,14 @@ export const MatchExplorerPage: React.FC = () => {
     setPage(1); // Reset to page 1 on filter change
   };
 
+  // Group matches by relative date (Today, Tomorrow, Yesterday, etc.) FotMob-style
+  const groupedMatches = matches.reduce<Record<string, typeof matches>>((acc, m) => {
+    const label = getRelativeDateLabel(m.kickoff_at, timeZone);
+    if (!acc[label]) acc[label] = [];
+    acc[label].push(m);
+    return acc;
+  }, {});
+
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-6">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
@@ -50,7 +62,7 @@ export const MatchExplorerPage: React.FC = () => {
             <span>Match Explorer</span>
           </h1>
           <p className="text-xs text-slate-400 font-sans mt-1">
-            Browse and search canonical fixtures across European competitions with pre-match audit statuses.
+            Browse and search canonical fixtures grouped by date with pre-match intelligence and decimal odds.
           </p>
         </div>
 
@@ -69,14 +81,16 @@ export const MatchExplorerPage: React.FC = () => {
         </div>
       </div>
 
-      {/* Filter Component */}
+      {/* Filter Component with Days & Timezone */}
       <MatchFilters
         filters={filters}
         onFilterChange={handleFilterChange}
         availableLeagues={availableLeagueCodes}
+        timeZone={timeZone}
+        onTimeZoneChange={(tz) => setTimeZone(tz)}
       />
 
-      {/* Fixtures List */}
+      {/* Fixtures List with FotMob-style Date Sections */}
       <div className="rounded-xl border border-surface-border bg-surface-card overflow-hidden shadow-sm">
         {isLoading ? (
           <LoadingSpinner label="Fetching fixtures from canonical store..." />
@@ -89,13 +103,43 @@ export const MatchExplorerPage: React.FC = () => {
             <AlertCircle className="w-8 h-8 text-slate-500 mx-auto" />
             <h3 className="font-semibold text-sm text-slate-200">No Matching Fixtures Found</h3>
             <p className="text-xs text-slate-400 font-sans max-w-sm mx-auto">
-              No matches matched the current filter criteria. Try broadening your date or competition selection.
+              No matches matched the current filter criteria. Try clicking "Today", "Tomorrow", or resetting filters.
             </p>
           </div>
         ) : (
           <div className="divide-y divide-surface-border">
-            {matches.map((m) => (
-              <MatchRow key={m.id} match={m} />
+            {Object.entries(groupedMatches).map(([dateLabel, dayMatches]) => (
+              <div key={dateLabel} className="border-b border-surface-border last:border-b-0">
+                {/* FotMob-style Date Group Header */}
+                <div className="bg-slate-950/80 px-4 py-2 border-b border-slate-800/80 flex items-center justify-between sticky top-16 z-20">
+                  <div className="flex items-center gap-2">
+                    <span className={`text-xs font-mono font-bold uppercase tracking-wider px-2 py-0.5 rounded ${
+                      dateLabel === 'Today'
+                        ? 'bg-emerald-950 text-emerald-400 border border-emerald-800'
+                        : dateLabel === 'Tomorrow'
+                        ? 'bg-blue-950 text-blue-400 border border-blue-800'
+                        : dateLabel === 'Yesterday'
+                        ? 'bg-amber-950 text-amber-400 border border-amber-800'
+                        : 'bg-slate-900 text-slate-300 border border-slate-800'
+                    }`}>
+                      {dateLabel}
+                    </span>
+                    <span className="text-[11px] font-mono text-slate-400">
+                      ({dayMatches.length} {dayMatches.length === 1 ? 'match' : 'matches'})
+                    </span>
+                  </div>
+                  <span className="text-[10px] font-mono text-slate-400">
+                    Showing in {timeZone === 'local' ? 'Local Browser Time' : 'UTC'}
+                  </span>
+                </div>
+
+                {/* Match Rows for this Day */}
+                <div className="divide-y divide-surface-border">
+                  {dayMatches.map((m) => (
+                    <MatchRow key={m.id} match={m} timeZone={timeZone} />
+                  ))}
+                </div>
+              </div>
             ))}
           </div>
         )}

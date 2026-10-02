@@ -105,6 +105,7 @@ export const apiClient = {
     status?: string;
     page?: number;
     page_size?: number;
+    sort_order?: 'asc' | 'desc';
     signal?: AbortSignal;
   }): Promise<PaginatedMatchesResponse> => {
     const query = new URLSearchParams();
@@ -112,6 +113,7 @@ export const apiClient = {
     if (params?.date) query.set('date', params.date);
     if (params?.team) query.set('team', params.team);
     if (params?.status) query.set('status', params.status);
+    if (params?.sort_order) query.set('sort_order', params.sort_order);
     if (params?.page) query.set('page', String(params.page));
     if (params?.page_size) query.set('page_size', String(params.page_size));
 

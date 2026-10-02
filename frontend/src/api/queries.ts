@@ -32,6 +32,7 @@ export function useMatches(params?: {
   status?: string;
   page?: number;
   page_size?: number;
+  sort_order?: 'asc' | 'desc';
 }) {
   return useQuery({
     queryKey: QUERY_KEYS.matches(params),

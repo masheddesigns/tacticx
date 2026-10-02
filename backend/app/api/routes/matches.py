@@ -58,6 +58,7 @@ def list_matches(
     status: Optional[str] = Query(None, description="SCHEDULED|PRE_MATCH|LIVE|HALFTIME|FINISHED|..."),
     page: int = Query(1, ge=1),
     page_size: int = Query(20, ge=1, le=100),
+    sort_order: str = Query("asc", description="Sort order by kickoff_at: asc | desc"),
 ):
     q, err = _filtered_query(db, league, team, status)
     if err:
@@ -70,7 +71,8 @@ def list_matches(
             raise HTTPException(400, "date must be YYYY-MM-DD")
         q = q.filter(Match.kickoff_at >= day, Match.kickoff_at < day + timedelta(days=1))
     total = q.count()
-    rows = q.order_by(Match.kickoff_at).offset((page - 1) * page_size).limit(page_size).all()
+    order_clause = Match.kickoff_at.desc() if sort_order.lower() == "desc" else Match.kickoff_at.asc()
+    rows = q.order_by(order_clause).offset((page - 1) * page_size).limit(page_size).all()
     return {
         "data": [_match_out(m, db) for m in rows],
         "meta": PaginatedMeta(page=page, page_size=page_size, total=total),

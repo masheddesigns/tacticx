@@ -6,18 +6,23 @@ export interface MatchFiltersState {
   status?: string;
   date?: string;
   team?: string;
+  sort_order?: 'asc' | 'desc';
 }
 
 export interface MatchFiltersProps {
   filters: MatchFiltersState;
   onFilterChange: (newFilters: MatchFiltersState) => void;
   availableLeagues?: string[];
+  timeZone?: 'UTC' | 'local' | string;
+  onTimeZoneChange?: (tz: 'UTC' | 'local') => void;
 }
 
 export const MatchFilters: React.FC<MatchFiltersProps> = ({
   filters,
   onFilterChange,
   availableLeagues = ['EPL', 'LA_LIGA', 'SERIE_A', 'BUNDESLIGA', 'LIGUE_1', 'UCL', 'NATIONS_LEAGUE', 'FRIENDLIES'],
+  timeZone = 'UTC',
+  onTimeZoneChange,
 }) => {
   const handleChange = (key: keyof MatchFiltersState, value: string) => {
     onFilterChange({
@@ -30,47 +35,85 @@ export const MatchFilters: React.FC<MatchFiltersProps> = ({
     onFilterChange({});
   };
 
+  // Canonical date references: Today is 2026-10-02, Yesterday 2026-10-01, Tomorrow 2026-10-03
+  const handleQuickDay = (dayStr: string) => {
+    onFilterChange({
+      ...filters,
+      date: dayStr,
+    });
+  };
+
   return (
-    <div className="rounded-xl border border-surface-border bg-surface-card p-4 space-y-3">
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-2 text-xs font-mono font-semibold text-slate-300">
-          <Filter className="w-3.5 h-3.5 text-emerald-400" />
-          <span>MATCH REGISTRY FILTERS</span>
-        </div>
-        <div className="flex items-center gap-2">
+    <div className="rounded-xl border border-surface-border bg-surface-card p-4 space-y-3.5">
+      {/* Top Filter Bar with Quick Day Chips and Timezone */}
+      <div className="flex flex-wrap items-center justify-between gap-3 pb-3 border-b border-surface-border/80">
+        <div className="flex flex-wrap items-center gap-1.5">
+          <span className="text-[11px] font-mono text-slate-400 font-semibold mr-1">Days:</span>
           <button
-            onClick={() => onFilterChange({ status: 'SCHEDULED' })}
-            className={`px-2 py-1 rounded text-[11px] font-mono transition-colors ${
-              filters.status === 'SCHEDULED' && !filters.league
+            onClick={() => handleQuickDay('2026-10-01')}
+            className={`px-2.5 py-1 rounded text-xs font-mono transition-colors ${
+              filters.date === '2026-10-01'
+                ? 'bg-emerald-600 text-white font-bold'
+                : 'bg-slate-800 text-slate-300 hover:bg-slate-700'
+            }`}
+          >
+            Yesterday (Oct 1)
+          </button>
+          <button
+            onClick={() => handleQuickDay('2026-10-02')}
+            className={`px-2.5 py-1 rounded text-xs font-mono transition-colors ${
+              filters.date === '2026-10-02'
+                ? 'bg-emerald-600 text-white font-bold'
+                : 'bg-slate-800 text-slate-300 hover:bg-slate-700'
+            }`}
+          >
+            Today (Oct 2)
+          </button>
+          <button
+            onClick={() => handleQuickDay('2026-10-03')}
+            className={`px-2.5 py-1 rounded text-xs font-mono transition-colors ${
+              filters.date === '2026-10-03'
+                ? 'bg-emerald-600 text-white font-bold'
+                : 'bg-slate-800 text-slate-300 hover:bg-slate-700'
+            }`}
+          >
+            Tomorrow (Oct 3)
+          </button>
+          <button
+            onClick={() => onFilterChange({ ...filters, status: 'SCHEDULED', date: undefined })}
+            className={`px-2.5 py-1 rounded text-xs font-mono transition-colors ${
+              filters.status === 'SCHEDULED' && !filters.date
                 ? 'bg-emerald-600 text-white font-bold'
                 : 'bg-slate-800 text-slate-300 hover:bg-slate-700'
             }`}
           >
             All Upcoming
           </button>
-          <button
-            onClick={() => onFilterChange({ league: 'NATIONS_LEAGUE', status: 'SCHEDULED' })}
-            className={`px-2 py-1 rounded text-[11px] font-mono transition-colors ${
-              filters.league === 'NATIONS_LEAGUE'
-                ? 'bg-emerald-600 text-white font-bold'
-                : 'bg-slate-800 text-slate-300 hover:bg-slate-700'
-            }`}
-          >
-            Nations League
-          </button>
-          <button
-            onClick={() => onFilterChange({ league: 'FRIENDLIES', status: 'SCHEDULED' })}
-            className={`px-2 py-1 rounded text-[11px] font-mono transition-colors ${
-              filters.league === 'FRIENDLIES'
-                ? 'bg-emerald-600 text-white font-bold'
-                : 'bg-slate-800 text-slate-300 hover:bg-slate-700'
-            }`}
-          >
-            Friendlies
-          </button>
+        </div>
+
+        {/* Timezone & Reset Controls */}
+        <div className="flex items-center gap-2">
+          {onTimeZoneChange && (
+            <div className="flex items-center gap-1 text-xs font-mono bg-slate-900 px-2 py-1 rounded border border-slate-800">
+              <span className="text-slate-400">Timezone:</span>
+              <button
+                onClick={() => onTimeZoneChange('UTC')}
+                className={`px-1.5 py-0.5 rounded ${timeZone === 'UTC' ? 'bg-slate-800 text-emerald-400 font-bold' : 'text-slate-400'}`}
+              >
+                UTC
+              </button>
+              <button
+                onClick={() => onTimeZoneChange('local')}
+                className={`px-1.5 py-0.5 rounded ${timeZone === 'local' ? 'bg-slate-800 text-emerald-400 font-bold' : 'text-slate-400'}`}
+              >
+                Local
+              </button>
+            </div>
+          )}
+
           <button
             onClick={handleReset}
-            className="inline-flex items-center gap-1 text-[11px] font-mono text-slate-400 hover:text-slate-200 transition-colors ml-1"
+            className="inline-flex items-center gap-1 text-xs font-mono text-slate-400 hover:text-slate-200 transition-colors px-2 py-1"
           >
             <RotateCcw className="w-3 h-3" />
             Reset
@@ -78,7 +121,8 @@ export const MatchFilters: React.FC<MatchFiltersProps> = ({
         </div>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+      {/* Primary Filter Selectors & Sort */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3">
         {/* Team Search */}
         <div className="relative">
           <Search className="absolute left-3 top-2.5 w-3.5 h-3.5 text-slate-500" />
@@ -123,7 +167,7 @@ export const MatchFilters: React.FC<MatchFiltersProps> = ({
           </select>
         </div>
 
-        {/* Date input */}
+        {/* Specific Date input */}
         <div>
           <input
             type="date"
@@ -132,7 +176,20 @@ export const MatchFilters: React.FC<MatchFiltersProps> = ({
             className="w-full bg-slate-900 border border-slate-700/80 rounded-lg px-3 py-2 text-xs text-slate-200 focus:outline-none focus:border-emerald-500/60 focus:ring-1 focus:ring-emerald-500/60 font-sans [color-scheme:dark]"
           />
         </div>
+
+        {/* Sort Order Selector */}
+        <div>
+          <select
+            value={filters.sort_order || 'asc'}
+            onChange={(e) => handleChange('sort_order', e.target.value)}
+            className="w-full bg-slate-900 border border-slate-700/80 rounded-lg px-3 py-2 text-xs text-slate-200 focus:outline-none focus:border-emerald-500/60 focus:ring-1 focus:ring-emerald-500/60 font-sans"
+          >
+            <option value="asc">Kickoff: Earliest First</option>
+            <option value="desc">Kickoff: Latest First</option>
+          </select>
+        </div>
       </div>
     </div>
   );
 };
+

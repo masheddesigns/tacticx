@@ -7,10 +7,11 @@ import { Badge } from '../common/Badge';
 
 export interface MatchRowProps {
   match: MatchListItem;
+  timeZone?: 'UTC' | 'local' | string;
 }
 
-export const MatchRow: React.FC<MatchRowProps> = ({ match }) => {
-  const kickoff = formatDateTime(match.kickoff_at);
+export const MatchRow: React.FC<MatchRowProps> = ({ match, timeZone = 'UTC' }) => {
+  const kickoff = formatDateTime(match.kickoff_at, timeZone);
 
   const getStatusBadgeVariant = (status: string) => {
     switch (status.toUpperCase()) {
