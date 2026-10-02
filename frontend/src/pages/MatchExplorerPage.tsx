@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { Database, ChevronLeft, ChevronRight, AlertCircle, RefreshCw } from 'lucide-react';
 import { useMatches, useLeagues } from '../api/queries';
 import { MatchRow } from '../components/matches/MatchRow';
@@ -8,9 +9,38 @@ import { LoadingSpinner } from '../components/common/LoadingSpinner';
 import { ErrorCard } from '../components/common/ErrorCard';
 
 export const MatchExplorerPage: React.FC = () => {
+  const [searchParams, setSearchParams] = useSearchParams();
   const [page, setPage] = useState<number>(1);
   const pageSize = 20;
-  const [filters, setFilters] = useState<MatchFiltersState>({});
+
+  // Initialize filters from URL query parameters if present
+  const [filters, setFilters] = useState<MatchFiltersState>(() => {
+    const urlStatus = searchParams.get('status') || undefined;
+    const urlLeague = searchParams.get('league') || undefined;
+    const urlDate = searchParams.get('date') || undefined;
+    const urlTeam = searchParams.get('team') || undefined;
+    return {
+      status: urlStatus,
+      league: urlLeague,
+      date: urlDate,
+      team: urlTeam,
+    };
+  });
+
+  // Sync state if URL search parameters change externally
+  useEffect(() => {
+    const urlStatus = searchParams.get('status') || undefined;
+    const urlLeague = searchParams.get('league') || undefined;
+    const urlDate = searchParams.get('date') || undefined;
+    const urlTeam = searchParams.get('team') || undefined;
+    setFilters((prev) => ({
+      ...prev,
+      status: urlStatus,
+      league: urlLeague,
+      date: urlDate,
+      team: urlTeam,
+    }));
+  }, [searchParams]);
 
   const { data: leaguesData } = useLeagues();
   const availableLeagueCodes = leaguesData?.data?.map((l) => l.code) || [
@@ -43,7 +73,16 @@ export const MatchExplorerPage: React.FC = () => {
   const handleFilterChange = (newFilters: MatchFiltersState) => {
     setFilters(newFilters);
     setPage(1); // Reset to page 1 on filter change
+
+    // Keep URL in sync
+    const params: Record<string, string> = {};
+    if (newFilters.status) params.status = newFilters.status;
+    if (newFilters.league) params.league = newFilters.league;
+    if (newFilters.date) params.date = newFilters.date;
+    if (newFilters.team) params.team = newFilters.team;
+    setSearchParams(params, { replace: true });
   };
+
 
   // Group matches by relative date (Today, Tomorrow, Yesterday, etc.) FotMob-style
   const groupedMatches = matches.reduce<Record<string, typeof matches>>((acc, m) => {
@@ -111,7 +150,7 @@ export const MatchExplorerPage: React.FC = () => {
             {Object.entries(groupedMatches).map(([dateLabel, dayMatches]) => (
               <div key={dateLabel} className="border-b border-surface-border last:border-b-0">
                 {/* FotMob-style Date Group Header */}
-                <div className="bg-slate-950/80 px-4 py-2 border-b border-slate-800/80 flex items-center justify-between sticky top-16 z-20">
+                <div className="bg-slate-900 px-4 py-2.5 border-b border-surface-border flex items-center justify-between">
                   <div className="flex items-center gap-2">
                     <span className={`text-xs font-mono font-bold uppercase tracking-wider px-2 py-0.5 rounded ${
                       dateLabel === 'Today'
@@ -120,7 +159,7 @@ export const MatchExplorerPage: React.FC = () => {
                         ? 'bg-blue-950 text-blue-400 border border-blue-800'
                         : dateLabel === 'Yesterday'
                         ? 'bg-amber-950 text-amber-400 border border-amber-800'
-                        : 'bg-slate-900 text-slate-300 border border-slate-800'
+                        : 'bg-slate-950 text-slate-300 border border-slate-800'
                     }`}>
                       {dateLabel}
                     </span>
@@ -132,6 +171,7 @@ export const MatchExplorerPage: React.FC = () => {
                     Showing in {timeZone === 'local' ? 'Local Browser Time' : 'UTC'}
                   </span>
                 </div>
+
 
                 {/* Match Rows for this Day */}
                 <div className="divide-y divide-surface-border">
