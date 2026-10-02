@@ -134,6 +134,40 @@ export interface DerivedMarketsSection {
   };
 }
 
+export interface TeamStatBreakdown {
+  corners: number;
+  shots_total: number;
+  shots_on_target: number;
+  yellow_cards: number;
+  red_cards: number;
+}
+
+export interface SituationMarketItem {
+  market_name: string;
+  category: 'corners' | 'shots' | 'cards' | string;
+  probability: number;
+  decimal_odds: number;
+  description: string;
+}
+
+export interface StatProjectionsResponse {
+  match_id: number;
+  home_team: string;
+  away_team: string;
+  team_projections: {
+    home: TeamStatBreakdown;
+    away: TeamStatBreakdown;
+  };
+  combined_projections: {
+    corners_total: number;
+    shots_total: number;
+    shots_on_target: number;
+    yellow_cards_total: number;
+    red_cards_total: number;
+  };
+  situation_markets: SituationMarketItem[];
+}
+
 export interface CorrectScoreEntry {
   score: string;
   probability: number;

@@ -1,11 +1,12 @@
 import React, { useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { ArrowLeft, RefreshCw, Layers, ShieldCheck, AlertCircle } from 'lucide-react';
-import { useMatchIntelligence, useMatch, usePredictionSnapshots, useMatchEvaluation } from '../api/queries';
+import { useMatchIntelligence, useMatch, usePredictionSnapshots, useMatchEvaluation, useStatProjections } from '../api/queries';
 import { MatchHeader } from '../components/intelligence/MatchHeader';
 import { CorePredictionCard } from '../components/intelligence/CorePredictionCard';
 import { ExpectedGoalsCard } from '../components/intelligence/ExpectedGoalsCard';
 import { DerivedMarketsCard } from '../components/intelligence/DerivedMarketsCard';
+import { SituationalStatsCard } from '../components/intelligence/SituationalStatsCard';
 import { CorrectScoreGrid } from '../components/intelligence/CorrectScoreGrid';
 import { UncertaintySection } from '../components/intelligence/UncertaintySection';
 import { ModelAgreementTable } from '../components/intelligence/ModelAgreementTable';
@@ -32,6 +33,7 @@ export const MatchIntelligencePage: React.FC = () => {
   const { data: matchFallback } = useMatch(idNum);
   const { data: execution, isLoading: executionLoading } = usePredictionSnapshots(idNum);
   const { data: matchEvaluation, isLoading: evaluationLoading } = useMatchEvaluation(idNum);
+  const { data: statProjections, isLoading: statProjLoading } = useStatProjections(idNum);
   const {
     data: intel,
     isLoading,
@@ -180,6 +182,14 @@ export const MatchIntelligencePage: React.FC = () => {
             markets={intel.derived_markets}
             homeTeamName={homeName}
             awayTeamName={awayName}
+          />
+
+          {/* 4b. Situational Props & Match Stats (Corners, Shots, Cards) */}
+          <SituationalStatsCard
+            projections={statProjections}
+            homeTeamName={homeName}
+            awayTeamName={awayName}
+            isLoading={statProjLoading}
           />
 
           {/* 5. Correct Score Heatmap & Rankings */}

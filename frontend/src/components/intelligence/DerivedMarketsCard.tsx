@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Layers, ShieldCheck } from 'lucide-react';
 import { DerivedMarketsSection } from '../../api/types';
-import { formatProbability } from '../../lib/utils';
+import { formatProbability, formatDecimalOdds } from '../../lib/utils';
 
 export interface DerivedMarketsCardProps {
   markets: DerivedMarketsSection;
@@ -74,33 +74,57 @@ export const DerivedMarketsCard: React.FC<DerivedMarketsCardProps> = ({
       {/* Tab 1: Double Chance */}
       {activeTab === 'double_chance' && (
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-          <div className="p-3.5 rounded-lg bg-slate-900/60 border border-slate-800 text-center">
-            <span className="text-xs font-mono text-slate-400 block">1X (Home or Draw)</span>
-            <div className="text-xl font-mono font-bold text-slate-100 mt-1">
-              {formatProbability(dc['1x'])}
+          <div className="p-3.5 rounded-lg bg-slate-900/60 border border-slate-800 text-center flex flex-col justify-between">
+            <div>
+              <span className="text-xs font-mono font-semibold text-slate-300 block">1X (Home Win or Draw)</span>
+              <div className="text-xl font-mono font-bold text-slate-100 mt-1">
+                {formatProbability(dc['1x'])}
+              </div>
+              <div className="mt-1 flex items-center justify-center gap-1.5">
+                <span className="text-xs font-mono font-bold px-2 py-0.5 rounded bg-slate-800 text-emerald-400 border border-slate-700">
+                  {formatDecimalOdds(dc['1x'], true)}
+                </span>
+                <span className="text-[10px] font-mono text-slate-400">Odds</span>
+              </div>
             </div>
-            <span className="text-[10px] text-slate-400 font-mono mt-0.5 block">
-              Exact: {dc['1x'] !== undefined && dc['1x'] !== null ? dc['1x'].toFixed(4) : '—'}
+            <span className="text-[10px] text-slate-500 font-sans mt-2 block">
+              Bet x {formatDecimalOdds(dc['1x'], true)} payout
             </span>
           </div>
 
-          <div className="p-3.5 rounded-lg bg-slate-900/60 border border-slate-800 text-center">
-            <span className="text-xs font-mono text-slate-400 block">X2 (Draw or Away)</span>
-            <div className="text-xl font-mono font-bold text-slate-100 mt-1">
-              {formatProbability(dc['x2'])}
+          <div className="p-3.5 rounded-lg bg-slate-900/60 border border-slate-800 text-center flex flex-col justify-between">
+            <div>
+              <span className="text-xs font-mono font-semibold text-slate-300 block">X2 (Draw or Away Win)</span>
+              <div className="text-xl font-mono font-bold text-slate-100 mt-1">
+                {formatProbability(dc['x2'])}
+              </div>
+              <div className="mt-1 flex items-center justify-center gap-1.5">
+                <span className="text-xs font-mono font-bold px-2 py-0.5 rounded bg-slate-800 text-emerald-400 border border-slate-700">
+                  {formatDecimalOdds(dc['x2'], true)}
+                </span>
+                <span className="text-[10px] font-mono text-slate-400">Odds</span>
+              </div>
             </div>
-            <span className="text-[10px] text-slate-400 font-mono mt-0.5 block">
-              Exact: {dc['x2'] !== undefined && dc['x2'] !== null ? dc['x2'].toFixed(4) : '—'}
+            <span className="text-[10px] text-slate-500 font-sans mt-2 block">
+              Bet x {formatDecimalOdds(dc['x2'], true)} payout
             </span>
           </div>
 
-          <div className="p-3.5 rounded-lg bg-slate-900/60 border border-slate-800 text-center">
-            <span className="text-xs font-mono text-slate-400 block">12 (Home or Away)</span>
-            <div className="text-xl font-mono font-bold text-slate-100 mt-1">
-              {formatProbability(dc['12'])}
+          <div className="p-3.5 rounded-lg bg-slate-900/60 border border-slate-800 text-center flex flex-col justify-between">
+            <div>
+              <span className="text-xs font-mono font-semibold text-slate-300 block">12 (Any Team Wins)</span>
+              <div className="text-xl font-mono font-bold text-slate-100 mt-1">
+                {formatProbability(dc['12'])}
+              </div>
+              <div className="mt-1 flex items-center justify-center gap-1.5">
+                <span className="text-xs font-mono font-bold px-2 py-0.5 rounded bg-slate-800 text-emerald-400 border border-slate-700">
+                  {formatDecimalOdds(dc['12'], true)}
+                </span>
+                <span className="text-[10px] font-mono text-slate-400">Odds</span>
+              </div>
             </div>
-            <span className="text-[10px] text-slate-400 font-mono mt-0.5 block">
-              Exact: {dc['12'] !== undefined && dc['12'] !== null ? dc['12'].toFixed(4) : '—'}
+            <span className="text-[10px] text-slate-500 font-sans mt-2 block">
+              Bet x {formatDecimalOdds(dc['12'], true)} payout
             </span>
           </div>
         </div>
@@ -121,13 +145,25 @@ export const DerivedMarketsCard: React.FC<DerivedMarketsCardProps> = ({
                 <span className="text-[11px] font-mono font-semibold text-purple-300 block text-center pb-1 border-b border-slate-800">
                   Total {displayLabel} Goals
                 </span>
-                <div className="flex justify-between items-center text-xs font-mono">
-                  <span className="text-slate-400">Over:</span>
-                  <span className="text-slate-100 font-bold">{formatProbability(overVal)}</span>
-                </div>
-                <div className="flex justify-between items-center text-xs font-mono">
-                  <span className="text-slate-400">Under:</span>
-                  <span className="text-slate-300">{formatProbability(underVal)}</span>
+                <div className="space-y-1">
+                  <div className="flex justify-between items-center text-xs font-mono">
+                    <span className="text-slate-400">Over:</span>
+                    <div className="flex items-center gap-1">
+                      <span className="text-slate-100 font-bold">{formatProbability(overVal)}</span>
+                      <span className="text-[10px] text-emerald-400 font-mono bg-slate-950 px-1 py-0.2 rounded border border-slate-800">
+                        {formatDecimalOdds(overVal, true)}
+                      </span>
+                    </div>
+                  </div>
+                  <div className="flex justify-between items-center text-xs font-mono">
+                    <span className="text-slate-400">Under:</span>
+                    <div className="flex items-center gap-1">
+                      <span className="text-slate-300">{formatProbability(underVal)}</span>
+                      <span className="text-[10px] text-emerald-400 font-mono bg-slate-950 px-1 py-0.2 rounded border border-slate-800">
+                        {formatDecimalOdds(underVal, true)}
+                      </span>
+                    </div>
+                  </div>
                 </div>
               </div>
             );
@@ -139,22 +175,34 @@ export const DerivedMarketsCard: React.FC<DerivedMarketsCardProps> = ({
       {activeTab === 'btts' && (
         <div className="grid grid-cols-2 gap-3 max-w-md mx-auto">
           <div className="p-4 rounded-lg bg-slate-900/60 border border-slate-800 text-center">
-            <span className="text-xs font-mono text-slate-400 block">Both Teams To Score: YES</span>
+            <span className="text-xs font-mono font-semibold text-slate-300 block">Both Teams To Score: YES</span>
             <div className="text-2xl font-mono font-bold text-emerald-400 mt-1">
               {formatProbability(btts.yes)}
             </div>
-            <span className="text-[10px] text-slate-400 font-mono mt-0.5 block">
-              Exact: {btts.yes !== undefined && btts.yes !== null ? btts.yes.toFixed(4) : '—'}
+            <div className="mt-1 flex items-center justify-center gap-1.5">
+              <span className="text-xs font-mono font-bold px-2 py-0.5 rounded bg-emerald-950 text-emerald-300 border border-emerald-800">
+                {formatDecimalOdds(btts.yes, true)}
+              </span>
+              <span className="text-[10px] font-mono text-slate-400">Odds</span>
+            </div>
+            <span className="text-[10px] text-slate-500 font-sans mt-2 block">
+              Bet x {formatDecimalOdds(btts.yes, true)} payout
             </span>
           </div>
 
           <div className="p-4 rounded-lg bg-slate-900/60 border border-slate-800 text-center">
-            <span className="text-xs font-mono text-slate-400 block">Both Teams To Score: NO</span>
+            <span className="text-xs font-mono font-semibold text-slate-300 block">Both Teams To Score: NO</span>
             <div className="text-2xl font-mono font-bold text-slate-200 mt-1">
               {formatProbability(btts.no)}
             </div>
-            <span className="text-[10px] text-slate-400 font-mono mt-0.5 block">
-              Exact: {btts.no !== undefined && btts.no !== null ? btts.no.toFixed(4) : '—'}
+            <div className="mt-1 flex items-center justify-center gap-1.5">
+              <span className="text-xs font-mono font-bold px-2 py-0.5 rounded bg-slate-800 text-slate-200 border border-slate-700">
+                {formatDecimalOdds(btts.no, true)}
+              </span>
+              <span className="text-[10px] font-mono text-slate-400">Odds</span>
+            </div>
+            <span className="text-[10px] text-slate-500 font-sans mt-2 block">
+              Bet x {formatDecimalOdds(btts.no, true)} payout
             </span>
           </div>
         </div>

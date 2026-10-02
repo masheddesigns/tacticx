@@ -64,6 +64,15 @@ export function useMatch(matchId: number) {
   });
 }
 
+export function useStatProjections(matchId: number) {
+  return useQuery({
+    queryKey: ['statProjections', matchId],
+    queryFn: ({ signal }) => apiClient.getStatProjections(matchId, signal),
+    enabled: !!matchId,
+    staleTime: 60 * 1000,
+  });
+}
+
 export function useUpcomingMatches(hours = 24) {
   return useQuery({
     queryKey: QUERY_KEYS.upcomingMatches(hours),

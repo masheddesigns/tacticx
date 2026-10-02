@@ -12,6 +12,36 @@ export function formatProbability(value?: number | null, decimals = 1): string {
   return `${(value * 100).toFixed(decimals)}%`;
 }
 
+/**
+ * Converts a decimal probability (0..1) to standard European Decimal Odds (e.g. 0.50 -> 2.00)
+ */
+export function probabilityToDecimalOdds(prob?: number | null, decimals = 2): number | null {
+  if (prob === null || prob === undefined || isNaN(prob) || prob <= 0) {
+    return null;
+  }
+  return Number((1 / prob).toFixed(decimals));
+}
+
+/**
+ * Formats decimal odds as European Odds string, e.g. "2.50"
+ */
+export function formatDecimalOdds(oddsOrProb?: number | null, isProb = false): string {
+  if (oddsOrProb === null || oddsOrProb === undefined || isNaN(oddsOrProb) || oddsOrProb <= 0) {
+    return '—';
+  }
+  const decimalOdds = isProb ? 1 / oddsOrProb : oddsOrProb;
+  return decimalOdds.toFixed(2);
+}
+
+/**
+ * Returns human-friendly payout explanation for a given decimal odds and stake
+ */
+export function getPayoutExplanation(odds: number, stake = 10, currency = '$'): string {
+  const payout = (stake * odds).toFixed(2);
+  const profit = (stake * odds - stake).toFixed(2);
+  return `${currency}${stake} bet returns ${currency}${payout} (${currency}${profit} profit)`;
+}
+
 export function formatLambda(value?: number | null, decimals = 2): string {
   if (value === null || value === undefined || isNaN(value)) {
     return '—';
