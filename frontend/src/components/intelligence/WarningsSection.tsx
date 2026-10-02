@@ -63,23 +63,33 @@ export const WarningsSection: React.FC<WarningsSectionProps> = ({ warnings }) =>
                   <span className="font-semibold text-slate-400 block mb-1">Audit Evidence:</span>
                   <div className="flex flex-wrap gap-2">
                     {Object.entries(w.evidence).map(([key, val]) => {
-                      let display: string;
-                      if (val == null) {
-                        display = 'null';
-                      } else if (Array.isArray(val)) {
-                        display = val.join(', ');
-                      } else if (typeof val === 'object') {
-                        // Render nested objects as readable key: value pairs
-                        display = Object.entries(val as Record<string, unknown>)
-                          .map(([k, v]) => `${k}: ${typeof v === 'number' ? (v as number).toFixed(3) : String(v)}`)
-                          .join(', ');
-                      } else {
-                        display = String(val);
-                      }
+                      const formatVal = (v: unknown): string => {
+                        if (v == null) return 'null';
+                        if (Array.isArray(v)) return v.map(formatVal).join(', ');
+                        if (typeof v === 'number') return v.toFixed(3);
+                        if (typeof v === 'object') {
+                          return Object.entries(v as Record<string, unknown>)
+                            .map(([subKey, subVal]) => {
+                              if (typeof subVal === 'object' && subVal !== null) {
+                                // For deeper objects like home: { mean: 0.68, range: 0.25 }
+                                const summary = Object.entries(subVal as Record<string, unknown>)
+                                  .filter(([k]) => ['mean', 'std', 'min', 'max', 'range'].includes(k))
+                                  .map(([k, sv]) => `${k}=${typeof sv === 'number' ? sv.toFixed(2) : String(sv)}`)
+                                  .join(' ');
+                                return `${subKey}: (${summary || JSON.stringify(subVal)})`;
+                              }
+                              return `${subKey}: ${typeof subVal === 'number' ? subVal.toFixed(3) : String(subVal)}`;
+                            })
+                            .join(' · ');
+                        }
+                        return String(v);
+                      };
+
                       return (
-                        <span key={key} className="px-1.5 py-0.5 rounded bg-slate-950 border border-slate-800">
-                          {key}: {display}
-                        </span>
+                        <div key={key} className="px-2 py-1 rounded bg-slate-950 border border-slate-800 text-[11px] leading-relaxed">
+                          <span className="text-slate-400 font-semibold">{key}: </span>
+                          <span className="text-slate-300 font-mono">{formatVal(val)}</span>
+                        </div>
                       );
                     })}
                   </div>
