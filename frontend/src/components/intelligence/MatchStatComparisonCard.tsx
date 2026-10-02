@@ -29,6 +29,7 @@ export const MatchStatComparisonCard: React.FC<MatchStatComparisonCardProps> = (
   awayTeamName,
 }) => {
   const [selectedCategory, setSelectedCategory] = useState<string>('ALL');
+  const [searchQuery, setSearchQuery] = useState<string>('');
 
   if (isLoading) {
     return (
@@ -61,10 +62,31 @@ export const MatchStatComparisonCard: React.FC<MatchStatComparisonCardProps> = (
   const home = homeTeamName || comparison.home_team?.name || 'Home';
   const away = awayTeamName || comparison.away_team?.name || 'Away';
 
-  const categories = ['ALL', 'Outcome', 'Goals', 'Situational', 'Discipline', 'Markets'];
-  const filteredComparisons = selectedCategory === 'ALL'
-    ? comparisons
-    : comparisons.filter((c) => c.category === selectedCategory);
+  const categories = [
+    'ALL',
+    '1X2 & Chance',
+    'Over / Under Goals',
+    'Both Teams To Score',
+    'Team Specials',
+    'Half Markets',
+    'Handicap & Parity',
+    'Correct Score',
+    'Situational Stats',
+    'Discipline',
+  ];
+
+  const filteredComparisons = comparisons.filter((c) => {
+    const matchesCategory = selectedCategory === 'ALL' || c.category === selectedCategory;
+    const q = searchQuery.toLowerCase().trim();
+    const matchesSearch =
+      !q ||
+      c.metric.toLowerCase().includes(q) ||
+      c.category.toLowerCase().includes(q) ||
+      (c.notes ? c.notes.toLowerCase().includes(q) : false);
+    return matchesCategory && matchesSearch;
+  });
+
+
 
   const getStatusBadge = (status: ComparisonItem['status']) => {
     switch (status) {
@@ -218,23 +240,46 @@ export const MatchStatComparisonCard: React.FC<MatchStatComparisonCardProps> = (
         </div>
       )}
 
-      {/* 3. Category Filter Tabs */}
-      <div className="flex items-center gap-1.5 overflow-x-auto pb-1 border-b border-surface-border/50">
-        <span className="text-xs text-slate-500 font-mono mr-2">Filter:</span>
-        {categories.map((cat) => (
-          <button
-            key={cat}
-            onClick={() => setSelectedCategory(cat)}
-            className={`px-3 py-1.5 rounded-lg text-xs font-mono font-medium transition-colors whitespace-nowrap ${
-              selectedCategory === cat
-                ? 'bg-emerald-600/20 text-emerald-400 border border-emerald-500/30'
-                : 'bg-slate-900/60 text-slate-400 hover:text-slate-200 border border-slate-800'
-            }`}
-          >
-            {cat === 'ALL' ? 'All Metrics' : cat}
-          </button>
-        ))}
+      {/* 3. Search and Category Filter Tabs */}
+      <div className="space-y-2.5 border-b border-surface-border/50 pb-2">
+        <div className="flex items-center gap-2">
+          <input
+            type="text"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            placeholder="Search metric (e.g. Win, Handicap, Over 2.5, Corners, 1st Half)..."
+            className="w-full max-w-sm px-3 py-1.5 rounded-lg bg-slate-900 border border-slate-800 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-emerald-500 font-mono transition-colors"
+          />
+          {searchQuery && (
+            <button
+              onClick={() => setSearchQuery('')}
+              className="px-2 py-1 text-xs text-slate-400 hover:text-white font-mono bg-slate-800/80 rounded"
+            >
+              Clear
+            </button>
+          )}
+          <span className="text-xs text-slate-500 font-mono ml-auto">
+            Showing {filteredComparisons.length} of {comparisons.length} metrics
+          </span>
+        </div>
+
+        <div className="flex items-center gap-1.5 overflow-x-auto pb-1 scrollbar-thin">
+          {categories.map((cat) => (
+            <button
+              key={cat}
+              onClick={() => setSelectedCategory(cat)}
+              className={`px-3 py-1.5 rounded-lg text-xs font-mono font-medium transition-colors whitespace-nowrap ${
+                selectedCategory === cat
+                  ? 'bg-emerald-600/20 text-emerald-400 border border-emerald-500/30'
+                  : 'bg-slate-900/60 text-slate-400 hover:text-slate-200 border border-slate-800'
+              }`}
+            >
+              {cat === 'ALL' ? 'All Metrics' : cat}
+            </button>
+          ))}
+        </div>
       </div>
+
 
       {/* 4. Side-by-Side Comparison Table */}
       <div className="overflow-x-auto rounded-xl border border-surface-border">

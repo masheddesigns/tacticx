@@ -49,10 +49,17 @@ def test_stat_comparison_endpoint_finished_match(client, db):
     assert len(data["comparisons"]) >= 4
 
     metrics = [c["metric"] for c in data["comparisons"]]
-    assert "Match Winner (1X2)" in metrics
-    assert "Scoreline vs Expected Goals (xG)" in metrics
-    assert "Total Goals Over/Under 2.5" in metrics
-    assert "Both Teams To Score (BTTS)" in metrics
+    # Exact user requested markets
+    assert "Win" in metrics
+    assert "Draw" in metrics
+    assert "Loss" in metrics
+    assert "Over 2.5 Goals" in metrics
+    assert "Under 2.5 Goals" in metrics
+    assert "Both Teams to Score — Yes" in metrics
+    assert "Both Teams to Score — No" in metrics
+    assert "Corners (Total & Teams)" in metrics
+    assert len(metrics) >= 44
+
 
 
 def test_stat_comparison_endpoint_scheduled_match(client, db):
