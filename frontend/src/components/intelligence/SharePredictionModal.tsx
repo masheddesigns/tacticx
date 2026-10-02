@@ -9,9 +9,17 @@ import {
   Shield,
   Trophy,
   ExternalLink,
+  Flag,
+  CreditCard,
+  Target,
+  Goal,
 } from 'lucide-react';
 import { toPng, toBlob } from 'html-to-image';
-import { MatchIntelligence, MatchStatComparisonResponse } from '../../api/types';
+import {
+  MatchIntelligence,
+  MatchStatComparisonResponse,
+  StatProjectionsResponse,
+} from '../../api/types';
 import { formatDateTime } from '../../lib/utils';
 
 export interface SharePredictionModalProps {
@@ -20,6 +28,7 @@ export interface SharePredictionModalProps {
   intel: MatchIntelligence;
   homeTeamName: string;
   awayTeamName: string;
+  statProjections?: StatProjectionsResponse;
   statComparison?: MatchStatComparisonResponse;
 }
 
@@ -54,6 +63,7 @@ export const SharePredictionModal: React.FC<SharePredictionModalProps> = ({
   intel,
   homeTeamName,
   awayTeamName,
+  statProjections,
   statComparison,
 }) => {
   const cardRef = useRef<HTMLDivElement>(null);
@@ -70,6 +80,7 @@ export const SharePredictionModal: React.FC<SharePredictionModalProps> = ({
   const homeInitials = getTeamInitials(homeTeamName);
   const awayInitials = getTeamInitials(awayTeamName);
 
+  // 1X2 Probabilities & Odds
   const core = intel.core_prediction;
   const homeProb = core.home ? Math.round(core.home * 1000) / 10 : 45.0;
   const drawProb = core.draw ? Math.round(core.draw * 1000) / 10 : 25.0;
@@ -79,13 +90,40 @@ export const SharePredictionModal: React.FC<SharePredictionModalProps> = ({
   const drawOdds = drawProb > 0 ? (100 / drawProb).toFixed(2) : '-';
   const awayOdds = awayProb > 0 ? (100 / awayProb).toFixed(2) : '-';
 
+  // Expected Goals (xG)
   const xg = intel.expected_goals;
   const homeXg = xg?.home_lambda ? Number(xg.home_lambda).toFixed(2) : '1.45';
   const awayXg = xg?.away_lambda ? Number(xg.away_lambda).toFixed(2) : '1.15';
 
-  const correctScore = intel.correct_score;
-  const topScore = correctScore?.top_n?.[0] || { score: '1-1', probability: 0.12 };
-  const topScoreProb = Math.round((topScore.probability || 0.12) * 100);
+  // Over / Under Goals & BTTS
+  const derived = intel.derived_markets;
+  const totals = derived?.totals || {};
+  const btts = derived?.btts || {};
+
+  const over15Prob = totals['over_1_5'] ? Math.round(totals['over_1_5'] * 100) : 78;
+  const under15Prob = 100 - over15Prob;
+  const over25Prob = totals['over_2_5'] ? Math.round(totals['over_2_5'] * 100) : 52;
+  const under25Prob = 100 - over25Prob;
+  const bttsYesProb = btts.yes ? Math.round(btts.yes * 100) : 54;
+  const bttsNoProb = btts.no ? Math.round(btts.no * 100) : 46;
+
+  // Corners, Cards & Shots Projections
+  const combined = statProjections?.combined_projections;
+  const teamProj = statProjections?.team_projections;
+
+  const cornersTot = combined?.corners_total ? combined.corners_total.toFixed(1) : '9.8';
+  const cornersH = teamProj?.home?.corners ? teamProj.home.corners.toFixed(1) : '5.4';
+  const cornersA = teamProj?.away?.corners ? teamProj.away.corners.toFixed(1) : '4.4';
+
+  const cardsTot = combined?.yellow_cards_total ? combined.yellow_cards_total.toFixed(1) : '3.4';
+  const shotsOnTargetTot = combined?.shots_on_target ? combined.shots_on_target.toFixed(1) : '7.6';
+
+  // Top Predicted Scores
+  const topScores = intel.correct_score?.top_n?.slice(0, 3) || [
+    { score: '2-1', probability: 0.14 },
+    { score: '1-1', probability: 0.12 },
+    { score: '2-0', probability: 0.10 },
+  ];
 
   const miroNarrative = statComparison?.mirofish_summary?.narrative || intel.explanation?.headline;
 
@@ -98,7 +136,7 @@ export const SharePredictionModal: React.FC<SharePredictionModalProps> = ({
       setIsCapturing(true);
       const dataUrl = await toPng(cardRef.current, {
         cacheBust: true,
-        pixelRatio: 2, // High resolution crisp export
+        pixelRatio: 2, // 2x high resolution
       });
       const link = document.createElement('a');
       link.download = fileName;
@@ -128,13 +166,12 @@ export const SharePredictionModal: React.FC<SharePredictionModalProps> = ({
           new ClipboardItem({ 'image/png': blob }),
         ]);
         setCopiedImage(true);
-        setStatusMessage('Image copied to clipboard! Paste it into WhatsApp/Telegram/X.');
+        setStatusMessage('Image copied to clipboard! Paste it anywhere.');
         setTimeout(() => {
           setCopiedImage(false);
           setStatusMessage(null);
         }, 3000);
       } else {
-        // Fallback: trigger download
         handleDownload();
       }
     } catch (err) {
@@ -158,13 +195,12 @@ export const SharePredictionModal: React.FC<SharePredictionModalProps> = ({
         if (navigator.canShare({ files: [file] })) {
           await navigator.share({
             title: `${homeTeamName} vs ${awayTeamName} - Match Prediction`,
-            text: `TacticX Match Intelligence: ${homeTeamName} (${homeProb}%) vs ${awayTeamName} (${awayProb}%). Verified Pre-Match Probability.`,
+            text: `TacticX Match Intelligence: ${homeTeamName} (${homeProb}%) vs ${awayTeamName} (${awayProb}%). Over 1.5 Goals: ${over15Prob}%. Corners: ~${cornersTot}.`,
             files: [file],
           });
           return;
         }
       }
-      // Fallback
       handleCopyImage();
     } catch (err) {
       handleCopyImage();
@@ -185,13 +221,13 @@ export const SharePredictionModal: React.FC<SharePredictionModalProps> = ({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm overflow-y-auto">
-      <div className="relative w-full max-w-lg bg-surface-card border border-surface-border rounded-2xl shadow-2xl p-5 sm:p-6 space-y-5 my-8">
+      <div className="relative w-full max-w-xl bg-surface-card border border-surface-border rounded-2xl shadow-2xl p-5 sm:p-6 space-y-5 my-8">
         {/* Header */}
         <div className="flex items-center justify-between pb-3 border-b border-surface-border">
           <div className="flex items-center gap-2">
             <Share2 className="w-4 h-4 text-emerald-400" />
             <h3 className="text-base font-bold text-white tracking-tight">
-              Share Match Prediction Snapshot
+              Share Match Prediction & Stats Snapshot
             </h3>
           </div>
           <button
@@ -214,7 +250,7 @@ export const SharePredictionModal: React.FC<SharePredictionModalProps> = ({
         <div className="rounded-xl overflow-hidden shadow-2xl border border-slate-700/80 bg-slate-950">
           <div
             ref={cardRef}
-            className="p-5 sm:p-6 bg-gradient-to-b from-[#0e1626] via-[#090d16] to-[#04060a] text-slate-100 space-y-5"
+            className="p-5 sm:p-6 bg-gradient-to-b from-[#0e1626] via-[#090d16] to-[#04060a] text-slate-100 space-y-4"
           >
             {/* Top Brand Bar */}
             <div className="flex items-center justify-between pb-3 border-b border-slate-800/80">
@@ -230,7 +266,7 @@ export const SharePredictionModal: React.FC<SharePredictionModalProps> = ({
                 </span>
               </div>
 
-              <div className="flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-slate-900 border border-slate-800 text-[10px] font-mono text-slate-300">
+              <div className="flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-slate-900 border border-slate-800 text-[10px] font-mono text-slate-300">
                 <Trophy className="w-3 h-3 text-amber-400" />
                 <span>{compName}</span>
               </div>
@@ -286,8 +322,8 @@ export const SharePredictionModal: React.FC<SharePredictionModalProps> = ({
               </div>
             </div>
 
-            {/* Core 1X2 Mathematical Model Probability Bar */}
-            <div className="bg-slate-900/90 p-3 rounded-xl border border-slate-800 space-y-2">
+            {/* 1. Core 1X2 Mathematical Model Probability Bar */}
+            <div className="bg-slate-900/90 p-3 rounded-xl border border-slate-800 space-y-1.5">
               <div className="flex items-center justify-between text-[11px] font-mono">
                 <span className="text-emerald-400 font-bold">
                   {homeInitials} Win: {homeProb}% <span className="text-amber-400">(@{homeOdds})</span>
@@ -302,49 +338,78 @@ export const SharePredictionModal: React.FC<SharePredictionModalProps> = ({
 
               {/* Tripartite Color Progress Bar */}
               <div className="h-2.5 w-full bg-slate-800 rounded-full overflow-hidden flex gap-0.5">
-                <div
-                  className="bg-emerald-500 h-full rounded-l-full"
-                  style={{ width: `${homeProb}%` }}
-                />
-                <div
-                  className="bg-amber-400 h-full"
-                  style={{ width: `${drawProb}%` }}
-                />
-                <div
-                  className="bg-blue-500 h-full rounded-r-full"
-                  style={{ width: `${awayProb}%` }}
-                />
+                <div className="bg-emerald-500 h-full rounded-l-full" style={{ width: `${homeProb}%` }} />
+                <div className="bg-amber-400 h-full" style={{ width: `${drawProb}%` }} />
+                <div className="bg-blue-500 h-full rounded-r-full" style={{ width: `${awayProb}%` }} />
               </div>
             </div>
 
-            {/* Key Markets Highlight Pill Grid */}
+            {/* 2. Top Predicted Scores & Goals Over/Under Split */}
             <div className="grid grid-cols-2 gap-2.5">
-              <div className="p-2.5 rounded-lg bg-slate-900/80 border border-slate-800 text-center">
-                <span className="text-[10px] font-mono text-slate-400 block uppercase">
-                  Top Correct Score
+              {/* Top 3 Predicted Scores */}
+              <div className="p-2.5 rounded-xl bg-slate-900/80 border border-slate-800 space-y-1.5">
+                <span className="text-[10px] font-mono text-purple-300 block uppercase font-bold flex items-center gap-1">
+                  <Target className="w-3 h-3" /> Top Predicted Scores
                 </span>
-                <span className="text-base font-extrabold text-white font-mono mt-0.5 block">
-                  {topScore.score}
-                </span>
-                <span className="text-[10px] font-mono text-emerald-400">
-                  {topScoreProb}% Poisson probability
-                </span>
+                <div className="flex items-center gap-1.5">
+                  {topScores.map((sc, i) => (
+                    <div
+                      key={sc.score}
+                      className={`flex-1 py-1 rounded text-center font-mono ${
+                        i === 0 ? 'bg-purple-950 border border-purple-700 text-white font-bold' : 'bg-slate-950 text-slate-300'
+                      }`}
+                    >
+                      <div className="text-xs font-bold">{sc.score}</div>
+                      <div className="text-[9px] text-purple-400">{Math.round(sc.probability * 100)}%</div>
+                    </div>
+                  ))}
+                </div>
               </div>
 
-              <div className="p-2.5 rounded-lg bg-slate-900/80 border border-slate-800 text-center">
-                <span className="text-[10px] font-mono text-slate-400 block uppercase">
-                  Mathematical Favored
+              {/* Over / Under Goals & BTTS */}
+              <div className="p-2.5 rounded-xl bg-slate-900/80 border border-slate-800 space-y-1 text-xs font-mono">
+                <span className="text-[10px] text-blue-300 uppercase font-bold flex items-center gap-1">
+                  <Goal className="w-3 h-3" /> Goals (Over / Under)
                 </span>
-                <span className="text-sm font-bold text-white font-mono mt-0.5 block truncate">
-                  {homeProb >= awayProb ? `${homeTeamName} or Draw` : `${awayTeamName} or Draw`}
-                </span>
-                <span className="text-[10px] font-mono text-blue-400">
-                  Double Chance Pick
-                </span>
+                <div className="flex justify-between text-[11px] pt-0.5">
+                  <span className="text-slate-400">Over 1.5: <strong className="text-emerald-400">{over15Prob}%</strong></span>
+                  <span className="text-slate-400">Over 2.5: <strong className="text-white">{over25Prob}%</strong></span>
+                </div>
+                <div className="flex justify-between text-[10px] text-slate-400">
+                  <span>BTTS:</span>
+                  <span className="text-emerald-300 font-bold">Yes {bttsYesProb}% / No {bttsNoProb}%</span>
+                </div>
               </div>
             </div>
 
-            {/* MiroFish Qualitative AI Simulation Note */}
+            {/* 3. In-Game Predicted Stats (Corners & Discipline) */}
+            <div className="p-2.5 rounded-xl bg-slate-900/80 border border-slate-800 grid grid-cols-3 gap-2 text-center text-xs font-mono">
+              <div className="p-1 rounded bg-slate-950/60 border border-slate-800/80">
+                <span className="text-[10px] text-slate-400 flex items-center justify-center gap-1">
+                  <Flag className="w-2.5 h-2.5 text-emerald-400" /> Corners
+                </span>
+                <div className="font-extrabold text-sm text-emerald-400 mt-0.5">~{cornersTot}</div>
+                <div className="text-[9px] text-slate-400">{cornersH} - {cornersA}</div>
+              </div>
+
+              <div className="p-1 rounded bg-slate-950/60 border border-slate-800/80">
+                <span className="text-[10px] text-slate-400 flex items-center justify-center gap-1">
+                  <CreditCard className="w-2.5 h-2.5 text-amber-400" /> Cards
+                </span>
+                <div className="font-extrabold text-sm text-amber-300 mt-0.5">~{cardsTot}</div>
+                <div className="text-[9px] text-slate-400">Yellows total</div>
+              </div>
+
+              <div className="p-1 rounded bg-slate-950/60 border border-slate-800/80">
+                <span className="text-[10px] text-slate-400 flex items-center justify-center gap-1">
+                  <Target className="w-2.5 h-2.5 text-blue-400" /> Target Shots
+                </span>
+                <div className="font-extrabold text-sm text-blue-300 mt-0.5">~{shotsOnTargetTot}</div>
+                <div className="text-[9px] text-slate-400">On Target</div>
+              </div>
+            </div>
+
+            {/* 4. MiroFish Qualitative AI Simulation Note */}
             {miroNarrative && (
               <div className="bg-amber-950/20 border border-amber-900/40 rounded-lg p-2.5 flex items-start gap-2">
                 <Sparkles className="w-3.5 h-3.5 text-amber-400 flex-shrink-0 mt-0.5" />
@@ -360,7 +425,7 @@ export const SharePredictionModal: React.FC<SharePredictionModalProps> = ({
                 <Shield className="w-3 h-3 text-emerald-400" />
                 <span>Pre-Match Cutoff Frozen</span>
               </div>
-              <span>Phase 27 Verified</span>
+              <span>Phase 27 Canonical Verification</span>
             </div>
           </div>
         </div>

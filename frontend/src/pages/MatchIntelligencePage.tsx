@@ -4,6 +4,7 @@ import { ArrowLeft, RefreshCw, Layers, ShieldCheck, AlertCircle, Share2 } from '
 import { useMatchIntelligence, useMatch, usePredictionSnapshots, useMatchEvaluation, useStatProjections, useMatchStatComparison } from '../api/queries';
 import { MatchHeader } from '../components/intelligence/MatchHeader';
 import { SharePredictionModal } from '../components/intelligence/SharePredictionModal';
+import { QuickPredictionSummaryCard } from '../components/intelligence/QuickPredictionSummaryCard';
 import { CorePredictionCard } from '../components/intelligence/CorePredictionCard';
 import { ExpectedGoalsCard } from '../components/intelligence/ExpectedGoalsCard';
 import { DerivedMarketsCard } from '../components/intelligence/DerivedMarketsCard';
@@ -128,6 +129,16 @@ export const MatchIntelligencePage: React.FC = () => {
         onShare={() => setShareOpen(true)}
       />
 
+      {/* 1b. Quick Match Predictions & Projected Stats Summary Card (Corners, Cards, Scores, Over/Under) */}
+      <QuickPredictionSummaryCard
+        intel={intel}
+        statProjections={statProjections}
+        statComparison={statComparison}
+        homeTeamName={homeName}
+        awayTeamName={awayName}
+        onShare={() => setShareOpen(true)}
+      />
+
       {/* Share Prediction Screenshot Modal */}
       <SharePredictionModal
         isOpen={shareOpen}
@@ -135,6 +146,7 @@ export const MatchIntelligencePage: React.FC = () => {
         intel={intel}
         homeTeamName={homeName}
         awayTeamName={awayName}
+        statProjections={statProjections}
         statComparison={statComparison}
       />
 

@@ -318,7 +318,7 @@ describe('Match Intelligence Components — Analytical & Statistical Integrity',
     );
 
     // Verify Title & Teams
-    expect(screen.getByText(/Share Match Prediction Snapshot/i)).toBeInTheDocument();
+    expect(screen.getByText(/Share Match Prediction/i)).toBeInTheDocument();
     expect(screen.getAllByText('Arsenal').length).toBeGreaterThanOrEqual(1);
     expect(screen.getAllByText('Chelsea').length).toBeGreaterThanOrEqual(1);
 
