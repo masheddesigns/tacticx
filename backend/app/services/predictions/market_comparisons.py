@@ -194,6 +194,23 @@ def generate_market_comparisons(
             status = "AWAITING_SYNC"
             delta = "-"
             actual_str = "Sync Pending"
+        elif is_live:
+            # During live matches, predictions are evaluated against current running score with IN_PLAY indicator
+            total_evaluated += 1
+            hit = (is_actual_true == predicted_favors_yes)
+            if hit:
+                correct_hits += 1
+                status = "HIT"
+                delta = "On Track (Live)"
+            else:
+                if 0.43 <= prob <= 0.57:
+                    status = "CLOSE"
+                    delta = "Within Margin (Live)"
+                else:
+                    status = "MISS"
+                    delta = "Trailing (Live)"
+            actual_str = f"{actual_val} (Live {m.minute}')" if m.minute else f"{actual_val} (Live)"
+
         else:
             total_evaluated += 1
             hit = (is_actual_true == predicted_favors_yes)
@@ -202,7 +219,7 @@ def generate_market_comparisons(
                 status = "HIT"
                 delta = "Exact Hit"
             else:
-                # If probability was very close to 50% (within 45-55%), mark CLOSE
+                # If probability was very close to 50% (within 43-57%), mark CLOSE
                 if 0.43 <= prob <= 0.57:
                     status = "CLOSE"
                     delta = "Within Margin"
@@ -223,48 +240,57 @@ def generate_market_comparisons(
         })
 
     # --- 1X2 & Double Chance Markets ---
+    # Clear human wording based on match state
+    if sh > sa:
+        actual_1x2_desc = f"{home_name} Leading ({sh}-{sa})" if is_live else f"{home_name} Won ({sh}-{sa})"
+    elif sa > sh:
+        actual_1x2_desc = f"{away_name} Leading ({sh}-{sa})" if is_live else f"{away_name} Won ({sh}-{sa})"
+    else:
+        actual_1x2_desc = f"Level / Drawn ({sh}-{sa})"
+
     add_market(
         "1X2 & Chance", "Win", p_win,
-        f"{home_name} Won ({sh}-{sa})" if (sh > sa) else f"{home_name} Did Not Win ({sh}-{sa})",
+        f"{home_name} Ahead ({sh}-{sa})" if (sh > sa) else actual_1x2_desc,
         (sh > sa) if has_score else None,
         f"Simulated {home_name} win bias",
-        f"Full-time home win for {home_name}",
+        f"Home win for {home_name}",
     )
     add_market(
         "1X2 & Chance", "Draw", p_draw,
-        f"Drawn ({sh}-{sa})" if (sh == sa) else f"No Draw ({sh}-{sa})",
+        f"Level ({sh}-{sa})" if (sh == sa) else f"Decisive ({sh}-{sa})",
         (sh == sa) if has_score else None,
         "Simulated draw friction",
-        "Scores level at final whistle",
+        "Scores level at full-time",
     )
     add_market(
         "1X2 & Chance", "Loss", p_loss,
-        f"{away_name} Won ({sh}-{sa})" if (sa > sh) else f"{away_name} Did Not Win ({sh}-{sa})",
+        f"{away_name} Ahead ({sh}-{sa})" if (sa > sh) else actual_1x2_desc,
         (sa > sh) if has_score else None,
         f"Simulated {away_name} victory",
-        f"Full-time away win for {away_name}",
+        f"Away win for {away_name}",
     )
     add_market(
         "1X2 & Chance", "Win or Draw", p_1x,
-        f"1X Achieved ({sh}-{sa})" if (sh >= sa) else f"Away Win ({sh}-{sa})",
+        f"1X Achieved ({sh}-{sa})" if (sh >= sa) else f"{away_name} Leading ({sh}-{sa})",
         (sh >= sa) if has_score else None,
         "Double chance home / draw",
         f"{home_name} wins or match draws",
     )
     add_market(
         "1X2 & Chance", "Loss or Draw", p_x2,
-        f"X2 Achieved ({sh}-{sa})" if (sa >= sh) else f"Home Win ({sh}-{sa})",
+        f"X2 Achieved ({sh}-{sa})" if (sa >= sh) else f"{home_name} Leading ({sh}-{sa})",
         (sa >= sh) if has_score else None,
         "Double chance draw / away",
         f"{away_name} wins or match draws",
     )
     add_market(
         "1X2 & Chance", "No Draw", p_12,
-        f"Decisive Winner ({sh}-{sa})" if (sh != sa) else f"Drawn ({sh}-{sa})",
+        f"Decisive Lead ({sh}-{sa})" if (sh != sa) else f"Tied ({sh}-{sa})",
         (sh != sa) if has_score else None,
         "Either team to win (Double chance 12)",
         "Decisive match without a draw",
     )
+
 
     # --- Over / Under Goal Markets ---
     for line in [0.5, 1.5, 2.5, 3.5, 4.5]:
