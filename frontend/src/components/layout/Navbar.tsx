@@ -35,8 +35,8 @@ export const Navbar: React.FC = () => {
   }, []);
 
   const primaryNavItems = [
-    { to: '/', label: 'Dashboard', icon: BarChart2 },
-    { to: '/matches', label: 'Match Explorer', icon: Database },
+    { to: '/', label: 'Matches', icon: Database },
+    { to: '/matches', label: 'Explorer', icon: BarChart2 },
   ];
 
   const platformTools = [

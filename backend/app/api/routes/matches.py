@@ -65,11 +65,13 @@ def _refresh_live_matches_if_needed(db: Session, max_age_seconds: int = 45):
         url = "https://v3.football.api-sports.io/fixtures?live=all"
         headers = {"x-apisports-key": "f1da5a48dd4965ed81ed9444e8191ce4"}
         req = urllib.request.Request(url, headers=headers)
+        active_live_fids = set()
         with urllib.request.urlopen(req, timeout=3) as resp:
             data = json.loads(resp.read().decode())
             live_items = data.get("response", [])
             for it in live_items:
                 fid = str(it.get("fixture", {}).get("id"))
+                active_live_fids.add(fid)
                 status_short = it.get("fixture", {}).get("status", {}).get("short")
                 elapsed = it.get("fixture", {}).get("status", {}).get("elapsed")
                 goals = it.get("goals", {})
@@ -90,7 +92,44 @@ def _refresh_live_matches_if_needed(db: Session, max_age_seconds: int = 45):
                     if h_score is not None and a_score is not None:
                         m.home_score = h_score
                         m.away_score = a_score
-            db.commit()
+
+        # Detect finished matches that API-Football dropped from ?live=all
+        now_utc = datetime.now(timezone.utc)
+        stale_live = db.query(Match).filter(Match.status.in_((MatchStatus.LIVE.value, MatchStatus.HALFTIME.value))).all()
+        for sm in stale_live:
+            sm_fid = str(sm.provider_match_id) if sm.provider_match_id else None
+            if sm_fid and sm_fid not in active_live_fids:
+                try:
+                    single_url = f"https://v3.football.api-sports.io/fixtures?id={sm_fid}"
+                    s_req = urllib.request.Request(single_url, headers=headers)
+                    with urllib.request.urlopen(s_req, timeout=3) as s_resp:
+                        s_data = json.loads(s_resp.read().decode())
+                        s_items = s_data.get("response", [])
+                        if s_items:
+                            s_it = s_items[0]
+                            s_status = s_it.get("fixture", {}).get("status", {}).get("short")
+                            s_goals = s_it.get("goals", {})
+                            if s_status in ("FT", "AET", "PEN"):
+                                sm.status = MatchStatus.FINISHED.value
+                                sm.minute = 90
+                            elif s_status in ("PST", "CANC", "ABD"):
+                                sm.status = MatchStatus.POSTPONED.value
+                            if s_goals.get("home") is not None and s_goals.get("away") is not None:
+                                sm.home_score = s_goals.get("home")
+                                sm.away_score = s_goals.get("away")
+                        else:
+                            if sm.kickoff_at and (now_utc - sm.kickoff_at).total_seconds() >= 105 * 60:
+                                sm.status = MatchStatus.FINISHED.value
+                                sm.minute = 90
+                except Exception:
+                    if sm.kickoff_at and (now_utc - sm.kickoff_at).total_seconds() >= 105 * 60:
+                        sm.status = MatchStatus.FINISHED.value
+                        sm.minute = 90
+            elif sm.kickoff_at and (now_utc - sm.kickoff_at).total_seconds() >= 125 * 60:
+                sm.status = MatchStatus.FINISHED.value
+                sm.minute = 90
+
+        db.commit()
     except Exception:
         pass
 
