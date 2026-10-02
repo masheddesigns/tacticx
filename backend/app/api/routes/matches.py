@@ -405,6 +405,49 @@ def get_match_stat_comparison(match_id: int, db: Session = Depends(get_db)):
 
     # 2. Fetch actual statistics from MatchStatistic table
     stats_rows = db.query(MatchStatistic).filter_by(match_id=match_id).all()
+    if not stats_rows and is_finished and m.provider_match_id:
+        try:
+            import urllib.request, json
+            url = f"https://v3.football.api-sports.io/fixtures/statistics?fixture={m.provider_match_id}"
+            headers = {"x-apisports-key": "f1da5a48dd4965ed81ed9444e8191ce4"}
+            req = urllib.request.Request(url, headers=headers)
+            with urllib.request.urlopen(req, timeout=3) as resp:
+                data = json.loads(resp.read().decode())
+                resp_data = data.get("response", [])
+                if len(resp_data) >= 2:
+                    stat_map = {
+                        "Total Shots": "shots_total",
+                        "Shots on Goal": "shots_on_target",
+                        "Corner Kicks": "corners",
+                        "Ball Possession": "possession",
+                        "Yellow Cards": "yellow_cards",
+                        "Red Cards": "red_cards",
+                        "Fouls": "fouls",
+                        "expected_goals": "xg",
+                    }
+                    for idx, team_data in enumerate(resp_data):
+                        team_role = "home" if idx == 0 else "away"
+                        for item in team_data.get("statistics", []):
+                            st_type = item.get("type")
+                            raw_val = item.get("value")
+                            if st_type in stat_map and raw_val is not None:
+                                canonical_name = stat_map[st_type]
+                                val_str = str(raw_val).replace("%", "")
+                                stat_obj = MatchStatistic(
+                                    match_id=m.id,
+                                    team=team_role,
+                                    stat_name=canonical_name,
+                                    stat_value=val_str,
+                                    period="full",
+                                    source="api_football",
+                                    source_record_id=f"{m.provider_match_id}_{team_role}_{canonical_name}",
+                                )
+                                db.add(stat_obj)
+                    db.commit()
+                    stats_rows = db.query(MatchStatistic).filter_by(match_id=match_id).all()
+        except Exception:
+            pass
+
     actual_stats: dict[str, dict[str, Any]] = {}
     for r in stats_rows:
         actual_stats.setdefault(r.stat_name, {})[r.team] = r.stat_value
@@ -568,9 +611,9 @@ def get_match_stat_comparison(match_id: int, db: Session = Depends(get_db)):
             "actual": "Provider stats pending" if is_finished else "Match Pending Kickoff",
             "engine_predicted": f"Projected: {proj_corners_tot} ({home_name}: {team_proj['home']['corners']}, {away_name}: {team_proj['away']['corners']})",
             "mirofish_predicted": f"Expected ~{proj_corners_tot} set pieces",
-            "status": "PENDING",
+            "status": "AWAITING_SYNC" if is_finished else "PENDING",
             "delta": "-",
-            "notes": "Awaiting fixture statistics update",
+            "notes": "Awaiting fixture statistics update" if is_finished else "Scheduled pre-match projection",
         })
 
     # Item 6: Shots on Target
@@ -598,9 +641,9 @@ def get_match_stat_comparison(match_id: int, db: Session = Depends(get_db)):
             "actual": "Provider stats pending" if is_finished else "Match Pending Kickoff",
             "engine_predicted": f"Projected: {proj_sot_tot} ({home_name}: {team_proj['home']['shots_on_target']}, {away_name}: {team_proj['away']['shots_on_target']})",
             "mirofish_predicted": f"Expected ~{proj_sot_tot} on target",
-            "status": "PENDING",
+            "status": "AWAITING_SYNC" if is_finished else "PENDING",
             "delta": "-",
-            "notes": "Awaiting fixture statistics update",
+            "notes": "Awaiting fixture statistics update" if is_finished else "Scheduled pre-match projection",
         })
 
     # Item 7: Total Shots
@@ -628,9 +671,9 @@ def get_match_stat_comparison(match_id: int, db: Session = Depends(get_db)):
             "actual": "Provider stats pending" if is_finished else "Match Pending Kickoff",
             "engine_predicted": f"Projected: {proj_shots_tot} ({home_name}: {team_proj['home']['shots_total']}, {away_name}: {team_proj['away']['shots_total']})",
             "mirofish_predicted": f"Expected ~{proj_shots_tot} shots",
-            "status": "PENDING",
+            "status": "AWAITING_SYNC" if is_finished else "PENDING",
             "delta": "-",
-            "notes": "Awaiting fixture statistics update",
+            "notes": "Awaiting fixture statistics update" if is_finished else "Scheduled pre-match projection",
         })
 
     # Item 8: Yellow Cards
@@ -651,6 +694,17 @@ def get_match_stat_comparison(match_id: int, db: Session = Depends(get_db)):
             "delta": f"{yc_diff:+} cards",
             "notes": "Disciplinary line consistent" if yc_hit else "Card count divergence",
         })
+    else:
+        comparisons.append({
+            "category": "Discipline",
+            "metric": "Yellow Cards (Bookings)",
+            "actual": "Provider stats pending" if is_finished else "Match Pending Kickoff",
+            "engine_predicted": f"Projected: {proj_yc_tot} ({home_name}: {team_proj['home']['yellow_cards']}, {away_name}: {team_proj['away']['yellow_cards']})",
+            "mirofish_predicted": "Foul friction simulation",
+            "status": "AWAITING_SYNC" if is_finished else "PENDING",
+            "delta": "-",
+            "notes": "Awaiting fixture statistics update" if is_finished else "Scheduled pre-match projection",
+        })
 
     # Item 9: Red Cards
     proj_rc_tot = comb_proj["red_cards_total"]
@@ -668,6 +722,17 @@ def get_match_stat_comparison(match_id: int, db: Session = Depends(get_db)):
             "status": "HIT" if rc_hit else "MISS",
             "delta": "0" if rc_hit else "Ejection recorded",
             "notes": "Clean match, no dismissal" if int(act_rc_tot) == 0 else "Player sent off",
+        })
+    else:
+        comparisons.append({
+            "category": "Discipline",
+            "metric": "Red Cards (Expulsions)",
+            "actual": "Provider stats pending" if is_finished else "Match Pending Kickoff",
+            "engine_predicted": f"Projected: {proj_rc_tot} (Low risk)" if proj_rc_tot <= 0.15 else f"Projected: {proj_rc_tot} (Elevated risk)",
+            "mirofish_predicted": "Simulated card probability",
+            "status": "AWAITING_SYNC" if is_finished else "PENDING",
+            "delta": "-",
+            "notes": "Awaiting fixture statistics update" if is_finished else "Scheduled pre-match projection",
         })
 
     # 4. Fetch stored Brier evaluation if exists

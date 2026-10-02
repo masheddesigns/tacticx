@@ -89,12 +89,19 @@ export const MatchStatComparisonCard: React.FC<MatchStatComparisonCardProps> = (
             Variance
           </span>
         );
+      case 'AWAITING_SYNC':
+        return (
+          <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-slate-800 text-slate-400 border border-slate-700">
+            <Clock className="w-3.5 h-3.5" />
+            Sync Pending
+          </span>
+        );
       case 'PENDING':
       default:
         return (
           <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-slate-800 text-slate-300 border border-slate-700">
             <Clock className="w-3.5 h-3.5" />
-            Pending Kickoff
+            {is_finished ? 'Sync Pending' : 'Pending Kickoff'}
           </span>
         );
     }

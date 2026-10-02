@@ -968,7 +968,7 @@ export interface ComparisonItem {
   actual: string;
   engine_predicted: string;
   mirofish_predicted?: string;
-  status: 'HIT' | 'MISS' | 'CLOSE' | 'PENDING';
+  status: 'HIT' | 'MISS' | 'CLOSE' | 'PENDING' | 'AWAITING_SYNC';
   delta?: string;
   notes?: string;
 }
