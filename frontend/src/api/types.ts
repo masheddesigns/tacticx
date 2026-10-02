@@ -961,3 +961,38 @@ export interface CandidateValidation {
   rerun?: boolean;
   created_at?: string | null;
 }
+
+export interface ComparisonItem {
+  category: string;
+  metric: string;
+  actual: string;
+  engine_predicted: string;
+  mirofish_predicted?: string;
+  status: 'HIT' | 'MISS' | 'CLOSE' | 'PENDING';
+  delta?: string;
+  notes?: string;
+}
+
+export interface MatchStatComparisonResponse {
+  match_id: number;
+  is_finished: boolean;
+  has_score: boolean;
+  home_team: { id?: number; name: string };
+  away_team: { id?: number; name: string };
+  actual_score?: { home: number; away: number } | null;
+  actual_possession?: { home?: string; away?: string } | null;
+  accuracy_summary: {
+    total_evaluated: number;
+    correct_hits: number;
+    accuracy_percentage: number | null;
+    brier_score?: number | null;
+    grade: string;
+  };
+  mirofish_summary: {
+    status: string;
+    narrative?: string | null;
+    scenarios_count: number;
+  };
+  comparisons: ComparisonItem[];
+}
+

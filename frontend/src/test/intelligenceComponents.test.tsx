@@ -18,6 +18,7 @@ import { ExplanationSection } from '../components/intelligence/ExplanationSectio
 import { DataQualitySection } from '../components/intelligence/DataQualitySection';
 import { WarningsSection } from '../components/intelligence/WarningsSection';
 import { ProvenanceSection } from '../components/intelligence/ProvenanceSection';
+import { MatchStatComparisonCard } from '../components/intelligence/MatchStatComparisonCard';
 import { MatchIntelligence } from '../api/types';
 
 const intel = mockData as unknown as MatchIntelligence;
@@ -231,4 +232,77 @@ describe('Match Intelligence Components — Analytical & Statistical Integrity',
     expect(screen.getByText(/CRYPTOGRAPHIC PROVENANCE/i)).toBeInTheDocument();
     expect(screen.getByText(/Copy JSON/i)).toBeInTheDocument();
   });
+
+  it('renders MatchStatComparisonCard with authentic results vs engine & MiroFish predictions', () => {
+    const mockComparison = {
+      match_id: 1881,
+      is_finished: true,
+      has_score: true,
+      home_team: { id: 111, name: 'Argentina' },
+      away_team: { id: 113, name: 'Bolivia' },
+      actual_score: { home: 4, away: 0 },
+      actual_possession: { home: '69', away: '31' },
+      accuracy_summary: {
+        total_evaluated: 4,
+        correct_hits: 3,
+        accuracy_percentage: 75.0,
+        brier_score: 0.234674,
+        grade: 'EXCELLENT',
+      },
+      mirofish_summary: {
+        status: 'ok',
+        narrative: 'High pressing dominance forecasted from opening whistle.',
+        scenarios_count: 1,
+      },
+      comparisons: [
+        {
+          category: 'Outcome',
+          metric: 'Match Winner (1X2)',
+          actual: 'Argentina Win (4-0)',
+          engine_predicted: 'Argentina Win (51.6%)',
+          mirofish_predicted: 'Simulated Argentina Win',
+          status: 'HIT' as const,
+          delta: 'Exact hit',
+          notes: 'Engine favored correct side',
+        },
+        {
+          category: 'Situational',
+          metric: 'Corners (Total & Teams)',
+          actual: '13 corners (Argentina: 12, Bolivia: 1)',
+          engine_predicted: 'Projected: 11.2 (Argentina: 8.5, Bolivia: 2.7)',
+          mirofish_predicted: 'Wing pressure simulation',
+          status: 'HIT' as const,
+          delta: '+1.8 corners',
+          notes: 'Within normal match variance',
+        },
+      ],
+    };
+
+    render(
+      <MatchStatComparisonCard
+        comparison={mockComparison}
+        homeTeamName="Argentina"
+        awayTeamName="Bolivia"
+      />
+    );
+
+    // Verify Title & Hero Score
+    expect(screen.getByText(/Match Original Data vs Engine & MiroFish AI Prediction/i)).toBeInTheDocument();
+    expect(screen.getByText('4 - 0')).toBeInTheDocument();
+    expect(screen.getByText('Argentina Won')).toBeInTheDocument();
+
+    // Verify Possession
+    expect(screen.getByText(/Argentina: 69%/i)).toBeInTheDocument();
+
+    // Verify Accuracy & Grade
+    expect(screen.getByText('75%')).toBeInTheDocument();
+    expect(screen.getByText('EXCELLENT')).toBeInTheDocument();
+
+    // Verify Comparisons Table
+    expect(screen.getByText('Match Winner (1X2)')).toBeInTheDocument();
+    expect(screen.getByText('Argentina Win (4-0)')).toBeInTheDocument();
+    expect(screen.getByText('Corners (Total & Teams)')).toBeInTheDocument();
+    expect(screen.getAllByText('Hit').length).toBeGreaterThanOrEqual(2);
+  });
 });
+

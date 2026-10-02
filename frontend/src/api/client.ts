@@ -35,6 +35,7 @@ import {
   EvidenceStatus,
   CandidateValidation,
   StatProjectionsResponse,
+  MatchStatComparisonResponse,
 } from './types';
 
 export class ApiError extends Error {
@@ -160,6 +161,10 @@ export const apiClient = {
 
   getStatProjections: async (matchId: number, signal?: AbortSignal): Promise<StatProjectionsResponse> => {
     return request<StatProjectionsResponse>(`/matches/${matchId}/stat-projections`, { signal });
+  },
+
+  getMatchStatComparison: async (matchId: number, signal?: AbortSignal): Promise<MatchStatComparisonResponse> => {
+    return request<MatchStatComparisonResponse>(`/matches/${matchId}/stat-comparison`, { signal });
   },
 
   // Canonical Match Intelligence

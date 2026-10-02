@@ -1,12 +1,13 @@
 import React, { useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { ArrowLeft, RefreshCw, Layers, ShieldCheck, AlertCircle } from 'lucide-react';
-import { useMatchIntelligence, useMatch, usePredictionSnapshots, useMatchEvaluation, useStatProjections } from '../api/queries';
+import { useMatchIntelligence, useMatch, usePredictionSnapshots, useMatchEvaluation, useStatProjections, useMatchStatComparison } from '../api/queries';
 import { MatchHeader } from '../components/intelligence/MatchHeader';
 import { CorePredictionCard } from '../components/intelligence/CorePredictionCard';
 import { ExpectedGoalsCard } from '../components/intelligence/ExpectedGoalsCard';
 import { DerivedMarketsCard } from '../components/intelligence/DerivedMarketsCard';
 import { SituationalStatsCard } from '../components/intelligence/SituationalStatsCard';
+import { MatchStatComparisonCard } from '../components/intelligence/MatchStatComparisonCard';
 import { CorrectScoreGrid } from '../components/intelligence/CorrectScoreGrid';
 import { UncertaintySection } from '../components/intelligence/UncertaintySection';
 import { ModelAgreementTable } from '../components/intelligence/ModelAgreementTable';
@@ -28,12 +29,13 @@ export const MatchIntelligencePage: React.FC = () => {
   const idNum = parseInt(matchId || '0', 10);
 
   const [temporalMode, setTemporalMode] = useState<string>('strict_prematch');
-  const [activeTab, setActiveTab] = useState<'markets' | 'analysis' | 'telemetry'>('markets');
+  const [activeTab, setActiveTab] = useState<'markets' | 'comparison' | 'analysis' | 'telemetry'>('markets');
 
   const { data: matchFallback } = useMatch(idNum);
   const { data: execution, isLoading: executionLoading } = usePredictionSnapshots(idNum);
   const { data: matchEvaluation, isLoading: evaluationLoading } = useMatchEvaluation(idNum);
   const { data: statProjections, isLoading: statProjLoading } = useStatProjections(idNum);
+  const { data: statComparison, isLoading: comparisonLoading } = useMatchStatComparison(idNum);
   const {
     data: intel,
     isLoading,
@@ -130,6 +132,20 @@ export const MatchIntelligencePage: React.FC = () => {
           </button>
 
           <button
+            onClick={() => setActiveTab('comparison')}
+            className={`py-3 px-1 border-b-2 font-medium text-xs font-mono flex items-center gap-2 whitespace-nowrap transition-colors ${
+              activeTab === 'comparison'
+                ? 'border-emerald-500 text-emerald-400 font-bold'
+                : 'border-transparent text-slate-400 hover:text-slate-200 hover:border-slate-700'
+            }`}
+          >
+            <span>Match Results vs Model</span>
+            <span className="px-1.5 py-0.2 rounded bg-emerald-950 text-emerald-400 text-[10px] font-mono border border-emerald-900/50">
+              {statComparison?.is_finished ? 'Verified Actuals' : 'Projections Ready'}
+            </span>
+          </button>
+
+          <button
             onClick={() => setActiveTab('analysis')}
             className={`py-3 px-1 border-b-2 font-medium text-xs font-mono flex items-center gap-2 whitespace-nowrap transition-colors ${
               activeTab === 'analysis'
@@ -158,14 +174,13 @@ export const MatchIntelligencePage: React.FC = () => {
       {/* TAB 1: Core Predictions & Markets */}
       {activeTab === 'markets' && (
         <div className="space-y-6">
-          {/* Post-Match Actual Score & Prediction Comparison Banner (When Match is Completed) */}
-          {matchEvaluation && matchEvaluation.outcome && (
-            <EvaluationSection
-              evaluation={matchEvaluation}
-              isLoading={evaluationLoading}
-              predictedHome={intel.core_prediction?.home}
-              predictedDraw={intel.core_prediction?.draw}
-              predictedAway={intel.core_prediction?.away}
+          {/* Post-Match Actual Score & Prediction Comparison Section (When Match is Completed or has Scores) */}
+          {statComparison && (statComparison.is_finished || statComparison.has_score) && (
+            <MatchStatComparisonCard
+              comparison={statComparison}
+              isLoading={comparisonLoading}
+              homeTeamName={homeName}
+              awayTeamName={awayName}
             />
           )}
 
@@ -219,6 +234,18 @@ export const MatchIntelligencePage: React.FC = () => {
 
           {/* 12. Explanation Breakdown */}
           <ExplanationSection explanation={intel.explanation} />
+        </div>
+      )}
+
+      {/* TAB: Match Results vs Model (Original Data vs Engine & MiroFish) */}
+      {activeTab === 'comparison' && (
+        <div className="space-y-6">
+          <MatchStatComparisonCard
+            comparison={statComparison}
+            isLoading={comparisonLoading}
+            homeTeamName={homeName}
+            awayTeamName={awayName}
+          />
         </div>
       )}
 
