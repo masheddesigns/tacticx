@@ -53,7 +53,11 @@ export class ApiError extends Error {
   }
 }
 
-export const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || '/api/v1';
+export const API_BASE_URL = (() => {
+  const envUrl = (import.meta.env.VITE_API_BASE_URL || '/api/v1').trim().replace(/\/$/, '');
+  if (!envUrl) return '/api/v1';
+  return envUrl.endsWith('/api/v1') ? envUrl : `${envUrl}/api/v1`;
+})();
 
 async function request<T>(endpoint: string, options?: RequestInit): Promise<T> {
   const url = `${API_BASE_URL.replace(/\/$/, '')}/${endpoint.replace(/^\//, '')}`;
