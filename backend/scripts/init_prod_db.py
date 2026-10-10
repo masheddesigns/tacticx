@@ -84,6 +84,18 @@ def main():
                 logger.warning("seed_production.sql not found.")
         else:
             logger.info("Database already contains matches. Skipping initial seed.")
+            
+        # 3. Ensure full October 2026 fixtures across Top 5 leagues and UCL are seeded
+        try:
+            try:
+                from scripts.seed_full_october_fixtures import seed_all_fixtures
+            except ImportError:
+                from backend.scripts.seed_full_october_fixtures import seed_all_fixtures
+            logger.info("Running seed_full_october_fixtures for Top 5 European leagues & UCL...")
+            seed_all_fixtures()
+            logger.info("seed_full_october_fixtures finished successfully.")
+        except Exception as seed_err:
+            logger.error(f"Error running seed_full_october_fixtures: {seed_err}")
     except Exception as e:
         logger.error(f"Seeding check failed: {e}")
     finally:

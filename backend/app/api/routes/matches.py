@@ -434,21 +434,13 @@ def get_daily_slips(
     team_stat_cache = {}
     poisson_model = PoissonModel()
 
-    # Sort matches by high-profile league hierarchy and evaluate top 8 matches for speed
-    priority_order = {1: 1, 2: 2, 3: 3, 4: 4, 5: 5, 6: 6, 7: 7, 8: 8}
+    # Sort matches by high-profile league hierarchy and evaluate top 12 matches for speed
+    priority_order = {1: 1, 6: 1.5, 2: 2, 3: 3, 4: 4, 5: 5, 7: 7, 8: 8}
     sorted_matches = sorted(matches, key=lambda x: priority_order.get(x.league_id, 99))
-    eval_matches = sorted_matches[:8]
+    eval_matches = sorted_matches[:12]
 
     for m in eval_matches:
         try:
-            pred = poisson_model.predict(db, m.id, cutoff=m.kickoff_at or datetime.now(timezone.utc))
-            p_h = float(pred.home_win_probability)
-            p_d = float(pred.draw_probability)
-            p_a = float(pred.away_win_probability)
-            p_o15 = float(pred.over_1_5_probability)
-            p_o25 = float(pred.over_2_5_probability)
-            p_btts = float(pred.btts_yes_probability)
-
             home_team = db.get(Team, m.home_team_id) if m.home_team_id else None
             away_team = db.get(Team, m.away_team_id) if m.away_team_id else None
             league = db.get(League, m.league_id) if m.league_id else None
@@ -475,6 +467,29 @@ def get_daily_slips(
                 "cards_total": round(cards_total, 1),
                 "shots_on_target": round(sot_total, 1),
             }
+
+            try:
+                pred = poisson_model.predict(db, m.id, cutoff=m.kickoff_at or datetime.now(timezone.utc))
+                p_h = float(pred.home_win_probability)
+                p_d = float(pred.draw_probability)
+                p_a = float(pred.away_win_probability)
+                p_o15 = float(pred.over_1_5_probability)
+                p_o25 = float(pred.over_2_5_probability)
+                p_btts = float(pred.btts_yes_probability)
+            except Exception:
+                # Robust Poisson model fallback for UEFA Champions League and cup competitions
+                import math
+                h_sot = t_proj.get("home", {}).get("shots_on_target", 4.5)
+                a_sot = t_proj.get("away", {}).get("shots_on_target", 3.8)
+                lam_h = max(0.6, min(3.2, h_sot * 0.32))
+                lam_a = max(0.5, min(2.8, a_sot * 0.30))
+                grid = [[(math.exp(-lam_h) * (lam_h ** i) / math.factorial(i)) * (math.exp(-lam_a) * (lam_a ** j) / math.factorial(j)) for j in range(10)] for i in range(10)]
+                p_h = sum(grid[i][j] for i in range(10) for j in range(10) if i > j)
+                p_d = sum(grid[i][j] for i in range(10) for j in range(10) if i == j)
+                p_a = sum(grid[i][j] for i in range(10) for j in range(10) if i < j)
+                p_o15 = sum(grid[i][j] for i in range(10) for j in range(10) if i + j >= 2)
+                p_o25 = sum(grid[i][j] for i in range(10) for j in range(10) if i + j >= 3)
+                p_btts = sum(grid[i][j] for i in range(10) for j in range(10) if i >= 1 and j >= 1)
 
             m_status = (m.status or "").upper()
             h_score = m.home_score

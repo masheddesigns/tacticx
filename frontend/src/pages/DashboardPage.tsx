@@ -333,6 +333,24 @@ export const DashboardPage: React.FC = () => {
             >
               All Upcoming
             </button>
+
+            {/* Direct Calendar Date Picker */}
+            <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-sans font-medium bg-[#1e222e] hover:bg-[#242938] border border-[#242938] transition-colors">
+              <Calendar className="w-3.5 h-3.5 text-[#21e786]" />
+              <input
+                type="date"
+                value={selectedDate || ''}
+                min="2026-10-01"
+                max="2026-11-05"
+                onChange={(e) => {
+                  if (e.target.value) {
+                    handleSelectDay(e.target.value);
+                  }
+                }}
+                className="bg-transparent text-slate-200 focus:outline-none cursor-pointer [color-scheme:dark]"
+                title="Pick any matchday date"
+              />
+            </div>
           </div>
 
           {/* Timezone & Reset */}
@@ -357,6 +375,36 @@ export const DashboardPage: React.FC = () => {
               </button>
             )}
           </div>
+        </div>
+
+        {/* Quick Matchday Shortcuts for October Top 5 Leagues & UCL */}
+        <div className="flex flex-wrap items-center gap-1.5 pt-1 text-xs">
+          <span className="text-[11px] font-mono text-slate-400 font-semibold flex items-center gap-1 mr-0.5">
+            <Sparkles className="w-3 h-3 text-[#21e786]" />
+            <span>Oct Matchdays:</span>
+          </span>
+          {[
+            { label: 'Oct 17 (Top 5 Slate)', date: '2026-10-17' },
+            { label: 'Oct 18 (Liverpool-Chelsea)', date: '2026-10-18' },
+            { label: 'Oct 20 (UCL MD3)', date: '2026-10-20' },
+            { label: 'Oct 21 (Barca-Bayern UCL)', date: '2026-10-21' },
+            { label: 'Oct 24 (El Clasico)', date: '2026-10-24' },
+            { label: 'Oct 25 (Arsenal-Liverpool)', date: '2026-10-25' },
+            { label: 'Oct 28 (Serie A & Cups)', date: '2026-10-28' },
+            { label: 'Oct 31 (Halloween Slate)', date: '2026-10-31' },
+          ].map((chip) => (
+            <button
+              key={chip.date}
+              onClick={() => handleSelectDay(chip.date)}
+              className={`px-2 py-0.5 rounded-md text-[11px] font-sans font-medium transition-all ${
+                selectedDate === chip.date
+                  ? 'bg-[#21e786] text-[#0e1015] font-bold shadow-sm'
+                  : 'bg-[#12151c] text-slate-300 hover:text-white hover:bg-[#1a1f2c] border border-[#242938]'
+              }`}
+            >
+              {chip.label}
+            </button>
+          ))}
         </div>
 
         {/* Search & Competition Filter */}
@@ -425,6 +473,7 @@ export const DashboardPage: React.FC = () => {
         dateStr={selectedDate || todayStr}
         timeZone={timeZone}
         isLoading={dailySlipsLoading}
+        onDateChange={handleSelectDay}
       />
 
       {/* 4. FotMob Hierarchical League-Grouped Fixture Cards */}

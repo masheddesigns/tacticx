@@ -1,5 +1,5 @@
 import React from 'react';
-import { Search, Filter, RotateCcw } from 'lucide-react';
+import { Search, Filter, RotateCcw, Calendar, Sparkles } from 'lucide-react';
 import { getTodayString, getDayOffsetString, formatDayDisplay } from '../../lib/utils';
 
 export interface MatchFiltersState {
@@ -136,6 +136,36 @@ export const MatchFilters: React.FC<MatchFiltersProps> = ({
             Reset
           </button>
         </div>
+      </div>
+
+      {/* Quick October Matchday Shortcuts */}
+      <div className="flex flex-wrap items-center gap-1.5 text-xs">
+        <span className="text-[11px] font-mono text-slate-400 font-semibold flex items-center gap-1 mr-0.5">
+          <Sparkles className="w-3 h-3 text-emerald-400" />
+          <span>Oct Matchdays:</span>
+        </span>
+        {[
+          { label: 'Oct 17 (Top 5 Slate)', date: '2026-10-17' },
+          { label: 'Oct 18 (Liverpool-Chelsea)', date: '2026-10-18' },
+          { label: 'Oct 20 (UCL MD3)', date: '2026-10-20' },
+          { label: 'Oct 21 (Barca-Bayern UCL)', date: '2026-10-21' },
+          { label: 'Oct 24 (El Clasico)', date: '2026-10-24' },
+          { label: 'Oct 25 (Arsenal-Liverpool)', date: '2026-10-25' },
+          { label: 'Oct 28 (Serie A & Cups)', date: '2026-10-28' },
+          { label: 'Oct 31 (Halloween Slate)', date: '2026-10-31' },
+        ].map((chip) => (
+          <button
+            key={chip.date}
+            onClick={() => handleQuickDay(chip.date)}
+            className={`px-2 py-0.5 rounded-md text-[11px] font-sans font-medium transition-all ${
+              filters.date === chip.date
+                ? 'bg-emerald-600 text-white font-bold'
+                : 'bg-slate-900 text-slate-300 hover:text-white hover:bg-slate-800 border border-slate-800'
+            }`}
+          >
+            {chip.label}
+          </button>
+        ))}
       </div>
 
       {/* Primary Filter Selectors & Sort */}

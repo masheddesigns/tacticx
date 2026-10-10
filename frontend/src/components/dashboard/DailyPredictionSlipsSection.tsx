@@ -20,6 +20,7 @@ import {
   Filter,
   Layers,
   RotateCcw,
+  Calendar,
 } from 'lucide-react';
 import { DailyPredictionSlip } from '../../api/types';
 import { formatDayDisplay } from '../../lib/utils';
@@ -30,6 +31,7 @@ export interface DailyPredictionSlipsSectionProps {
   dateStr: string;
   timeZone: 'UTC' | 'local' | string;
   isLoading?: boolean;
+  onDateChange?: (date: string) => void;
 }
 
 export type SlipFilterType =
@@ -54,6 +56,7 @@ export const DailyPredictionSlipsSection: React.FC<DailyPredictionSlipsSectionPr
   dateStr,
   timeZone,
   isLoading,
+  onDateChange,
 }) => {
   const [selectedSlipForShare, setSelectedSlipForShare] = useState<DailyPredictionSlip | null>(null);
   const [activeFilter, setActiveFilter] = useState<SlipFilterType>('ALL');
@@ -236,7 +239,26 @@ export const DailyPredictionSlipsSection: React.FC<DailyPredictionSlipsSectionPr
           </div>
         </div>
 
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2">
+          {onDateChange && (
+            <div className="flex items-center gap-1.5 bg-[#0e1015] px-2.5 py-1 rounded-lg border border-[#242938]">
+              <Calendar className="w-3.5 h-3.5 text-[#21e786]" />
+              <input
+                type="date"
+                value={dateStr}
+                min="2026-10-01"
+                max="2026-11-05"
+                onChange={(e) => {
+                  if (e.target.value) {
+                    onDateChange(e.target.value);
+                  }
+                }}
+                className="bg-transparent text-xs text-slate-200 font-sans focus:outline-none cursor-pointer [color-scheme:dark]"
+                title="Select date for daily prediction slips"
+              />
+            </div>
+          )}
+
           <span className="text-[11px] font-mono text-[#21e786] bg-[#21e786]/10 px-2.5 py-1 rounded-md border border-[#21e786]/20 font-bold">
             {slips.length} Slips Available
           </span>
