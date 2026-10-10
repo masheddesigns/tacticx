@@ -13,16 +13,40 @@ def poisson_pmf(k: int, lam: float) -> float:
     return math.exp(-lam) * (lam ** k) / math.factorial(k)
 
 
-def score_grid(lambda_home: float, lambda_away: float,
-               max_goals: int = MAX_GRID_GOALS) -> Dict[str, float]:
-    """Independent-Poisson scoreline distribution, renormalized to sum 1.
+def tau_dixon_coles(x: int, y: int, lambda_home: float, lambda_away: float, rho: float) -> float:
+    """Dixon & Coles (1997) bivariate correction factor for low-scoring dependence.
+    
+    Adjusts probabilities for (0,0), (1,0), (0,1), and (1,1) where independent Poisson
+    underestimates draw frequencies and overestimates narrow 1-0/0-1 scorelines.
+    """
+    if x == 0 and y == 0:
+        return max(0.0, 1.0 - (lambda_home * lambda_away * rho))
+    elif x == 0 and y == 1:
+        return max(0.0, 1.0 + (lambda_home * rho))
+    elif x == 1 and y == 0:
+        return max(0.0, 1.0 + (lambda_away * rho))
+    elif x == 1 and y == 1:
+        return max(0.0, 1.0 - rho)
+    return 1.0
 
-    Independence is a documented simplification (no Dixon-Coles correlation).
+
+def score_grid(lambda_home: float, lambda_away: float,
+               max_goals: int = MAX_GRID_GOALS,
+               dixon_coles_rho: float = -0.13) -> Dict[str, float]:
+    """Bivariate scoreline distribution with Dixon-Coles low-scoreline dependence correction.
+    
+    Default rho = -0.13 aligns with calibrated football empirical dependency (Dixon & Coles 1997).
+    When rho = 0, mathematically equivalent to standard independent Poisson.
+    Renormalized to guarantee sum of probabilities is exactly 1.0.
     """
     grid = {}
     for home in range(max_goals + 1):
         for away in range(max_goals + 1):
-            grid[f"{home}-{away}"] = poisson_pmf(home, lambda_home) * poisson_pmf(away, lambda_away)
+            base_prob = poisson_pmf(home, lambda_home) * poisson_pmf(away, lambda_away)
+            if dixon_coles_rho != 0.0 and home <= 1 and away <= 1:
+                tau = tau_dixon_coles(home, away, lambda_home, lambda_away, dixon_coles_rho)
+                base_prob *= tau
+            grid[f"{home}-{away}"] = base_prob
     total = sum(grid.values())
     if total <= 0:
         return {"0-0": 1.0}
