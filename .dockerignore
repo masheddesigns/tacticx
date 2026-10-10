@@ -1,0 +1,13 @@
+.git/
+.venv/
+backend/.venv/
+backend/data/
+frontend/
+__pycache__/
+*.pyc
+*.pyo
+.env
+*.db
+.pytest_cache/
+.ruff_cache/
+.DS_Store
