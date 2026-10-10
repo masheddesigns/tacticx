@@ -19,7 +19,7 @@ class Settings(BaseSettings):
     LOG_LEVEL: str = "INFO"
     LOG_FORMAT: str = "console"  # console | json
     API_V1_PREFIX: str = "/api/v1"
-    CORS_ORIGINS: str = "http://localhost:3000"
+    CORS_ORIGINS: str = "http://localhost:3000,http://localhost:5173,https://tacticx-five.vercel.app"
     SECRET_KEY: str = "dev-secret-key-change-in-production"
     ENABLE_OPERATIONAL_ENDPOINTS: Optional[bool] = None
     # Phase 31: continuous-operation switches (safe defaults: everything on
