@@ -83,6 +83,44 @@ export function formatDateTime(
 }
 
 /**
+ * Returns formatted YYYY-MM-DD date string for today based on client or timezone
+ */
+export function getTodayString(timeZone: 'UTC' | 'local' | string = 'local'): string {
+  const d = new Date();
+  const tzOption = timeZone === 'local' ? undefined : timeZone;
+  return d.toLocaleDateString('en-CA', { timeZone: tzOption }); // returns YYYY-MM-DD
+}
+
+/**
+ * Returns formatted YYYY-MM-DD string offset by a number of days (+1 tomorrow, -1 yesterday)
+ */
+export function getDayOffsetString(offsetDays: number, timeZone: 'UTC' | 'local' | string = 'local'): string {
+  const d = new Date();
+  d.setDate(d.getDate() + offsetDays);
+  const tzOption = timeZone === 'local' ? undefined : timeZone;
+  return d.toLocaleDateString('en-CA', { timeZone: tzOption });
+}
+
+/**
+ * Formats a YYYY-MM-DD string into a short label like "Oct 10" or "Yesterday (Oct 9)"
+ */
+export function formatDayDisplay(dateStr: string, timeZone: 'UTC' | 'local' | string = 'local'): string {
+  try {
+    const parts = dateStr.split('-');
+    if (parts.length === 3) {
+      const year = parseInt(parts[0], 10);
+      const month = parseInt(parts[1], 10) - 1;
+      const day = parseInt(parts[2], 10);
+      const d = new Date(year, month, day);
+      return d.toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
+    }
+    return dateStr;
+  } catch {
+    return dateStr;
+  }
+}
+
+/**
  * Returns FotMob-style human-friendly date header for match lists:
  * "Today", "Tomorrow", "Yesterday", or formatted weekday e.g. "Saturday, Oct 3"
  */
@@ -92,7 +130,6 @@ export function getRelativeDateLabel(isoString?: string | null, timeZone: 'UTC' 
     const matchDate = new Date(isoString);
     if (isNaN(matchDate.getTime())) return isoString;
 
-    // Use current canonical system date (2026-10-02) as reference point
     const refDate = new Date();
     const tzOption = timeZone === 'local' ? undefined : timeZone;
 

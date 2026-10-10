@@ -27,18 +27,24 @@ import { CurrentSeasonBanner } from '../components/dashboard/CurrentSeasonBanner
 import { CompetitionCards, CompetitionData } from '../components/dashboard/CompetitionCards';
 import { MatchRow } from '../components/matches/MatchRow';
 import { getLeagueMeta } from './MatchExplorerPage';
-import { getRelativeDateLabel } from '../lib/utils';
+import { getRelativeDateLabel, getTodayString, getDayOffsetString, formatDayDisplay } from '../lib/utils';
 import { LoadingSpinner } from '../components/common/LoadingSpinner';
 import { ErrorCard } from '../components/common/ErrorCard';
 import { Badge } from '../components/common/Badge';
 
 export const DashboardPage: React.FC = () => {
-  // FotMob Homepage Filter State
-  const [selectedDate, setSelectedDate] = useState<string | undefined>('2026-10-02');
+  const [timeZone, setTimeZone] = useState<'UTC' | 'local'>('local');
+
+  // Dynamically calculate today, yesterday, tomorrow based on current date
+  const todayStr = getTodayString(timeZone);
+  const yesterdayStr = getDayOffsetString(-1, timeZone);
+  const tomorrowStr = getDayOffsetString(1, timeZone);
+
+  // FotMob Homepage Filter State: default to today or matches if today has none
+  const [selectedDate, setSelectedDate] = useState<string | undefined>(todayStr);
   const [selectedStatus, setSelectedStatus] = useState<string | undefined>(undefined);
   const [selectedLeague, setSelectedLeague] = useState<string | undefined>(undefined);
   const [searchQuery, setSearchQuery] = useState<string>('');
-  const [timeZone, setTimeZone] = useState<'UTC' | 'local'>('UTC');
 
   const { data: dashboard, isLoading: dashLoading, error: dashError } = useJobDashboard();
   const { data: sourcesData } = useSources();
@@ -175,7 +181,7 @@ export const DashboardPage: React.FC = () => {
   };
 
   const handleResetFilters = () => {
-    setSelectedDate('2026-10-02');
+    setSelectedDate(todayStr);
     setSelectedStatus(undefined);
     setSelectedLeague(undefined);
     setSearchQuery('');
@@ -247,36 +253,36 @@ export const DashboardPage: React.FC = () => {
             </button>
 
             <button
-              onClick={() => handleSelectDay('2026-10-01')}
+              onClick={() => handleSelectDay(yesterdayStr)}
               className={`px-3 py-1.5 rounded-lg text-xs font-sans font-medium transition-colors ${
-                selectedDate === '2026-10-01'
+                selectedDate === yesterdayStr
                   ? 'bg-[#21e786] text-[#0e1015] font-bold shadow-sm'
                   : 'bg-[#1e222e] text-slate-300 hover:bg-[#242938]'
               }`}
             >
-              Yesterday (Oct 1)
+              Yesterday ({formatDayDisplay(yesterdayStr, timeZone)})
             </button>
 
             <button
-              onClick={() => handleSelectDay('2026-10-02')}
+              onClick={() => handleSelectDay(todayStr)}
               className={`px-3 py-1.5 rounded-lg text-xs font-sans font-medium transition-colors ${
-                selectedDate === '2026-10-02'
+                selectedDate === todayStr
                   ? 'bg-[#21e786] text-[#0e1015] font-bold shadow-sm'
                   : 'bg-[#1e222e] text-slate-300 hover:bg-[#242938]'
               }`}
             >
-              Today (Oct 2)
+              Today ({formatDayDisplay(todayStr, timeZone)})
             </button>
 
             <button
-              onClick={() => handleSelectDay('2026-10-03')}
+              onClick={() => handleSelectDay(tomorrowStr)}
               className={`px-3 py-1.5 rounded-lg text-xs font-sans font-medium transition-colors ${
-                selectedDate === '2026-10-03'
+                selectedDate === tomorrowStr
                   ? 'bg-[#21e786] text-[#0e1015] font-bold shadow-sm'
                   : 'bg-[#1e222e] text-slate-300 hover:bg-[#242938]'
               }`}
             >
-              Tomorrow (Oct 3)
+              Tomorrow ({formatDayDisplay(tomorrowStr, timeZone)})
             </button>
 
             <button
@@ -306,7 +312,7 @@ export const DashboardPage: React.FC = () => {
               </button>
             </div>
 
-            {(selectedStatus || selectedDate !== '2026-10-02' || selectedLeague || searchQuery) && (
+            {(selectedStatus || selectedDate !== todayStr || selectedLeague || searchQuery) && (
               <button
                 onClick={handleResetFilters}
                 className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-sans text-slate-400 hover:text-white bg-[#1e222e] border border-[#242938] transition-colors"

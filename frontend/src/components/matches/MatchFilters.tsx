@@ -1,5 +1,6 @@
 import React from 'react';
 import { Search, Filter, RotateCcw } from 'lucide-react';
+import { getTodayString, getDayOffsetString, formatDayDisplay } from '../../lib/utils';
 
 export interface MatchFiltersState {
   league?: string;
@@ -24,6 +25,10 @@ export const MatchFilters: React.FC<MatchFiltersProps> = ({
   timeZone = 'UTC',
   onTimeZoneChange,
 }) => {
+  const todayStr = getTodayString(timeZone);
+  const yesterdayStr = getDayOffsetString(-1, timeZone);
+  const tomorrowStr = getDayOffsetString(1, timeZone);
+
   const handleChange = (key: keyof MatchFiltersState, value: string) => {
     onFilterChange({
       ...filters,
@@ -35,11 +40,11 @@ export const MatchFilters: React.FC<MatchFiltersProps> = ({
     onFilterChange({});
   };
 
-  // Canonical date references: Today is 2026-10-02, Yesterday 2026-10-01, Tomorrow 2026-10-03
   const handleQuickDay = (dayStr: string) => {
     onFilterChange({
       ...filters,
       date: dayStr,
+      status: undefined,
     });
   };
 
@@ -61,34 +66,34 @@ export const MatchFilters: React.FC<MatchFiltersProps> = ({
             Live Now
           </button>
           <button
-            onClick={() => handleQuickDay('2026-10-01')}
+            onClick={() => handleQuickDay(yesterdayStr)}
             className={`px-2.5 py-1 rounded text-xs font-mono transition-colors ${
-              filters.date === '2026-10-01'
+              filters.date === yesterdayStr
                 ? 'bg-emerald-600 text-white font-bold'
                 : 'bg-slate-800 text-slate-300 hover:bg-slate-700'
             }`}
           >
-            Yesterday (Oct 1)
+            Yesterday ({formatDayDisplay(yesterdayStr, timeZone)})
           </button>
           <button
-            onClick={() => handleQuickDay('2026-10-02')}
+            onClick={() => handleQuickDay(todayStr)}
             className={`px-2.5 py-1 rounded text-xs font-mono transition-colors ${
-              filters.date === '2026-10-02'
+              filters.date === todayStr
                 ? 'bg-emerald-600 text-white font-bold'
                 : 'bg-slate-800 text-slate-300 hover:bg-slate-700'
             }`}
           >
-            Today (Oct 2)
+            Today ({formatDayDisplay(todayStr, timeZone)})
           </button>
           <button
-            onClick={() => handleQuickDay('2026-10-03')}
+            onClick={() => handleQuickDay(tomorrowStr)}
             className={`px-2.5 py-1 rounded text-xs font-mono transition-colors ${
-              filters.date === '2026-10-03'
+              filters.date === tomorrowStr
                 ? 'bg-emerald-600 text-white font-bold'
                 : 'bg-slate-800 text-slate-300 hover:bg-slate-700'
             }`}
           >
-            Tomorrow (Oct 3)
+            Tomorrow ({formatDayDisplay(tomorrowStr, timeZone)})
           </button>
           <button
             onClick={() => onFilterChange({ ...filters, status: 'SCHEDULED', date: undefined })}
