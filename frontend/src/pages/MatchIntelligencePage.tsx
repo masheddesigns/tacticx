@@ -214,9 +214,6 @@ export const MatchIntelligencePage: React.FC = () => {
         statComparison={statComparison}
       />
 
-      {/* Warnings (if present) */}
-      {intel.warnings?.length > 0 && <WarningsSection warnings={intel.warnings} />}
-
       {/* Navigation Tabs */}
       <div className="border-b border-[#242938]">
         <nav className="flex space-x-6 overflow-x-auto" aria-label="Tabs">
@@ -406,6 +403,11 @@ export const MatchIntelligencePage: React.FC = () => {
             dataQuality={intel.data_quality}
             temporalQuality={intel.temporal_quality}
           />
+
+          {/* 13b. System Ingestion & Calibration Notices (Auditing) */}
+          {intel.warnings?.length > 0 && (
+            <WarningsSection warnings={intel.warnings} defaultOpen={false} />
+          )}
 
           {/* 16. Cryptographic Provenance */}
           <ProvenanceSection provenance={intel.provenance} rawJson={intel} />

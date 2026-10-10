@@ -8,7 +8,7 @@ export interface WarningsSectionProps {
   defaultOpen?: boolean;
 }
 
-export const WarningsSection: React.FC<WarningsSectionProps> = ({ warnings, defaultOpen = true }) => {
+export const WarningsSection: React.FC<WarningsSectionProps> = ({ warnings, defaultOpen = false }) => {
   const [isOpen, setIsOpen] = useState(defaultOpen);
 
 
