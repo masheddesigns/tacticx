@@ -254,8 +254,17 @@ def advance_match_lifecycles(
     if target_match_id:
         query = query.filter(Match.id == target_match_id)
     else:
-        # Check matches that have kicked off or are scheduled within 2 hours
-        query = query.filter(Match.kickoff_at <= now_utc)
+        from datetime import timedelta
+        recent_cutoff = now_utc - timedelta(hours=48)
+        query = query.filter(
+            Match.kickoff_at <= now_utc,
+            (
+                (Match.status != MatchStatus.FINISHED.value)
+                | (Match.home_score == None)
+                | (Match.away_score == None)
+                | (Match.kickoff_at >= recent_cutoff)
+            )
+        )
 
     matches = query.all()
     live_count = 0
@@ -265,6 +274,10 @@ def advance_match_lifecycles(
     from app.services.prediction_evaluation.service import evaluate_prediction_snapshot
 
     for m in matches:
+        if m.status == MatchStatus.FINISHED.value and m.home_score is not None and m.away_score is not None:
+            finished_count += 1
+            continue
+
         # If match was already updated by real API-Football live feed, skip synthetic advancement
         if m.provider_match_id and m.provider_match_id in real_fids:
             if m.status in (MatchStatus.LIVE.value, MatchStatus.HALFTIME.value):
