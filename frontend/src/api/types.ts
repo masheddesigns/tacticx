@@ -34,6 +34,14 @@ export interface PaginatedMatchesResponse {
   season?: string;
 }
 
+export interface DailyProjectedStats {
+  corners_total?: number;
+  corners_home?: number;
+  corners_away?: number;
+  cards_total?: number;
+  shots_on_target?: number;
+}
+
 export interface DailyPredictionPick {
   match_id: number;
   fixture: string;
@@ -45,11 +53,12 @@ export interface DailyPredictionPick {
   odds: number;
   confidence: 'VERY HIGH' | 'HIGH' | 'MEDIUM';
   kickoff_at?: string | null;
+  projected_stats?: DailyProjectedStats;
 }
 
 export interface DailyPredictionSlip {
   title: string;
-  type: 'banker' | 'accumulator' | 'value';
+  type: 'banker' | 'accumulator' | 'corners_cards' | 'goals' | 'value' | 'mega' | string;
   badge: string;
   description: string;
   total_odds: number;

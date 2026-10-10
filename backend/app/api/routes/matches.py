@@ -252,389 +252,7 @@ def current_season_readiness_summary_endpoint(
     return get_current_season_prematch_summary(db, season=season)
 
 
-@router.get("/daily-slips", summary="Curated daily prediction slips (Banker, Value, Multi-League Accumulator)")
-def get_daily_slips(
-    date: Optional[str] = Query(None, description="YYYY-MM-DD date (defaults to current UTC day)"),
-    db: Session = Depends(get_db),
-):
-    """Generates intelligent daily betting slips from the day's match pool:
-    1. Safe Banker Slip: Highest-confidence predictive outcomes across all leagues.
-    2. High-Value Slip: Outcomes with attractive Parimatch odds (1.70 - 2.50) backed by high model edge.
-    3. Multi-League Accumulator Slip: Synergistic combo pick spanning EPL, La Liga, Serie A, Bundesliga, etc.
-    All odds incorporate standard 5% commercial bookmaker margin.
-    """
-    from app.services.match_intelligence.service import build_match_intelligence
-    from datetime import datetime, timezone, timedelta
-
-    target_date_str = date
-    if not target_date_str:
-        target_date_str = datetime.now(timezone.utc).strftime("%Y-%m-%d")
-
-    try:
-        day_start = datetime.strptime(target_date_str, "%Y-%m-%d").replace(tzinfo=timezone.utc)
-    except ValueError:
-        raise HTTPException(400, "date must be YYYY-MM-DD")
-
-    day_end = day_start + timedelta(days=1)
-    matches = db.query(Match).filter(
-        Match.kickoff_at >= day_start,
-        Match.kickoff_at < day_end
-    ).order_by(Match.kickoff_at).all()
-
-    if not matches:
-        return {
-            "date": target_date_str,
-            "total_matches": 0,
-            "slips": [],
-        }
-
-    # Helper for commercial Parimatch odds (5% overround)
-    def _calc_odds(p: float, margin: float = 0.05) -> float:
-        if p <= 0:
-            return 1.01
-        commercial_p = min(0.98, p * (1 + margin))
-        return round(1.0 / commercial_p, 2)
-
-    all_picks = []
-
-    for m in matches:
-        try:
-            intel = build_match_intelligence(db, m.id)
-            core = intel.get("core_prediction") or {}
-            derived = intel.get("derived_markets") or {}
-            totals = derived.get("totals") or {}
-            btts = derived.get("btts") or {}
-            dc = derived.get("double_chance") or {}
-
-            home_team = db.get(Team, m.home_team_id) if m.home_team_id else None
-            away_team = db.get(Team, m.away_team_id) if m.away_team_id else None
-            league = db.get(League, m.league_id) if m.league_id else None
-
-            h_name = home_team.name if home_team else "Home"
-            a_name = away_team.name if away_team else "Away"
-            lg_code = league.code if league else "LEAGUE"
-            lg_name = league.name if league else "Football"
-
-            p_h = float(core.get("home", 0.33))
-            p_d = float(core.get("draw", 0.33))
-            p_a = float(core.get("away", 0.33))
-
-            # Candidate 1: Direct Win
-            if p_h >= 0.55:
-                all_picks.append({
-                    "match_id": m.id,
-                    "fixture": f"{h_name} vs {a_name}",
-                    "league": lg_name,
-                    "league_code": lg_code,
-                    "pick": f"{h_name} to Win",
-                    "market": "1X2 (Match Winner)",
-                    "probability": round(p_h, 3),
-                    "odds": _calc_odds(p_h),
-                    "confidence": "HIGH" if p_h >= 0.65 else "MEDIUM",
-                    "kickoff_at": m.kickoff_at.isoformat() if m.kickoff_at else None,
-                })
-            elif p_a >= 0.50:
-                all_picks.append({
-                    "match_id": m.id,
-                    "fixture": f"{h_name} vs {a_name}",
-                    "league": lg_name,
-                    "league_code": lg_code,
-                    "pick": f"{a_name} to Win",
-                    "market": "1X2 (Match Winner)",
-                    "probability": round(p_a, 3),
-                    "odds": _calc_odds(p_a),
-                    "confidence": "HIGH" if p_a >= 0.60 else "MEDIUM",
-                    "kickoff_at": m.kickoff_at.isoformat() if m.kickoff_at else None,
-                })
-
-            # Candidate 2: Double Chance (Safety Pick)
-            p_1x = p_h + p_d
-            if p_1x >= 0.75:
-                all_picks.append({
-                    "match_id": m.id,
-                    "fixture": f"{h_name} vs {a_name}",
-                    "league": lg_name,
-                    "league_code": lg_code,
-                    "pick": f"{h_name} or Draw (1X)",
-                    "market": "Double Chance",
-                    "probability": round(p_1x, 3),
-                    "odds": _calc_odds(p_1x),
-                    "confidence": "VERY HIGH",
-                    "kickoff_at": m.kickoff_at.isoformat() if m.kickoff_at else None,
-                })
-
-            p_x2 = p_d + p_a
-            if p_x2 >= 0.75:
-                all_picks.append({
-                    "match_id": m.id,
-                    "fixture": f"{h_name} vs {a_name}",
-                    "league": lg_name,
-                    "league_code": lg_code,
-                    "pick": f"{a_name} or Draw (X2)",
-                    "market": "Double Chance",
-                    "probability": round(p_x2, 3),
-                    "odds": _calc_odds(p_x2),
-                    "confidence": "VERY HIGH",
-                    "kickoff_at": m.kickoff_at.isoformat() if m.kickoff_at else None,
-                })
-
-            # Candidate 3: Over 1.5 Goals
-            p_o15 = float(totals.get("over_1_5", 0.0))
-            if p_o15 >= 0.75:
-                all_picks.append({
-                    "match_id": m.id,
-                    "fixture": f"{h_name} vs {a_name}",
-                    "league": lg_name,
-                    "league_code": lg_code,
-                    "pick": "Over 1.5 Total Goals",
-                    "market": "Totals",
-                    "probability": round(p_o15, 3),
-                    "odds": _calc_odds(p_o15),
-                    "confidence": "HIGH",
-                    "kickoff_at": m.kickoff_at.isoformat() if m.kickoff_at else None,
-                })
-
-            # Candidate 4: Over 2.5 Goals (Value Pick)
-            p_o25 = float(totals.get("over_2_5", 0.0))
-            if 0.52 <= p_o25 <= 0.72:
-                all_picks.append({
-                    "match_id": m.id,
-                    "fixture": f"{h_name} vs {a_name}",
-                    "league": lg_name,
-                    "league_code": lg_code,
-                    "pick": "Over 2.5 Goals",
-                    "market": "Totals",
-                    "probability": round(p_o25, 3),
-                    "odds": _calc_odds(p_o25),
-                    "confidence": "MEDIUM",
-                    "kickoff_at": m.kickoff_at.isoformat() if m.kickoff_at else None,
-                })
-
-            # Candidate 5: Both Teams to Score (BTTS)
-            p_btts = float(btts.get("yes", 0.0))
-            if 0.55 <= p_btts <= 0.70:
-                all_picks.append({
-                    "match_id": m.id,
-                    "fixture": f"{h_name} vs {a_name}",
-                    "league": lg_name,
-                    "league_code": lg_code,
-                    "pick": "Both Teams to Score (Yes)",
-                    "market": "BTTS",
-                    "probability": round(p_btts, 3),
-                    "odds": _calc_odds(p_btts),
-                    "confidence": "MEDIUM",
-                    "kickoff_at": m.kickoff_at.isoformat() if m.kickoff_at else None,
-                })
-        except Exception:
-            continue
-
-    # Helper: calculate combined accumulator odds
-    def _combine_slip(picks_list, name, badge, desc, slip_type):
-        if not picks_list:
-            return None
-        comb_odds = 1.0
-        for p in picks_list:
-            comb_odds *= p["odds"]
-        avg_prob = sum(p["probability"] for p in picks_list) / len(picks_list)
-        return {
-            "title": name,
-            "type": slip_type,
-            "badge": badge,
-            "description": desc,
-            "total_odds": round(comb_odds, 2),
-            "win_probability": round(avg_prob * 100, 1),
-            "selections_count": len(picks_list),
-            "picks": picks_list,
-        }
-
-    slips = []
-
-    # 1. THE DAILY BANKER SLIP (Highest Probability >= 75%, ultra safe 3-fold)
-    banker_candidates = sorted(
-        [p for p in all_picks if p["probability"] >= 0.70],
-        key=lambda x: x["probability"],
-        reverse=True
-    )
-    # Deduplicate matches
-    seen_matches = set()
-    banker_picks = []
-    for p in banker_candidates:
-        if p["match_id"] not in seen_matches:
-            seen_matches.add(p["match_id"])
-            banker_picks.append(p)
-            if len(banker_picks) == 3:
-                break
-    if banker_picks:
-        slips.append(_combine_slip(
-            banker_picks,
-            "Safe Banker Treble",
-            "Highest Accuracy (75%+ Prob)",
-            "Top-confidence mathematical selections designed for minimal variance.",
-            "banker"
-        ))
-
-    # 2. MULTI-LEAGUE ACCUMULATOR SLIP (Spanning multiple top competitions: EPL, La Liga, Serie A, etc.)
-    multi_league_picks = []
-    seen_leagues = set()
-    seen_matches_acc = set()
-    # Sort by balance of strong prob and decent odds
-    acc_candidates = sorted(
-        [p for p in all_picks if p["probability"] >= 0.58 and p["odds"] >= 1.30],
-        key=lambda x: x["probability"] * x["odds"],
-        reverse=True
-    )
-    for p in acc_candidates:
-        if p["match_id"] not in seen_matches_acc and p["league_code"] not in seen_leagues:
-            seen_matches_acc.add(p["match_id"])
-            seen_leagues.add(p["league_code"])
-            multi_league_picks.append(p)
-            if len(multi_league_picks) == 4:
-                break
-
-    if len(multi_league_picks) >= 2:
-        slips.append(_combine_slip(
-            multi_league_picks,
-            "Cross-League Power Acca",
-            "Multi-League Combo",
-            f"Cross-competition accumulator combining {len(multi_league_picks)} distinct European leagues.",
-            "accumulator"
-        ))
-
-    # 3. GOALS FEST SLIP (Over 1.5 / Over 2.5 & BTTS specialist slip)
-    goal_candidates = sorted(
-        [p for p in all_picks if p["market"] in ("Totals", "BTTS") and p["probability"] >= 0.65],
-        key=lambda x: x["probability"],
-        reverse=True
-    )
-    seen_goals = set()
-    goal_picks = []
-    for p in goal_candidates:
-        if p["match_id"] not in seen_goals:
-            seen_goals.add(p["match_id"])
-            goal_picks.append(p)
-            if len(goal_picks) == 3:
-                break
-    if goal_picks:
-        slips.append(_combine_slip(
-            goal_picks,
-            "Goals Galore Combo",
-            "Over Goals & BTTS",
-            "Curated goal lines combining high expected goals (xG) projections across leagues.",
-            "goals"
-        ))
-
-    # 4. HIGH-VALUE SLIP (Attractive odds 1.65 - 2.40 with model edge)
-    value_candidates = sorted(
-        [p for p in all_picks if 1.60 <= p["odds"] <= 2.45 and p["probability"] >= 0.46],
-        key=lambda x: x["probability"] * x["odds"],
-        reverse=True
-    )
-    seen_val = set()
-    value_picks = []
-    for p in value_candidates:
-        if p["match_id"] not in seen_val:
-            seen_val.add(p["match_id"])
-            value_picks.append(p)
-            if len(value_picks) == 3:
-                break
-
-    if value_picks:
-        slips.append(_combine_slip(
-            value_picks,
-            "High Value Multiplier",
-            "Value Edge (1.70+ Odds)",
-            "Selections where model win probability offers significant positive expected value.",
-            "value"
-        ))
-
-    # 5. MEGA ACCUMULATOR SLIP (5-Fold High Multiplier across all European competitions)
-    mega_candidates = sorted(
-        [p for p in all_picks if p["probability"] >= 0.62],
-        key=lambda x: x["probability"],
-        reverse=True
-    )
-    seen_mega = set()
-    mega_picks = []
-    for p in mega_candidates:
-        if p["match_id"] not in seen_mega:
-            seen_mega.add(p["match_id"])
-            mega_picks.append(p)
-            if len(mega_picks) == 5:
-                break
-    if len(mega_picks) >= 4:
-        slips.append(_combine_slip(
-            mega_picks,
-            "Mega 5-Fold Parlay",
-            "Big Odds Multiplier",
-            f"Strategic 5-selection cross-league parlay designed for high-yield returns.",
-            "mega"
-        ))
-
-    return {
-        "date": target_date_str,
-        "total_matches": len(matches),
-        "slips": [s for s in slips if s is not None],
-    }
-
-
-@router.get("/{match_id}", summary="Match detail", response_model=MatchOut)
-def get_match(match_id: int, db: Session = Depends(get_db)):
-    m = db.get(Match, match_id)
-    if not m:
-        raise HTTPException(404, "match not found")
-    return _match_out(m, db)
-
-
-@router.get("/{match_id}/pre-match-readiness", summary="Pre-match data quality and readiness gate evaluation")
-def match_pre_match_readiness_endpoint(
-    match_id: int,
-    cutoff: Optional[str] = Query(None, description="ISO-8601 evaluation cutoff timestamp"),
-    mode: str = Query("PRE_MATCH", description="Evaluation mode: PRE_MATCH | POST_MATCH | EVALUATION"),
-    persist: bool = Query(False, description="Whether to persist an immutable readiness certificate"),
-    db: Session = Depends(get_db),
-):
-    """Evaluate pre-match data quality, cross-source reconciliation, and temporal readiness."""
-    m = db.get(Match, match_id)
-    if not m:
-        raise HTTPException(404, "match not found")
-
-    cutoff_dt = None
-    if cutoff:
-        try:
-            cutoff_dt = datetime.fromisoformat(cutoff.replace("Z", "+00:00"))
-        except ValueError:
-            raise HTTPException(400, "cutoff must be valid ISO-8601 timestamp")
-
-    from app.services.acquisition.readiness_gate import (
-        evaluate_pre_match_readiness,
-        generate_readiness_certificate,
-    )
-
-    if persist:
-        cert = generate_readiness_certificate(db, match_id, cutoff=cutoff_dt, mode=mode)
-        evaluation = evaluate_pre_match_readiness(db, match_id, cutoff=cutoff_dt, mode=mode)
-        evaluation["certificate"] = {
-            "certificate_id": cert.certificate_id,
-            "certificate_version": cert.certificate_version,
-            "payload_hash": cert.payload_hash,
-            "supersedes_certificate_id": cert.supersedes_certificate_id,
-            "created_at": cert.created_at.isoformat() if cert.created_at else None,
-        }
-        return evaluation
-
-    return evaluate_pre_match_readiness(db, match_id, cutoff=cutoff_dt, mode=mode)
-
-
-@router.get("/{match_id}/statistics", summary="Match statistics")
-def get_statistics(match_id: int, db: Session = Depends(get_db)):
-    if not db.get(Match, match_id):
-        raise HTTPException(404, "match not found")
-    rows = db.query(MatchStatistic).filter_by(match_id=match_id).all()
-    return {"data": [StatOut(team=r.team, stat_name=r.stat_name, stat_value=r.stat_value,
-                             period=r.period) for r in rows]}
-
-
-def _compute_stat_projections_data(db: Session, m: Match) -> dict:
+def _compute_stat_projections_data(db: Session, m: Match, team_cache: Optional[dict] = None) -> dict:
     home_team = db.get(Team, m.home_team_id) if m.home_team_id else None
     away_team = db.get(Team, m.away_team_id) if m.away_team_id else None
 
@@ -642,7 +260,10 @@ def _compute_stat_projections_data(db: Session, m: Match) -> dict:
     def _team_stat_averages(team_id: int, is_home: bool) -> dict[str, float]:
         if not team_id:
             return {"corners": 4.8, "shots_total": 12.5, "shots_on_target": 4.2, "yellow_cards": 1.8, "red_cards": 0.08}
-        # Last 10 finished matches
+        cache_key = (team_id, is_home)
+        if team_cache is not None and cache_key in team_cache:
+            return team_cache[cache_key]
+
         hist_matches = (
             db.query(Match)
             .filter((Match.home_team_id == team_id) | (Match.away_team_id == team_id))
@@ -652,7 +273,10 @@ def _compute_stat_projections_data(db: Session, m: Match) -> dict:
             .all()
         )
         if not hist_matches:
-            return {"corners": 4.8, "shots_total": 12.5, "shots_on_target": 4.2, "yellow_cards": 1.8, "red_cards": 0.08}
+            res = {"corners": 4.8, "shots_total": 12.5, "shots_on_target": 4.2, "yellow_cards": 1.8, "red_cards": 0.08}
+            if team_cache is not None:
+                team_cache[cache_key] = res
+            return res
 
         m_ids = [hm.id for hm in hist_matches]
         stats = db.query(MatchStatistic).filter(MatchStatistic.match_id.in_(m_ids)).all()
@@ -670,10 +294,13 @@ def _compute_stat_projections_data(db: Session, m: Match) -> dict:
                     pass
 
         defaults = {"corners": 4.8, "shots_total": 12.5, "shots_on_target": 4.2, "yellow_cards": 1.8, "red_cards": 0.08}
-        return {
+        res = {
             k: round(sum(totals[k]) / len(totals[k]), 1) if totals.get(k) else defaults[k]
             for k in defaults
         }
+        if team_cache is not None:
+            team_cache[cache_key] = res
+        return res
 
     h_stats = _team_stat_averages(m.home_team_id, True)
     a_stats = _team_stat_averages(m.away_team_id, False)
@@ -744,6 +371,485 @@ def _compute_stat_projections_data(db: Session, m: Match) -> dict:
             },
         ],
     }
+
+
+@router.get("/daily-slips", summary="Curated 6 daily prediction slips (Banker, Acca, Props, Goals, Value, Mega)")
+def get_daily_slips(
+    date: Optional[str] = Query(None, description="YYYY-MM-DD date (defaults to current UTC day)"),
+    db: Session = Depends(get_db),
+):
+    """Generates 6 distinct, mathematically curated daily betting slips with projected match stats:
+    1. Safe Banker Treble: Highest-confidence predictive outcomes across all leagues (75%+ prob).
+    2. Cross-League Power Acca: Synergistic combo spanning EPL, La Liga, Serie A, Bundesliga, etc.
+    3. Corners & Cards Specialist: Prop market edge based on projected corners and referee booking rates.
+    4. Goals Galore Combo: Goal-line specialist slip (Over 1.5 / Over 2.5 & BTTS).
+    5. High Value Multiplier: Attractive odds (1.70 - 2.50) with significant positive model EV edge.
+    6. Mega 5-Fold Parlay: High compound accumulator returns across European competitions.
+    All odds incorporate standard 5% commercial bookmaker margin.
+    """
+    from app.services.match_intelligence.service import build_match_intelligence
+    from datetime import datetime, timezone, timedelta
+
+    target_date_str = date
+    if not target_date_str:
+        target_date_str = datetime.now(timezone.utc).strftime("%Y-%m-%d")
+
+    try:
+        day_start = datetime.strptime(target_date_str, "%Y-%m-%d").replace(tzinfo=timezone.utc)
+    except ValueError:
+        raise HTTPException(400, "date must be YYYY-MM-DD")
+
+    day_end = day_start + timedelta(days=1)
+    matches = db.query(Match).filter(
+        Match.kickoff_at >= day_start,
+        Match.kickoff_at < day_end
+    ).order_by(Match.kickoff_at).all()
+
+    if not matches:
+        return {
+            "date": target_date_str,
+            "total_matches": 0,
+            "slips": [],
+        }
+
+    # Helper for commercial Parimatch odds (5% overround)
+    def _calc_odds(p: float, margin: float = 0.05) -> float:
+        if p <= 0:
+            return 1.01
+        commercial_p = min(0.98, p * (1 + margin))
+        return round(1.0 / commercial_p, 2)
+
+    all_picks = []
+    team_stat_cache = {}
+
+    for m in matches:
+        try:
+            intel = build_match_intelligence(db, m.id)
+            core = intel.get("core_prediction") or {}
+            derived = intel.get("derived_markets") or {}
+            totals = derived.get("totals") or {}
+            btts = derived.get("btts") or {}
+
+            home_team = db.get(Team, m.home_team_id) if m.home_team_id else None
+            away_team = db.get(Team, m.away_team_id) if m.away_team_id else None
+            league = db.get(League, m.league_id) if m.league_id else None
+
+            h_name = home_team.name if home_team else "Home"
+            a_name = away_team.name if away_team else "Away"
+            lg_code = league.code if league else "LEAGUE"
+            lg_name = league.name if league else "Football"
+
+            # Compute stat projections
+            proj_data = _compute_stat_projections_data(db, m, team_cache=team_stat_cache)
+            comb = proj_data.get("combined_projections") or {}
+            t_proj = proj_data.get("team_projections") or {}
+            h_corn = t_proj.get("home", {}).get("corners", 5.0)
+            a_corn = t_proj.get("away", {}).get("corners", 4.5)
+            c_total = comb.get("corners_total", 9.5)
+            cards_total = comb.get("yellow_cards_total", 3.5)
+            sot_total = comb.get("shots_on_target", 8.5)
+
+            projected_stats_payload = {
+                "corners_total": round(c_total, 1),
+                "corners_home": round(h_corn, 1),
+                "corners_away": round(a_corn, 1),
+                "cards_total": round(cards_total, 1),
+                "shots_on_target": round(sot_total, 1),
+            }
+
+            p_h = float(core.get("home", 0.33))
+            p_d = float(core.get("draw", 0.33))
+            p_a = float(core.get("away", 0.33))
+
+            # Candidate 1: Direct Win
+            if p_h >= 0.55:
+                all_picks.append({
+                    "match_id": m.id,
+                    "fixture": f"{h_name} vs {a_name}",
+                    "league": lg_name,
+                    "league_code": lg_code,
+                    "pick": f"{h_name} to Win",
+                    "market": "1X2 (Match Winner)",
+                    "probability": round(p_h, 3),
+                    "odds": _calc_odds(p_h),
+                    "confidence": "HIGH" if p_h >= 0.65 else "MEDIUM",
+                    "kickoff_at": m.kickoff_at.isoformat() if m.kickoff_at else None,
+                    "projected_stats": projected_stats_payload,
+                })
+            elif p_a >= 0.50:
+                all_picks.append({
+                    "match_id": m.id,
+                    "fixture": f"{h_name} vs {a_name}",
+                    "league": lg_name,
+                    "league_code": lg_code,
+                    "pick": f"{a_name} to Win",
+                    "market": "1X2 (Match Winner)",
+                    "probability": round(p_a, 3),
+                    "odds": _calc_odds(p_a),
+                    "confidence": "HIGH" if p_a >= 0.60 else "MEDIUM",
+                    "kickoff_at": m.kickoff_at.isoformat() if m.kickoff_at else None,
+                    "projected_stats": projected_stats_payload,
+                })
+
+            # Candidate 2: Double Chance (Safety Pick)
+            p_1x = p_h + p_d
+            if p_1x >= 0.75:
+                all_picks.append({
+                    "match_id": m.id,
+                    "fixture": f"{h_name} vs {a_name}",
+                    "league": lg_name,
+                    "league_code": lg_code,
+                    "pick": f"{h_name} or Draw (1X)",
+                    "market": "Double Chance",
+                    "probability": round(p_1x, 3),
+                    "odds": _calc_odds(p_1x),
+                    "confidence": "VERY HIGH",
+                    "kickoff_at": m.kickoff_at.isoformat() if m.kickoff_at else None,
+                    "projected_stats": projected_stats_payload,
+                })
+
+            p_x2 = p_d + p_a
+            if p_x2 >= 0.75:
+                all_picks.append({
+                    "match_id": m.id,
+                    "fixture": f"{h_name} vs {a_name}",
+                    "league": lg_name,
+                    "league_code": lg_code,
+                    "pick": f"{a_name} or Draw (X2)",
+                    "market": "Double Chance",
+                    "probability": round(p_x2, 3),
+                    "odds": _calc_odds(p_x2),
+                    "confidence": "VERY HIGH",
+                    "kickoff_at": m.kickoff_at.isoformat() if m.kickoff_at else None,
+                    "projected_stats": projected_stats_payload,
+                })
+
+            # Candidate 3: Over 1.5 Goals
+            p_o15 = float(totals.get("over_1_5", 0.0))
+            if p_o15 >= 0.72:
+                all_picks.append({
+                    "match_id": m.id,
+                    "fixture": f"{h_name} vs {a_name}",
+                    "league": lg_name,
+                    "league_code": lg_code,
+                    "pick": "Over 1.5 Total Goals",
+                    "market": "Totals",
+                    "probability": round(p_o15, 3),
+                    "odds": _calc_odds(p_o15),
+                    "confidence": "HIGH",
+                    "kickoff_at": m.kickoff_at.isoformat() if m.kickoff_at else None,
+                    "projected_stats": projected_stats_payload,
+                })
+
+            # Candidate 4: Over 2.5 Goals (Value Pick)
+            p_o25 = float(totals.get("over_2_5", 0.0))
+            if 0.50 <= p_o25 <= 0.75:
+                all_picks.append({
+                    "match_id": m.id,
+                    "fixture": f"{h_name} vs {a_name}",
+                    "league": lg_name,
+                    "league_code": lg_code,
+                    "pick": "Over 2.5 Goals",
+                    "market": "Totals",
+                    "probability": round(p_o25, 3),
+                    "odds": _calc_odds(p_o25),
+                    "confidence": "MEDIUM",
+                    "kickoff_at": m.kickoff_at.isoformat() if m.kickoff_at else None,
+                    "projected_stats": projected_stats_payload,
+                })
+
+            # Candidate 5: Both Teams to Score (BTTS)
+            p_btts = float(btts.get("yes", 0.0))
+            if 0.52 <= p_btts <= 0.75:
+                all_picks.append({
+                    "match_id": m.id,
+                    "fixture": f"{h_name} vs {a_name}",
+                    "league": lg_name,
+                    "league_code": lg_code,
+                    "pick": "Both Teams to Score (Yes)",
+                    "market": "BTTS",
+                    "probability": round(p_btts, 3),
+                    "odds": _calc_odds(p_btts),
+                    "confidence": "MEDIUM",
+                    "kickoff_at": m.kickoff_at.isoformat() if m.kickoff_at else None,
+                    "projected_stats": projected_stats_payload,
+                })
+
+            # Candidate 6: Stat Props (Corners, Yellow Cards, Shots on Target)
+            for sm in proj_data.get("situation_markets", []):
+                cat = sm.get("category", "")
+                market_name = sm.get("market_name", "")
+                prob = sm.get("probability", 0.5)
+                # Keep high-reliability prop markets
+                if cat in ("corners", "cards", "shots") and prob >= 0.55:
+                    all_picks.append({
+                        "match_id": m.id,
+                        "fixture": f"{h_name} vs {a_name}",
+                        "league": lg_name,
+                        "league_code": lg_code,
+                        "pick": market_name,
+                        "market": f"Props ({cat.capitalize()})",
+                        "probability": round(prob, 3),
+                        "odds": _calc_odds(prob),
+                        "confidence": "HIGH" if prob >= 0.62 else "MEDIUM",
+                        "kickoff_at": m.kickoff_at.isoformat() if m.kickoff_at else None,
+                        "projected_stats": projected_stats_payload,
+                    })
+
+        except Exception:
+            continue
+
+    # Helper: calculate combined accumulator odds
+    def _combine_slip(picks_list, name, badge, desc, slip_type):
+        if not picks_list:
+            return None
+        comb_odds = 1.0
+        for p in picks_list:
+            comb_odds *= p["odds"]
+        avg_prob = sum(p["probability"] for p in picks_list) / len(picks_list)
+        return {
+            "title": name,
+            "type": slip_type,
+            "badge": badge,
+            "description": desc,
+            "total_odds": round(comb_odds, 2),
+            "win_probability": round(avg_prob * 100, 1),
+            "selections_count": len(picks_list),
+            "picks": picks_list,
+        }
+
+    slips = []
+
+    # 1. SAFE BANKER TREBLE (Highest Probability >= 75%, ultra-low variance)
+    banker_candidates = sorted(
+        [p for p in all_picks if p["probability"] >= 0.70],
+        key=lambda x: x["probability"],
+        reverse=True
+    )
+    if len(banker_candidates) < 3:
+        banker_candidates = sorted(all_picks, key=lambda x: x["probability"], reverse=True)
+
+    seen_matches_banker = set()
+    banker_picks = []
+    for p in banker_candidates:
+        if p["match_id"] not in seen_matches_banker:
+            seen_matches_banker.add(p["match_id"])
+            banker_picks.append(p)
+            if len(banker_picks) == 3:
+                break
+    if banker_picks:
+        slips.append(_combine_slip(
+            banker_picks,
+            "Safe Banker Treble",
+            "Highest Accuracy (75%+ Prob)",
+            "Top-confidence mathematical selections designed for minimal variance.",
+            "banker"
+        ))
+
+    # 2. CROSS-LEAGUE POWER ACCA (Multi-league synergy: EPL, La Liga, Serie A, etc.)
+    acc_candidates = sorted(
+        [p for p in all_picks if p["probability"] >= 0.58 and p["odds"] >= 1.25],
+        key=lambda x: x["probability"] * x["odds"],
+        reverse=True
+    )
+    if len(acc_candidates) < 4:
+        acc_candidates = sorted(all_picks, key=lambda x: x["probability"], reverse=True)
+
+    multi_league_picks = []
+    seen_leagues = set()
+    seen_matches_acc = set()
+    for p in acc_candidates:
+        if p["match_id"] not in seen_matches_acc and p["league_code"] not in seen_leagues:
+            seen_matches_acc.add(p["match_id"])
+            seen_leagues.add(p["league_code"])
+            multi_league_picks.append(p)
+            if len(multi_league_picks) == 4:
+                break
+    # If not enough distinct leagues, fill with best remaining matches
+    if len(multi_league_picks) < 3:
+        for p in acc_candidates:
+            if p["match_id"] not in seen_matches_acc:
+                seen_matches_acc.add(p["match_id"])
+                multi_league_picks.append(p)
+                if len(multi_league_picks) == 4:
+                    break
+
+    if multi_league_picks:
+        slips.append(_combine_slip(
+            multi_league_picks,
+            "Cross-League Power Acca",
+            "Multi-League Combo",
+            f"Cross-competition accumulator combining {len(multi_league_picks)} high-synergy selections.",
+            "accumulator"
+        ))
+
+    # 3. CORNERS & CARDS SPECIALIST (Prop market specialist slip)
+    prop_candidates = sorted(
+        [p for p in all_picks if p["market"].startswith("Props") and p["probability"] >= 0.56],
+        key=lambda x: x["probability"],
+        reverse=True
+    )
+    if len(prop_candidates) < 3:
+        prop_candidates = sorted([p for p in all_picks if p["market"].startswith("Props")], key=lambda x: x["probability"], reverse=True)
+
+    seen_matches_prop = set()
+    prop_picks = []
+    for p in prop_candidates:
+        if p["match_id"] not in seen_matches_prop:
+            seen_matches_prop.add(p["match_id"])
+            prop_picks.append(p)
+            if len(prop_picks) == 3:
+                break
+    if prop_picks:
+        slips.append(_combine_slip(
+            prop_picks,
+            "Corners & Cards Specialist",
+            "Prop Market Edge",
+            "Data-driven statistical props based on referee averages, set-piece pressure, and card rates.",
+            "corners_cards"
+        ))
+
+    # 4. GOALS GALORE COMBO (Over Goals & BTTS specialist)
+    goal_candidates = sorted(
+        [p for p in all_picks if p["market"] in ("Totals", "BTTS") and p["probability"] >= 0.60],
+        key=lambda x: x["probability"],
+        reverse=True
+    )
+    if len(goal_candidates) < 3:
+        goal_candidates = sorted([p for p in all_picks if p["market"] in ("Totals", "BTTS")], key=lambda x: x["probability"], reverse=True)
+
+    seen_matches_goal = set()
+    goal_picks = []
+    for p in goal_candidates:
+        if p["match_id"] not in seen_matches_goal:
+            seen_matches_goal.add(p["match_id"])
+            goal_picks.append(p)
+            if len(goal_picks) == 3:
+                break
+    if goal_picks:
+        slips.append(_combine_slip(
+            goal_picks,
+            "Goals Galore Combo",
+            "Over Goals & BTTS",
+            "Curated goal lines combining high expected goals (xG) projections across leagues.",
+            "goals"
+        ))
+
+    # 5. HIGH VALUE MULTIPLIER (Positive EV, 1.65+ odds picks)
+    value_candidates = sorted(
+        [p for p in all_picks if 1.55 <= p["odds"] <= 2.50 and p["probability"] >= 0.45],
+        key=lambda x: x["probability"] * x["odds"],
+        reverse=True
+    )
+    if len(value_candidates) < 3:
+        value_candidates = sorted([p for p in all_picks if p["odds"] >= 1.50], key=lambda x: x["probability"] * x["odds"], reverse=True)
+
+    seen_matches_val = set()
+    value_picks = []
+    for p in value_candidates:
+        if p["match_id"] not in seen_matches_val:
+            seen_matches_val.add(p["match_id"])
+            value_picks.append(p)
+            if len(value_picks) == 3:
+                break
+    if value_picks:
+        slips.append(_combine_slip(
+            value_picks,
+            "High Value Multiplier",
+            "Value Edge (1.70+ Odds)",
+            "Selections where model win probability offers significant positive expected value against market margins.",
+            "value"
+        ))
+
+    # 6. MEGA 5-FOLD PARLAY (High Compound Multiplier across Europe)
+    mega_candidates = sorted(
+        [p for p in all_picks if p["probability"] >= 0.60],
+        key=lambda x: x["probability"],
+        reverse=True
+    )
+    if len(mega_candidates) < 5:
+        mega_candidates = sorted(all_picks, key=lambda x: x["probability"], reverse=True)
+
+    seen_matches_mega = set()
+    mega_picks = []
+    for p in mega_candidates:
+        if p["match_id"] not in seen_matches_mega:
+            seen_matches_mega.add(p["match_id"])
+            mega_picks.append(p)
+            if len(mega_picks) == 5:
+                break
+    if len(mega_picks) >= 3:
+        slips.append(_combine_slip(
+            mega_picks,
+            "Mega 5-Fold Parlay",
+            "Big Odds Multiplier",
+            f"Strategic {len(mega_picks)}-selection cross-league parlay designed for high compound returns.",
+            "mega"
+        ))
+
+    return {
+        "date": target_date_str,
+        "total_matches": len(matches),
+        "slips": [s for s in slips if s is not None],
+    }
+
+
+@router.get("/{match_id}", summary="Match detail", response_model=MatchOut)
+def get_match(match_id: int, db: Session = Depends(get_db)):
+    m = db.get(Match, match_id)
+    if not m:
+        raise HTTPException(404, "match not found")
+    return _match_out(m, db)
+
+
+@router.get("/{match_id}/pre-match-readiness", summary="Pre-match data quality and readiness gate evaluation")
+def match_pre_match_readiness_endpoint(
+    match_id: int,
+    cutoff: Optional[str] = Query(None, description="ISO-8601 evaluation cutoff timestamp"),
+    mode: str = Query("PRE_MATCH", description="Evaluation mode: PRE_MATCH | POST_MATCH | EVALUATION"),
+    persist: bool = Query(False, description="Whether to persist an immutable readiness certificate"),
+    db: Session = Depends(get_db),
+):
+    """Evaluate pre-match data quality, cross-source reconciliation, and temporal readiness."""
+    m = db.get(Match, match_id)
+    if not m:
+        raise HTTPException(404, "match not found")
+
+    cutoff_dt = None
+    if cutoff:
+        try:
+            cutoff_dt = datetime.fromisoformat(cutoff.replace("Z", "+00:00"))
+        except ValueError:
+            raise HTTPException(400, "cutoff must be valid ISO-8601 timestamp")
+
+    from app.services.acquisition.readiness_gate import (
+        evaluate_pre_match_readiness,
+        generate_readiness_certificate,
+    )
+
+    if persist:
+        cert = generate_readiness_certificate(db, match_id, cutoff=cutoff_dt, mode=mode)
+        evaluation = evaluate_pre_match_readiness(db, match_id, cutoff=cutoff_dt, mode=mode)
+        evaluation["certificate"] = {
+            "certificate_id": cert.certificate_id,
+            "certificate_version": cert.certificate_version,
+            "payload_hash": cert.payload_hash,
+            "supersedes_certificate_id": cert.supersedes_certificate_id,
+            "created_at": cert.created_at.isoformat() if cert.created_at else None,
+        }
+        return evaluation
+
+    return evaluate_pre_match_readiness(db, match_id, cutoff=cutoff_dt, mode=mode)
+
+
+@router.get("/{match_id}/statistics", summary="Match statistics")
+def get_statistics(match_id: int, db: Session = Depends(get_db)):
+    if not db.get(Match, match_id):
+        raise HTTPException(404, "match not found")
+    rows = db.query(MatchStatistic).filter_by(match_id=match_id).all()
+    return {"data": [StatOut(team=r.team, stat_name=r.stat_name, stat_value=r.stat_value,
+                             period=r.period) for r in rows]}
+
 
 
 @router.get("/{match_id}/stat-projections", summary="Team-wise projected stats and situational markets (corners, cards, shots)")

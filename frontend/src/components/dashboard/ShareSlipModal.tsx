@@ -12,6 +12,8 @@ import {
   TrendingUp,
   Flame,
   CheckCircle2,
+  Flag,
+  Target,
 } from 'lucide-react';
 import { toPng, toBlob } from 'html-to-image';
 import { DailyPredictionSlip } from '../../api/types';
@@ -152,31 +154,60 @@ export const ShareSlipModal: React.FC<ShareSlipModalProps> = ({
             {slip.picks.map((pick, pIdx) => (
               <div
                 key={pIdx}
-                className="p-3 rounded-xl bg-[#161922] border border-[#242938] flex items-center justify-between gap-3"
+                className="p-3 rounded-xl bg-[#161922] border border-[#242938] flex flex-col gap-2"
               >
-                <div className="min-w-0 flex-1">
-                  <div className="flex items-center gap-1.5 text-[10px] font-mono text-slate-400">
-                    <span>{pick.league}</span>
-                    <span>•</span>
-                    <span className="text-[#21e786] font-bold">
-                      {Math.round(pick.probability * 100)}% Win Prob
-                    </span>
+                <div className="flex items-start justify-between gap-3">
+                  <div className="min-w-0 flex-1">
+                    <div className="flex items-center gap-1.5 text-[10px] font-mono text-slate-400">
+                      <span>{pick.league}</span>
+                      <span>•</span>
+                      <span className="text-[#21e786] font-bold">
+                        {Math.round(pick.probability * 100)}% Win Prob
+                      </span>
+                    </div>
+                    <div className="text-xs font-semibold text-slate-200 mt-0.5 truncate">
+                      {pick.fixture}
+                    </div>
+                    <div className="text-xs font-bold text-white mt-0.5 flex items-center gap-1">
+                      <CheckCircle2 className="w-3.5 h-3.5 text-[#21e786] shrink-0" />
+                      <span className="truncate">{pick.pick}</span>
+                    </div>
                   </div>
-                  <div className="text-xs font-semibold text-slate-200 mt-0.5 truncate">
-                    {pick.fixture}
-                  </div>
-                  <div className="text-xs font-bold text-white mt-0.5 flex items-center gap-1">
-                    <CheckCircle2 className="w-3.5 h-3.5 text-[#21e786] shrink-0" />
-                    <span className="truncate">{pick.pick}</span>
+
+                  <div className="text-right shrink-0">
+                    <div className="text-[10px] text-slate-400 font-sans">Odds</div>
+                    <div className="text-xs font-mono font-bold text-[#21e786] bg-[#0e1015] px-2 py-1 rounded border border-[#242938] mt-0.5">
+                      {pick.odds.toFixed(2)}
+                    </div>
                   </div>
                 </div>
 
-                <div className="text-right shrink-0">
-                  <div className="text-[10px] text-slate-400 font-sans">Odds</div>
-                  <div className="text-xs font-mono font-bold text-[#21e786] bg-[#0e1015] px-2 py-1 rounded border border-[#242938] mt-0.5">
-                    {pick.odds.toFixed(2)}
+                {/* Projected Stats Bar (Corners, Cards, Shots on Target) */}
+                {pick.projected_stats && (
+                  <div className="flex flex-wrap items-center gap-1.5 pt-1.5 border-t border-[#242938]/60 text-[10px] font-mono">
+                    {pick.projected_stats.corners_total !== undefined && (
+                      <div className="flex items-center gap-1 bg-[#0e1015] px-1.5 py-0.5 rounded border border-[#242938] text-purple-300">
+                        <Flag className="w-2.5 h-2.5 text-purple-400" />
+                        <span>~{pick.projected_stats.corners_total} Corn</span>
+                        {pick.projected_stats.corners_home !== undefined && pick.projected_stats.corners_away !== undefined && (
+                          <span className="text-slate-500 text-[9px]">({pick.projected_stats.corners_home}-{pick.projected_stats.corners_away})</span>
+                        )}
+                      </div>
+                    )}
+                    {pick.projected_stats.cards_total !== undefined && (
+                      <div className="flex items-center gap-1 bg-[#0e1015] px-1.5 py-0.5 rounded border border-[#242938] text-amber-300">
+                        <span className="w-2 h-2.5 bg-amber-400 rounded-[1px] inline-block shadow-[0_0_4px_rgba(251,191,36,0.5)]" />
+                        <span>~{pick.projected_stats.cards_total} Cards</span>
+                      </div>
+                    )}
+                    {pick.projected_stats.shots_on_target !== undefined && (
+                      <div className="flex items-center gap-1 bg-[#0e1015] px-1.5 py-0.5 rounded border border-[#242938] text-cyan-300">
+                        <Target className="w-2.5 h-2.5 text-cyan-400" />
+                        <span>~{pick.projected_stats.shots_on_target} SoT</span>
+                      </div>
+                    )}
                   </div>
-                </div>
+                )}
               </div>
             ))}
           </div>

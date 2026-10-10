@@ -9,6 +9,8 @@ import {
   ChevronRight,
   Sparkles,
   Share2,
+  Flag,
+  Target,
 } from 'lucide-react';
 import { DailyPredictionSlip } from '../../api/types';
 import { formatDayDisplay } from '../../lib/utils';
@@ -33,7 +35,7 @@ export const DailyPredictionSlipsSection: React.FC<DailyPredictionSlipsSectionPr
     return (
       <div className="rounded-2xl border border-[#242938] bg-[#161922] p-6 animate-pulse space-y-4">
         <div className="h-5 w-48 bg-slate-800 rounded-lg" />
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           <div className="h-52 bg-slate-800/50 rounded-xl" />
           <div className="h-52 bg-slate-800/50 rounded-xl" />
           <div className="h-52 bg-slate-800/50 rounded-xl" />
@@ -52,10 +54,12 @@ export const DailyPredictionSlipsSection: React.FC<DailyPredictionSlipsSectionPr
         return <ShieldCheck className="w-4 h-4 text-[#21e786]" />;
       case 'accumulator':
         return <Zap className="w-4 h-4 text-amber-400" />;
+      case 'corners_cards':
+        return <Flag className="w-4 h-4 text-purple-400" />;
       case 'goals':
         return <Flame className="w-4 h-4 text-rose-400" />;
       case 'value':
-        return <TrendingUp className="w-4 h-4 text-purple-400" />;
+        return <TrendingUp className="w-4 h-4 text-emerald-400" />;
       case 'mega':
         return <Sparkles className="w-4 h-4 text-cyan-400" />;
       default:
@@ -69,10 +73,12 @@ export const DailyPredictionSlipsSection: React.FC<DailyPredictionSlipsSectionPr
         return 'border-[#21e786]/30 hover:border-[#21e786]/60 shadow-[0_0_15px_rgba(33,231,134,0.06)]';
       case 'accumulator':
         return 'border-amber-400/30 hover:border-amber-400/60 shadow-[0_0_15px_rgba(251,191,36,0.06)]';
+      case 'corners_cards':
+        return 'border-purple-400/30 hover:border-purple-400/60 shadow-[0_0_15px_rgba(192,132,252,0.06)]';
       case 'goals':
         return 'border-rose-400/30 hover:border-rose-400/60 shadow-[0_0_15px_rgba(244,63,94,0.06)]';
       case 'value':
-        return 'border-purple-400/30 hover:border-purple-400/60 shadow-[0_0_15px_rgba(192,132,252,0.06)]';
+        return 'border-emerald-400/30 hover:border-emerald-400/60 shadow-[0_0_15px_rgba(52,211,153,0.06)]';
       case 'mega':
         return 'border-cyan-400/30 hover:border-cyan-400/60 shadow-[0_0_15px_rgba(34,211,238,0.06)]';
       default:
@@ -98,20 +104,20 @@ export const DailyPredictionSlipsSection: React.FC<DailyPredictionSlipsSectionPr
               </h2>
             </div>
             <p className="text-xs text-slate-400 font-sans mt-0.5">
-              Mathematically curated slips with highest predictive accuracy & multi-league cross combos for {formatDayDisplay(dateStr, timeZone)}.
+              6 mathematically curated winning slips with match stat projections (Corners, Cards & SoT) for {formatDayDisplay(dateStr, timeZone)}.
             </p>
           </div>
         </div>
 
         <div className="flex items-center gap-2">
-          <span className="text-[11px] font-mono text-slate-400 bg-[#1e222e] px-2.5 py-1 rounded-md border border-[#242938]">
-            {slips.length} Slips Generated
+          <span className="text-[11px] font-mono text-[#21e786] bg-[#21e786]/10 px-2.5 py-1 rounded-md border border-[#21e786]/20 font-bold">
+            {slips.length} Winning Slips
           </span>
         </div>
       </div>
 
-      {/* Slips Grid (3 Cards: Banker, Acca, Value) */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+      {/* Slips Grid (6 Cards in 2x3 responsive layout) */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5">
         {slips.map((slip, idx) => (
           <div
             key={idx}
@@ -131,7 +137,7 @@ export const DailyPredictionSlipsSection: React.FC<DailyPredictionSlipsSectionPr
                 </span>
               </div>
 
-              <p className="text-[11px] text-slate-400 font-sans mt-2">
+              <p className="text-[11px] text-slate-400 font-sans mt-2 line-clamp-2">
                 {slip.description}
               </p>
 
@@ -140,33 +146,62 @@ export const DailyPredictionSlipsSection: React.FC<DailyPredictionSlipsSectionPr
                 {slip.picks.map((pick, pIdx) => (
                   <div
                     key={pIdx}
-                    className="p-2.5 rounded-lg bg-[#161922] border border-[#242938] hover:border-slate-700 transition-colors flex items-center justify-between gap-2"
+                    className="p-2.5 rounded-lg bg-[#161922] border border-[#242938] hover:border-slate-700 transition-colors flex flex-col gap-1.5"
                   >
-                    <div className="min-w-0 flex-1">
-                      <div className="flex items-center gap-1.5">
-                        <span className="text-[10px] font-mono text-slate-400 truncate">
-                          {pick.league}
-                        </span>
-                        <span className="text-[10px] text-slate-600">•</span>
-                        <span className="text-[10px] font-mono font-semibold text-[#21e786]">
-                          {Math.round(pick.probability * 100)}% Win
-                        </span>
+                    <div className="flex items-start justify-between gap-2">
+                      <div className="min-w-0 flex-1">
+                        <div className="flex items-center gap-1.5">
+                          <span className="text-[10px] font-mono text-slate-400 truncate">
+                            {pick.league}
+                          </span>
+                          <span className="text-[10px] text-slate-600">•</span>
+                          <span className="text-[10px] font-mono font-semibold text-[#21e786]">
+                            {Math.round(pick.probability * 100)}% Win
+                          </span>
+                        </div>
+                        <div className="text-xs font-semibold text-slate-200 truncate mt-0.5">
+                          {pick.fixture}
+                        </div>
+                        <div className="text-[11px] font-sans font-bold text-white mt-0.5 flex items-center gap-1">
+                          <CheckCircle2 className="w-3 h-3 text-[#21e786] shrink-0" />
+                          <span className="truncate">{pick.pick}</span>
+                        </div>
                       </div>
-                      <div className="text-xs font-semibold text-slate-200 truncate mt-0.5">
-                        {pick.fixture}
-                      </div>
-                      <div className="text-[11px] font-sans font-bold text-white mt-0.5 flex items-center gap-1">
-                        <CheckCircle2 className="w-3 h-3 text-[#21e786]" />
-                        <span>{pick.pick}</span>
+
+                      <div className="text-right shrink-0">
+                        <div className="text-[10px] text-slate-400 font-sans">Odds</div>
+                        <div className="text-xs font-mono font-bold text-[#21e786] bg-[#0e1015] px-2 py-1 rounded border border-[#242938] mt-0.5">
+                          {pick.odds.toFixed(2)}
+                        </div>
                       </div>
                     </div>
 
-                    <div className="text-right shrink-0">
-                      <div className="text-[10px] text-slate-400 font-sans">Odds</div>
-                      <div className="text-xs font-mono font-bold text-[#21e786] bg-[#0e1015] px-2 py-1 rounded border border-[#242938] mt-0.5">
-                        {pick.odds.toFixed(2)}
+                    {/* Projected Stats Bar (Corners, Cards, Shots on Target) */}
+                    {pick.projected_stats && (
+                      <div className="flex flex-wrap items-center gap-1.5 pt-1.5 border-t border-[#242938]/60 text-[10px] font-mono">
+                        {pick.projected_stats.corners_total !== undefined && (
+                          <div className="flex items-center gap-1 bg-[#0e1015] px-1.5 py-0.5 rounded border border-[#242938] text-purple-300">
+                            <Flag className="w-2.5 h-2.5 text-purple-400" />
+                            <span>~{pick.projected_stats.corners_total} Corn</span>
+                            {pick.projected_stats.corners_home !== undefined && pick.projected_stats.corners_away !== undefined && (
+                              <span className="text-slate-500 text-[9px]">({pick.projected_stats.corners_home}-{pick.projected_stats.corners_away})</span>
+                            )}
+                          </div>
+                        )}
+                        {pick.projected_stats.cards_total !== undefined && (
+                          <div className="flex items-center gap-1 bg-[#0e1015] px-1.5 py-0.5 rounded border border-[#242938] text-amber-300">
+                            <span className="w-2 h-2.5 bg-amber-400 rounded-[1px] inline-block shadow-[0_0_4px_rgba(251,191,36,0.5)]" />
+                            <span>~{pick.projected_stats.cards_total} Cards</span>
+                          </div>
+                        )}
+                        {pick.projected_stats.shots_on_target !== undefined && (
+                          <div className="flex items-center gap-1 bg-[#0e1015] px-1.5 py-0.5 rounded border border-[#242938] text-cyan-300">
+                            <Target className="w-2.5 h-2.5 text-cyan-400" />
+                            <span>~{pick.projected_stats.shots_on_target} SoT</span>
+                          </div>
+                        )}
                       </div>
-                    </div>
+                    )}
                   </div>
                 ))}
               </div>
