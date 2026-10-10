@@ -1,7 +1,7 @@
 """Match endpoints: list / detail / upcoming / live / statistics / events."""
 from __future__ import annotations
 
-from typing import Optional
+from typing import Optional, Dict, Any
 
 from datetime import datetime, timedelta, timezone
 
@@ -373,6 +373,9 @@ def _compute_stat_projections_data(db: Session, m: Match, team_cache: Optional[d
     }
 
 
+_DAILY_SLIPS_CACHE: Dict[str, Any] = {}
+
+
 @router.get("/daily-slips", summary="Curated 6 daily prediction slips (Banker, Acca, Props, Goals, Value, Mega)")
 def get_daily_slips(
     date: Optional[str] = Query(None, description="YYYY-MM-DD date (defaults to current UTC day)"),
@@ -387,12 +390,18 @@ def get_daily_slips(
     6. Mega 5-Fold Parlay: High compound accumulator returns across European competitions.
     All odds incorporate standard 5% commercial bookmaker margin.
     """
-    from app.services.match_intelligence.service import build_match_intelligence
+    from app.services.predictions.poisson import PoissonModel
     from datetime import datetime, timezone, timedelta
+    import time
 
     target_date_str = date
     if not target_date_str:
         target_date_str = datetime.now(timezone.utc).strftime("%Y-%m-%d")
+
+    # Fast in-memory cache return (< 1ms)
+    cached = _DAILY_SLIPS_CACHE.get(target_date_str)
+    if cached and (time.time() - cached["ts"] < 300):
+        return cached["data"]
 
     try:
         day_start = datetime.strptime(target_date_str, "%Y-%m-%d").replace(tzinfo=timezone.utc)
@@ -406,11 +415,13 @@ def get_daily_slips(
     ).order_by(Match.kickoff_at).all()
 
     if not matches:
-        return {
+        empty_res = {
             "date": target_date_str,
             "total_matches": 0,
             "slips": [],
         }
+        _DAILY_SLIPS_CACHE[target_date_str] = {"ts": time.time(), "data": empty_res}
+        return empty_res
 
     # Helper for commercial Parimatch odds (5% overround)
     def _calc_odds(p: float, margin: float = 0.05) -> float:
@@ -421,14 +432,22 @@ def get_daily_slips(
 
     all_picks = []
     team_stat_cache = {}
+    poisson_model = PoissonModel()
 
-    for m in matches:
+    # Sort matches by high-profile league hierarchy and evaluate top 8 matches for speed
+    priority_order = {1: 1, 2: 2, 3: 3, 4: 4, 5: 5, 6: 6, 7: 7, 8: 8}
+    sorted_matches = sorted(matches, key=lambda x: priority_order.get(x.league_id, 99))
+    eval_matches = sorted_matches[:8]
+
+    for m in eval_matches:
         try:
-            intel = build_match_intelligence(db, m.id)
-            core = intel.get("core_prediction") or {}
-            derived = intel.get("derived_markets") or {}
-            totals = derived.get("totals") or {}
-            btts = derived.get("btts") or {}
+            pred = poisson_model.predict(db, m.id, cutoff=m.kickoff_at or datetime.now(timezone.utc))
+            p_h = float(pred.home_win_probability)
+            p_d = float(pred.draw_probability)
+            p_a = float(pred.away_win_probability)
+            p_o15 = float(pred.over_1_5_probability)
+            p_o25 = float(pred.over_2_5_probability)
+            p_btts = float(pred.btts_yes_probability)
 
             home_team = db.get(Team, m.home_team_id) if m.home_team_id else None
             away_team = db.get(Team, m.away_team_id) if m.away_team_id else None
@@ -482,10 +501,6 @@ def get_daily_slips(
                 elif m_status in ("IN_PLAY", "LIVE"):
                     return "LIVE"
                 return "PENDING"
-
-            p_h = float(core.get("home", 0.33))
-            p_d = float(core.get("draw", 0.33))
-            p_a = float(core.get("away", 0.33))
 
             # Candidate 1: Direct Win
             if p_h >= 0.55:
@@ -555,7 +570,6 @@ def get_daily_slips(
                 })
 
             # Candidate 3: Over 1.5 Goals
-            p_o15 = float(totals.get("over_1_5", 0.0))
             if p_o15 >= 0.72:
                 all_picks.append({
                     "match_id": m.id,
@@ -573,7 +587,6 @@ def get_daily_slips(
                 })
 
             # Candidate 4: Over 2.5 Goals (Value Pick)
-            p_o25 = float(totals.get("over_2_5", 0.0))
             if 0.50 <= p_o25 <= 0.75:
                 all_picks.append({
                     "match_id": m.id,
@@ -591,7 +604,6 @@ def get_daily_slips(
                 })
 
             # Candidate 5: Both Teams to Score (BTTS)
-            p_btts = float(btts.get("yes", 0.0))
             if 0.52 <= p_btts <= 0.75:
                 all_picks.append({
                     "match_id": m.id,
@@ -893,11 +905,13 @@ def get_daily_slips(
     for rank_idx, s in enumerate(valid_slips, 1):
         s["rank"] = rank_idx
 
-    return {
+    result = {
         "date": target_date_str,
         "total_matches": len(matches),
         "slips": valid_slips,
     }
+    _DAILY_SLIPS_CACHE[target_date_str] = {"ts": time.time(), "data": result}
+    return result
 
 
 @router.get("/{match_id}", summary="Match detail", response_model=MatchOut)
