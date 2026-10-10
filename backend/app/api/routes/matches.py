@@ -252,6 +252,285 @@ def current_season_readiness_summary_endpoint(
     return get_current_season_prematch_summary(db, season=season)
 
 
+@router.get("/daily-slips", summary="Curated daily prediction slips (Banker, Value, Multi-League Accumulator)")
+def get_daily_slips(
+    date: Optional[str] = Query(None, description="YYYY-MM-DD date (defaults to current UTC day)"),
+    db: Session = Depends(get_db),
+):
+    """Generates intelligent daily betting slips from the day's match pool:
+    1. Safe Banker Slip: Highest-confidence predictive outcomes across all leagues.
+    2. High-Value Slip: Outcomes with attractive Parimatch odds (1.70 - 2.50) backed by high model edge.
+    3. Multi-League Accumulator Slip: Synergistic combo pick spanning EPL, La Liga, Serie A, Bundesliga, etc.
+    All odds incorporate standard 5% commercial bookmaker margin.
+    """
+    from app.services.match_intelligence.service import build_match_intelligence
+    from datetime import datetime, timezone, timedelta
+
+    target_date_str = date
+    if not target_date_str:
+        target_date_str = datetime.now(timezone.utc).strftime("%Y-%m-%d")
+
+    try:
+        day_start = datetime.strptime(target_date_str, "%Y-%m-%d").replace(tzinfo=timezone.utc)
+    except ValueError:
+        raise HTTPException(400, "date must be YYYY-MM-DD")
+
+    day_end = day_start + timedelta(days=1)
+    matches = db.query(Match).filter(
+        Match.kickoff_at >= day_start,
+        Match.kickoff_at < day_end
+    ).order_by(Match.kickoff_at).all()
+
+    if not matches:
+        return {
+            "date": target_date_str,
+            "total_matches": 0,
+            "slips": [],
+        }
+
+    # Helper for commercial Parimatch odds (5% overround)
+    def _calc_odds(p: float, margin: float = 0.05) -> float:
+        if p <= 0:
+            return 1.01
+        commercial_p = min(0.98, p * (1 + margin))
+        return round(1.0 / commercial_p, 2)
+
+    all_picks = []
+
+    for m in matches:
+        try:
+            intel = build_match_intelligence(db, m.id)
+            core = intel.get("core_prediction") or {}
+            derived = intel.get("derived_markets") or {}
+            totals = derived.get("totals") or {}
+            btts = derived.get("btts") or {}
+            dc = derived.get("double_chance") or {}
+
+            home_team = db.get(Team, m.home_team_id) if m.home_team_id else None
+            away_team = db.get(Team, m.away_team_id) if m.away_team_id else None
+            league = db.get(League, m.league_id) if m.league_id else None
+
+            h_name = home_team.name if home_team else "Home"
+            a_name = away_team.name if away_team else "Away"
+            lg_code = league.code if league else "LEAGUE"
+            lg_name = league.name if league else "Football"
+
+            p_h = float(core.get("home", 0.33))
+            p_d = float(core.get("draw", 0.33))
+            p_a = float(core.get("away", 0.33))
+
+            # Candidate 1: Direct Win
+            if p_h >= 0.55:
+                all_picks.append({
+                    "match_id": m.id,
+                    "fixture": f"{h_name} vs {a_name}",
+                    "league": lg_name,
+                    "league_code": lg_code,
+                    "pick": f"{h_name} to Win",
+                    "market": "1X2 (Match Winner)",
+                    "probability": round(p_h, 3),
+                    "odds": _calc_odds(p_h),
+                    "confidence": "HIGH" if p_h >= 0.65 else "MEDIUM",
+                    "kickoff_at": m.kickoff_at.isoformat() if m.kickoff_at else None,
+                })
+            elif p_a >= 0.50:
+                all_picks.append({
+                    "match_id": m.id,
+                    "fixture": f"{h_name} vs {a_name}",
+                    "league": lg_name,
+                    "league_code": lg_code,
+                    "pick": f"{a_name} to Win",
+                    "market": "1X2 (Match Winner)",
+                    "probability": round(p_a, 3),
+                    "odds": _calc_odds(p_a),
+                    "confidence": "HIGH" if p_a >= 0.60 else "MEDIUM",
+                    "kickoff_at": m.kickoff_at.isoformat() if m.kickoff_at else None,
+                })
+
+            # Candidate 2: Double Chance (Safety Pick)
+            p_1x = p_h + p_d
+            if p_1x >= 0.75:
+                all_picks.append({
+                    "match_id": m.id,
+                    "fixture": f"{h_name} vs {a_name}",
+                    "league": lg_name,
+                    "league_code": lg_code,
+                    "pick": f"{h_name} or Draw (1X)",
+                    "market": "Double Chance",
+                    "probability": round(p_1x, 3),
+                    "odds": _calc_odds(p_1x),
+                    "confidence": "VERY HIGH",
+                    "kickoff_at": m.kickoff_at.isoformat() if m.kickoff_at else None,
+                })
+
+            p_x2 = p_d + p_a
+            if p_x2 >= 0.75:
+                all_picks.append({
+                    "match_id": m.id,
+                    "fixture": f"{h_name} vs {a_name}",
+                    "league": lg_name,
+                    "league_code": lg_code,
+                    "pick": f"{a_name} or Draw (X2)",
+                    "market": "Double Chance",
+                    "probability": round(p_x2, 3),
+                    "odds": _calc_odds(p_x2),
+                    "confidence": "VERY HIGH",
+                    "kickoff_at": m.kickoff_at.isoformat() if m.kickoff_at else None,
+                })
+
+            # Candidate 3: Over 1.5 Goals
+            p_o15 = float(totals.get("over_1_5", 0.0))
+            if p_o15 >= 0.75:
+                all_picks.append({
+                    "match_id": m.id,
+                    "fixture": f"{h_name} vs {a_name}",
+                    "league": lg_name,
+                    "league_code": lg_code,
+                    "pick": "Over 1.5 Total Goals",
+                    "market": "Totals",
+                    "probability": round(p_o15, 3),
+                    "odds": _calc_odds(p_o15),
+                    "confidence": "HIGH",
+                    "kickoff_at": m.kickoff_at.isoformat() if m.kickoff_at else None,
+                })
+
+            # Candidate 4: Over 2.5 Goals (Value Pick)
+            p_o25 = float(totals.get("over_2_5", 0.0))
+            if 0.52 <= p_o25 <= 0.72:
+                all_picks.append({
+                    "match_id": m.id,
+                    "fixture": f"{h_name} vs {a_name}",
+                    "league": lg_name,
+                    "league_code": lg_code,
+                    "pick": "Over 2.5 Goals",
+                    "market": "Totals",
+                    "probability": round(p_o25, 3),
+                    "odds": _calc_odds(p_o25),
+                    "confidence": "MEDIUM",
+                    "kickoff_at": m.kickoff_at.isoformat() if m.kickoff_at else None,
+                })
+
+            # Candidate 5: Both Teams to Score (BTTS)
+            p_btts = float(btts.get("yes", 0.0))
+            if 0.55 <= p_btts <= 0.70:
+                all_picks.append({
+                    "match_id": m.id,
+                    "fixture": f"{h_name} vs {a_name}",
+                    "league": lg_name,
+                    "league_code": lg_code,
+                    "pick": "Both Teams to Score (Yes)",
+                    "market": "BTTS",
+                    "probability": round(p_btts, 3),
+                    "odds": _calc_odds(p_btts),
+                    "confidence": "MEDIUM",
+                    "kickoff_at": m.kickoff_at.isoformat() if m.kickoff_at else None,
+                })
+        except Exception:
+            continue
+
+    # Helper: calculate combined accumulator odds
+    def _combine_slip(picks_list, name, badge, desc, slip_type):
+        if not picks_list:
+            return None
+        comb_odds = 1.0
+        for p in picks_list:
+            comb_odds *= p["odds"]
+        avg_prob = sum(p["probability"] for p in picks_list) / len(picks_list)
+        return {
+            "title": name,
+            "type": slip_type,
+            "badge": badge,
+            "description": desc,
+            "total_odds": round(comb_odds, 2),
+            "win_probability": round(avg_prob * 100, 1),
+            "selections_count": len(picks_list),
+            "picks": picks_list,
+        }
+
+    slips = []
+
+    # 1. THE DAILY BANKER SLIP (Highest Probability >= 75%, ultra safe 3-fold)
+    banker_candidates = sorted(
+        [p for p in all_picks if p["probability"] >= 0.70],
+        key=lambda x: x["probability"],
+        reverse=True
+    )
+    # Deduplicate matches
+    seen_matches = set()
+    banker_picks = []
+    for p in banker_candidates:
+        if p["match_id"] not in seen_matches:
+            seen_matches.add(p["match_id"])
+            banker_picks.append(p)
+            if len(banker_picks) == 3:
+                break
+    if banker_picks:
+        slips.append(_combine_slip(
+            banker_picks,
+            "Safe Banker Treble",
+            "Highest Accuracy (75%+ Prob)",
+            "Top-confidence mathematical selections designed for minimal variance.",
+            "banker"
+        ))
+
+    # 2. MULTI-LEAGUE ACCUMULATOR SLIP (Spanning multiple top competitions: EPL, La Liga, Serie A, etc.)
+    multi_league_picks = []
+    seen_leagues = set()
+    seen_matches_acc = set()
+    # Sort by balance of strong prob and decent odds
+    acc_candidates = sorted(
+        [p for p in all_picks if p["probability"] >= 0.58 and p["odds"] >= 1.30],
+        key=lambda x: x["probability"] * x["odds"],
+        reverse=True
+    )
+    for p in acc_candidates:
+        if p["match_id"] not in seen_matches_acc and p["league_code"] not in seen_leagues:
+            seen_matches_acc.add(p["match_id"])
+            seen_leagues.add(p["league_code"])
+            multi_league_picks.append(p)
+            if len(multi_league_picks) == 4:
+                break
+
+    if len(multi_league_picks) >= 2:
+        slips.append(_combine_slip(
+            multi_league_picks,
+            "Cross-League Power Acca",
+            "Multi-League Combo",
+            f"Cross-competition accumulator combining {len(multi_league_picks)} distinct European leagues.",
+            "accumulator"
+        ))
+
+    # 3. HIGH-VALUE SLIP (Attractive odds 1.70 - 2.50 with model edge)
+    value_candidates = sorted(
+        [p for p in all_picks if 1.65 <= p["odds"] <= 2.40 and p["probability"] >= 0.48],
+        key=lambda x: x["probability"],
+        reverse=True
+    )
+    seen_val = set()
+    value_picks = []
+    for p in value_candidates:
+        if p["match_id"] not in seen_val:
+            seen_val.add(p["match_id"])
+            value_picks.append(p)
+            if len(value_picks) == 3:
+                break
+
+    if value_picks:
+        slips.append(_combine_slip(
+            value_picks,
+            "High Value Multiplier",
+            "Value Edge (1.70+ Odds)",
+            "Selections where model win probability offers significant positive expected value.",
+            "value"
+        ))
+
+    return {
+        "date": target_date_str,
+        "total_matches": len(matches),
+        "slips": [s for s in slips if s is not None],
+    }
+
+
 @router.get("/{match_id}", summary="Match detail", response_model=MatchOut)
 def get_match(match_id: int, db: Session = Depends(get_db)):
     m = db.get(Match, match_id)

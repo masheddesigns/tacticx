@@ -34,6 +34,36 @@ export interface PaginatedMatchesResponse {
   season?: string;
 }
 
+export interface DailyPredictionPick {
+  match_id: number;
+  fixture: string;
+  league: string;
+  league_code: string;
+  pick: string;
+  market: string;
+  probability: number;
+  odds: number;
+  confidence: 'VERY HIGH' | 'HIGH' | 'MEDIUM';
+  kickoff_at?: string | null;
+}
+
+export interface DailyPredictionSlip {
+  title: string;
+  type: 'banker' | 'accumulator' | 'value';
+  badge: string;
+  description: string;
+  total_odds: number;
+  win_probability: number;
+  selections_count: number;
+  picks: DailyPredictionPick[];
+}
+
+export interface DailySlipsResponse {
+  date: string;
+  total_matches: number;
+  slips: DailyPredictionSlip[];
+}
+
 export interface LeagueItem {
   id: number;
   code: string;

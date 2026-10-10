@@ -23,7 +23,16 @@ export const QUERY_KEYS = {
   preMatchReadinessSummary: (params?: any) => ['preMatchReadinessSummary', params],
   predictionSnapshots: (matchId: number) => ['predictionSnapshots', matchId],
   predictionSnapshot: (predictionId: string) => ['predictionSnapshot', predictionId],
+  dailySlips: (date?: string) => ['dailySlips', date],
 };
+
+export function useDailySlips(date?: string) {
+  return useQuery({
+    queryKey: QUERY_KEYS.dailySlips(date),
+    queryFn: ({ signal }) => apiClient.getDailySlips({ date, signal }),
+    staleTime: 60 * 1000,
+  });
+}
 
 export function useMatches(params?: {
   league?: string;

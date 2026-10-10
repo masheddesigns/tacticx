@@ -36,6 +36,7 @@ import {
   CandidateValidation,
   StatProjectionsResponse,
   MatchStatComparisonResponse,
+  DailySlipsResponse,
 } from './types';
 
 export class ApiError extends Error {
@@ -120,6 +121,18 @@ export const apiClient = {
 
     const qs = query.toString();
     return request<PaginatedMatchesResponse>(`/matches${qs ? `?${qs}` : ''}`, {
+      signal: params?.signal,
+    });
+  },
+
+  getDailySlips: async (params?: {
+    date?: string;
+    signal?: AbortSignal;
+  }): Promise<DailySlipsResponse> => {
+    const query = new URLSearchParams();
+    if (params?.date) query.set('date', params.date);
+    const qs = query.toString();
+    return request<DailySlipsResponse>(`/matches/daily-slips${qs ? `?${qs}` : ''}`, {
       signal: params?.signal,
     });
   },

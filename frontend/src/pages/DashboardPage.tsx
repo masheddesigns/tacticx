@@ -22,10 +22,12 @@ import {
   useMatches,
   useReadyProbe,
   useLeagues,
+  useDailySlips,
 } from '../api/queries';
 import { CurrentSeasonBanner } from '../components/dashboard/CurrentSeasonBanner';
 import { CompetitionCards, CompetitionData } from '../components/dashboard/CompetitionCards';
 import { MatchRow } from '../components/matches/MatchRow';
+import { DailyPredictionSlipsSection } from '../components/dashboard/DailyPredictionSlipsSection';
 import { getLeagueMeta } from './MatchExplorerPage';
 import { getRelativeDateLabel, getTodayString, getDayOffsetString, formatDayDisplay } from '../lib/utils';
 import { LoadingSpinner } from '../components/common/LoadingSpinner';
@@ -73,6 +75,9 @@ export const DashboardPage: React.FC = () => {
     team: searchQuery || undefined,
     page_size: 50,
   });
+
+  // Query daily prediction slips for currently active day
+  const { data: dailySlipsData, isLoading: dailySlipsLoading } = useDailySlips(selectedDate || todayStr);
 
   const availableLeagueCodes = leaguesData?.data?.map((l) => l.code) || [
     'EPL',
@@ -411,6 +416,14 @@ export const DashboardPage: React.FC = () => {
           </div>
         </div>
       )}
+
+      {/* 3. Daily AI Prediction Slips (Banker, Multi-League Acca, Value) */}
+      <DailyPredictionSlipsSection
+        slips={dailySlipsData?.slips || []}
+        dateStr={selectedDate || todayStr}
+        timeZone={timeZone}
+        isLoading={dailySlipsLoading}
+      />
 
       {/* 4. FotMob Hierarchical League-Grouped Fixture Cards */}
       <div className="space-y-4">
