@@ -26,7 +26,7 @@ from app.services.intelligence.schemas import (
 )
 
 MIN_ANALOGUES = 20
-MAX_CANDIDATES = 2000
+MAX_CANDIDATES = 50
 FEATURES = ("elo_diff", "form_ppm_diff", "goal_diff_diff", "rest_diff",
             "total_goals_avg")
 
@@ -112,7 +112,7 @@ def find_analogues(db: Session, match_id: int, cutoff: datetime,
         raise ValueError("cutoff is required")
     repo = HistoricalFeatureRepository(db, cutoff, mode)
     pool = [m for m in repo.finished_before(league_id=match.league_id)
-            if m.id != match_id][:MAX_CANDIDATES]
+            if m.id != match_id][-MAX_CANDIDATES:]
     target = _target_vector(db, match, cutoff, mode)
     if target is None:
         return AnalogueResult(

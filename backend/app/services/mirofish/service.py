@@ -51,6 +51,14 @@ def run_mirofish_scenario(
     from app.services.intelligence.composer import PredictionComposer
 
     config = config_mod.load_config()
+    if not config.enabled:
+        return {
+            "status": "unavailable",
+            "error": "mirofish_disabled",
+            "provenance": {"provider": "unavailable"},
+            "contract_version": config.contract_version,
+            "scenarios": [],
+        }
     started = _utcnow()
     started_ms = time.monotonic()
     match = db.get(Match, match_id)

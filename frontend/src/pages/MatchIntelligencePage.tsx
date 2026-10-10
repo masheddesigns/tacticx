@@ -51,7 +51,71 @@ export const MatchIntelligencePage: React.FC = () => {
   });
 
   if (isLoading) {
-    return <LoadingSpinner label={`Assembling Canonical Intelligence for Match #${idNum}...`} />;
+    const loadingMatchSection = matchFallback
+      ? {
+          match_id: idNum,
+          home_team: {
+            id: matchFallback.home_team_id,
+            name: matchFallback.home_team_name,
+            short_name: matchFallback.home_team_name,
+          },
+          away_team: {
+            id: matchFallback.away_team_id,
+            name: matchFallback.away_team_name,
+            short_name: matchFallback.away_team_name,
+          },
+          competition: {
+            id: matchFallback.league_id,
+            name: matchFallback.league_name,
+            code: matchFallback.league_code,
+          },
+          kickoff: matchFallback.kickoff_at || '',
+          status: matchFallback.status || 'SCHEDULED',
+          venue: null,
+          round: null,
+          season: '2026/27',
+          attendance: null,
+          sources: [],
+        }
+      : null;
+
+    return (
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-6">
+        <div className="flex items-center justify-between gap-3">
+          <Link
+            to="/matches"
+            className="inline-flex items-center gap-1.5 text-xs font-mono text-slate-400 hover:text-slate-200 transition-colors"
+          >
+            <ArrowLeft className="w-3.5 h-3.5" />
+            <span>Return to Explorer</span>
+          </Link>
+          <div className="flex items-center gap-2 text-xs font-mono text-[#21e786]">
+            <RefreshCw className="w-3.5 h-3.5 animate-spin" />
+            <span>Assembling AI Match Models...</span>
+          </div>
+        </div>
+
+        {loadingMatchSection ? (
+          <MatchHeader match={loadingMatchSection} onShare={() => setShareOpen(true)} />
+        ) : (
+          <div className="rounded-2xl border border-[#242938] bg-[#161922] p-8 animate-pulse h-48 flex items-center justify-center">
+            <LoadingSpinner label={`Assembling Canonical Intelligence for Match #${idNum}...`} />
+          </div>
+        )}
+
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div className="md:col-span-2 rounded-2xl border border-[#242938] bg-[#161922] p-6 animate-pulse space-y-4">
+            <div className="h-6 bg-slate-800 rounded w-1/3" />
+            <div className="h-32 bg-slate-800/60 rounded" />
+            <div className="h-20 bg-slate-800/40 rounded" />
+          </div>
+          <div className="rounded-2xl border border-[#242938] bg-[#161922] p-6 animate-pulse space-y-4">
+            <div className="h-6 bg-slate-800 rounded w-1/2" />
+            <div className="h-40 bg-slate-800/60 rounded" />
+          </div>
+        </div>
+      </div>
+    );
   }
 
   if (error || !intel) {

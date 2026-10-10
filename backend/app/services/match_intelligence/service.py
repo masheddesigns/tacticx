@@ -37,9 +37,9 @@ HASHED_FIELDS = (
 )
 
 # In-memory cache: immutable finished matches cache indefinitely;
-# scheduled/live matches cache for 60s. Keyed by full request identity.
+# scheduled/live matches cache for 600s (10 min). Keyed by full request identity.
 _CACHE: Dict[str, Dict[str, Any]] = {}
-_CACHE_TTL_SCHEDULED = 60.0
+_CACHE_TTL_SCHEDULED = 600.0
 
 
 def content_hash(document: Dict[str, Any]) -> str:
