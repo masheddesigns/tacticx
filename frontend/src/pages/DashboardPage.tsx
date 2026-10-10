@@ -165,7 +165,7 @@ export const DashboardPage: React.FC = () => {
     0
   );
 
-  const isEngineReady = readyProbe?.status === 'ok';
+  const isEngineReady = readyProbe?.status === 'ok' || readyProbe?.checks?.database === 'ok';
   const liveMatches = liveData?.data || [];
   const homepageMatches = matchesData?.data || [];
 

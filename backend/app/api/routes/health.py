@@ -66,7 +66,7 @@ def health_ready(response: Response) -> dict:
     if not db_ok:
         response.status_code = 503
         status = "unhealthy"
-    elif checks.get("cache") == "ok":
+    elif checks.get("cache") in ("ok", "memory_fallback"):
         status = "ok"
     else:
         status = "degraded"

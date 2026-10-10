@@ -18,7 +18,7 @@ import { useReadyProbe, useUpcomingMatches } from '../../api/queries';
 export const Navbar: React.FC = () => {
   const { data: ready } = useReadyProbe();
   const { data: upcoming } = useUpcomingMatches(72);
-  const isHealthy = ready?.status === 'ok';
+  const isHealthy = ready?.status === 'ok' || ready?.checks?.database === 'ok';
   const upcomingCount = upcoming?.data?.length || 0;
 
   const [platformMenuOpen, setPlatformMenuOpen] = useState(false);
