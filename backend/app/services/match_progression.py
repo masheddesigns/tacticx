@@ -237,6 +237,93 @@ def ensure_match_statistics(
         )
 
 
+_CANONICAL_PRIMETIME_FIXTURES = [
+    # Premier League Saturday Primetime (19:00 UTC)
+    {
+        "provider_match_id": "epl_2026_1010_new_whu",
+        "league_id": 1,
+        "home_team_id": 13, # Newcastle
+        "away_team_id": 6,  # West Ham
+        "kickoff_at": "2026-10-10T19:00:00Z",
+    },
+    # Serie A Saturday Primetime (18:45 UTC)
+    {
+        "provider_match_id": "sa_2026_1010_mil_laz",
+        "league_id": 3,
+        "home_team_id": 65, # Milan
+        "away_team_id": 59, # Lazio
+        "kickoff_at": "2026-10-10T18:45:00Z",
+    },
+    # La Liga Basque Derby (19:00 UTC)
+    {
+        "provider_match_id": "ll_2026_1010_soc_ath",
+        "league_id": 2,
+        "home_team_id": 30, # Sociedad
+        "away_team_id": 34, # Ath Bilbao
+        "kickoff_at": "2026-10-10T19:00:00Z",
+    },
+    # Ligue 1 Saturday Primetime (19:00 UTC)
+    {
+        "provider_match_id": "l1_2026_1010_mar_len",
+        "league_id": 5,
+        "home_team_id": 86, # Marseille
+        "away_team_id": 91, # Lens
+        "kickoff_at": "2026-10-10T19:00:00Z",
+    },
+    # UEFA Nations League (19:45 UTC)
+    {
+        "provider_match_id": "nl_2026_1010_esp_por",
+        "league_id": 7,
+        "home_team_id": 106, # Spain
+        "away_team_id": 108, # Portugal
+        "kickoff_at": "2026-10-10T19:45:00Z",
+    },
+    # Bundesliga Der Klassiker (16:30 UTC)
+    {
+        "provider_match_id": "bl_2026_1010_fcb_bvb",
+        "league_id": 4,
+        "home_team_id": 67, # Bayern Munich
+        "away_team_id": 78, # Dortmund
+        "kickoff_at": "2026-10-10T16:30:00Z",
+    },
+]
+
+_canonical_fixtures_checked = False
+
+
+def ensure_canonical_fixtures(db: Session) -> None:
+    global _canonical_fixtures_checked
+    if _canonical_fixtures_checked:
+        return
+    _canonical_fixtures_checked = True
+
+    try:
+        from sqlalchemy import func
+        max_id = db.query(func.max(Match.id)).scalar() or 2830
+        inserted = False
+        for f in _CANONICAL_PRIMETIME_FIXTURES:
+            exists = db.query(Match).filter_by(provider_match_id=f["provider_match_id"]).first()
+            if not exists:
+                max_id += 1
+                ko = datetime.fromisoformat(f["kickoff_at"].replace("Z", "+00:00"))
+                m = Match(
+                    id=max_id,
+                    league_id=f["league_id"],
+                    home_team_id=f["home_team_id"],
+                    away_team_id=f["away_team_id"],
+                    kickoff_at=ko,
+                    status=MatchStatus.SCHEDULED.value,
+                    provider="canonical_primetime",
+                    provider_match_id=f["provider_match_id"],
+                )
+                db.add(m)
+                inserted = True
+        if inserted:
+            db.commit()
+    except Exception:
+        db.rollback()
+
+
 def advance_match_lifecycles(
     db: Session,
     now_utc: Optional[datetime] = None,
@@ -248,6 +335,7 @@ def advance_match_lifecycles(
     and triggers prediction evaluation upon match completion.
     """
     now_utc = now_utc or datetime.now(timezone.utc)
+    ensure_canonical_fixtures(db)
     real_fids = sync_api_football_live(db)
 
     query = db.query(Match).filter(Match.kickoff_at != None)

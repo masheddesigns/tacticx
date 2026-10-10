@@ -46,7 +46,8 @@ export function useMatches(params?: {
   return useQuery({
     queryKey: QUERY_KEYS.matches(params),
     queryFn: ({ signal }) => apiClient.getMatches({ ...params, signal }),
-    staleTime: 30 * 1000,
+    staleTime: params?.status === 'LIVE' ? 8 * 1000 : 30 * 1000,
+    refetchInterval: params?.status === 'LIVE' ? 10 * 1000 : false,
   });
 }
 

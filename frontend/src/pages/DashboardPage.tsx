@@ -36,7 +36,7 @@ import { ErrorCard } from '../components/common/ErrorCard';
 import { Badge } from '../components/common/Badge';
 
 export const DashboardPage: React.FC = () => {
-  const [timeZone, setTimeZone] = useState<'UTC' | 'local'>('local');
+  const [timeZone, setTimeZone] = useState<'UTC' | 'local'>('UTC');
 
   // Dynamically calculate today, yesterday, tomorrow based on current date
   const todayStr = getTodayString(timeZone);
@@ -208,6 +208,7 @@ export const DashboardPage: React.FC = () => {
   const handleSelectLive = () => {
     setSelectedStatus('LIVE');
     setSelectedDate(undefined);
+    setSelectedLeague(undefined);
   };
 
   const handleSelectDay = (day: string) => {
