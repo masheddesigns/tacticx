@@ -162,6 +162,26 @@ export const DashboardPage: React.FC = () => {
   const liveMatches = liveData?.data || [];
   const homepageMatches = matchesData?.data || [];
 
+  // Standard FotMob League display priority
+  const LEAGUE_PRIORITY: Record<string, number> = {
+    'Premier League': 1,
+    'EPL': 1,
+    'La Liga': 2,
+    'LA_LIGA': 2,
+    'Serie A': 3,
+    'SERIE_A': 3,
+    'Bundesliga': 4,
+    'BUNDESLIGA': 4,
+    'Ligue 1': 5,
+    'LIGUE_1': 5,
+    'UEFA Champions League': 6,
+    'UCL': 6,
+    'UEFA Nations League': 7,
+    'NATIONS_LEAGUE': 7,
+    'International Friendlies': 8,
+    'FRIENDLIES': 8,
+  };
+
   // Group homepage matches by League (FotMob standard)
   const leagueGroups = homepageMatches.reduce<Record<string, typeof homepageMatches>>((acc, m) => {
     const lKey = m.league_name || m.league_code || 'Other Competitions';
@@ -169,6 +189,14 @@ export const DashboardPage: React.FC = () => {
     acc[lKey].push(m);
     return acc;
   }, {});
+
+  // Sort leagues according to official FotMob hierarchy (EPL -> La Liga -> Serie A -> Bundesliga -> Ligue 1 -> UCL)
+  const sortedLeagueEntries = Object.entries(leagueGroups).sort(([leagueA], [leagueB]) => {
+    const rankA = LEAGUE_PRIORITY[leagueA] ?? 99;
+    const rankB = LEAGUE_PRIORITY[leagueB] ?? 99;
+    if (rankA !== rankB) return rankA - rankB;
+    return leagueA.localeCompare(leagueB);
+  });
 
   const handleSelectLive = () => {
     setSelectedStatus('LIVE');
@@ -436,7 +464,7 @@ export const DashboardPage: React.FC = () => {
           </div>
         ) : (
           <div className="space-y-4">
-            {Object.entries(leagueGroups).map(([leagueKey, matchesInLeague]) => {
+            {sortedLeagueEntries.map(([leagueKey, matchesInLeague]) => {
               const lMeta = getLeagueMeta(leagueKey);
 
               return (
