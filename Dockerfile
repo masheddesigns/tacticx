@@ -48,4 +48,4 @@ HEALTHCHECK --interval=15s --timeout=3s --start-period=5s --retries=3 \
     CMD python -c "import urllib.request, os; urllib.request.urlopen(f'http://localhost:{os.environ.get(\"PORT\", 8000)}/health/live')" || exit 1
 
 # Render dynamically injects $PORT (defaults to 10000). Bind to $PORT or default to 8000.
-CMD ["sh", "-c", "exec uvicorn app.main:app --host 0.0.0.0 --port ${PORT:-8000} --timeout-graceful-shutdown 15"]
+CMD ["sh", "-c", "python scripts/init_prod_db.py || true && exec uvicorn app.main:app --host 0.0.0.0 --port ${PORT:-8000} --timeout-graceful-shutdown 15"]
