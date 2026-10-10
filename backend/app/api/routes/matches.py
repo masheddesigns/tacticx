@@ -457,6 +457,32 @@ def get_daily_slips(
                 "shots_on_target": round(sot_total, 1),
             }
 
+            m_status = (m.status or "").upper()
+            h_score = m.home_score
+            a_score = m.away_score
+
+            def _get_pick_status(pick_text: str) -> str:
+                if m_status == "FINISHED" and h_score is not None and a_score is not None:
+                    tot_g = h_score + a_score
+                    if "Over 1.5" in pick_text:
+                        return "WON" if tot_g >= 2 else "LOST"
+                    if "Over 2.5" in pick_text:
+                        return "WON" if tot_g >= 3 else "LOST"
+                    if "Both Teams to Score" in pick_text:
+                        return "WON" if (h_score > 0 and a_score > 0) else "LOST"
+                    if "or Draw (1X)" in pick_text:
+                        return "WON" if h_score >= a_score else "LOST"
+                    if "or Draw (X2)" in pick_text:
+                        return "WON" if a_score >= h_score else "LOST"
+                    if "to Win" in pick_text:
+                        if h_name in pick_text:
+                            return "WON" if h_score > a_score else "LOST"
+                        else:
+                            return "WON" if a_score > h_score else "LOST"
+                elif m_status in ("IN_PLAY", "LIVE"):
+                    return "LIVE"
+                return "PENDING"
+
             p_h = float(core.get("home", 0.33))
             p_d = float(core.get("draw", 0.33))
             p_a = float(core.get("away", 0.33))
@@ -475,6 +501,7 @@ def get_daily_slips(
                     "confidence": "HIGH" if p_h >= 0.65 else "MEDIUM",
                     "kickoff_at": m.kickoff_at.isoformat() if m.kickoff_at else None,
                     "projected_stats": projected_stats_payload,
+                    "status": _get_pick_status(f"{h_name} to Win"),
                 })
             elif p_a >= 0.50:
                 all_picks.append({
@@ -489,6 +516,7 @@ def get_daily_slips(
                     "confidence": "HIGH" if p_a >= 0.60 else "MEDIUM",
                     "kickoff_at": m.kickoff_at.isoformat() if m.kickoff_at else None,
                     "projected_stats": projected_stats_payload,
+                    "status": _get_pick_status(f"{a_name} to Win"),
                 })
 
             # Candidate 2: Double Chance (Safety Pick)
@@ -506,6 +534,7 @@ def get_daily_slips(
                     "confidence": "VERY HIGH",
                     "kickoff_at": m.kickoff_at.isoformat() if m.kickoff_at else None,
                     "projected_stats": projected_stats_payload,
+                    "status": _get_pick_status(f"{h_name} or Draw (1X)"),
                 })
 
             p_x2 = p_d + p_a
@@ -522,6 +551,7 @@ def get_daily_slips(
                     "confidence": "VERY HIGH",
                     "kickoff_at": m.kickoff_at.isoformat() if m.kickoff_at else None,
                     "projected_stats": projected_stats_payload,
+                    "status": _get_pick_status(f"{a_name} or Draw (X2)"),
                 })
 
             # Candidate 3: Over 1.5 Goals
@@ -539,6 +569,7 @@ def get_daily_slips(
                     "confidence": "HIGH",
                     "kickoff_at": m.kickoff_at.isoformat() if m.kickoff_at else None,
                     "projected_stats": projected_stats_payload,
+                    "status": _get_pick_status("Over 1.5 Total Goals"),
                 })
 
             # Candidate 4: Over 2.5 Goals (Value Pick)
@@ -556,6 +587,7 @@ def get_daily_slips(
                     "confidence": "MEDIUM",
                     "kickoff_at": m.kickoff_at.isoformat() if m.kickoff_at else None,
                     "projected_stats": projected_stats_payload,
+                    "status": _get_pick_status("Over 2.5 Goals"),
                 })
 
             # Candidate 5: Both Teams to Score (BTTS)
@@ -573,6 +605,7 @@ def get_daily_slips(
                     "confidence": "MEDIUM",
                     "kickoff_at": m.kickoff_at.isoformat() if m.kickoff_at else None,
                     "projected_stats": projected_stats_payload,
+                    "status": _get_pick_status("Both Teams to Score (Yes)"),
                 })
 
             # Candidate 6: Stat Props (Corners, Yellow Cards, Shots on Target)
@@ -594,19 +627,48 @@ def get_daily_slips(
                         "confidence": "HIGH" if prob >= 0.62 else "MEDIUM",
                         "kickoff_at": m.kickoff_at.isoformat() if m.kickoff_at else None,
                         "projected_stats": projected_stats_payload,
+                        "status": "LIVE" if m_status in ("IN_PLAY", "LIVE") else "PENDING",
                     })
 
         except Exception:
             continue
 
-    # Helper: calculate combined accumulator odds
-    def _combine_slip(picks_list, name, badge, desc, slip_type):
+    # Helper: calculate combined accumulator odds and ranking metrics
+    def _combine_slip(picks_list, name, badge, desc, slip_type, is_single: bool = False):
         if not picks_list:
             return None
         comb_odds = 1.0
         for p in picks_list:
             comb_odds *= p["odds"]
         avg_prob = sum(p["probability"] for p in picks_list) / len(picks_list)
+
+        # Risk level determination
+        if avg_prob >= 0.78 or comb_odds <= 1.40:
+            risk_lvl = "LOW"
+        elif avg_prob >= 0.60 and comb_odds <= 3.50:
+            risk_lvl = "BALANCED"
+        else:
+            risk_lvl = "HIGH_YIELD"
+
+        # Edge calculation: (Model Probability * Decimal Odds) - 1.0
+        ev_pct = round(((avg_prob * comb_odds) - 1.0) * 100, 1)
+        ev_str = f"+{ev_pct}% Edge" if ev_pct > 0 else f"{ev_pct}% Edge"
+
+        # AI Ranking score (combining safety, payoff potential, and model edge)
+        raw_score = (avg_prob * 65.0) + min(25.0, (comb_odds - 1.0) * 10.0) + (max(0.0, ev_pct) * 0.5)
+        ai_score = round(min(99.0, max(55.0, raw_score)), 1)
+
+        # Outcome status calculation
+        statuses = [p.get("status", "PENDING") for p in picks_list]
+        if "LOST" in statuses:
+            outcome = "LOST"
+        elif all(s == "WON" for s in statuses):
+            outcome = "WON"
+        elif any(s == "LIVE" for s in statuses):
+            outcome = "LIVE"
+        else:
+            outcome = "PENDING"
+
         return {
             "title": name,
             "type": slip_type,
@@ -615,6 +677,11 @@ def get_daily_slips(
             "total_odds": round(comb_odds, 2),
             "win_probability": round(avg_prob * 100, 1),
             "selections_count": len(picks_list),
+            "is_single_match": is_single,
+            "risk_level": risk_lvl,
+            "ev_edge": ev_str,
+            "ai_score": ai_score,
+            "outcome_status": outcome,
             "picks": picks_list,
         }
 
@@ -665,7 +732,6 @@ def get_daily_slips(
             multi_league_picks.append(p)
             if len(multi_league_picks) == 4:
                 break
-    # If not enough distinct leagues, fill with best remaining matches
     if len(multi_league_picks) < 3:
         for p in acc_candidates:
             if p["match_id"] not in seen_matches_acc:
@@ -787,10 +853,50 @@ def get_daily_slips(
             "mega"
         ))
 
+    # 7. SINGLE MATCH BANKER (Top Single Game Pick with Highest Confidence)
+    single_banker_candidates = sorted(all_picks, key=lambda x: x["probability"], reverse=True)
+    if single_banker_candidates:
+        s_pick = single_banker_candidates[0]
+        slips.append(_combine_slip(
+            [s_pick],
+            f"Single: {s_pick['fixture']}",
+            "Top Single Banker",
+            f"Highest-confidence standalone single match pick ({s_pick['pick']}) with deep statistical backing.",
+            "single_match",
+            is_single=True
+        ))
+
+    # 8. SINGLE MATCH VALUE EDGE (Top Standalone Value with 1.65+ Odds)
+    single_val_candidates = sorted(
+        [p for p in all_picks if p["odds"] >= 1.65],
+        key=lambda x: x["probability"] * x["odds"],
+        reverse=True
+    )
+    if not single_val_candidates:
+        single_val_candidates = sorted(all_picks, key=lambda x: x["odds"], reverse=True)
+    if single_val_candidates:
+        s_val_pick = single_val_candidates[0]
+        if single_banker_candidates and s_val_pick["match_id"] == single_banker_candidates[0]["match_id"] and len(single_val_candidates) > 1:
+            s_val_pick = single_val_candidates[1]
+        slips.append(_combine_slip(
+            [s_val_pick],
+            f"Single Value: {s_val_pick['fixture']}",
+            "Top Single Value (1.70+ Odds)",
+            f"Prime single match betting opportunity on {s_val_pick['fixture']} ({s_val_pick['pick']}) offering maximum model EV edge.",
+            "single_match",
+            is_single=True
+        ))
+
+    valid_slips = [s for s in slips if s is not None]
+    # Assign official ranking: Rank #1, #2, #3... by ai_score descending
+    valid_slips.sort(key=lambda x: x["ai_score"], reverse=True)
+    for rank_idx, s in enumerate(valid_slips, 1):
+        s["rank"] = rank_idx
+
     return {
         "date": target_date_str,
         "total_matches": len(matches),
-        "slips": [s for s in slips if s is not None],
+        "slips": valid_slips,
     }
 
 

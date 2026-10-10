@@ -54,11 +54,18 @@ export interface DailyPredictionPick {
   confidence: 'VERY HIGH' | 'HIGH' | 'MEDIUM';
   kickoff_at?: string | null;
   projected_stats?: DailyProjectedStats;
+  status?: 'WON' | 'LOST' | 'LIVE' | 'PENDING';
 }
 
 export interface DailyPredictionSlip {
+  rank?: number;
+  ai_score?: number;
+  ev_edge?: string;
+  risk_level?: 'LOW' | 'BALANCED' | 'HIGH_YIELD';
+  outcome_status?: 'WON' | 'LOST' | 'LIVE' | 'PENDING';
+  is_single_match?: boolean;
   title: string;
-  type: 'banker' | 'accumulator' | 'corners_cards' | 'goals' | 'value' | 'mega' | string;
+  type: 'banker' | 'accumulator' | 'corners_cards' | 'goals' | 'value' | 'mega' | 'single_match' | string;
   badge: string;
   description: string;
   total_odds: number;

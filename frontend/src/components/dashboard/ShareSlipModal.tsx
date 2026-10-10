@@ -14,6 +14,7 @@ import {
   CheckCircle2,
   Flag,
   Target,
+  Trophy,
 } from 'lucide-react';
 import { toPng, toBlob } from 'html-to-image';
 import { DailyPredictionSlip } from '../../api/types';
@@ -155,15 +156,30 @@ export const ShareSlipModal: React.FC<ShareSlipModalProps> = ({
             {/* Slip Title & Combined Odds Banner */}
             <div className="p-3.5 rounded-xl bg-gradient-to-r from-[#161922] via-[#1e222e] to-[#161922] border border-[#242938] flex items-center justify-between">
               <div>
-                <span className="text-[10px] font-mono uppercase tracking-wider text-[#21e786] font-bold">
-                  {slip.badge}
-                </span>
+                <div className="flex flex-wrap items-center gap-1.5">
+                  {slip.rank && (
+                    <span className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-amber-400/20 text-amber-300 border border-amber-400/30 font-bold flex items-center gap-1">
+                      <Trophy className="w-2.5 h-2.5 text-amber-400" />
+                      <span>Rank #{slip.rank}</span>
+                    </span>
+                  )}
+                  <span className="text-[10px] font-mono uppercase tracking-wider text-[#21e786] font-bold">
+                    {slip.badge}
+                  </span>
+                  {slip.ev_edge && (
+                    <span className="text-[9px] font-mono px-1.5 py-0.5 rounded bg-[#21e786]/10 text-[#21e786] border border-[#21e786]/20">
+                      {slip.ev_edge}
+                    </span>
+                  )}
+                </div>
                 <h4 className="text-base font-extrabold text-white font-sans mt-0.5">
                   {slip.title}
                 </h4>
               </div>
               <div className="text-right">
-                <div className="text-[10px] font-mono text-slate-400 uppercase">Total Odds</div>
+                <div className="text-[10px] font-mono text-slate-400 uppercase">
+                  {slip.is_single_match ? 'Single Odds' : 'Total Odds'}
+                </div>
                 <div className="text-xl font-black font-mono text-[#21e786]">
                   {slip.total_odds.toFixed(2)}x
                 </div>
