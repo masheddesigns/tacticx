@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import {
   ShieldCheck,
@@ -522,16 +522,16 @@ export const DashboardPage: React.FC = () => {
             </div>
             <div className="flex flex-wrap items-center justify-center gap-2 pt-2">
               <button
-                onClick={() => handleSelectDay(getTodayString('UTC'))}
+                onClick={() => handleSelectDay(getTodayString(timeZone))}
                 className="px-3.5 py-1.5 rounded-lg text-xs font-sans font-semibold bg-[#21e786] text-[#0e1015] hover:bg-[#1cd378] transition-colors shadow-sm"
               >
-                View Today's Matchday (Oct 10 — 28 Matches & Live In-Play)
+                View Today's Matches
               </button>
               <button
-                onClick={() => handleSelectDay(getDayOffsetString(1, 'UTC'))}
+                onClick={() => handleSelectDay(getDayOffsetString(1, timeZone))}
                 className="px-3.5 py-1.5 rounded-lg text-xs font-sans font-semibold bg-[#1e222e] text-white hover:bg-[#242938] border border-[#242938] transition-colors"
               >
-                View Tomorrow's Slate (Oct 11 — 21 Matches)
+                View Tomorrow's Slate
               </button>
               <button
                 onClick={() => {

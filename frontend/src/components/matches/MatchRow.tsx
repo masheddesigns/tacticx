@@ -45,6 +45,10 @@ export const MatchRow: React.FC<MatchRowProps> = ({ match, timeZone = 'UTC' }) =
         return 'error';
       case 'FINISHED':
         return 'default';
+      case 'POSTPONED':
+      case 'SUSPENDED':
+      case 'CANCELLED':
+        return 'warning';
       case 'SCHEDULED':
       case 'PRE_MATCH':
         return 'info';
