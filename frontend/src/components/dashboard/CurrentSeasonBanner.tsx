@@ -38,7 +38,10 @@ export const CurrentSeasonBanner: React.FC<CurrentSeasonBannerProps> = ({
   );
 
   return (
-    <section aria-labelledby="current-season-notice-title" className="rounded-xl border border-amber-800/40 bg-gradient-to-br from-amber-950/30 via-slate-900/60 to-slate-900/80 p-5 shadow-lg backdrop-blur-sm">
+    <section
+      aria-labelledby="current-season-notice-title"
+      className={`rounded-xl border ${anyActive ? 'border-emerald-500/40 bg-gradient-to-br from-emerald-950/30 via-slate-900/60 to-slate-900/80' : 'border-amber-800/40 bg-gradient-to-br from-amber-950/30 via-slate-900/60 to-slate-900/80'} p-5 shadow-lg backdrop-blur-sm`}
+    >
       <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
         <div className="flex items-start gap-3.5">
           <div className={`p-2 rounded-lg ${anyActive ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-400' : 'bg-amber-500/10 border-amber-500/20 text-amber-400'} border mt-0.5 shrink-0`}>
@@ -107,7 +110,7 @@ export const CurrentSeasonBanner: React.FC<CurrentSeasonBannerProps> = ({
             <div key={code} className="p-2.5 rounded bg-slate-900/60 border border-slate-800 flex flex-col justify-between">
               <div>
                 <span className="text-[11px] font-mono text-slate-400 block">{code.replace('_', ' ')}</span>
-                <span className="text-sm font-mono font-bold text-amber-400 mt-0.5 block">
+                <span className={`text-sm font-mono font-bold ${status === 'ACTIVE' ? 'text-emerald-400' : 'text-amber-400'} mt-0.5 block`}>
                   {fixtureCount} fixtures
                 </span>
               </div>

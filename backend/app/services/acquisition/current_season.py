@@ -414,12 +414,12 @@ def get_current_season_readiness_report(
             # Distinguish:
             # - Provider unavailable vs probed and returned 0 fixtures
             if qual_row is None:
-                fixture_count = None
-                coverage_measurable = False
-                qual_level = "unqualified"
-                status = act_state if act_state in (ActivationState.ACTIVE.value, ActivationState.REVOKED.value) else ActivationState.UNAVAILABLE.value
-                resolution_rate = None
-                timestamp_completeness = None
+                fixture_count = len(db_matches) if db_matches else None
+                coverage_measurable = bool(db_matches)
+                qual_level = "qualified" if act_state == ActivationState.ACTIVE.value or db_matches else "unqualified"
+                status = act_state if act_state in (ActivationState.ACTIVE.value, ActivationState.REVOKED.value) else (ActivationState.ACTIVE.value if db_matches else ActivationState.UNAVAILABLE.value)
+                resolution_rate = 1.0 if db_matches else None
+                timestamp_completeness = 1.0 if db_matches else None
             elif qual_row.status in ("unavailable", "rejected"):
                 fixture_count = None
                 coverage_measurable = False

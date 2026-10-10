@@ -23,6 +23,7 @@ import {
   useReadyProbe,
   useLeagues,
   useDailySlips,
+  useReadinessReport,
 } from '../api/queries';
 import { CurrentSeasonBanner } from '../components/dashboard/CurrentSeasonBanner';
 import { CompetitionCards, CompetitionData } from '../components/dashboard/CompetitionCards';
@@ -54,6 +55,7 @@ export const DashboardPage: React.FC = () => {
   const { data: readyProbe } = useReadyProbe();
   const { data: upcomingData } = useUpcomingMatches(168);
   const { data: leaguesData } = useLeagues();
+  const { data: readinessData } = useReadinessReport();
 
   // Query live matches right now
   const { data: liveData, refetch: refetchLive } = useMatches({
@@ -530,10 +532,11 @@ export const DashboardPage: React.FC = () => {
         <CompetitionCards competitions={primaryCompetitions} />
       </section>
 
-      {/* 6. Honest Zero-Data Current Season Notice */}
+      {/* 6. Current Season Controlled Acquisition Active */}
       <CurrentSeasonBanner
-        currentSeason={acqStatus?.coverage?.current_season || '2026/27'}
+        currentSeason={readinessData?.season || acqStatus?.coverage?.current_season || '2026/27'}
         leaguesCoverage={competitionsMap}
+        readinessItems={readinessData?.items || []}
       />
     </div>
   );
