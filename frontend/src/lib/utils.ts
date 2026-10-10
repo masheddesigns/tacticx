@@ -13,24 +13,51 @@ export function formatProbability(value?: number | null, decimals = 1): string {
 }
 
 /**
+ * Converts pure mathematical probability (0..1) to commercial bookmaker decimal odds
+ * like Parimatch, Bet365, etc. by incorporating the standard 5-6% bookmaker margin (overround).
+ * Pure odds: 1 / P.
+ * Commercial odds: 1 / (P * (1 + margin)).
+ */
+export function probabilityToBookmakerOdds(
+  prob?: number | null,
+  marginPercent = 5.0,
+  decimals = 2
+): number | null {
+  if (prob === null || prob === undefined || isNaN(prob) || prob <= 0 || prob >= 1) {
+    return null;
+  }
+  // Margin multiplier (e.g. 5% overround = 1.05)
+  const multiplier = 1 + marginPercent / 100;
+  const commercialProb = Math.min(0.98, prob * multiplier);
+  const rawOdds = 1 / commercialProb;
+  return Number(rawOdds.toFixed(decimals));
+}
+
+/**
  * Converts a decimal probability (0..1) to standard European Decimal Odds (e.g. 0.50 -> 2.00)
  */
-export function probabilityToDecimalOdds(prob?: number | null, decimals = 2): number | null {
+export function probabilityToDecimalOdds(prob?: number | null, decimals = 2, withBookmakerMargin = true): number | null {
   if (prob === null || prob === undefined || isNaN(prob) || prob <= 0) {
     return null;
+  }
+  if (withBookmakerMargin) {
+    return probabilityToBookmakerOdds(prob, 5.0, decimals);
   }
   return Number((1 / prob).toFixed(decimals));
 }
 
 /**
- * Formats decimal odds as European Odds string, e.g. "2.50"
+ * Formats decimal odds as European Odds string, e.g. "2.15" (matching Parimatch slip style)
  */
-export function formatDecimalOdds(oddsOrProb?: number | null, isProb = false): string {
+export function formatDecimalOdds(oddsOrProb?: number | null, isProb = false, withMargin = true): string {
   if (oddsOrProb === null || oddsOrProb === undefined || isNaN(oddsOrProb) || oddsOrProb <= 0) {
     return '—';
   }
-  const decimalOdds = isProb ? 1 / oddsOrProb : oddsOrProb;
-  return decimalOdds.toFixed(2);
+  if (isProb) {
+    const odds = probabilityToDecimalOdds(oddsOrProb, 2, withMargin);
+    return odds ? odds.toFixed(2) : '—';
+  }
+  return oddsOrProb.toFixed(2);
 }
 
 /**

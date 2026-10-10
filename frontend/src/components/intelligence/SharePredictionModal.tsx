@@ -20,7 +20,7 @@ import {
   MatchStatComparisonResponse,
   StatProjectionsResponse,
 } from '../../api/types';
-import { formatDateTime } from '../../lib/utils';
+import { formatDateTime, probabilityToBookmakerOdds } from '../../lib/utils';
 
 export interface SharePredictionModalProps {
   isOpen: boolean;
@@ -80,15 +80,20 @@ export const SharePredictionModal: React.FC<SharePredictionModalProps> = ({
   const homeInitials = getTeamInitials(homeTeamName);
   const awayInitials = getTeamInitials(awayTeamName);
 
-  // 1X2 Probabilities & Odds
+  // 1X2 Probabilities & Parimatch Commercial Odds (with standard 5% bookmaker overround)
   const core = intel.core_prediction;
-  const homeProb = core.home ? Math.round(core.home * 1000) / 10 : 45.0;
-  const drawProb = core.draw ? Math.round(core.draw * 1000) / 10 : 25.0;
-  const awayProb = core.away ? Math.round(core.away * 1000) / 10 : 30.0;
+  const rawHomeProb = core.home || 0.45;
+  const rawDrawProb = core.draw || 0.25;
+  const rawAwayProb = core.away || 0.30;
 
-  const homeOdds = homeProb > 0 ? (100 / homeProb).toFixed(2) : '-';
-  const drawOdds = drawProb > 0 ? (100 / drawProb).toFixed(2) : '-';
-  const awayOdds = awayProb > 0 ? (100 / awayProb).toFixed(2) : '-';
+  const homeProb = Math.round(rawHomeProb * 1000) / 10;
+  const drawProb = Math.round(rawDrawProb * 1000) / 10;
+  const awayProb = Math.round(rawAwayProb * 1000) / 10;
+
+  // Commercial betting slip odds (Parimatch style)
+  const homeOdds = probabilityToBookmakerOdds(rawHomeProb, 5.0)?.toFixed(2) || (100 / homeProb).toFixed(2);
+  const drawOdds = probabilityToBookmakerOdds(rawDrawProb, 5.0)?.toFixed(2) || (100 / drawProb).toFixed(2);
+  const awayOdds = probabilityToBookmakerOdds(rawAwayProb, 5.0)?.toFixed(2) || (100 / awayProb).toFixed(2);
 
   // Expected Goals (xG)
   const xg = intel.expected_goals;

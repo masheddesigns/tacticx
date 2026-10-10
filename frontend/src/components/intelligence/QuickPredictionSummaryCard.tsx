@@ -14,6 +14,7 @@ import {
   Info,
 } from 'lucide-react';
 import { MatchIntelligence, StatProjectionsResponse, MatchStatComparisonResponse } from '../../api/types';
+import { probabilityToBookmakerOdds } from '../../lib/utils';
 
 export interface QuickPredictionSummaryCardProps {
   intel: MatchIntelligence;
@@ -126,6 +127,28 @@ export const QuickPredictionSummaryCard: React.FC<QuickPredictionSummaryCardProp
             <span>{homeTeamName.slice(0, 3).toUpperCase()}: {homeProb}%</span>
             <span>Draw: {drawProb}%</span>
             <span>{awayTeamName.slice(0, 3).toUpperCase()}: {awayProb}%</span>
+          </div>
+
+          {/* Parimatch-style Betting Slip Odds Pills */}
+          <div className="grid grid-cols-3 gap-1.5 pt-0.5">
+            <div className="flex flex-col items-center justify-center p-1.5 rounded-lg bg-[#0e1015] border border-[#242938]">
+              <span className="text-[10px] text-slate-400 font-sans">1 (Home)</span>
+              <span className="text-xs font-mono font-bold text-[#21e786]">
+                {probabilityToBookmakerOdds(core.home || 0.45)?.toFixed(2) || '2.10'}
+              </span>
+            </div>
+            <div className="flex flex-col items-center justify-center p-1.5 rounded-lg bg-[#0e1015] border border-[#242938]">
+              <span className="text-[10px] text-slate-400 font-sans">X (Draw)</span>
+              <span className="text-xs font-mono font-bold text-amber-400">
+                {probabilityToBookmakerOdds(core.draw || 0.25)?.toFixed(2) || '3.40'}
+              </span>
+            </div>
+            <div className="flex flex-col items-center justify-center p-1.5 rounded-lg bg-[#0e1015] border border-[#242938]">
+              <span className="text-[10px] text-slate-400 font-sans">2 (Away)</span>
+              <span className="text-xs font-mono font-bold text-blue-400">
+                {probabilityToBookmakerOdds(core.away || 0.30)?.toFixed(2) || '3.20'}
+              </span>
+            </div>
           </div>
 
           <div className="h-1.5 w-full bg-[#0e1015] rounded-full overflow-hidden flex gap-0.5 border border-[#242938]">
