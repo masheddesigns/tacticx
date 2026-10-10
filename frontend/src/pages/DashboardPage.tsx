@@ -393,12 +393,46 @@ export const DashboardPage: React.FC = () => {
         ) : matchesError ? (
           <ErrorCard error={matchesError as Error} title="Unable to Load Matches" onRetry={() => refetchMatches()} />
         ) : homepageMatches.length === 0 ? (
-          <div className="rounded-2xl border border-surface-border bg-surface-card p-12 text-center space-y-2">
-            <Clock className="w-8 h-8 text-slate-500 mx-auto" />
-            <h3 className="font-semibold text-sm text-slate-200">No Matches Found for this Filter</h3>
-            <p className="text-xs text-slate-400 font-sans max-w-sm mx-auto">
-              No fixtures currently match the chosen date or competition. Try clicking "Today", "Live", or resetting filters.
-            </p>
+          <div className="rounded-2xl border border-surface-border bg-surface-card p-10 text-center space-y-4">
+            <div className="w-12 h-12 mx-auto rounded-full bg-slate-800/80 border border-slate-700 flex items-center justify-center text-slate-400">
+              <Clock className="w-6 h-6" />
+            </div>
+            <div>
+              <h3 className="font-bold text-base text-white font-sans">
+                No Fixtures Scheduled for {selectedDate ? formatDayDisplay(selectedDate, timeZone) : 'Selected Date'}
+              </h3>
+              <p className="text-xs text-slate-400 font-sans max-w-md mx-auto mt-1">
+                There are no matches recorded for this specific date in the database.
+              </p>
+            </div>
+            <div className="flex flex-wrap items-center justify-center gap-2 pt-2">
+              <button
+                onClick={() => handleSelectDay('2026-10-02')}
+                className="px-3.5 py-1.5 rounded-lg text-xs font-sans font-semibold bg-[#21e786] text-[#0e1015] hover:bg-[#1cd378] transition-colors shadow-sm"
+              >
+                View Latest Matchday (Oct 2 — 26 Matches)
+              </button>
+              <button
+                onClick={() => {
+                  setSelectedStatus('SCHEDULED');
+                  setSelectedDate(undefined);
+                }}
+                className="px-3.5 py-1.5 rounded-lg text-xs font-sans font-medium bg-[#1e222e] text-slate-200 hover:text-white border border-[#242938] transition-colors"
+              >
+                View All Upcoming
+              </button>
+              <button
+                onClick={() => {
+                  setSelectedDate(undefined);
+                  setSelectedStatus(undefined);
+                  setSelectedLeague(undefined);
+                  setSearchQuery('');
+                }}
+                className="px-3.5 py-1.5 rounded-lg text-xs font-sans font-medium bg-[#1e222e] text-slate-400 hover:text-slate-200 border border-[#242938] transition-colors"
+              >
+                Clear Date Filter
+              </button>
+            </div>
           </div>
         ) : (
           <div className="space-y-4">
