@@ -52,7 +52,7 @@ def _filtered_query(db: Session, league: Optional[str], team: Optional[str], sta
 _last_live_sync_at = 0.0
 
 
-def _refresh_live_matches_if_needed(db: Session, max_age_seconds: int = 25):
+def _refresh_live_matches_if_needed(db: Session, max_age_seconds: int = 8):
     """Sync live scores, elapsed minutes, and lifecycle statuses on-demand."""
     global _last_live_sync_at
     import time

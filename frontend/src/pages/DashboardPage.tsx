@@ -49,6 +49,23 @@ export const DashboardPage: React.FC = () => {
   const [selectedLeague, setSelectedLeague] = useState<string | undefined>(undefined);
   const [searchQuery, setSearchQuery] = useState<string>('');
 
+  // Automatically keep date in sync when midnight rolls over or time advances
+  useEffect(() => {
+    const timer = setInterval(() => {
+      const currentToday = getTodayString(timeZone);
+      if (selectedDate === todayStr && currentToday !== todayStr) {
+        setSelectedDate(currentToday);
+      }
+    }, 15000);
+    return () => clearInterval(timer);
+  }, [timeZone, todayStr, selectedDate]);
+
+  const handleToggleTimeZone = () => {
+    const nextTz = timeZone === 'UTC' ? 'local' : 'UTC';
+    setTimeZone(nextTz);
+    setSelectedDate(getTodayString(nextTz));
+  };
+
   const { data: dashboard, isLoading: dashLoading, error: dashError } = useJobDashboard();
   const { data: sourcesData } = useSources();
   const { data: acqStatus } = useAcquisitionStatus();
@@ -257,6 +274,11 @@ export const DashboardPage: React.FC = () => {
             <span className="text-slate-400 ml-1.5 font-sans">Fixtures</span>
           </div>
 
+          <div className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-[#161922] border border-[#242938] text-[11px] font-mono text-[#21e786]" title="Automatic live updates every 10 seconds">
+            <span className="w-1.5 h-1.5 rounded-full bg-[#21e786] animate-pulse" />
+            <span>Auto-Sync 10s</span>
+          </div>
+
           <button
             onClick={() => {
               refetchLive();
@@ -359,7 +381,7 @@ export const DashboardPage: React.FC = () => {
             <div className="flex items-center gap-1 text-xs font-mono bg-[#161922] px-2.5 py-1 rounded-lg border border-[#242938]">
               <span className="text-slate-400">TZ:</span>
               <button
-                onClick={() => setTimeZone(timeZone === 'UTC' ? 'local' : 'UTC')}
+                onClick={handleToggleTimeZone}
                 className="text-[#21e786] hover:underline font-semibold"
               >
                 {timeZone === 'UTC' ? 'UTC' : 'Local'}
@@ -500,10 +522,16 @@ export const DashboardPage: React.FC = () => {
             </div>
             <div className="flex flex-wrap items-center justify-center gap-2 pt-2">
               <button
-                onClick={() => handleSelectDay('2026-10-02')}
+                onClick={() => handleSelectDay(getTodayString('UTC'))}
                 className="px-3.5 py-1.5 rounded-lg text-xs font-sans font-semibold bg-[#21e786] text-[#0e1015] hover:bg-[#1cd378] transition-colors shadow-sm"
               >
-                View Latest Matchday (Oct 2 — 26 Matches)
+                View Today's Matchday (Oct 10 — 28 Matches & Live In-Play)
+              </button>
+              <button
+                onClick={() => handleSelectDay(getDayOffsetString(1, 'UTC'))}
+                className="px-3.5 py-1.5 rounded-lg text-xs font-sans font-semibold bg-[#1e222e] text-white hover:bg-[#242938] border border-[#242938] transition-colors"
+              >
+                View Tomorrow's Slate (Oct 11 — 21 Matches)
               </button>
               <button
                 onClick={() => {

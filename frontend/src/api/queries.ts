@@ -30,7 +30,8 @@ export function useDailySlips(date?: string) {
   return useQuery({
     queryKey: QUERY_KEYS.dailySlips(date),
     queryFn: ({ signal }) => apiClient.getDailySlips({ date, signal }),
-    staleTime: 60 * 1000,
+    staleTime: 8 * 1000,
+    refetchInterval: 12 * 1000,
   });
 }
 
@@ -42,12 +43,12 @@ export function useMatches(params?: {
   page?: number;
   page_size?: number;
   sort_order?: 'asc' | 'desc';
-}) {
+}, options?: { refetchInterval?: number | false }) {
   return useQuery({
     queryKey: QUERY_KEYS.matches(params),
     queryFn: ({ signal }) => apiClient.getMatches({ ...params, signal }),
-    staleTime: params?.status === 'LIVE' ? 8 * 1000 : 30 * 1000,
-    refetchInterval: params?.status === 'LIVE' ? 10 * 1000 : false,
+    staleTime: 6 * 1000,
+    refetchInterval: options?.refetchInterval ?? 10 * 1000,
   });
 }
 
