@@ -1,27 +1,3 @@
---
--- PostgreSQL database dump
---
-
-\restrict ZFWm8if9dpJNCCr08XWrWyXg5b1lFWvXzf1Yac05W0TuybKcOIWi82iJF3ic7We
-
--- Dumped from database version 16.15
--- Dumped by pg_dump version 16.15
-
-SET statement_timeout = 0;
-SET lock_timeout = 0;
-SET idle_in_transaction_session_timeout = 0;
-SET client_encoding = 'UTF8';
-SET standard_conforming_strings = on;
-SELECT pg_catalog.set_config('search_path', '', false);
-SET check_function_bodies = false;
-SET xmloption = content;
-SET client_min_messages = warning;
-SET row_security = off;
-
---
--- Data for Name: leagues; Type: TABLE DATA; Schema: public; Owner: bet
---
-
 INSERT INTO public.leagues (id, code, name, country, provider, provider_league_id, season, created_at) VALUES (6, 'UCL', 'UEFA Champions League', NULL, 'api_football', '2', '2024', '2026-09-30 11:21:58.946243+00');
 INSERT INTO public.leagues (id, code, name, country, provider, provider_league_id, season, created_at) VALUES (1, 'EPL', 'Premier League', NULL, 'api_football', '39', '2026', '2026-09-30 11:21:58.946243+00');
 INSERT INTO public.leagues (id, code, name, country, provider, provider_league_id, season, created_at) VALUES (2, 'LA_LIGA', 'La Liga', NULL, 'api_football', '140', '2023', '2026-09-30 11:21:58.946243+00');
@@ -30,12 +6,6 @@ INSERT INTO public.leagues (id, code, name, country, provider, provider_league_i
 INSERT INTO public.leagues (id, code, name, country, provider, provider_league_id, season, created_at) VALUES (5, 'LIGUE_1', 'Ligue 1', NULL, 'api_football', '61', '2023', '2026-09-30 11:21:58.946243+00');
 INSERT INTO public.leagues (id, code, name, country, provider, provider_league_id, season, created_at) VALUES (7, 'NATIONS_LEAGUE', 'UEFA Nations League', NULL, 'api_football', '5', '2026', '2026-09-30 11:51:28.854581+00');
 INSERT INTO public.leagues (id, code, name, country, provider, provider_league_id, season, created_at) VALUES (8, 'FRIENDLIES', 'International Friendlies', NULL, 'api_football', '10', '2026', '2026-09-30 11:51:28.854581+00');
-
-
---
--- Data for Name: teams; Type: TABLE DATA; Schema: public; Owner: bet
---
-
 INSERT INTO public.teams (id, league_id, name, short_name, country, provider, provider_team_id, created_at) VALUES (1, NULL, 'Burnley', NULL, NULL, 'csv', 'name:burnley', '2026-09-30 11:23:04.043464+00');
 INSERT INTO public.teams (id, league_id, name, short_name, country, provider, provider_team_id, created_at) VALUES (2, NULL, 'Man City', NULL, NULL, 'csv', 'name:man city', '2026-09-30 11:23:04.055707+00');
 INSERT INTO public.teams (id, league_id, name, short_name, country, provider, provider_team_id, created_at) VALUES (3, NULL, 'Arsenal', NULL, NULL, 'csv', 'name:arsenal', '2026-09-30 11:23:04.18356+00');
@@ -296,12 +266,6 @@ INSERT INTO public.teams (id, league_id, name, short_name, country, provider, pr
 INSERT INTO public.teams (id, league_id, name, short_name, country, provider, provider_team_id, created_at) VALUES (258, 2, 'Elche', 'ELC', NULL, 'manual_curated', '258', '2026-10-10 06:29:13.360979+00');
 INSERT INTO public.teams (id, league_id, name, short_name, country, provider, provider_team_id, created_at) VALUES (259, 2, 'Deportivo La Coruna', 'DEP', NULL, 'manual_curated', '259', '2026-10-10 06:29:13.360979+00');
 INSERT INTO public.teams (id, league_id, name, short_name, country, provider, provider_team_id, created_at) VALUES (260, 2, 'Racing Santander', 'RAC', NULL, 'manual_curated', '260', '2026-10-10 06:29:13.360979+00');
-
-
---
--- Data for Name: matches; Type: TABLE DATA; Schema: public; Owner: bet
---
-
 INSERT INTO public.matches (id, league_id, home_team_id, away_team_id, kickoff_at, status, minute, home_score, away_score, provider, provider_match_id, updated_at) VALUES (1, 1, 1, 2, '2023-08-11 20:00:00+00', 'FINISHED', NULL, 0, 3, 'csv', 'data/.cache/football_data_co_uk/2324_E0.csv#0', '2026-09-30 11:23:04.058272+00');
 INSERT INTO public.matches (id, league_id, home_team_id, away_team_id, kickoff_at, status, minute, home_score, away_score, provider, provider_match_id, updated_at) VALUES (2, 1, 3, 4, '2023-08-12 12:30:00+00', 'FINISHED', NULL, 2, 1, 'csv', 'data/.cache/football_data_co_uk/2324_E0.csv#1', '2026-09-30 11:23:04.187711+00');
 INSERT INTO public.matches (id, league_id, home_team_id, away_team_id, kickoff_at, status, minute, home_score, away_score, provider, provider_match_id, updated_at) VALUES (3, 1, 5, 6, '2023-08-12 15:00:00+00', 'FINISHED', NULL, 1, 1, 'csv', 'data/.cache/football_data_co_uk/2324_E0.csv#2', '2026-09-30 11:23:04.290745+00');
@@ -3096,68 +3060,13 @@ INSERT INTO public.matches (id, league_id, home_team_id, away_team_id, kickoff_a
 INSERT INTO public.matches (id, league_id, home_team_id, away_team_id, kickoff_at, status, minute, home_score, away_score, provider, provider_match_id, updated_at) VALUES (2814, 2, 258, 36, '2026-10-11 12:00:00+00', 'SCHEDULED', NULL, NULL, NULL, 'complete_league_curated', 'll_2026_1011_elc_cel', '2026-10-10 06:29:13.368303+00');
 INSERT INTO public.matches (id, league_id, home_team_id, away_team_id, kickoff_at, status, minute, home_score, away_score, provider, provider_match_id, updated_at) VALUES (2815, 2, 30, 259, '2026-10-11 14:15:00+00', 'SCHEDULED', NULL, NULL, NULL, 'complete_league_curated', 'll_2026_1011_soc_dep', '2026-10-10 06:29:13.368303+00');
 INSERT INTO public.matches (id, league_id, home_team_id, away_team_id, kickoff_at, status, minute, home_score, away_score, provider, provider_match_id, updated_at) VALUES (2816, 2, 260, 29, '2026-10-11 19:00:00+00', 'SCHEDULED', NULL, NULL, NULL, 'complete_league_curated', 'll_2026_1011_rac_val', '2026-10-10 06:29:13.368303+00');
-
-
---
--- Data for Name: source_activations; Type: TABLE DATA; Schema: public; Owner: bet
---
-
 INSERT INTO public.source_activations (id, source, state, decided_by, checks, reason, decided_at) VALUES (1, 'api_football', 'ACTIVE', 'admin', '{"competition": "EPL", "season": "2026/27", "eligible": true, "decision": {"eligible": true, "provider": "api_football", "competition": "EPL", "season": "2026/27", "reasons": [], "warnings": [], "capabilities": {}, "checked_at": "2026-10-10T08:19:48.658498+00:00"}}', 'Active production fixtures verified', '2026-10-10 08:19:48.653811+00');
 INSERT INTO public.source_activations (id, source, state, decided_by, checks, reason, decided_at) VALUES (2, 'api_football', 'ACTIVE', 'admin', '{"competition": "LA_LIGA", "season": "2026/27", "eligible": true, "decision": {"eligible": true, "provider": "api_football", "competition": "LA_LIGA", "season": "2026/27", "reasons": [], "warnings": [], "capabilities": {}, "checked_at": "2026-10-10T08:19:48.668315+00:00"}}', 'Active production fixtures verified', '2026-10-10 08:19:48.666795+00');
 INSERT INTO public.source_activations (id, source, state, decided_by, checks, reason, decided_at) VALUES (3, 'api_football', 'ACTIVE', 'admin', '{"competition": "SERIE_A", "season": "2026/27", "eligible": true, "decision": {"eligible": true, "provider": "api_football", "competition": "SERIE_A", "season": "2026/27", "reasons": [], "warnings": [], "capabilities": {}, "checked_at": "2026-10-10T08:19:48.675557+00:00"}}', 'Active production fixtures verified', '2026-10-10 08:19:48.674074+00');
 INSERT INTO public.source_activations (id, source, state, decided_by, checks, reason, decided_at) VALUES (4, 'api_football', 'ACTIVE', 'admin', '{"competition": "BUNDESLIGA", "season": "2026/27", "eligible": true, "decision": {"eligible": true, "provider": "api_football", "competition": "BUNDESLIGA", "season": "2026/27", "reasons": [], "warnings": [], "capabilities": {}, "checked_at": "2026-10-10T08:19:48.683919+00:00"}}', 'Active production fixtures verified', '2026-10-10 08:19:48.682208+00');
 INSERT INTO public.source_activations (id, source, state, decided_by, checks, reason, decided_at) VALUES (5, 'api_football', 'ACTIVE', 'admin', '{"competition": "LIGUE_1", "season": "2026/27", "eligible": true, "decision": {"eligible": true, "provider": "api_football", "competition": "LIGUE_1", "season": "2026/27", "reasons": [], "warnings": [], "capabilities": {}, "checked_at": "2026-10-10T08:19:48.691896+00:00"}}', 'Active production fixtures verified', '2026-10-10 08:19:48.690028+00');
-
-
---
--- Data for Name: source_qualifications; Type: TABLE DATA; Schema: public; Owner: bet
---
-
 INSERT INTO public.source_qualifications (id, qualification_run_id, source, competition, season, retrieved_at, request_count, response_count, fixture_count, resolved_count, unresolved_count, conflict_count, status, reason_codes, capability_hash, sample_hash) VALUES (1, '', 'api_football', 'EPL', '2026/27', '2026-10-10 08:19:48.596931+00', 0, 0, 70, 70, 0, 0, 'qualified', '["baseline_qualified", "fixtures_verified", "timestamps_valid"]', '', '');
 INSERT INTO public.source_qualifications (id, qualification_run_id, source, competition, season, retrieved_at, request_count, response_count, fixture_count, resolved_count, unresolved_count, conflict_count, status, reason_codes, capability_hash, sample_hash) VALUES (2, '', 'api_football', 'LA_LIGA', '2026/27', '2026-10-10 08:19:48.596931+00', 0, 0, 8, 8, 0, 0, 'qualified', '["baseline_qualified", "fixtures_verified", "timestamps_valid"]', '', '');
 INSERT INTO public.source_qualifications (id, qualification_run_id, source, competition, season, retrieved_at, request_count, response_count, fixture_count, resolved_count, unresolved_count, conflict_count, status, reason_codes, capability_hash, sample_hash) VALUES (3, '', 'api_football', 'SERIE_A', '2026/27', '2026-10-10 08:19:48.596931+00', 0, 0, 8, 8, 0, 0, 'qualified', '["baseline_qualified", "fixtures_verified", "timestamps_valid"]', '', '');
 INSERT INTO public.source_qualifications (id, qualification_run_id, source, competition, season, retrieved_at, request_count, response_count, fixture_count, resolved_count, unresolved_count, conflict_count, status, reason_codes, capability_hash, sample_hash) VALUES (4, '', 'api_football', 'BUNDESLIGA', '2026/27', '2026-10-10 08:19:48.596931+00', 0, 0, 8, 8, 0, 0, 'qualified', '["baseline_qualified", "fixtures_verified", "timestamps_valid"]', '', '');
 INSERT INTO public.source_qualifications (id, qualification_run_id, source, competition, season, retrieved_at, request_count, response_count, fixture_count, resolved_count, unresolved_count, conflict_count, status, reason_codes, capability_hash, sample_hash) VALUES (5, '', 'api_football', 'LIGUE_1', '2026/27', '2026-10-10 08:19:48.596931+00', 0, 0, 7, 7, 0, 0, 'qualified', '["baseline_qualified", "fixtures_verified", "timestamps_valid"]', '', '');
-
-
---
--- Name: leagues_id_seq; Type: SEQUENCE SET; Schema: public; Owner: bet
---
-
-SELECT pg_catalog.setval('public.leagues_id_seq', 8, true);
-
-
---
--- Name: matches_id_seq; Type: SEQUENCE SET; Schema: public; Owner: bet
---
-
-SELECT pg_catalog.setval('public.matches_id_seq', 2816, true);
-
-
---
--- Name: source_activations_id_seq; Type: SEQUENCE SET; Schema: public; Owner: bet
---
-
-SELECT pg_catalog.setval('public.source_activations_id_seq', 5, true);
-
-
---
--- Name: source_qualifications_id_seq; Type: SEQUENCE SET; Schema: public; Owner: bet
---
-
-SELECT pg_catalog.setval('public.source_qualifications_id_seq', 5, true);
-
-
---
--- Name: teams_id_seq; Type: SEQUENCE SET; Schema: public; Owner: bet
---
-
-SELECT pg_catalog.setval('public.teams_id_seq', 260, true);
-
-
---
--- PostgreSQL database dump complete
---
-
-\unrestrict ZFWm8if9dpJNCCr08XWrWyXg5b1lFWvXzf1Yac05W0TuybKcOIWi82iJF3ic7We
-

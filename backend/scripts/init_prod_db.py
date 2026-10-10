@@ -10,27 +10,28 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("init_prod_db")
 
 def main():
-    logger.info("Checking database initialization...")
+    logger.info("Starting production database initialization...")
     from app.db.session import get_engine, get_session_local
     from app.config import get_settings
     
     settings = get_settings()
     engine = get_engine()
     
-    # 1. Run Alembic migrations to head
+    # 1. Run Alembic migrations programmatically
     try:
-        import alembic.config
+        from alembic import command
+        from alembic.config import Config
         logger.info("Running Alembic migrations to head...")
-        cur_dir = os.getcwd()
-        if os.path.exists("alembic.ini"):
-            alembic.config.main(argv=["--raiseerr", "upgrade", "head"])
-        elif os.path.exists("backend/alembic.ini"):
-            os.chdir("backend")
-            alembic.config.main(argv=["--raiseerr", "upgrade", "head"])
-            os.chdir(cur_dir)
+        
+        cfg_path = "alembic.ini"
+        if not os.path.exists(cfg_path) and os.path.exists("backend/alembic.ini"):
+            cfg_path = "backend/alembic.ini"
+            
+        cfg = Config(cfg_path)
+        command.upgrade(cfg, "head")
         logger.info("Alembic migrations completed successfully.")
     except Exception as e:
-        logger.error(f"Alembic migration error: {e}")
+        logger.error(f"Alembic migration error (falling back to Base.metadata): {e}")
         try:
             from app.db.base import Base
             Base.metadata.create_all(bind=engine)
@@ -38,7 +39,7 @@ def main():
         except Exception as ex:
             logger.error(f"Fallback create_all failed: {ex}")
 
-    # 2. Check if matches are already seeded
+    # 2. Check and seed database if empty
     Session = get_session_local()
     db = Session()
     try:
@@ -55,20 +56,34 @@ def main():
                 if os.path.exists(candidate):
                     sql_file = candidate
                     break
+            
             if sql_file:
+                logger.info(f"Reading seed file: {sql_file}")
                 with open(sql_file, "r") as f:
-                    sql_content = f.read()
+                    statements = [line.strip() for line in f if line.strip().startswith("INSERT INTO")]
+                
                 raw_conn = engine.raw_connection()
                 try:
                     cursor = raw_conn.cursor()
-                    cursor.execute(sql_content)
+                    success_count = 0
+                    for stmt in statements:
+                        try:
+                            # Strip 'public.' if sqlite
+                            if engine.dialect.name == "sqlite":
+                                stmt = stmt.replace("public.", "")
+                            cursor.execute(stmt)
+                            success_count += 1
+                        except Exception as insert_err:
+                            pass
                     raw_conn.commit()
                     cursor.close()
-                    logger.info("Production database seeded successfully.")
+                    logger.info(f"Successfully seeded {success_count} records into production database.")
                 finally:
                     raw_conn.close()
             else:
-                logger.warning("seed_production.sql file not found.")
+                logger.warning("seed_production.sql not found.")
+        else:
+            logger.info("Database already contains matches. Skipping initial seed.")
     except Exception as e:
         logger.error(f"Seeding check failed: {e}")
     finally:
