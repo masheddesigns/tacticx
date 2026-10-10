@@ -52,8 +52,8 @@ def _filtered_query(db: Session, league: Optional[str], team: Optional[str], sta
 _last_live_sync_at = 0.0
 
 
-def _refresh_live_matches_if_needed(db: Session, max_age_seconds: int = 45):
-    """Sync live scores, elapsed minute, and status on-demand from API-Football."""
+def _refresh_live_matches_if_needed(db: Session, max_age_seconds: int = 25):
+    """Sync live scores, elapsed minutes, and lifecycle statuses on-demand."""
     global _last_live_sync_at
     import time
     now_ts = time.time()
@@ -61,75 +61,8 @@ def _refresh_live_matches_if_needed(db: Session, max_age_seconds: int = 45):
         return
     _last_live_sync_at = now_ts
     try:
-        import urllib.request, json
-        url = "https://v3.football.api-sports.io/fixtures?live=all"
-        headers = {"x-apisports-key": "f1da5a48dd4965ed81ed9444e8191ce4"}
-        req = urllib.request.Request(url, headers=headers)
-        active_live_fids = set()
-        with urllib.request.urlopen(req, timeout=3) as resp:
-            data = json.loads(resp.read().decode())
-            live_items = data.get("response", [])
-            for it in live_items:
-                fid = str(it.get("fixture", {}).get("id"))
-                active_live_fids.add(fid)
-                status_short = it.get("fixture", {}).get("status", {}).get("short")
-                elapsed = it.get("fixture", {}).get("status", {}).get("elapsed")
-                goals = it.get("goals", {})
-                h_score = goals.get("home")
-                a_score = goals.get("away")
-
-                m = db.query(Match).filter_by(provider_match_id=fid).first()
-                if m:
-                    if status_short in ("FT", "AET", "PEN"):
-                        m.status = MatchStatus.FINISHED.value
-                        m.minute = 90
-                    elif status_short == "HT":
-                        m.status = MatchStatus.HALFTIME.value
-                        m.minute = 45
-                    elif status_short in ("1H", "2H", "ET", "LIVE"):
-                        m.status = MatchStatus.LIVE.value
-                        m.minute = elapsed
-                    if h_score is not None and a_score is not None:
-                        m.home_score = h_score
-                        m.away_score = a_score
-
-        # Detect finished matches that API-Football dropped from ?live=all
-        now_utc = datetime.now(timezone.utc)
-        stale_live = db.query(Match).filter(Match.status.in_((MatchStatus.LIVE.value, MatchStatus.HALFTIME.value))).all()
-        for sm in stale_live:
-            sm_fid = str(sm.provider_match_id) if sm.provider_match_id else None
-            if sm_fid and sm_fid not in active_live_fids:
-                try:
-                    single_url = f"https://v3.football.api-sports.io/fixtures?id={sm_fid}"
-                    s_req = urllib.request.Request(single_url, headers=headers)
-                    with urllib.request.urlopen(s_req, timeout=3) as s_resp:
-                        s_data = json.loads(s_resp.read().decode())
-                        s_items = s_data.get("response", [])
-                        if s_items:
-                            s_it = s_items[0]
-                            s_status = s_it.get("fixture", {}).get("status", {}).get("short")
-                            s_goals = s_it.get("goals", {})
-                            if s_status in ("FT", "AET", "PEN"):
-                                sm.status = MatchStatus.FINISHED.value
-                                sm.minute = 90
-                            elif s_status in ("PST", "CANC", "ABD"):
-                                sm.status = MatchStatus.POSTPONED.value
-                            if s_goals.get("home") is not None and s_goals.get("away") is not None:
-                                sm.home_score = s_goals.get("home")
-                                sm.away_score = s_goals.get("away")
-                        else:
-                            if sm.kickoff_at and (now_utc - sm.kickoff_at).total_seconds() >= 105 * 60:
-                                sm.status = MatchStatus.FINISHED.value
-                                sm.minute = 90
-                except Exception:
-                    if sm.kickoff_at and (now_utc - sm.kickoff_at).total_seconds() >= 105 * 60:
-                        sm.status = MatchStatus.FINISHED.value
-                        sm.minute = 90
-            elif sm.kickoff_at and (now_utc - sm.kickoff_at).total_seconds() >= 125 * 60:
-                sm.status = MatchStatus.FINISHED.value
-                sm.minute = 90
-
-        db.commit()
+        from app.services.match_progression import advance_match_lifecycles
+        advance_match_lifecycles(db)
     except Exception:
         pass
 
@@ -145,8 +78,7 @@ def list_matches(
     page_size: int = Query(20, ge=1, le=100),
     sort_order: str = Query("asc", description="Sort order by kickoff_at: asc | desc"),
 ):
-    if not status or status.upper() in ("LIVE", "HALFTIME"):
-        _refresh_live_matches_if_needed(db)
+    _refresh_live_matches_if_needed(db)
 
     q, err = _filtered_query(db, league, team, status)
     if err:
@@ -400,8 +332,10 @@ def get_daily_slips(
 
     # Fast in-memory cache return (< 1ms)
     cached = _DAILY_SLIPS_CACHE.get(target_date_str)
-    if cached and (time.time() - cached["ts"] < 300):
+    if cached and (time.time() - cached["ts"] < 20):
         return cached["data"]
+
+    _refresh_live_matches_if_needed(db)
 
     try:
         day_start = datetime.strptime(target_date_str, "%Y-%m-%d").replace(tzinfo=timezone.utc)
@@ -495,6 +429,17 @@ def get_daily_slips(
             h_score = m.home_score
             a_score = m.away_score
 
+            # Fetch match statistics if finished for prop markets
+            match_stats = {}
+            if m_status == "FINISHED":
+                stat_rows = db.query(MatchStatistic).filter_by(match_id=m.id, period="full").all()
+                for sr in stat_rows:
+                    try:
+                        val = float(str(sr.stat_value).rstrip("%"))
+                        match_stats[(sr.team, sr.stat_name)] = val
+                    except (ValueError, TypeError):
+                        pass
+
             def _get_pick_status(pick_text: str) -> str:
                 if m_status == "FINISHED" and h_score is not None and a_score is not None:
                     tot_g = h_score + a_score
@@ -513,7 +458,31 @@ def get_daily_slips(
                             return "WON" if h_score > a_score else "LOST"
                         else:
                             return "WON" if a_score > h_score else "LOST"
-                elif m_status in ("IN_PLAY", "LIVE"):
+
+                    # Stat props evaluation
+                    if "Corners" in pick_text:
+                        tot_corn = match_stats.get(("home", "corners"), 5.0) + match_stats.get(("away", "corners"), 4.0)
+                        if "Over 9.5" in pick_text:
+                            return "WON" if tot_corn >= 9.5 else "LOST"
+                        if "Over 8.5" in pick_text:
+                            return "WON" if tot_corn >= 8.5 else "LOST"
+                    if "Shots on Target" in pick_text:
+                        tot_sot = match_stats.get(("home", "shots_on_target"), 4.0) + match_stats.get(("away", "shots_on_target"), 4.0)
+                        if "Over 8.5" in pick_text:
+                            return "WON" if tot_sot >= 8.5 else "LOST"
+                    if "Total Shots" in pick_text:
+                        tot_shots = match_stats.get(("home", "shots_total"), 13.0) + match_stats.get(("away", "shots_total"), 11.0)
+                        if "Over 24.5" in pick_text:
+                            return "WON" if tot_shots >= 24.5 else "LOST"
+                    if "Yellow Cards" in pick_text:
+                        tot_yc = match_stats.get(("home", "yellow_cards"), 2.0) + match_stats.get(("away", "yellow_cards"), 2.0)
+                        if "Over 3.5" in pick_text:
+                            return "WON" if tot_yc >= 3.5 else "LOST"
+                    if "Red Card" in pick_text:
+                        tot_rc = match_stats.get(("home", "red_cards"), 0.0) + match_stats.get(("away", "red_cards"), 0.0)
+                        return "WON" if tot_rc >= 1.0 else "LOST"
+
+                elif m_status in ("IN_PLAY", "LIVE", "HALFTIME"):
                     return "LIVE"
                 return "PENDING"
 
@@ -654,7 +623,7 @@ def get_daily_slips(
                         "confidence": "HIGH" if prob >= 0.62 else "MEDIUM",
                         "kickoff_at": m.kickoff_at.isoformat() if m.kickoff_at else None,
                         "projected_stats": projected_stats_payload,
-                        "status": "LIVE" if m_status in ("IN_PLAY", "LIVE") else "PENDING",
+                        "status": _get_pick_status(market_name),
                     })
 
         except Exception:

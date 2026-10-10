@@ -221,7 +221,7 @@ describe('Match Intelligence Components — Analytical & Statistical Integrity',
   });
 
   it('renders backend warnings accurately', () => {
-    render(<WarningsSection warnings={intel.warnings} />);
+    render(<WarningsSection warnings={intel.warnings} defaultOpen={true} />);
 
     expect(screen.getByText('XG_UNAVAILABLE')).toBeInTheDocument();
     expect(screen.getByText('CLOSING_ONLY')).toBeInTheDocument();

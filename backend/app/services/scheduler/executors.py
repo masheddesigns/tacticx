@@ -84,64 +84,38 @@ def execute_fixture_refresh(db: Session, config: dict[str, Any],
 def execute_status_refresh(db: Session, config: dict[str, Any],
                            dry_run: bool = False) -> dict[str, Any]:
     """Update match statuses (scheduled/postponed/cancelled/live/finished).
-    Uses existing lifecycle sync; idempotent."""
-    from app.db.models.core import League, Match
-    from app.services.acquisition.current_season import current_canonical_season
-
-    competitions = config.get("competitions", [])
-    season = config.get("seasons", ["current"])[0] if config.get("seasons") else "current"
-    if season == "current":
-        season = current_canonical_season()
-
-    query = db.query(Match).join(League)
-    if competitions:
-        query = query.filter(League.code.in_(competitions))
-    matches = query.filter(Match.status.in_(["SCHEDULED", "PRE_MATCH", "LIVE"])).all()
-
+    Advances clock-driven lifecycles, live score lines, and minutes."""
     if dry_run:
         return {
             "status": "dry_run",
-            "matches_found": len(matches),
-            "competitions": competitions,
             "note": "no writes performed",
         }
 
-    # Status refresh is observation-driven: existing matches keep their
-    # latest observed status. No mutation of historical observations.
+    from app.services.match_progression import advance_match_lifecycles
+    res = advance_match_lifecycles(db)
     return {
         "status": "succeeded",
-        "matches_checked": len(matches),
-        "competitions": competitions,
+        "matches_checked": res.get("matches_checked", 0),
+        "live_count": res.get("live_count", 0),
+        "finished_count": res.get("finished_count", 0),
     }
 
 
 def execute_result_refresh(db: Session, config: dict[str, Any],
                            dry_run: bool = False) -> dict[str, Any]:
-    """Discover completed results. Uses existing acquisition pipeline.
-    Idempotent: finished matches are never re-created."""
-    from app.db.models.core import League, Match
-
-    competitions = config.get("competitions", [])
-    query = db.query(Match).join(League)
-    if competitions:
-        query = query.filter(League.code.in_(competitions))
-    finished = query.filter(Match.status == "FINISHED").count()
-    pending = query.filter(Match.status.in_(["SCHEDULED", "PRE_MATCH", "LIVE"])).count()
-
+    """Discover completed results and evaluate prediction snapshots."""
     if dry_run:
         return {
             "status": "dry_run",
-            "finished_count": finished,
-            "pending_count": pending,
-            "competitions": competitions,
             "note": "no writes performed",
         }
 
+    from app.services.match_progression import advance_match_lifecycles
+    res = advance_match_lifecycles(db)
     return {
         "status": "succeeded",
-        "finished_count": finished,
-        "pending_count": pending,
-        "competitions": competitions,
+        "finished_count": res.get("finished_count", 0),
+        "evaluated_count": res.get("evaluated_count", 0),
     }
 
 
