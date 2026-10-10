@@ -500,10 +500,33 @@ def get_daily_slips(
             "accumulator"
         ))
 
-    # 3. HIGH-VALUE SLIP (Attractive odds 1.70 - 2.50 with model edge)
-    value_candidates = sorted(
-        [p for p in all_picks if 1.65 <= p["odds"] <= 2.40 and p["probability"] >= 0.48],
+    # 3. GOALS FEST SLIP (Over 1.5 / Over 2.5 & BTTS specialist slip)
+    goal_candidates = sorted(
+        [p for p in all_picks if p["market"] in ("Totals", "BTTS") and p["probability"] >= 0.65],
         key=lambda x: x["probability"],
+        reverse=True
+    )
+    seen_goals = set()
+    goal_picks = []
+    for p in goal_candidates:
+        if p["match_id"] not in seen_goals:
+            seen_goals.add(p["match_id"])
+            goal_picks.append(p)
+            if len(goal_picks) == 3:
+                break
+    if goal_picks:
+        slips.append(_combine_slip(
+            goal_picks,
+            "Goals Galore Combo",
+            "Over Goals & BTTS",
+            "Curated goal lines combining high expected goals (xG) projections across leagues.",
+            "goals"
+        ))
+
+    # 4. HIGH-VALUE SLIP (Attractive odds 1.65 - 2.40 with model edge)
+    value_candidates = sorted(
+        [p for p in all_picks if 1.60 <= p["odds"] <= 2.45 and p["probability"] >= 0.46],
+        key=lambda x: x["probability"] * x["odds"],
         reverse=True
     )
     seen_val = set()
@@ -522,6 +545,29 @@ def get_daily_slips(
             "Value Edge (1.70+ Odds)",
             "Selections where model win probability offers significant positive expected value.",
             "value"
+        ))
+
+    # 5. MEGA ACCUMULATOR SLIP (5-Fold High Multiplier across all European competitions)
+    mega_candidates = sorted(
+        [p for p in all_picks if p["probability"] >= 0.62],
+        key=lambda x: x["probability"],
+        reverse=True
+    )
+    seen_mega = set()
+    mega_picks = []
+    for p in mega_candidates:
+        if p["match_id"] not in seen_mega:
+            seen_mega.add(p["match_id"])
+            mega_picks.append(p)
+            if len(mega_picks) == 5:
+                break
+    if len(mega_picks) >= 4:
+        slips.append(_combine_slip(
+            mega_picks,
+            "Mega 5-Fold Parlay",
+            "Big Odds Multiplier",
+            f"Strategic 5-selection cross-league parlay designed for high-yield returns.",
+            "mega"
         ))
 
     return {

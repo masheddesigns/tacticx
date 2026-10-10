@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import {
   Ticket,
   ShieldCheck,
@@ -8,10 +8,11 @@ import {
   CheckCircle2,
   ChevronRight,
   Sparkles,
+  Share2,
 } from 'lucide-react';
 import { DailyPredictionSlip } from '../../api/types';
 import { formatDayDisplay } from '../../lib/utils';
-import { Link } from 'react-router-dom';
+import { ShareSlipModal } from './ShareSlipModal';
 
 export interface DailyPredictionSlipsSectionProps {
   slips: DailyPredictionSlip[];
@@ -26,6 +27,8 @@ export const DailyPredictionSlipsSection: React.FC<DailyPredictionSlipsSectionPr
   timeZone,
   isLoading,
 }) => {
+  const [selectedSlipForShare, setSelectedSlipForShare] = useState<DailyPredictionSlip | null>(null);
+
   if (isLoading) {
     return (
       <div className="rounded-2xl border border-[#242938] bg-[#161922] p-6 animate-pulse space-y-4">
@@ -49,8 +52,12 @@ export const DailyPredictionSlipsSection: React.FC<DailyPredictionSlipsSectionPr
         return <ShieldCheck className="w-4 h-4 text-[#21e786]" />;
       case 'accumulator':
         return <Zap className="w-4 h-4 text-amber-400" />;
+      case 'goals':
+        return <Flame className="w-4 h-4 text-rose-400" />;
       case 'value':
         return <TrendingUp className="w-4 h-4 text-purple-400" />;
+      case 'mega':
+        return <Sparkles className="w-4 h-4 text-cyan-400" />;
       default:
         return <Ticket className="w-4 h-4 text-blue-400" />;
     }
@@ -62,8 +69,12 @@ export const DailyPredictionSlipsSection: React.FC<DailyPredictionSlipsSectionPr
         return 'border-[#21e786]/30 hover:border-[#21e786]/60 shadow-[0_0_15px_rgba(33,231,134,0.06)]';
       case 'accumulator':
         return 'border-amber-400/30 hover:border-amber-400/60 shadow-[0_0_15px_rgba(251,191,36,0.06)]';
+      case 'goals':
+        return 'border-rose-400/30 hover:border-rose-400/60 shadow-[0_0_15px_rgba(244,63,94,0.06)]';
       case 'value':
         return 'border-purple-400/30 hover:border-purple-400/60 shadow-[0_0_15px_rgba(192,132,252,0.06)]';
+      case 'mega':
+        return 'border-cyan-400/30 hover:border-cyan-400/60 shadow-[0_0_15px_rgba(34,211,238,0.06)]';
       default:
         return 'border-[#242938] hover:border-slate-700';
     }
@@ -161,29 +172,48 @@ export const DailyPredictionSlipsSection: React.FC<DailyPredictionSlipsSectionPr
               </div>
             </div>
 
-            {/* Slip Summary / Total Odds Footer */}
-            <div className="pt-3 border-t border-[#242938] flex items-center justify-between gap-2">
-              <div>
-                <div className="text-[10px] text-slate-400 font-sans uppercase tracking-wider">
-                  Combined Odds
+            {/* Slip Summary / Total Odds Footer & Share Button */}
+            <div className="pt-3 border-t border-[#242938] space-y-2.5">
+              <div className="flex items-center justify-between gap-2">
+                <div>
+                  <div className="text-[10px] text-slate-400 font-sans uppercase tracking-wider">
+                    Combined Odds
+                  </div>
+                  <div className="text-lg font-black font-mono text-[#21e786]">
+                    {slip.total_odds.toFixed(2)}x
+                  </div>
                 </div>
-                <div className="text-lg font-black font-mono text-[#21e786]">
-                  {slip.total_odds.toFixed(2)}x
+
+                <div className="text-right">
+                  <div className="text-[10px] text-slate-400 font-sans uppercase tracking-wider">
+                    Win Probability
+                  </div>
+                  <div className="text-xs font-bold font-mono text-slate-200">
+                    {slip.win_probability}%
+                  </div>
                 </div>
               </div>
 
-              <div className="text-right">
-                <div className="text-[10px] text-slate-400 font-sans uppercase tracking-wider">
-                  Win Probability
-                </div>
-                <div className="text-xs font-bold font-mono text-slate-200">
-                  {slip.win_probability}%
-                </div>
-              </div>
+              <button
+                onClick={() => setSelectedSlipForShare(slip)}
+                className="w-full py-1.5 px-3 rounded-lg text-xs font-sans font-semibold bg-[#1e222e] hover:bg-[#242938] text-slate-200 hover:text-white border border-[#242938] transition-colors flex items-center justify-center gap-1.5 shadow-sm"
+              >
+                <Share2 className="w-3.5 h-3.5 text-[#21e786]" />
+                <span>Share Slip Screenshot</span>
+              </button>
             </div>
           </div>
         ))}
       </div>
+
+      {/* Share Slip Modal */}
+      <ShareSlipModal
+        isOpen={Boolean(selectedSlipForShare)}
+        onClose={() => setSelectedSlipForShare(null)}
+        slip={selectedSlipForShare}
+        dateStr={dateStr}
+        timeZone={timeZone}
+      />
     </div>
   );
 };
