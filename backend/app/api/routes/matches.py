@@ -635,115 +635,134 @@ def get_daily_slips(
             # Evaluate all candidate outcomes for this match to determine the single Best Possible Outcome
             match_candidates = []
 
+            # Helper to calculate continuous AI Power Index (15 - 99)
+            def _score_outcome(prob_val: float, odds_val: float, ev_val: float) -> float:
+                p_norm = prob_val / 100.0
+                return round(min(99.0, max(15.0, (p_norm * 75.0) + min(15.0, (odds_val - 1.0) * 8.0) + max(-5.0, ev_val * 0.4))), 1)
+
             # 1. Home Win
             p_h_ev = round(((p_h * _calc_odds(p_h)) - 1.0) * 100, 1)
+            p_h_pct = round(p_h * 100, 1)
+            p_h_odds = _calc_odds(p_h)
             match_candidates.append({
                 "pick": f"{h_name} to Win",
                 "market": "1X2 (Match Winner)",
-                "probability": round(p_h * 100, 1),
-                "odds": _calc_odds(p_h),
+                "probability": p_h_pct,
+                "odds": p_h_odds,
                 "confidence": "VERY HIGH" if p_h >= 0.70 else ("HIGH" if p_h >= 0.58 else "MEDIUM"),
                 "category": "BANKER" if p_h >= 0.70 else ("VALUE" if p_h_ev >= 5.0 else "MATCH_WINNER"),
                 "badge": "Top Home Banker" if p_h >= 0.70 else ("High Value Edge" if p_h_ev >= 5.0 else "Home Win"),
                 "ev_edge": f"+{p_h_ev}% Edge" if p_h_ev > 0 else f"{p_h_ev}% Edge",
-                "ai_score": round(min(99.0, max(50.0, (p_h * 68.0) + min(18.0, (_calc_odds(p_h) - 1.0) * 10.0) + max(0.0, p_h_ev * 0.5))), 1),
+                "ai_score": _score_outcome(p_h_pct, p_h_odds, p_h_ev),
                 "status": _get_pick_status(f"{h_name} to Win"),
             })
 
             # 2. Away Win
             p_a_ev = round(((p_a * _calc_odds(p_a)) - 1.0) * 100, 1)
+            p_a_pct = round(p_a * 100, 1)
+            p_a_odds = _calc_odds(p_a)
             match_candidates.append({
                 "pick": f"{a_name} to Win",
                 "market": "1X2 (Match Winner)",
-                "probability": round(p_a * 100, 1),
-                "odds": _calc_odds(p_a),
+                "probability": p_a_pct,
+                "odds": p_a_odds,
                 "confidence": "VERY HIGH" if p_a >= 0.65 else ("HIGH" if p_a >= 0.55 else "MEDIUM"),
                 "category": "BANKER" if p_a >= 0.65 else ("VALUE" if p_a_ev >= 5.0 else "MATCH_WINNER"),
                 "badge": "Top Away Banker" if p_a >= 0.65 else ("High Value Edge" if p_a_ev >= 5.0 else "Away Win"),
                 "ev_edge": f"+{p_a_ev}% Edge" if p_a_ev > 0 else f"{p_a_ev}% Edge",
-                "ai_score": round(min(99.0, max(50.0, (p_a * 68.0) + min(18.0, (_calc_odds(p_a) - 1.0) * 10.0) + max(0.0, p_a_ev * 0.5))), 1),
+                "ai_score": _score_outcome(p_a_pct, p_a_odds, p_a_ev),
                 "status": _get_pick_status(f"{a_name} to Win"),
             })
 
             # 3. Double Chance (1X)
             p_1x = min(0.98, p_h + p_d)
             p_1x_ev = round(((p_1x * _calc_odds(p_1x)) - 1.0) * 100, 1)
+            p_1x_pct = round(p_1x * 100, 1)
+            p_1x_odds = _calc_odds(p_1x)
             match_candidates.append({
                 "pick": f"{h_name} or Draw (1X)",
                 "market": "Double Chance",
-                "probability": round(p_1x * 100, 1),
-                "odds": _calc_odds(p_1x),
+                "probability": p_1x_pct,
+                "odds": p_1x_odds,
                 "confidence": "VERY HIGH" if p_1x >= 0.80 else "HIGH",
                 "category": "SAFETY",
                 "badge": "Safe Buffer (1X)",
                 "ev_edge": f"+{p_1x_ev}% Edge" if p_1x_ev > 0 else f"{p_1x_ev}% Edge",
-                "ai_score": round(min(99.0, max(50.0, (p_1x * 62.0) + min(12.0, (_calc_odds(p_1x) - 1.0) * 10.0) + max(0.0, p_1x_ev * 0.4))), 1),
+                "ai_score": _score_outcome(p_1x_pct, p_1x_odds, p_1x_ev),
                 "status": _get_pick_status(f"{h_name} or Draw (1X)"),
             })
 
             # 4. Double Chance (X2)
             p_x2 = min(0.98, p_d + p_a)
             p_x2_ev = round(((p_x2 * _calc_odds(p_x2)) - 1.0) * 100, 1)
+            p_x2_pct = round(p_x2 * 100, 1)
+            p_x2_odds = _calc_odds(p_x2)
             match_candidates.append({
                 "pick": f"{a_name} or Draw (X2)",
                 "market": "Double Chance",
-                "probability": round(p_x2 * 100, 1),
-                "odds": _calc_odds(p_x2),
+                "probability": p_x2_pct,
+                "odds": p_x2_odds,
                 "confidence": "VERY HIGH" if p_x2 >= 0.80 else "HIGH",
                 "category": "SAFETY",
                 "badge": "Safe Buffer (X2)",
                 "ev_edge": f"+{p_x2_ev}% Edge" if p_x2_ev > 0 else f"{p_x2_ev}% Edge",
-                "ai_score": round(min(99.0, max(50.0, (p_x2 * 62.0) + min(12.0, (_calc_odds(p_x2) - 1.0) * 10.0) + max(0.0, p_x2_ev * 0.4))), 1),
+                "ai_score": _score_outcome(p_x2_pct, p_x2_odds, p_x2_ev),
                 "status": _get_pick_status(f"{a_name} or Draw (X2)"),
             })
 
             # 5. Over 1.5 Goals
             p_o15_ev = round(((p_o15 * _calc_odds(p_o15)) - 1.0) * 100, 1)
+            p_o15_pct = round(p_o15 * 100, 1)
+            p_o15_odds = _calc_odds(p_o15)
             match_candidates.append({
                 "pick": "Over 1.5 Total Goals",
                 "market": "Totals",
-                "probability": round(p_o15 * 100, 1),
-                "odds": _calc_odds(p_o15),
+                "probability": p_o15_pct,
+                "odds": p_o15_odds,
                 "confidence": "VERY HIGH" if p_o15 >= 0.80 else "HIGH",
                 "category": "GOALS",
                 "badge": "Over 1.5 Lock",
                 "ev_edge": f"+{p_o15_ev}% Edge" if p_o15_ev > 0 else f"{p_o15_ev}% Edge",
-                "ai_score": round(min(99.0, max(50.0, (p_o15 * 63.0) + min(12.0, (_calc_odds(p_o15) - 1.0) * 10.0) + max(0.0, p_o15_ev * 0.4))), 1),
+                "ai_score": _score_outcome(p_o15_pct, p_o15_odds, p_o15_ev),
                 "status": _get_pick_status("Over 1.5 Total Goals"),
             })
 
             # 6. Over 2.5 Goals
             p_o25_ev = round(((p_o25 * _calc_odds(p_o25)) - 1.0) * 100, 1)
+            p_o25_pct = round(p_o25 * 100, 1)
+            p_o25_odds = _calc_odds(p_o25)
             match_candidates.append({
                 "pick": "Over 2.5 Total Goals",
                 "market": "Totals",
-                "probability": round(p_o25 * 100, 1),
-                "odds": _calc_odds(p_o25),
+                "probability": p_o25_pct,
+                "odds": p_o25_odds,
                 "confidence": "HIGH" if p_o25 >= 0.65 else "MEDIUM",
                 "category": "GOALS",
                 "badge": "Over 2.5 Goals",
                 "ev_edge": f"+{p_o25_ev}% Edge" if p_o25_ev > 0 else f"{p_o25_ev}% Edge",
-                "ai_score": round(min(99.0, max(50.0, (p_o25 * 60.0) + min(22.0, (_calc_odds(p_o25) - 1.0) * 12.0) + max(0.0, p_o25_ev * 0.5))), 1),
+                "ai_score": _score_outcome(p_o25_pct, p_o25_odds, p_o25_ev),
                 "status": _get_pick_status("Over 2.5 Goals"),
             })
 
             # 7. BTTS Yes
             p_btts_ev = round(((p_btts * _calc_odds(p_btts)) - 1.0) * 100, 1)
+            p_btts_pct = round(p_btts * 100, 1)
+            p_btts_odds = _calc_odds(p_btts)
             match_candidates.append({
                 "pick": "Both Teams to Score (Yes)",
                 "market": "BTTS",
-                "probability": round(p_btts * 100, 1),
-                "odds": _calc_odds(p_btts),
+                "probability": p_btts_pct,
+                "odds": p_btts_odds,
                 "confidence": "HIGH" if p_btts >= 0.65 else "MEDIUM",
                 "category": "GOALS",
                 "badge": "BTTS (Yes)",
                 "ev_edge": f"+{p_btts_ev}% Edge" if p_btts_ev > 0 else f"{p_btts_ev}% Edge",
-                "ai_score": round(min(99.0, max(50.0, (p_btts * 60.0) + min(22.0, (_calc_odds(p_btts) - 1.0) * 12.0) + max(0.0, p_btts_ev * 0.5))), 1),
+                "ai_score": _score_outcome(p_btts_pct, p_btts_odds, p_btts_ev),
                 "status": _get_pick_status("Both Teams to Score (Yes)"),
             })
 
-            # Sort match candidates to find the single Best Possible Outcome
-            match_candidates.sort(key=lambda x: x["ai_score"], reverse=True)
+            # Sort match candidates to prioritize the highest mathematical viability and win probability
+            match_candidates.sort(key=lambda x: (x["probability"] * 0.70) + (x["ai_score"] * 0.30), reverse=True)
             best_outcome = match_candidates[0]
 
             # Choose up to 2 alternative viable picks from different markets
