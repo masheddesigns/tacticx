@@ -25,6 +25,8 @@ import {
 import { DailyPredictionSlip } from '../../api/types';
 import { formatDayDisplay } from '../../lib/utils';
 import { ShareSlipModal } from './ShareSlipModal';
+import { TeamLogo } from '../common/TeamLogo';
+import { LeagueLogo } from '../common/LeagueLogo';
 
 export interface DailyPredictionSlipsSectionProps {
   slips: DailyPredictionSlip[];
@@ -496,16 +498,34 @@ export const DailyPredictionSlipsSection: React.FC<DailyPredictionSlipsSectionPr
                       <div className="flex items-start justify-between gap-2">
                         <div className="min-w-0 flex-1">
                           <div className="flex items-center gap-1.5">
-                            <span className="text-[10px] font-mono text-slate-400 truncate">
-                              {pick.league}
+                            <LeagueLogo league={pick.league_code || pick.league} size="xs" />
+                            <span className="text-[10px] font-mono text-slate-300 font-semibold truncate">
+                              {pick.league || pick.league_code}
                             </span>
                             <span className="text-[10px] text-slate-600">•</span>
                             <span className="text-[10px] font-mono font-semibold text-[#21e786]">
                               {Math.round(pick.probability * 100)}% Win
                             </span>
                           </div>
-                          <div className="text-xs font-semibold text-slate-200 truncate mt-0.5">
-                            {pick.fixture}
+                          <div className="flex items-center gap-1.5 text-xs font-semibold text-slate-200 truncate mt-0.5">
+                            {(() => {
+                              const [home, away] = pick.fixture.includes(' vs ')
+                                ? pick.fixture.split(' vs ')
+                                : [pick.fixture, ''];
+                              return (
+                                <>
+                                  {home && <TeamLogo teamName={home.trim()} size="xs" />}
+                                  <span className="truncate">{home.trim()}</span>
+                                  {away && (
+                                    <>
+                                      <span className="text-slate-500 text-[10px] font-mono">vs</span>
+                                      <TeamLogo teamName={away.trim()} size="xs" />
+                                      <span className="truncate">{away.trim()}</span>
+                                    </>
+                                  )}
+                                </>
+                              );
+                            })()}
                           </div>
                           <div className="text-[11px] font-sans font-bold text-white mt-0.5 flex items-center gap-1">
                             {pick.status === 'WON' ? (

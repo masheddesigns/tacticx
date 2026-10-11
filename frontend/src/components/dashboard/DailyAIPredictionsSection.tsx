@@ -1159,33 +1159,54 @@ export const DailyAIPredictionsSection: React.FC<DailyAIPredictionsSectionProps>
                     </div>
 
                     {/* Legs */}
-                    <div className="space-y-1.5 pt-1">
+                    <div className="space-y-2 pt-1">
                       {slip.picks.map((pick, pIdx) => {
                         const [homeTeam, awayTeam] = pick.fixture.includes(' vs ')
                           ? pick.fixture.split(' vs ')
                           : [pick.fixture, ''];
+                        const winProbPct = pick.probability > 1
+                          ? Math.round(pick.probability)
+                          : Math.round(pick.probability * 100);
                         return (
                           <div
                             key={pIdx}
-                            className="p-2 rounded-xl bg-[#0d1017] border border-[#1f2636] flex items-center justify-between gap-2 text-xs font-sans"
+                            className="p-2.5 rounded-xl bg-[#0d1017] border border-[#1f2636] flex flex-col gap-1.5 text-xs font-sans"
                           >
-                            <div className="truncate min-w-0">
-                              <div className="flex items-center gap-1.5 text-[11px] text-slate-400 truncate">
-                                {homeTeam && <TeamLogo teamName={homeTeam.trim()} size="xs" />}
-                                <span className="truncate">{homeTeam.trim()}</span>
-                                {awayTeam && (
-                                  <>
-                                    <span className="text-slate-600 text-[10px]">vs</span>
-                                    <TeamLogo teamName={awayTeam.trim()} size="xs" />
-                                    <span className="truncate">{awayTeam.trim()}</span>
-                                  </>
-                                )}
+                            {/* Competition Header: League Logo + League Name */}
+                            <div className="flex items-center justify-between gap-2 pb-1 border-b border-[#181f2c]">
+                              <div className="flex items-center gap-1.5 min-w-0">
+                                <LeagueLogo league={pick.league_code || pick.league} size="xs" />
+                                <span className="text-[10px] font-mono font-semibold text-slate-300 truncate">
+                                  {pick.league || pick.league_code}
+                                </span>
                               </div>
-                              <div className="font-bold text-white text-xs truncate mt-0.5">{pick.pick}</div>
+                              <span className="text-[10px] font-mono text-[#21e786] font-semibold shrink-0">
+                                {winProbPct}% Win
+                              </span>
                             </div>
-                            <span className="font-mono text-emerald-400 font-bold whitespace-nowrap text-[11px]">
-                              @{pick.odds.toFixed(2)}
-                            </span>
+
+                            {/* Matchup & Recommended Pick */}
+                            <div className="flex items-center justify-between gap-2">
+                              <div className="truncate min-w-0 flex-1 space-y-0.5">
+                                <div className="flex items-center gap-1.5 text-[11px] text-slate-200 font-medium truncate">
+                                  {homeTeam && <TeamLogo teamName={homeTeam.trim()} size="xs" />}
+                                  <span className="truncate">{homeTeam.trim()}</span>
+                                  {awayTeam && (
+                                    <>
+                                      <span className="text-slate-500 text-[10px] font-mono">vs</span>
+                                      <TeamLogo teamName={awayTeam.trim()} size="xs" />
+                                      <span className="truncate">{awayTeam.trim()}</span>
+                                    </>
+                                  )}
+                                </div>
+                                <div className="font-bold text-white text-xs truncate">
+                                  {pick.pick}
+                                </div>
+                              </div>
+                              <span className="font-mono text-emerald-400 font-bold whitespace-nowrap text-[11px] px-2 py-0.5 rounded bg-emerald-950/60 border border-emerald-800/50">
+                                @{pick.odds.toFixed(2)}
+                              </span>
+                            </div>
                           </div>
                         );
                       })}
@@ -1522,9 +1543,21 @@ export const DailyAIPredictionsSection: React.FC<DailyAIPredictionsSectionProps>
                                       : 'bg-[#170e13]/80 border-rose-900/30'
                                   }`}
                                 >
+                                  {/* Competition Header: League Logo + League Name */}
+                                  <div className="flex items-center justify-between gap-2 pb-1 border-b border-[#1a2230]/60">
+                                    <div className="flex items-center gap-1.5 min-w-0">
+                                      <LeagueLogo league={pick.league_code || pick.league_name} size="xs" />
+                                      <span className="text-[10px] font-mono font-semibold text-slate-300 truncate">
+                                        {pick.league_name || pick.league_code}
+                                      </span>
+                                    </div>
+                                    <span className="text-[10px] font-mono text-slate-400 shrink-0">
+                                      {pick.market}
+                                    </span>
+                                  </div>
+
                                   <div className="flex items-center justify-between gap-2">
                                     <div className="flex items-center gap-1.5 min-w-0 truncate">
-                                      <LeagueLogo league={pick.league_code} size="xs" />
                                       <TeamLogo teamName={pick.home_team} size="xs" />
                                       <span className="font-bold text-white truncate">{pick.home_team}</span>
                                       <span className="text-slate-500 text-[10px]">vs</span>
@@ -1550,7 +1583,7 @@ export const DailyAIPredictionsSection: React.FC<DailyAIPredictionsSectionProps>
 
                                   <div className="flex items-center justify-between gap-2 pt-0.5 border-t border-[#1a2230]/60">
                                     <span className="text-[#21e786] font-semibold text-[11px] truncate">
-                                      {pick.pick} <span className="text-slate-400 font-mono font-normal">({pick.market})</span>
+                                      {pick.pick}
                                     </span>
                                     <span className="font-mono text-slate-300 text-[11px] font-bold">
                                       @{pick.odds.toFixed(2)}
