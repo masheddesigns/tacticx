@@ -36,3 +36,14 @@ def configured_leagues(db: Session = Depends(get_db)):
          "ingested": code in stored}
         for code, e in configured.items()
     ]}
+
+
+@router.post("/seed-expanded", summary="Re-seed authentic expanded leagues fixtures and predictions")
+def trigger_seed_expanded(db: Session = Depends(get_db)):
+    try:
+        from scripts.seed_expanded_leagues import seed_expanded_leagues
+    except ImportError:
+        from backend.scripts.seed_expanded_leagues import seed_expanded_leagues
+    result = seed_expanded_leagues(db)
+    return {"status": "success", "result": result}
+
