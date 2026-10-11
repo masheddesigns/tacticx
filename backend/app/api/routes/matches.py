@@ -519,123 +519,126 @@ def get_daily_slips(
                     return "LIVE"
                 return "PENDING"
 
-            # Candidate 1: Direct Win
-            if p_h >= 0.55:
-                all_picks.append({
-                    "match_id": m.id,
-                    "fixture": f"{h_name} vs {a_name}",
-                    "league": lg_name,
-                    "league_code": lg_code,
-                    "pick": f"{h_name} to Win",
-                    "market": "1X2 (Match Winner)",
-                    "probability": round(p_h, 3),
-                    "odds": _calc_odds(p_h),
-                    "confidence": "HIGH" if p_h >= 0.65 else "MEDIUM",
-                    "kickoff_at": m.kickoff_at.isoformat() if m.kickoff_at else None,
-                    "projected_stats": projected_stats_payload,
-                    "status": _get_pick_status(f"{h_name} to Win"),
-                })
-            elif p_a >= 0.50:
-                all_picks.append({
-                    "match_id": m.id,
-                    "fixture": f"{h_name} vs {a_name}",
-                    "league": lg_name,
-                    "league_code": lg_code,
-                    "pick": f"{a_name} to Win",
-                    "market": "1X2 (Match Winner)",
-                    "probability": round(p_a, 3),
-                    "odds": _calc_odds(p_a),
-                    "confidence": "HIGH" if p_a >= 0.60 else "MEDIUM",
-                    "kickoff_at": m.kickoff_at.isoformat() if m.kickoff_at else None,
-                    "projected_stats": projected_stats_payload,
-                    "status": _get_pick_status(f"{a_name} to Win"),
-                })
+            # Candidate picks for accumulator slips (STRICTLY for active/upcoming matches)
+            # Finished matches are eliminated so all slips contain only placeable, active bets!
+            if m_status != "FINISHED" and m_status not in ("POSTPONED", "CANCELLED", "ABANDONED"):
+                # Candidate 1: Direct Win
+                if p_h >= 0.55:
+                    all_picks.append({
+                        "match_id": m.id,
+                        "fixture": f"{h_name} vs {a_name}",
+                        "league": lg_name,
+                        "league_code": lg_code,
+                        "pick": f"{h_name} to Win",
+                        "market": "1X2 (Match Winner)",
+                        "probability": round(p_h, 3),
+                        "odds": _calc_odds(p_h),
+                        "confidence": "HIGH" if p_h >= 0.65 else "MEDIUM",
+                        "kickoff_at": m.kickoff_at.isoformat() if m.kickoff_at else None,
+                        "projected_stats": projected_stats_payload,
+                        "status": _get_pick_status(f"{h_name} to Win"),
+                    })
+                elif p_a >= 0.50:
+                    all_picks.append({
+                        "match_id": m.id,
+                        "fixture": f"{h_name} vs {a_name}",
+                        "league": lg_name,
+                        "league_code": lg_code,
+                        "pick": f"{a_name} to Win",
+                        "market": "1X2 (Match Winner)",
+                        "probability": round(p_a, 3),
+                        "odds": _calc_odds(p_a),
+                        "confidence": "HIGH" if p_a >= 0.60 else "MEDIUM",
+                        "kickoff_at": m.kickoff_at.isoformat() if m.kickoff_at else None,
+                        "projected_stats": projected_stats_payload,
+                        "status": _get_pick_status(f"{a_name} to Win"),
+                    })
 
-            # Candidate 2: Double Chance (Safety Pick)
-            p_1x = p_h + p_d
-            if p_1x >= 0.75:
-                all_picks.append({
-                    "match_id": m.id,
-                    "fixture": f"{h_name} vs {a_name}",
-                    "league": lg_name,
-                    "league_code": lg_code,
-                    "pick": f"{h_name} or Draw (1X)",
-                    "market": "Double Chance",
-                    "probability": round(p_1x, 3),
-                    "odds": _calc_odds(p_1x),
-                    "confidence": "VERY HIGH",
-                    "kickoff_at": m.kickoff_at.isoformat() if m.kickoff_at else None,
-                    "projected_stats": projected_stats_payload,
-                    "status": _get_pick_status(f"{h_name} or Draw (1X)"),
-                })
+                # Candidate 2: Double Chance (Safety Pick)
+                p_1x = p_h + p_d
+                if p_1x >= 0.75:
+                    all_picks.append({
+                        "match_id": m.id,
+                        "fixture": f"{h_name} vs {a_name}",
+                        "league": lg_name,
+                        "league_code": lg_code,
+                        "pick": f"{h_name} or Draw (1X)",
+                        "market": "Double Chance",
+                        "probability": round(p_1x, 3),
+                        "odds": _calc_odds(p_1x),
+                        "confidence": "VERY HIGH",
+                        "kickoff_at": m.kickoff_at.isoformat() if m.kickoff_at else None,
+                        "projected_stats": projected_stats_payload,
+                        "status": _get_pick_status(f"{h_name} or Draw (1X)"),
+                    })
 
-            p_x2 = p_d + p_a
-            if p_x2 >= 0.75:
-                all_picks.append({
-                    "match_id": m.id,
-                    "fixture": f"{h_name} vs {a_name}",
-                    "league": lg_name,
-                    "league_code": lg_code,
-                    "pick": f"{a_name} or Draw (X2)",
-                    "market": "Double Chance",
-                    "probability": round(p_x2, 3),
-                    "odds": _calc_odds(p_x2),
-                    "confidence": "VERY HIGH",
-                    "kickoff_at": m.kickoff_at.isoformat() if m.kickoff_at else None,
-                    "projected_stats": projected_stats_payload,
-                    "status": _get_pick_status(f"{a_name} or Draw (X2)"),
-                })
+                p_x2 = p_d + p_a
+                if p_x2 >= 0.75:
+                    all_picks.append({
+                        "match_id": m.id,
+                        "fixture": f"{h_name} vs {a_name}",
+                        "league": lg_name,
+                        "league_code": lg_code,
+                        "pick": f"{a_name} or Draw (X2)",
+                        "market": "Double Chance",
+                        "probability": round(p_x2, 3),
+                        "odds": _calc_odds(p_x2),
+                        "confidence": "VERY HIGH",
+                        "kickoff_at": m.kickoff_at.isoformat() if m.kickoff_at else None,
+                        "projected_stats": projected_stats_payload,
+                        "status": _get_pick_status(f"{a_name} or Draw (X2)"),
+                    })
 
-            # Candidate 3: Over 1.5 Goals
-            if p_o15 >= 0.72:
-                all_picks.append({
-                    "match_id": m.id,
-                    "fixture": f"{h_name} vs {a_name}",
-                    "league": lg_name,
-                    "league_code": lg_code,
-                    "pick": "Over 1.5 Total Goals",
-                    "market": "Totals",
-                    "probability": round(p_o15, 3),
-                    "odds": _calc_odds(p_o15),
-                    "confidence": "HIGH",
-                    "kickoff_at": m.kickoff_at.isoformat() if m.kickoff_at else None,
-                    "projected_stats": projected_stats_payload,
-                    "status": _get_pick_status("Over 1.5 Total Goals"),
-                })
+                # Candidate 3: Over 1.5 Goals
+                if p_o15 >= 0.72:
+                    all_picks.append({
+                        "match_id": m.id,
+                        "fixture": f"{h_name} vs {a_name}",
+                        "league": lg_name,
+                        "league_code": lg_code,
+                        "pick": "Over 1.5 Total Goals",
+                        "market": "Totals",
+                        "probability": round(p_o15, 3),
+                        "odds": _calc_odds(p_o15),
+                        "confidence": "HIGH",
+                        "kickoff_at": m.kickoff_at.isoformat() if m.kickoff_at else None,
+                        "projected_stats": projected_stats_payload,
+                        "status": _get_pick_status("Over 1.5 Total Goals"),
+                    })
 
-            # Candidate 4: Over 2.5 Goals (Value Pick)
-            if 0.50 <= p_o25 <= 0.75:
-                all_picks.append({
-                    "match_id": m.id,
-                    "fixture": f"{h_name} vs {a_name}",
-                    "league": lg_name,
-                    "league_code": lg_code,
-                    "pick": "Over 2.5 Goals",
-                    "market": "Totals",
-                    "probability": round(p_o25, 3),
-                    "odds": _calc_odds(p_o25),
-                    "confidence": "MEDIUM",
-                    "kickoff_at": m.kickoff_at.isoformat() if m.kickoff_at else None,
-                    "projected_stats": projected_stats_payload,
-                    "status": _get_pick_status("Over 2.5 Goals"),
-                })
+                # Candidate 4: Over 2.5 Goals (Value Pick)
+                if 0.50 <= p_o25 <= 0.75:
+                    all_picks.append({
+                        "match_id": m.id,
+                        "fixture": f"{h_name} vs {a_name}",
+                        "league": lg_name,
+                        "league_code": lg_code,
+                        "pick": "Over 2.5 Goals",
+                        "market": "Totals",
+                        "probability": round(p_o25, 3),
+                        "odds": _calc_odds(p_o25),
+                        "confidence": "MEDIUM",
+                        "kickoff_at": m.kickoff_at.isoformat() if m.kickoff_at else None,
+                        "projected_stats": projected_stats_payload,
+                        "status": _get_pick_status("Over 2.5 Goals"),
+                    })
 
-            # Candidate 5: Both Teams to Score (BTTS)
-            if 0.52 <= p_btts <= 0.75:
-                all_picks.append({
-                    "match_id": m.id,
-                    "fixture": f"{h_name} vs {a_name}",
-                    "league": lg_name,
-                    "league_code": lg_code,
-                    "pick": "Both Teams to Score (Yes)",
-                    "market": "BTTS",
-                    "probability": round(p_btts, 3),
-                    "odds": _calc_odds(p_btts),
-                    "confidence": "MEDIUM",
-                    "kickoff_at": m.kickoff_at.isoformat() if m.kickoff_at else None,
-                    "projected_stats": projected_stats_payload,
-                    "status": _get_pick_status("Both Teams to Score (Yes)"),
-                })
+                # Candidate 5: Both Teams to Score (BTTS)
+                if 0.52 <= p_btts <= 0.75:
+                    all_picks.append({
+                        "match_id": m.id,
+                        "fixture": f"{h_name} vs {a_name}",
+                        "league": lg_name,
+                        "league_code": lg_code,
+                        "pick": "Both Teams to Score (Yes)",
+                        "market": "BTTS",
+                        "probability": round(p_btts, 3),
+                        "odds": _calc_odds(p_btts),
+                        "confidence": "MEDIUM",
+                        "kickoff_at": m.kickoff_at.isoformat() if m.kickoff_at else None,
+                        "projected_stats": projected_stats_payload,
+                        "status": _get_pick_status("Both Teams to Score (Yes)"),
+                    })
 
             # Evaluate all candidate outcomes for this match to determine the single Best Possible Outcome
             match_candidates = []
@@ -1075,19 +1078,357 @@ def get_daily_slips(
     for rank_idx, s in enumerate(valid_slips, 1):
         s["rank"] = rank_idx
 
-    # Sort match-by-match predictions: Rank #1, #2, #3... by AI Power Score
-    ranked_predictions.sort(key=lambda x: x["sort_score"], reverse=True)
-    for r_idx, rp in enumerate(ranked_predictions, 1):
+    # Eliminate finished matches from active predictions so active bettors only see actionable upcoming games
+    active_predictions = [
+        rp for rp in ranked_predictions
+        if rp["status"] != "FINISHED" and rp["status"] not in ("POSTPONED", "CANCELLED", "ABANDONED")
+    ]
+    settled_predictions_today = [
+        rp for rp in ranked_predictions
+        if rp["status"] == "FINISHED"
+    ]
+
+    # Re-rank active predictions from #1 to #N by AI Power Score
+    active_predictions.sort(key=lambda x: x["sort_score"], reverse=True)
+    for r_idx, rp in enumerate(active_predictions, 1):
         rp["rank"] = r_idx
         rp["is_nap_of_the_day"] = (r_idx == 1)
 
     result = {
         "date": target_date_str,
         "total_matches": len(matches),
-        "ranked_predictions": ranked_predictions,
+        "upcoming_count": len(active_predictions),
+        "settled_count": len(settled_predictions_today),
+        "ranked_predictions": active_predictions,
+        "settled_predictions_today": settled_predictions_today,
         "slips": valid_slips,
     }
     _DAILY_SLIPS_CACHE[cache_key] = {"ts": time.time(), "data": result}
+    return result
+
+
+_PREDICTION_HISTORY_CACHE: Dict[str, Any] = {}
+
+
+@router.get("/prediction-history", summary="Historical prediction track record with audited outcomes (won vs lost)")
+def get_prediction_history(
+    days: int = Query(7, ge=1, le=30, description="Lookback window in days"),
+    league: Optional[str] = Query(None, description="Filter by league code or name"),
+    outcome: Optional[str] = Query("ALL", description="Filter outcome: ALL | WON | LOST"),
+    limit: int = Query(60, ge=1, le=150, description="Max historical matches to evaluate"),
+    tz: Optional[str] = Query("IST", description="Timezone: IST | UTC"),
+    db: Session = Depends(get_db),
+):
+    """Provides an audited, transparent historical ledger of past AI match predictions and settlements:
+    - Queries matches that have ended with confirmed official full-time scorelines.
+    - Evaluates the pre-match AI Best Outcome against actual match results.
+    - Accurately settles each pick as WON (Correct) or LOST (Wrong) with unit returns and audit explanations.
+    - Aggregates overall performance metrics: Win Rate %, Net Units PnL, ROI %, and category breakdowns.
+    """
+    from app.services.predictions.poisson import PoissonModel
+    from datetime import datetime, timezone, timedelta
+    import time
+    import math
+
+    cache_key = f"{days}_{league or 'all'}_{outcome or 'all'}_{limit}_{tz or 'IST'}"
+    cached = _PREDICTION_HISTORY_CACHE.get(cache_key)
+    if cached and (time.time() - cached["ts"] < 25):
+        return cached["data"]
+
+    now_utc = datetime.now(timezone.utc)
+    cutoff_dt = now_utc - timedelta(days=days)
+
+    q = db.query(Match).filter(
+        Match.status == "FINISHED",
+        Match.home_score.isnot(None),
+        Match.away_score.isnot(None),
+        Match.kickoff_at >= cutoff_dt,
+    )
+
+    if league:
+        l_clean = league.strip()
+        lg = db.query(League).filter(
+            (League.code.ilike(l_clean)) | (League.name.ilike(f"%{l_clean}%"))
+        ).first()
+        if lg:
+            q = q.filter(Match.league_id == lg.id)
+
+    matches = q.order_by(Match.kickoff_at.desc()).limit(limit * 2).all()
+
+    FLAG_MAP = {
+        "EPL": "🏴󠁧󠁢󠁥󠁮󠁧󠁿", "LA_LIGA": "🇪🇸", "SERIE_A": "🇮🇹", "BUNDESLIGA": "🇩🇪", "LIGUE_1": "🇫🇷",
+        "UCL": "🏆", "ISL": "🇮🇳", "MLS": "🇺🇸", "BRA_SERIE_A": "🇧🇷", "LIGA_ARG": "🇦🇷",
+        "NATIONS_LEAGUE": "🇪🇺", "FRIENDLIES": "🌍"
+    }
+
+    poisson_model = PoissonModel()
+
+    def _calc_odds(p: float, margin: float = 0.05) -> float:
+        if p <= 0:
+            return 1.01
+        commercial_p = min(0.98, p * (1 + margin))
+        return round(1.0 / commercial_p, 2)
+
+    def _score_outcome(prob_val: float, odds_val: float, ev_val: float) -> float:
+        p_norm = prob_val / 100.0
+        return round(min(99.0, max(15.0, (p_norm * 75.0) + min(15.0, (odds_val - 1.0) * 8.0) + max(-5.0, ev_val * 0.4))), 1)
+
+    all_history_items = []
+
+    for m in matches:
+        try:
+            home_team = db.get(Team, m.home_team_id) if m.home_team_id else None
+            away_team = db.get(Team, m.away_team_id) if m.away_team_id else None
+            league_obj = db.get(League, m.league_id) if m.league_id else None
+
+            h_name = home_team.name if home_team else "Home"
+            a_name = away_team.name if away_team else "Away"
+            lg_code = league_obj.code if league_obj else "LEAGUE"
+            lg_name = league_obj.name if league_obj else "Football"
+            h_score = m.home_score
+            a_score = m.away_score
+
+            # Poisson pre-match prediction
+            try:
+                pred = poisson_model.predict(db, m.id, cutoff=m.kickoff_at or now_utc)
+                p_h = float(pred.home_win_probability)
+                p_d = float(pred.draw_probability)
+                p_a = float(pred.away_win_probability)
+                p_o15 = float(pred.over_1_5_probability)
+                p_o25 = float(pred.over_2_5_probability)
+                p_btts = float(pred.btts_yes_probability)
+                lam_h = float(getattr(pred, "expected_home_goals", None) or 1.4)
+                lam_a = float(getattr(pred, "expected_away_goals", None) or 1.1)
+            except Exception:
+                lam_h, lam_a = 1.4, 1.1
+                grid = [[(math.exp(-lam_h) * (lam_h ** i) / math.factorial(i)) * (math.exp(-lam_a) * (lam_a ** j) / math.factorial(j)) for j in range(10)] for i in range(10)]
+                p_h = sum(grid[i][j] for i in range(10) for j in range(10) if i > j)
+                p_d = sum(grid[i][j] for i in range(10) for j in range(10) if i == j)
+                p_a = sum(grid[i][j] for i in range(10) for j in range(10) if i < j)
+                p_o15 = sum(grid[i][j] for i in range(10) for j in range(10) if i + j >= 2)
+                p_o25 = sum(grid[i][j] for i in range(10) for j in range(10) if i + j >= 3)
+                p_btts = sum(grid[i][j] for i in range(10) for j in range(10) if i >= 1 and j >= 1)
+
+            candidates = []
+
+            # 1. Home Win
+            p_h_ev = round(((p_h * _calc_odds(p_h)) - 1.0) * 100, 1)
+            candidates.append({
+                "pick": f"{h_name} to Win",
+                "market": "1X2 (Match Winner)",
+                "probability": round(p_h * 100, 1),
+                "odds": _calc_odds(p_h),
+                "confidence": "VERY HIGH" if p_h >= 0.65 else ("HIGH" if p_h >= 0.55 else "MEDIUM"),
+                "category": "BANKER" if p_h >= 0.65 else ("VALUE" if p_h_ev >= 5.0 else "MATCH_WINNER"),
+                "ai_score": _score_outcome(round(p_h * 100, 1), _calc_odds(p_h), p_h_ev),
+            })
+
+            # 2. Away Win
+            p_a_ev = round(((p_a * _calc_odds(p_a)) - 1.0) * 100, 1)
+            candidates.append({
+                "pick": f"{a_name} to Win",
+                "market": "1X2 (Match Winner)",
+                "probability": round(p_a * 100, 1),
+                "odds": _calc_odds(p_a),
+                "confidence": "VERY HIGH" if p_a >= 0.65 else ("HIGH" if p_a >= 0.55 else "MEDIUM"),
+                "category": "BANKER" if p_a >= 0.65 else ("VALUE" if p_a_ev >= 5.0 else "MATCH_WINNER"),
+                "ai_score": _score_outcome(round(p_a * 100, 1), _calc_odds(p_a), p_a_ev),
+            })
+
+            # 3. Double Chance (1X)
+            p_1x = min(0.98, p_h + p_d)
+            p_1x_ev = round(((p_1x * _calc_odds(p_1x)) - 1.0) * 100, 1)
+            candidates.append({
+                "pick": f"{h_name} or Draw (1X)",
+                "market": "Double Chance",
+                "probability": round(p_1x * 100, 1),
+                "odds": _calc_odds(p_1x),
+                "confidence": "VERY HIGH" if p_1x >= 0.80 else "HIGH",
+                "category": "SAFETY",
+                "ai_score": _score_outcome(round(p_1x * 100, 1), _calc_odds(p_1x), p_1x_ev),
+            })
+
+            # 4. Double Chance (X2)
+            p_x2 = min(0.98, p_d + p_a)
+            p_x2_ev = round(((p_x2 * _calc_odds(p_x2)) - 1.0) * 100, 1)
+            candidates.append({
+                "pick": f"{a_name} or Draw (X2)",
+                "market": "Double Chance",
+                "probability": round(p_x2 * 100, 1),
+                "odds": _calc_odds(p_x2),
+                "confidence": "VERY HIGH" if p_x2 >= 0.80 else "HIGH",
+                "category": "SAFETY",
+                "ai_score": _score_outcome(round(p_x2 * 100, 1), _calc_odds(p_x2), p_x2_ev),
+            })
+
+            # 5. Over 1.5 Goals
+            p_o15_ev = round(((p_o15 * _calc_odds(p_o15)) - 1.0) * 100, 1)
+            candidates.append({
+                "pick": "Over 1.5 Total Goals",
+                "market": "Totals",
+                "probability": round(p_o15 * 100, 1),
+                "odds": _calc_odds(p_o15),
+                "confidence": "VERY HIGH" if p_o15 >= 0.80 else "HIGH",
+                "category": "GOALS",
+                "ai_score": _score_outcome(round(p_o15 * 100, 1), _calc_odds(p_o15), p_o15_ev),
+            })
+
+            # 6. Over 2.5 Goals
+            p_o25_ev = round(((p_o25 * _calc_odds(p_o25)) - 1.0) * 100, 1)
+            candidates.append({
+                "pick": "Over 2.5 Total Goals",
+                "market": "Totals",
+                "probability": round(p_o25 * 100, 1),
+                "odds": _calc_odds(p_o25),
+                "confidence": "HIGH" if p_o25 >= 0.65 else "MEDIUM",
+                "category": "GOALS",
+                "ai_score": _score_outcome(round(p_o25 * 100, 1), _calc_odds(p_o25), p_o25_ev),
+            })
+
+            # 7. BTTS Yes
+            p_btts_ev = round(((p_btts * _calc_odds(p_btts)) - 1.0) * 100, 1)
+            candidates.append({
+                "pick": "Both Teams to Score (Yes)",
+                "market": "BTTS",
+                "probability": round(p_btts * 100, 1),
+                "odds": _calc_odds(p_btts),
+                "confidence": "HIGH" if p_btts >= 0.65 else "MEDIUM",
+                "category": "GOALS",
+                "ai_score": _score_outcome(round(p_btts * 100, 1), _calc_odds(p_btts), p_btts_ev),
+            })
+
+            candidates.sort(key=lambda x: (x["probability"] * 0.70) + (x["ai_score"] * 0.30), reverse=True)
+            best_pick = candidates[0]
+
+            tot_goals = h_score + a_score
+            is_won = False
+            audit_note = ""
+
+            pick_text = best_pick["pick"]
+            if "Over 1.5" in pick_text:
+                is_won = (tot_goals >= 2)
+                audit_note = (
+                    f"Match finished {h_score}-{a_score} ({tot_goals} goals), clearing the Over 1.5 line."
+                    if is_won else
+                    f"Match finished {h_score}-{a_score} ({tot_goals} goal), missing the Over 1.5 line by 1 goal."
+                )
+            elif "Over 2.5" in pick_text:
+                is_won = (tot_goals >= 3)
+                audit_note = (
+                    f"Match ended {h_score}-{a_score} ({tot_goals} total goals), surpassing the Over 2.5 threshold."
+                    if is_won else
+                    f"Match ended {h_score}-{a_score} ({tot_goals} goals), falling short of 3 total goals."
+                )
+            elif "Both Teams to Score" in pick_text:
+                is_won = (h_score > 0 and a_score > 0)
+                audit_note = (
+                    f"Both teams found the net in a {h_score}-{a_score} contest, fulfilling BTTS (Yes)."
+                    if is_won else
+                    f"Clean sheet preserved in {h_score}-{a_score} finish, BTTS (Yes) not fulfilled."
+                )
+            elif "or Draw (1X)" in pick_text:
+                is_won = (h_score >= a_score)
+                audit_note = (
+                    f"{h_name} avoided defeat ({h_score}-{a_score}), securing the Double Chance 1X buffer."
+                    if is_won else
+                    f"{away_team.name if away_team else 'Away team'} won {a_score}-{h_score}, breaching the 1X buffer."
+                )
+            elif "or Draw (X2)" in pick_text:
+                is_won = (a_score >= h_score)
+                audit_note = (
+                    f"{a_name} avoided defeat ({h_score}-{a_score}), securing the Double Chance X2 buffer."
+                    if is_won else
+                    f"{home_team.name if home_team else 'Home team'} won {h_score}-{a_score}, breaching the X2 buffer."
+                )
+            elif "to Win" in pick_text:
+                if h_name in pick_text:
+                    is_won = (h_score > a_score)
+                    audit_note = (
+                        f"{h_name} claimed victory {h_score}-{a_score}, securing the Home Win pick cleanly."
+                        if is_won else
+                        f"{h_name} failed to win ({h_score}-{a_score}), missing the Home Win pick."
+                    )
+                else:
+                    is_won = (a_score > h_score)
+                    audit_note = (
+                        f"{a_name} claimed victory {h_score}-{a_score}, securing the Away Win pick cleanly."
+                        if is_won else
+                        f"{a_name} failed to win ({h_score}-{a_score}), missing the Away Win pick."
+                    )
+            else:
+                is_won = (tot_goals >= 2)
+                audit_note = f"Match settled at {h_score}-{a_score}."
+
+            outcome_status = "WON" if is_won else "LOST"
+            unit_pnl = round(best_pick["odds"] - 1.0, 2) if is_won else -1.0
+
+            all_history_items.append({
+                "match_id": m.id,
+                "fixture": f"{h_name} vs {a_name}",
+                "home_team": h_name,
+                "away_team": a_name,
+                "league_code": lg_code,
+                "league_name": lg_name,
+                "league_flag": FLAG_MAP.get(lg_code, "⚽"),
+                "kickoff_at": m.kickoff_at.isoformat() if m.kickoff_at else None,
+                "final_score": f"{h_score} - {a_score}",
+                "home_score": h_score,
+                "away_score": a_score,
+                "pick": best_pick["pick"],
+                "market": best_pick["market"],
+                "odds": best_pick["odds"],
+                "probability": best_pick["probability"],
+                "confidence": best_pick["confidence"],
+                "category": best_pick["category"],
+                "outcome_status": outcome_status,
+                "is_correct": is_won,
+                "unit_return": f"+{unit_pnl}u" if unit_pnl > 0 else f"{unit_pnl}u",
+                "unit_pnl": unit_pnl,
+                "audit_note": audit_note,
+            })
+        except Exception:
+            continue
+
+    total_evaluated = len(all_history_items)
+    won_count = sum(1 for item in all_history_items if item["outcome_status"] == "WON")
+    lost_count = sum(1 for item in all_history_items if item["outcome_status"] == "LOST")
+    win_rate = round((won_count / max(1, won_count + lost_count)) * 100, 1)
+    net_units = round(sum(item["unit_pnl"] for item in all_history_items), 2)
+    roi_pct = round((net_units / max(1, won_count + lost_count)) * 100, 1)
+    avg_odds = round(sum(item["odds"] for item in all_history_items) / max(1, total_evaluated), 2) if total_evaluated > 0 else 1.0
+
+    bankers = [i for i in all_history_items if i["probability"] >= 75.0]
+    banker_won = sum(1 for i in bankers if i["outcome_status"] == "WON")
+    banker_win_rate = round((banker_won / max(1, len(bankers))) * 100, 1) if bankers else win_rate
+
+    # Filter by outcome if requested
+    filtered_items = all_history_items
+    if outcome and outcome.upper() == "WON":
+        filtered_items = [i for i in all_history_items if i["outcome_status"] == "WON"]
+    elif outcome and outcome.upper() == "LOST":
+        filtered_items = [i for i in all_history_items if i["outcome_status"] == "LOST"]
+
+    limited_items = filtered_items[:limit]
+
+    result = {
+        "summary": {
+            "total_predictions": total_evaluated,
+            "won_count": won_count,
+            "lost_count": lost_count,
+            "win_rate": win_rate,
+            "total_units": f"+{net_units}u" if net_units > 0 else f"{net_units}u",
+            "net_units_num": net_units,
+            "roi_pct": roi_pct,
+            "avg_odds": avg_odds,
+            "banker_win_rate": banker_win_rate,
+        },
+        "history": limited_items,
+        "days": days,
+        "league_filter": league,
+        "outcome_filter": outcome or "ALL",
+    }
+
+    _PREDICTION_HISTORY_CACHE[cache_key] = {"ts": time.time(), "data": result}
     return result
 
 

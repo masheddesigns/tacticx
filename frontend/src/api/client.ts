@@ -37,6 +37,7 @@ import {
   StatProjectionsResponse,
   MatchStatComparisonResponse,
   DailySlipsResponse,
+  PredictionHistoryResponse,
 } from './types';
 
 export class ApiError extends Error {
@@ -141,6 +142,26 @@ export const apiClient = {
     if (params?.tz) query.set('tz', params.tz);
     const qs = query.toString();
     return request<DailySlipsResponse>(`/matches/daily-slips${qs ? `?${qs}` : ''}`, {
+      signal: params?.signal,
+    });
+  },
+
+  getPredictionHistory: async (params?: {
+    days?: number;
+    league?: string;
+    outcome?: 'ALL' | 'WON' | 'LOST';
+    limit?: number;
+    tz?: string;
+    signal?: AbortSignal;
+  }): Promise<PredictionHistoryResponse> => {
+    const query = new URLSearchParams();
+    if (params?.days) query.set('days', String(params.days));
+    if (params?.league) query.set('league', params.league);
+    if (params?.outcome) query.set('outcome', params.outcome);
+    if (params?.limit) query.set('limit', String(params.limit));
+    if (params?.tz) query.set('tz', params.tz);
+    const qs = query.toString();
+    return request<PredictionHistoryResponse>(`/matches/prediction-history${qs ? `?${qs}` : ''}`, {
       signal: params?.signal,
     });
   },

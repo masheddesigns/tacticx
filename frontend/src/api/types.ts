@@ -112,8 +112,56 @@ export interface DailyRankedPrediction {
 export interface DailySlipsResponse {
   date: string;
   total_matches: number;
+  upcoming_count?: number;
+  settled_count?: number;
   ranked_predictions?: DailyRankedPrediction[];
+  settled_predictions_today?: DailyRankedPrediction[];
   slips: DailyPredictionSlip[];
+}
+
+export interface HistoricalPredictionItem {
+  match_id: number;
+  fixture: string;
+  home_team: string;
+  away_team: string;
+  league_code: string;
+  league_name: string;
+  league_flag: string;
+  kickoff_at?: string | null;
+  final_score: string;
+  home_score: number;
+  away_score: number;
+  pick: string;
+  market: string;
+  odds: number;
+  probability: number;
+  confidence: string;
+  category: string;
+  outcome_status: 'WON' | 'LOST' | 'VOID' | string;
+  is_correct: boolean;
+  unit_return: string;
+  unit_pnl: number;
+  audit_note: string;
+}
+
+export interface PredictionHistorySummary {
+  total_predictions: number;
+  won_count: number;
+  lost_count: number;
+  win_rate: number;
+  total_units: string;
+  net_units_num: number;
+  roi_pct: number;
+  avg_odds: number;
+  banker_win_rate: number;
+}
+
+export interface PredictionHistoryResponse {
+  summary: PredictionHistorySummary;
+  history: HistoricalPredictionItem[];
+  days: number;
+  league_filter?: string | null;
+  outcome_filter?: string;
 }
 
 export interface LeagueItem {

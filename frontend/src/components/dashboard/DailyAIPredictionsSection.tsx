@@ -21,8 +21,12 @@ import {
   Award,
   Copy,
   Check,
+  History,
+  BarChart3,
+  RotateCcw,
 } from 'lucide-react';
 import { DailyRankedPrediction, DailyPredictionSlip, RankedPredictionOutcome } from '../../api/types';
+import { usePredictionHistory } from '../../api/queries';
 import { formatDayDisplay, formatDateTime } from '../../lib/utils';
 import { ShareSlipModal } from './ShareSlipModal';
 
@@ -37,7 +41,7 @@ export interface DailyAIPredictionsSectionProps {
 
 export type RankingFilterMode = 'ALL' | 'BANKERS' | 'VALUE' | 'GOALS' | 'SAFETY';
 export type RankingSortMode = 'RANK' | 'PROB_DESC' | 'ODDS_DESC' | 'EV_DESC';
-export type ViewTabMode = 'RANKED_MATCHES' | 'COMBO_SLIPS';
+export type ViewTabMode = 'RANKED_MATCHES' | 'COMBO_SLIPS' | 'PREDICTION_HISTORY';
 
 export const DailyAIPredictionsSection: React.FC<DailyAIPredictionsSectionProps> = ({
   rankedPredictions = [],
@@ -53,6 +57,19 @@ export const DailyAIPredictionsSection: React.FC<DailyAIPredictionsSectionProps>
   const [sortMode, setSortMode] = useState<RankingSortMode>('RANK');
   const [selectedSlipForShare, setSelectedSlipForShare] = useState<DailyPredictionSlip | null>(null);
   const [copiedId, setCopiedId] = useState<number | null>(null);
+
+  // Historical Track Record states
+  const [historyDays, setHistoryDays] = useState<number>(7);
+  const [historyLeague, setHistoryLeague] = useState<string>('ALL');
+  const [historyOutcome, setHistoryOutcome] = useState<'ALL' | 'WON' | 'LOST'>('ALL');
+
+  const { data: historyData, isLoading: isHistoryLoading, refetch: refetchHistory } = usePredictionHistory({
+    days: historyDays,
+    league: historyLeague !== 'ALL' ? historyLeague : undefined,
+    outcome: historyOutcome,
+    limit: 60,
+    tz: timeZone,
+  });
 
   // If backend rankedPredictions is not yet populated (e.g. while server cache refreshes), derive from slips.picks
   const effectivePredictions = useMemo(() => {
@@ -138,9 +155,25 @@ export const DailyAIPredictionsSection: React.FC<DailyAIPredictionsSectionProps>
     return Array.from(map.values());
   }, [effectivePredictions]);
 
-  // Filter and sort ranked predictions
+  // Separate active upcoming predictions from finished matches
+  // Ended matches are completely eliminated from active bet lists!
+  const activePredictions = useMemo(() => {
+    return effectivePredictions.filter((p) => p.status !== 'FINISHED');
+  }, [effectivePredictions]);
+
+  const finishedPredictionsToday = useMemo(() => {
+    return effectivePredictions.filter((p) => p.status === 'FINISHED');
+  }, [effectivePredictions]);
+
+  // Slips with finished picks eliminated
+  const activeSlips = useMemo(() => {
+    const list = slips.filter((s) => !s.picks.some((p) => p.status === 'WON' || p.status === 'LOST'));
+    return list.length > 0 ? list : slips;
+  }, [slips]);
+
+  // Filter and sort active predictions only
   const filteredPredictions = useMemo(() => {
-    let list = [...effectivePredictions];
+    let list = [...activePredictions];
 
     // Filter by category
     if (filterMode === 'BANKERS') {
@@ -196,17 +229,17 @@ export const DailyAIPredictionsSection: React.FC<DailyAIPredictionsSectionProps>
     });
 
     return list;
-  }, [effectivePredictions, filterMode, selectedLeague, sortMode]);
+  }, [activePredictions, filterMode, selectedLeague, sortMode]);
 
-  // KPI Metrics
-  const totalAnalyzed = effectivePredictions.length;
-  const topBankersCount = effectivePredictions.filter(
+  // KPI Metrics (Calculated exclusively on active upcoming matches)
+  const totalAnalyzed = activePredictions.length;
+  const topBankersCount = activePredictions.filter(
     (p) => p.best_outcome.category === 'BANKER' || p.best_outcome.probability >= 70
   ).length;
-  const highValueCount = effectivePredictions.filter(
+  const highValueCount = activePredictions.filter(
     (p) => parseFloat(p.best_outcome.ev_edge.replace(/[^0-9.-]/g, '') || '0') >= 5.0
   ).length;
-  const napOfTheDay = effectivePredictions.find((p) => p.is_nap_of_the_day || p.rank === 1);
+  const napOfTheDay = activePredictions.find((p) => p.is_nap_of_the_day || p.rank === 1) || activePredictions[0];
 
   const handleCopyPrediction = (p: DailyRankedPrediction) => {
     const text = `🎯 TacticX AI Daily Pick [Rank #${p.rank}]\n⚽ ${p.fixture} (${p.league_name})\n💡 Best Outcome: ${p.best_outcome.pick} @ ${p.best_outcome.odds}\n📊 Probability: ${p.best_outcome.probability}%\n📈 EV Edge: ${p.best_outcome.ev_edge}\n🔮 Projected Score: ${p.projected_score}\n🧠 Insight: ${p.ai_insight}\n⚡ Verified by TacticX AI Engine`;
@@ -296,31 +329,52 @@ export const DailyAIPredictionsSection: React.FC<DailyAIPredictionsSectionProps>
           </div>
         </div>
 
-        {/* Primary View Switcher: Ranked Matches vs Combo Slips */}
+        {/* Primary View Switcher: Active Ranked Matches vs Combo Slips vs Prediction History */}
         <div className="mt-4 pt-3 border-t border-[#202738] flex flex-wrap items-center justify-between gap-3">
-          <div className="flex items-center p-1 rounded-xl bg-[#0b0e14] border border-[#202738]">
+          <div className="flex flex-wrap items-center p-1 rounded-xl bg-[#0b0e14] border border-[#202738] gap-1">
             <button
               onClick={() => setActiveTab('RANKED_MATCHES')}
               className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg text-xs font-sans font-semibold transition-all ${
                 activeTab === 'RANKED_MATCHES'
-                  ? 'bg-[#21e786] text-[#0a0d14] shadow-md shadow-[#21e786]/20'
+                  ? 'bg-[#21e786] text-[#0a0d14] shadow-md shadow-[#21e786]/20 font-bold'
                   : 'text-slate-400 hover:text-slate-200'
               }`}
             >
               <Trophy className="w-3.5 h-3.5" />
-              <span>Ranked Match Outcomes ({rankedPredictions.length})</span>
+              <span>Active AI Picks ({activePredictions.length})</span>
             </button>
 
             <button
               onClick={() => setActiveTab('COMBO_SLIPS')}
               className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg text-xs font-sans font-semibold transition-all ${
                 activeTab === 'COMBO_SLIPS'
-                  ? 'bg-[#21e786] text-[#0a0d14] shadow-md shadow-[#21e786]/20'
+                  ? 'bg-[#21e786] text-[#0a0d14] shadow-md shadow-[#21e786]/20 font-bold'
                   : 'text-slate-400 hover:text-slate-200'
               }`}
             >
               <Layers className="w-3.5 h-3.5" />
-              <span>Curated Accas & Slips ({slips.length})</span>
+              <span>Curated Slips & Accas ({activeSlips.length})</span>
+            </button>
+
+            <button
+              onClick={() => setActiveTab('PREDICTION_HISTORY')}
+              className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg text-xs font-sans font-semibold transition-all ${
+                activeTab === 'PREDICTION_HISTORY'
+                  ? 'bg-[#21e786] text-[#0a0d14] shadow-md shadow-[#21e786]/20 font-bold'
+                  : 'text-slate-400 hover:text-slate-200'
+              }`}
+            >
+              <History className="w-3.5 h-3.5" />
+              <span>Prediction Track Record</span>
+              {historyData?.summary?.win_rate !== undefined && (
+                <span className={`text-[10px] font-mono px-1.5 py-0.2 rounded-full font-bold ${
+                  activeTab === 'PREDICTION_HISTORY'
+                    ? 'bg-[#0a0d14]/20 text-[#0a0d14]'
+                    : 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30'
+                }`}>
+                  {historyData.summary.win_rate}% Won
+                </span>
+              )}
             </button>
           </div>
 
@@ -330,6 +384,27 @@ export const DailyAIPredictionsSection: React.FC<DailyAIPredictionsSectionProps>
             <span className="text-emerald-400 font-bold">{timeZone === 'IST' ? 'IST (UTC+5:30)' : timeZone}</span>
           </div>
         </div>
+
+        {/* Finished Matches Notification Banner (Eliminated from Active Slips) */}
+        {finishedPredictionsToday.length > 0 && activeTab !== 'PREDICTION_HISTORY' && (
+          <div className="mt-3 p-3 rounded-xl bg-[#141a26] border border-[#243044] flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-xs font-sans">
+            <div className="flex items-center gap-2 text-slate-300">
+              <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
+              <span>
+                <strong className="text-white font-mono">{finishedPredictionsToday.length} matches</strong> finished earlier today.
+                Ended matches are eliminated from active betting slips so every slip is active and placeable.
+              </span>
+            </div>
+            <button
+              onClick={() => setActiveTab('PREDICTION_HISTORY')}
+              className="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg bg-[#1f2638] hover:bg-[#273044] text-[#21e786] border border-[#2b354e] font-mono font-semibold transition-colors shrink-0 text-xs"
+            >
+              <History className="w-3.5 h-3.5" />
+              <span>View Settled Results & Audit ({finishedPredictionsToday.length})</span>
+              <ChevronRight className="w-3.5 h-3.5" />
+            </button>
+          </div>
+        )}
       </div>
 
       {/* 2. TAB A: RANKED MATCHES VIEW */}
@@ -729,12 +804,12 @@ export const DailyAIPredictionsSection: React.FC<DailyAIPredictionsSectionProps>
       {/* 3. TAB B: CURATED COMBO SLIPS & ACCAS */}
       {activeTab === 'COMBO_SLIPS' && (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {slips.length === 0 ? (
+          {activeSlips.length === 0 ? (
             <div className="col-span-full p-10 text-center rounded-2xl border border-[#242938] bg-[#141822] text-slate-400 text-xs font-sans">
               No accumulator slips generated for this date.
             </div>
           ) : (
-            slips.map((slip, sIdx) => {
+            activeSlips.map((slip, sIdx) => {
               return (
                 <div
                   key={sIdx}
@@ -792,6 +867,277 @@ export const DailyAIPredictionsSection: React.FC<DailyAIPredictionsSectionProps>
                 </div>
               );
             })
+          )}
+        </div>
+      )}
+
+      {/* 4. TAB C: PREDICTION TRACK RECORD & AUDITED HISTORY */}
+      {activeTab === 'PREDICTION_HISTORY' && (
+        <div className="space-y-4">
+          {/* Performance Summary Banner */}
+          <div className="rounded-2xl border border-[#232b3d] bg-gradient-to-br from-[#121622] via-[#10141f] to-[#0c0f18] p-4 sm:p-5 shadow-lg space-y-4">
+            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+              <div>
+                <div className="flex items-center gap-2">
+                  <span className="p-1.5 rounded-lg bg-emerald-500/10 text-emerald-400 border border-emerald-500/25">
+                    <ShieldCheck className="w-4 h-4" />
+                  </span>
+                  <h3 className="font-bold text-white text-base font-sans">
+                    Prediction Settlement Ledger & Accuracy
+                  </h3>
+                </div>
+                <p className="text-xs text-slate-400 font-sans mt-1">
+                  Immutable record of finished matches evaluated against official full-time scorelines. Every pick is settled as Won or Lost with honest unit tracking.
+                </p>
+              </div>
+
+              {/* Quick Lookback Selector */}
+              <div className="flex items-center gap-1.5 text-xs font-mono">
+                <span className="text-slate-400">Window:</span>
+                {[3, 7, 14, 30].map((d) => (
+                  <button
+                    key={d}
+                    onClick={() => setHistoryDays(d)}
+                    className={`px-2.5 py-1 rounded-lg transition-all ${
+                      historyDays === d
+                        ? 'bg-[#21e786] text-[#0a0d14] font-bold shadow-sm'
+                        : 'bg-[#181d28] text-slate-400 hover:text-white border border-[#232a3a]'
+                    }`}
+                  >
+                    {d}d
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* KPI Performance Cards Grid */}
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+              {/* Win Rate */}
+              <div className="p-3 rounded-xl bg-[#0e121a] border border-[#202738] space-y-1">
+                <div className="text-[10px] font-mono text-slate-400 uppercase">Win Rate</div>
+                <div className="text-xl sm:text-2xl font-bold font-mono text-[#21e786]">
+                  {historyData?.summary?.win_rate ?? 0}%
+                </div>
+                <div className="text-[11px] font-sans text-slate-400">
+                  Overall Accuracy
+                </div>
+              </div>
+
+              {/* Record (Won / Lost) */}
+              <div className="p-3 rounded-xl bg-[#0e121a] border border-[#202738] space-y-1">
+                <div className="text-[10px] font-mono text-slate-400 uppercase">Record (W / L)</div>
+                <div className="text-xl sm:text-2xl font-bold font-mono text-white flex items-center gap-2">
+                  <span className="text-emerald-400">{historyData?.summary?.won_count ?? 0}W</span>
+                  <span className="text-slate-500">/</span>
+                  <span className="text-rose-400">{historyData?.summary?.lost_count ?? 0}L</span>
+                </div>
+                <div className="text-[11px] font-sans text-slate-400">
+                  {historyData?.summary?.total_predictions ?? 0} Matches Settled
+                </div>
+              </div>
+
+              {/* Net Profit Units */}
+              <div className="p-3 rounded-xl bg-[#0e121a] border border-[#202738] space-y-1">
+                <div className="text-[10px] font-mono text-slate-400 uppercase">Net Return</div>
+                <div className={`text-xl sm:text-2xl font-bold font-mono ${
+                  (historyData?.summary?.net_units_num ?? 0) >= 0 ? 'text-emerald-400' : 'text-rose-400'
+                }`}>
+                  {historyData?.summary?.total_units ?? '+0.0u'}
+                </div>
+                <div className="text-[11px] font-sans text-slate-400">
+                  ROI: {historyData?.summary?.roi_pct ?? 0}%
+                </div>
+              </div>
+
+              {/* Banker Accuracy */}
+              <div className="p-3 rounded-xl bg-[#0e121a] border border-[#202738] space-y-1">
+                <div className="text-[10px] font-mono text-slate-400 uppercase">Bankers Win Rate</div>
+                <div className="text-xl sm:text-2xl font-bold font-mono text-amber-300">
+                  {historyData?.summary?.banker_win_rate ?? 0}%
+                </div>
+                <div className="text-[11px] font-sans text-slate-400">
+                  Lock Picks (75%+ Prob)
+                </div>
+              </div>
+            </div>
+
+            {/* Filter Toolbar: Outcome & League */}
+            <div className="pt-2 border-t border-[#1e2534] flex flex-wrap items-center justify-between gap-3">
+              <div className="flex items-center gap-1.5 text-xs font-sans">
+                {(['ALL', 'WON', 'LOST'] as const).map((mode) => (
+                  <button
+                    key={mode}
+                    onClick={() => setHistoryOutcome(mode)}
+                    className={`px-3 py-1.5 rounded-lg font-semibold transition-all ${
+                      historyOutcome === mode
+                        ? mode === 'WON'
+                          ? 'bg-emerald-500 text-slate-950 shadow-sm font-bold'
+                          : mode === 'LOST'
+                          ? 'bg-rose-500 text-white shadow-sm font-bold'
+                          : 'bg-[#21e786] text-[#0a0d14] shadow-sm font-bold'
+                        : 'bg-[#161a24] text-slate-300 hover:text-white border border-[#242c3c]'
+                    }`}
+                  >
+                    {mode === 'ALL' ? 'All Settled' : mode === 'WON' ? 'Won Only ✅' : 'Lost Only ❌'}
+                  </button>
+                ))}
+              </div>
+
+              {/* League Selector */}
+              <div className="flex items-center gap-2 text-xs font-sans">
+                <span className="text-slate-400 font-mono">League:</span>
+                <select
+                  value={historyLeague}
+                  onChange={(e) => setHistoryLeague(e.target.value)}
+                  className="bg-[#0e121a] border border-[#242c3c] rounded-lg px-2.5 py-1 text-slate-200 text-xs focus:outline-none focus:border-[#21e786]"
+                >
+                  <option value="ALL">All Competitions</option>
+                  <option value="EPL">Premier League</option>
+                  <option value="LA_LIGA">La Liga</option>
+                  <option value="SERIE_A">Serie A</option>
+                  <option value="BUNDESLIGA">Bundesliga</option>
+                  <option value="LIGUE_1">Ligue 1</option>
+                  <option value="UCL">Champions League</option>
+                  <option value="ISL">Indian Super League (ISL)</option>
+                  <option value="MLS">Major League Soccer (MLS)</option>
+                  <option value="BRA_SERIE_A">Brasileirão Série A</option>
+                  <option value="LIGA_ARG">Liga Profesional Argentina</option>
+                </select>
+
+                <button
+                  onClick={() => refetchHistory()}
+                  className="p-1.5 rounded-lg bg-[#161a24] text-slate-300 hover:text-white border border-[#242c3c]"
+                  title="Refresh track record"
+                >
+                  <RotateCcw className="w-3.5 h-3.5" />
+                </button>
+              </div>
+            </div>
+          </div>
+
+          {/* Historical Match Cards */}
+          {isHistoryLoading ? (
+            <div className="p-12 text-center text-xs font-mono text-slate-400 rounded-2xl border border-[#242938] bg-[#141822]">
+              Auditing historical predictions against canonical scorelines...
+            </div>
+          ) : !historyData?.history || historyData.history.length === 0 ? (
+            <div className="p-12 text-center rounded-2xl border border-[#242938] bg-[#141822] space-y-2">
+              <CheckCircle2 className="w-8 h-8 text-slate-500 mx-auto" />
+              <h4 className="font-bold text-sm text-white font-sans">No Historical Matches Found</h4>
+              <p className="text-xs text-slate-400 font-sans max-w-sm mx-auto">
+                No finished predictions matched your selected filters ({historyOutcome}, {historyLeague}, {historyDays}d). Try resetting filters.
+              </p>
+              <button
+                onClick={() => {
+                  setHistoryOutcome('ALL');
+                  setHistoryLeague('ALL');
+                  setHistoryDays(7);
+                }}
+                className="px-3.5 py-1.5 rounded-lg text-xs font-sans font-semibold bg-[#21e786] text-[#0a0d14]"
+              >
+                Reset History Filters
+              </button>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3.5">
+              {historyData.history.map((item) => {
+                const isWon = item.outcome_status === 'WON';
+                return (
+                  <div
+                    key={item.match_id}
+                    className={`rounded-2xl border p-4 space-y-3 shadow-sm transition-all ${
+                      isWon
+                        ? 'border-emerald-500/30 bg-gradient-to-b from-[#101918] to-[#0e141a]'
+                        : 'border-rose-500/30 bg-gradient-to-b from-[#1a1014] to-[#0e141a]'
+                    }`}
+                  >
+                    {/* Header: League & Status Banner */}
+                    <div className="flex items-center justify-between gap-2">
+                      <div className="flex items-center gap-1.5 text-xs text-slate-400 font-sans">
+                        <span>{item.league_flag}</span>
+                        <span className="font-semibold text-slate-300">{item.league_name}</span>
+                      </div>
+
+                      <div className="flex items-center gap-1.5">
+                        <span
+                          className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-mono font-bold tracking-wide ${
+                            isWon
+                              ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/40'
+                              : 'bg-rose-500/20 text-rose-300 border border-rose-500/40'
+                          }`}
+                        >
+                          {isWon ? (
+                            <>
+                              <CheckCircle2 className="w-3 h-3 text-emerald-400" />
+                              <span>CORRECT • {item.unit_return}</span>
+                            </>
+                          ) : (
+                            <>
+                              <XCircle className="w-3 h-3 text-rose-400" />
+                              <span>WRONG • {item.unit_return}</span>
+                            </>
+                          )}
+                        </span>
+                      </div>
+                    </div>
+
+                    {/* Fixture & Final Score */}
+                    <div className="p-2.5 rounded-xl bg-[#0b0e14]/90 border border-[#1e2536] flex items-center justify-between gap-3">
+                      <div className="truncate">
+                        <div className="text-xs font-bold text-white truncate font-sans">
+                          {item.fixture}
+                        </div>
+                        {item.kickoff_at && (
+                          <div className="text-[10px] font-mono text-slate-400">
+                            {formatDateTime(item.kickoff_at, timeZone).full}
+                          </div>
+                        )}
+                      </div>
+
+                      {/* Prominent Full Time Score */}
+                      <div className="text-right shrink-0">
+                        <div className="text-[10px] font-mono text-slate-400 uppercase">Final Score</div>
+                        <div className="text-base font-bold font-mono text-white px-2 py-0.5 rounded bg-[#171c26] border border-[#262f40]">
+                          {item.final_score}
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Pick Details */}
+                    <div className="space-y-1">
+                      <div className="flex items-center justify-between text-xs font-sans">
+                        <span className="text-slate-400 text-[11px]">AI Recommended Pick:</span>
+                        <span className="font-mono text-slate-300 text-[11px]">
+                          Prob: <strong className="text-white">{item.probability}%</strong>
+                        </span>
+                      </div>
+
+                      <div className="p-2 rounded-xl bg-[#131722] border border-[#232c3e] flex items-center justify-between gap-2">
+                        <div>
+                          <div className="font-bold text-xs text-[#21e786] font-sans">
+                            {item.pick}
+                          </div>
+                          <div className="text-[10px] font-mono text-slate-400">
+                            {item.market}
+                          </div>
+                        </div>
+
+                        <span className="font-mono text-xs font-bold px-2 py-1 rounded bg-[#0b0e14] text-white border border-[#1f2636]">
+                          @{item.odds.toFixed(2)}
+                        </span>
+                      </div>
+                    </div>
+
+                    {/* Post-Match Settlement Note */}
+                    <div className="pt-2 border-t border-[#1c2230] text-xs font-sans text-slate-300">
+                      <p className="text-[11px] leading-relaxed text-slate-300">
+                        {item.audit_note}
+                      </p>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
           )}
         </div>
       )}

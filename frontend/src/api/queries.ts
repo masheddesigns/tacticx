@@ -24,6 +24,7 @@ export const QUERY_KEYS = {
   predictionSnapshots: (matchId: number) => ['predictionSnapshots', matchId],
   predictionSnapshot: (predictionId: string) => ['predictionSnapshot', predictionId],
   dailySlips: (date?: string, tz?: string) => ['dailySlips', date, tz],
+  predictionHistory: (params?: any) => ['predictionHistory', params],
 };
 
 export function useDailySlips(date?: string, tz?: string) {
@@ -32,6 +33,20 @@ export function useDailySlips(date?: string, tz?: string) {
     queryFn: ({ signal }) => apiClient.getDailySlips({ date, tz, signal }),
     staleTime: 8 * 1000,
     refetchInterval: 12 * 1000,
+  });
+}
+
+export function usePredictionHistory(params?: {
+  days?: number;
+  league?: string;
+  outcome?: 'ALL' | 'WON' | 'LOST';
+  limit?: number;
+  tz?: string;
+}) {
+  return useQuery({
+    queryKey: QUERY_KEYS.predictionHistory(params),
+    queryFn: ({ signal }) => apiClient.getPredictionHistory({ ...params, signal }),
+    staleTime: 25 * 1000,
   });
 }
 
