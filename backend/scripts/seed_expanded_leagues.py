@@ -307,17 +307,39 @@ def seed_expanded_leagues(db: Session) -> Dict[str, int]:
     if syn_matches:
         syn_ids = [m.id for m in syn_matches]
         id_str = f"({', '.join(str(i) for i in syn_ids)})"
+        
+        # 1. Odds selections child table
         try:
             db.execute(text(f"DELETE FROM odds_selections WHERE snapshot_id IN (SELECT id FROM odds_snapshots WHERE match_id IN {id_str})"))
-            db.execute(text(f"DELETE FROM odds_snapshots WHERE match_id IN {id_str}"))
-            db.execute(text(f"DELETE FROM pre_match_prediction_snapshots WHERE match_id IN {id_str}"))
-            db.execute(text(f"DELETE FROM predictions WHERE match_id IN {id_str}"))
+            db.commit()
+        except Exception:
+            db.rollback()
+
+        # 2. Dynamic foreign key tables referencing matches
+        try:
+            fk_sql = "SELECT conrelid::regclass::text FROM pg_constraint WHERE confrelid = 'matches'::regclass"
+            fk_tables = [r[0] for r in db.execute(text(fk_sql)).fetchall()]
+        except Exception:
+            fk_tables = [
+                "odds_snapshots", "pre_match_prediction_snapshots", "live_prediction_snapshots",
+                "predictions", "match_statistics", "match_events", "lineups", "evaluation_records",
+                "evaluation_jobs", "match_lifecycle_events", "freshness_trackers"
+            ]
+
+        for tbl in fk_tables:
+            try:
+                db.execute(text(f"DELETE FROM {tbl} WHERE match_id IN {id_str}"))
+                db.commit()
+            except Exception:
+                db.rollback()
+
+        try:
             db.execute(text(f"DELETE FROM matches WHERE id IN {id_str}"))
             db.commit()
             print(f"Purged {len(syn_matches)} synthetic matches.")
         except Exception as e:
             db.rollback()
-            print(f"Purge note: {e}")
+            print(f"Purge error: {e}")
 
     max_match_id = db.execute(text("SELECT coalesce(max(id), 3000) FROM matches")).scalar() or 3000
     total_historical = 0
