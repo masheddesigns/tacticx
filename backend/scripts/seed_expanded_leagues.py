@@ -295,38 +295,47 @@ def seed_expanded_leagues(db: Session) -> Dict[str, int]:
 
     db.commit()
 
-    # 4. Purge any outdated or synthetic matches previously created for these leagues
-    target_league_ids = [l.id for l in league_obj_map.values()]
-    prev_matches = db.query(Match).filter(Match.league_id.in_(target_league_ids)).all()
-    if prev_matches:
-        prev_ids = [m.id for m in prev_matches]
-        print(f"Purging {len(prev_ids)} previous matches for expanded leagues to ensure pure authentic data...")
-        id_str = f"({', '.join(str(i) for i in prev_ids)})"
-        for purge_sql in [
-            f"DELETE FROM odds_selections WHERE snapshot_id IN (SELECT id FROM odds_snapshots WHERE match_id IN {id_str})",
-            f"DELETE FROM odds_snapshots WHERE match_id IN {id_str}",
-            f"DELETE FROM pre_match_prediction_snapshots WHERE match_id IN {id_str}",
-            f"DELETE FROM predictions WHERE match_id IN {id_str}",
-            f"DELETE FROM match_statistics WHERE match_id IN {id_str}",
-            f"DELETE FROM matches WHERE id IN {id_str}",
-        ]:
-            try:
-                db.execute(text(purge_sql))
-                db.commit()
-            except Exception as del_err:
-                db.rollback()
-                print(f"  Purge note: {del_err}")
-        print("  Purge completed successfully.")
+    # 4. Purge specifically known synthetic matches from prior generic seeding
+    synthetic_ids = [
+        "mls_2026_1011_mia_clb", "mls_2026_1011_lafc_sea", "arg_2026_1011_riv_boc", "arg_2026_1011_rac_ind",
+        "bra_2026_1011_fla_pal", "bra_2026_1011_sao_cor", "isl_2026_1011_kbf_bfc", "isl_2026_1011_mbg_mcf",
+        "isl_2026_1015_goa_ebg", "arg_2026_1015_slo_vel", "isl_2026_1017_odi_che", "isl_2026_1018_bfc_mbg",
+        "arg_2026_1018_est_ros", "arg_2026_1018_tal_new", "isl_2026_1024_kbf_goa", "arg_2026_1025_riv_rac",
+        "isl_2026_1031_mcf_bfc", "bra_2026_1031_pal_sao", "arg_2026_1031_boc_slo",
+    ]
+    syn_matches = db.query(Match).filter(Match.provider_match_id.in_(synthetic_ids)).all()
+    if syn_matches:
+        syn_ids = [m.id for m in syn_matches]
+        id_str = f"({', '.join(str(i) for i in syn_ids)})"
+        try:
+            db.execute(text(f"DELETE FROM odds_selections WHERE snapshot_id IN (SELECT id FROM odds_snapshots WHERE match_id IN {id_str})"))
+            db.execute(text(f"DELETE FROM odds_snapshots WHERE match_id IN {id_str}"))
+            db.execute(text(f"DELETE FROM pre_match_prediction_snapshots WHERE match_id IN {id_str}"))
+            db.execute(text(f"DELETE FROM predictions WHERE match_id IN {id_str}"))
+            db.execute(text(f"DELETE FROM matches WHERE id IN {id_str}"))
+            db.commit()
+            print(f"Purged {len(syn_matches)} synthetic matches.")
+        except Exception as e:
+            db.rollback()
+            print(f"Purge note: {e}")
 
     max_match_id = db.execute(text("SELECT coalesce(max(id), 3000) FROM matches")).scalar() or 3000
     total_historical = 0
     total_scheduled = 0
 
     # 5. Generate Historical Finished Matches (August & September 2026) for Model Sufficiency
-    # 5 matchdays across core clubs per league
+    # 5 matchdays across core clubs per league (skipped if already present)
     hist_base_date = datetime(2026, 8, 10, 18, 0, tzinfo=timezone.utc)
     for l_code, t_dict in team_map.items():
         league_id = league_obj_map[l_code].id
+        existing_hist = db.query(Match).filter(
+            Match.league_id == league_id,
+            Match.status == MatchStatus.FINISHED.value,
+        ).count()
+        if existing_hist >= 20:
+            print(f"  League {l_code} already has {existing_hist} historical matches. Skipping baseline generation.")
+            continue
+
         teams_list = list(t_dict.values())[:10]  # First 10 teams round-robin
         n = len(teams_list)
 
@@ -345,9 +354,11 @@ def seed_expanded_leagues(db: Session) -> Dict[str, int]:
                 h_score = (h_idx + r) % 4
                 a_score = (a_idx + r) % 3
 
-                max_match_id += 1
                 prov_m_id = f"{l_code.lower()}_hist_r{r+1}_{home_t.id}_{away_t.id}"
+                if db.query(Match).filter_by(provider_match_id=prov_m_id).first():
+                    continue
 
+                max_match_id += 1
                 m = Match(
                     id=max_match_id,
                     league_id=league_id,
@@ -575,6 +586,9 @@ def seed_expanded_leagues(db: Session) -> Dict[str, int]:
         target_league = league_obj_map[l_code]
         home_t = team_map[l_code][fin["home"]]
         away_t = team_map[l_code][fin["away"]]
+
+        if db.query(Match).filter_by(provider_match_id=fin["p_id"]).first():
+            continue
 
         max_match_id += 1
         ko_dt = datetime.fromisoformat(fin["kickoff"].replace("Z", "+00:00"))
@@ -1020,92 +1034,103 @@ def seed_expanded_leagues(db: Session) -> Dict[str, int]:
         home_t = team_map[l_code][fix["home"]]
         away_t = team_map[l_code][fix["away"]]
 
-        max_match_id += 1
+        existing_m = db.query(Match).filter_by(provider_match_id=fix["p_id"]).first()
         ko_dt = datetime.fromisoformat(fix["kickoff"].replace("Z", "+00:00"))
 
-        m = Match(
-            id=max_match_id,
-            league_id=target_league.id,
-            home_team_id=home_t.id,
-            away_team_id=away_t.id,
-            kickoff_at=ko_dt,
-            status=MatchStatus.SCHEDULED.value,
-            provider="expanded_seed",
-            provider_match_id=fix["p_id"],
-        )
-        db.add(m)
-        db.flush()
-        total_scheduled += 1
+        if not existing_m:
+            max_match_id += 1
+            m = Match(
+                id=max_match_id,
+                league_id=target_league.id,
+                home_team_id=home_t.id,
+                away_team_id=away_t.id,
+                kickoff_at=ko_dt,
+                status=MatchStatus.SCHEDULED.value,
+                provider="expanded_seed",
+                provider_match_id=fix["p_id"],
+            )
+            db.add(m)
+            db.flush()
+            match_obj = m
+            total_scheduled += 1
+        else:
+            match_obj = existing_m
 
         # Analytical predictions (Poisson + Ensemble)
         probs = _calc_poisson_probs(fix["lam_h"], fix["lam_a"])
         cutoff_dt = ko_dt - timedelta(hours=2)
 
-        pred_obj = Prediction(
-            match_id=m.id,
-            model_name="ensemble",
-            model_version="ensemble_v1",
-            prediction_type="1x2",
-            predicted_probability=probs["home_win"],
-            probabilities=probs,
-            confidence=round(max(probs["home_win"], probs["away_win"]) * 1.05, 3),
-            status="valid",
-            temporal_mode="strict_prematch",
-            prediction_cutoff=cutoff_dt,
-        )
-        db.add(pred_obj)
-        db.flush()
-
-        # PreMatchPredictionSnapshot
-        p_hash = hashlib.sha256(f"{m.id}:{probs['home_win']}:{probs['away_win']}".encode()).hexdigest()
-        db.add(PreMatchPredictionSnapshot(
-            prediction_id=f"pred_exp_{m.id}",
-            match_id=m.id,
-            prediction_version=1,
-            model_id="ensemble",
-            model_version="ensemble_v1",
-            prediction_mode="PRE_MATCH",
-            cutoff_time=cutoff_dt,
-            kickoff_time=ko_dt,
-            readiness_certificate_id=f"cert_{m.id}",
-            readiness_certificate_hash=p_hash[:32],
-            readiness_state="PREDICTION_READY",
-            feature_snapshot_id=f"feat_{m.id}",
-            feature_snapshot_hash=p_hash[32:],
-            prediction_payload=probs,
-            prediction_hash=p_hash,
-            execution_key=f"key_{m.id}_ens",
-            provenance={"source": "expanded_seed_engine", "models": ["poisson_v1", "elo_v1"]},
-        ))
-
-        # Odds Snapshots and Selections
-        fair_h = max(1.10, round(0.95 / max(0.05, probs["home_win"]), 2))
-        fair_d = max(1.10, round(0.95 / max(0.05, probs["draw"]), 2))
-        fair_a = max(1.10, round(0.95 / max(0.05, probs["away_win"]), 2))
-
-        for idx, bm in enumerate(bms):
-            snap = OddsSnapshot(
-                match_id=m.id,
-                bookmaker_id=bm.id,
-                market_type="h2h",
-                timestamp=cutoff_dt - timedelta(minutes=15 * idx),
-                is_live=False,
-                source="odds_seed",
-                source_market_id=f"mkt-{m.id}-{bm.id}",
+        existing_pred = db.query(Prediction).filter_by(match_id=match_obj.id).first()
+        if not existing_pred:
+            pred_obj = Prediction(
+                match_id=match_obj.id,
+                model_name="ensemble",
+                model_version="ensemble_v1",
+                prediction_type="1x2",
+                predicted_probability=probs["home_win"],
+                probabilities=probs,
+                confidence=round(max(probs["home_win"], probs["away_win"]) * 1.05, 3),
+                status="valid",
+                temporal_mode="strict_prematch",
+                prediction_cutoff=cutoff_dt,
             )
-            db.add(snap)
+            db.add(pred_obj)
             db.flush()
 
-            for sel, price in [("home", round(fair_h + idx * 0.04, 2)),
-                              ("draw", round(fair_d - idx * 0.02, 2)),
-                              ("away", round(fair_a + idx * 0.05, 2))]:
-                d_hash = hashlib.sha256(f"{snap.id}:{sel}:{price}".encode()).hexdigest()
-                db.add(OddsSelection(
-                    snapshot_id=snap.id,
-                    selection=sel,
-                    odds=price,
-                    dedup_hash=d_hash,
-                ))
+        # PreMatchPredictionSnapshot
+        existing_snap = db.query(PreMatchPredictionSnapshot).filter_by(match_id=match_obj.id).first()
+        if not existing_snap:
+            p_hash = hashlib.sha256(f"{match_obj.id}:{probs['home_win']}:{probs['away_win']}".encode()).hexdigest()
+            db.add(PreMatchPredictionSnapshot(
+                prediction_id=f"pred_exp_{match_obj.id}",
+                match_id=match_obj.id,
+                prediction_version=1,
+                model_id="ensemble",
+                model_version="ensemble_v1",
+                prediction_mode="PRE_MATCH",
+                cutoff_time=cutoff_dt,
+                kickoff_time=ko_dt,
+                readiness_certificate_id=f"cert_{match_obj.id}",
+                readiness_certificate_hash=p_hash[:32],
+                readiness_state="PREDICTION_READY",
+                feature_snapshot_id=f"feat_{match_obj.id}",
+                feature_snapshot_hash=p_hash[32:],
+                prediction_payload=probs,
+                prediction_hash=p_hash,
+                execution_key=f"key_{match_obj.id}_ens",
+                provenance={"source": "expanded_seed_engine", "models": ["poisson_v1", "elo_v1"]},
+            ))
+
+        # Odds Snapshots and Selections
+        existing_odds = db.query(OddsSnapshot).filter_by(match_id=match_obj.id).first()
+        if not existing_odds:
+            fair_h = max(1.10, round(0.95 / max(0.05, probs["home_win"]), 2))
+            fair_d = max(1.10, round(0.95 / max(0.05, probs["draw"]), 2))
+            fair_a = max(1.10, round(0.95 / max(0.05, probs["away_win"]), 2))
+
+            for idx, bm in enumerate(bms):
+                snap = OddsSnapshot(
+                    match_id=match_obj.id,
+                    bookmaker_id=bm.id,
+                    market_type="h2h",
+                    timestamp=cutoff_dt - timedelta(minutes=15 * idx),
+                    is_live=False,
+                    source="odds_seed",
+                    source_market_id=f"mkt-{match_obj.id}-{bm.id}",
+                )
+                db.add(snap)
+                db.flush()
+
+                for sel, price in [("home", round(fair_h + idx * 0.04, 2)),
+                                  ("draw", round(fair_d - idx * 0.02, 2)),
+                                  ("away", round(fair_a + idx * 0.05, 2))]:
+                    d_hash = hashlib.sha256(f"{snap.id}:{sel}:{price}".encode()).hexdigest()
+                    db.add(OddsSelection(
+                        snapshot_id=snap.id,
+                        selection=sel,
+                        odds=price,
+                        dedup_hash=d_hash,
+                    ))
 
         print(f"  Added Authentic Fixture: [{l_code}] {home_t.name} vs {away_t.name} ({ko_dt.strftime('%b %d %H:%M')})")
 
