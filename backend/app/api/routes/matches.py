@@ -1410,6 +1410,158 @@ def get_prediction_history(
 
     limited_items = filtered_items[:limit]
 
+    # -------------------------------------------------------------
+    # BUILD HISTORICAL SLIPS (Accumulators, Doubles, Trebles)
+    # -------------------------------------------------------------
+    historical_slips = []
+
+    def _make_historical_slip(picks_list, name, badge, desc, s_type, slip_date):
+        if not picks_list:
+            return None
+        comb_odds = 1.0
+        for p in picks_list:
+            comb_odds *= p["odds"]
+        avg_prob = sum(p["probability"] for p in picks_list) / len(picks_list)
+
+        statuses = [p["outcome_status"] for p in picks_list]
+        is_won = all(s == "WON" for s in statuses)
+        slip_status = "WON" if is_won else "LOST"
+
+        unit_pnl = round(comb_odds - 1.0, 2) if is_won else -1.0
+        unit_return = f"+{unit_pnl}u" if unit_pnl > 0 else f"{unit_pnl}u"
+
+        won_legs = sum(1 for s in statuses if s == "WON")
+        if is_won:
+            audit_note = f"All {len(picks_list)} selections won! Payout multiplier achieved @ {comb_odds:.2f} odds."
+        else:
+            failed_teams = [p["fixture"] for p in picks_list if p["outcome_status"] != "WON"]
+            audit_note = f"{won_legs} of {len(picks_list)} legs won. Slip failed on {', '.join(failed_teams)}."
+
+        slip_picks = []
+        for p in picks_list:
+            slip_picks.append({
+                "match_id": p["match_id"],
+                "fixture": p["fixture"],
+                "home_team": p["home_team"],
+                "away_team": p["away_team"],
+                "league_code": p["league_code"],
+                "league_name": p["league_name"],
+                "league_flag": p["league_flag"],
+                "pick": p["pick"],
+                "market": p["market"],
+                "odds": p["odds"],
+                "probability": p["probability"],
+                "final_score": p["final_score"],
+                "status": p["outcome_status"],
+                "audit_note": p["audit_note"],
+            })
+
+        return {
+            "id": f"hist-slip-{slip_date}-{s_type}-{len(historical_slips)+1}",
+            "title": name,
+            "type": s_type,
+            "badge": badge,
+            "description": desc,
+            "date": slip_date,
+            "total_odds": round(comb_odds, 2),
+            "win_probability": round(avg_prob, 1),
+            "selections_count": len(picks_list),
+            "outcome_status": slip_status,
+            "unit_return": unit_return,
+            "unit_pnl": unit_pnl,
+            "audit_note": audit_note,
+            "picks": slip_picks,
+        }
+
+    # Group matches by day (kickoff_at date)
+    date_groups: Dict[str, List[Dict[str, Any]]] = {}
+    for item in all_history_items:
+        d_key = item["kickoff_at"][:10] if item.get("kickoff_at") else "Past"
+        date_groups.setdefault(d_key, []).append(item)
+
+    for d_key, d_items in date_groups.items():
+        if len(d_items) >= 2:
+            banker_candidates = sorted(d_items, key=lambda x: x["probability"], reverse=True)
+            b_count = min(3, len(banker_candidates))
+            b_slip = _make_historical_slip(
+                banker_candidates[:b_count],
+                f"Safe Banker {'Treble' if b_count == 3 else 'Double'}",
+                "75%+ Probability",
+                f"Top mathematical certainty selections from {d_key} fixtures.",
+                "banker",
+                d_key,
+            )
+            if b_slip:
+                historical_slips.append(b_slip)
+
+            goal_picks = [p for p in d_items if p["category"] == "GOALS" or "Over" in p["pick"] or "BTTS" in p["pick"] or "Both Teams" in p["pick"]]
+            if len(goal_picks) >= 2:
+                g_slip = _make_historical_slip(
+                    goal_picks[:3],
+                    "Goals Galore Combo",
+                    "Over Goals & BTTS",
+                    f"Curated goal lines from {d_key} matchday.",
+                    "goals",
+                    d_key,
+                )
+                if g_slip:
+                    historical_slips.append(g_slip)
+            elif len(d_items) >= 4:
+                distinct_leagues = []
+                seen_lg = set()
+                for p in d_items:
+                    if p["league_code"] not in seen_lg:
+                        seen_lg.add(p["league_code"])
+                        distinct_leagues.append(p)
+                if len(distinct_leagues) >= 3:
+                    acc_slip = _make_historical_slip(
+                        distinct_leagues[:4],
+                        "Cross-League Power Acca",
+                        "Multi-League Combo",
+                        f"Multi-competition accumulator across {len(distinct_leagues[:4])} leagues on {d_key}.",
+                        "accumulator",
+                        d_key,
+                    )
+                    if acc_slip:
+                        historical_slips.append(acc_slip)
+        elif len(d_items) == 1:
+            s_item = d_items[0]
+            s_slip = _make_historical_slip(
+                [s_item],
+                f"Single Banker: {s_item['fixture']}",
+                "Top Single Pick",
+                f"Primary standalone recommendation on {d_key}.",
+                "single_match",
+                d_key,
+            )
+            if s_slip:
+                historical_slips.append(s_slip)
+
+    if len(all_history_items) >= 3 and len(historical_slips) < 3:
+        top_overall = sorted(all_history_items, key=lambda x: x["probability"], reverse=True)[:3]
+        cross_slip = _make_historical_slip(
+            top_overall,
+            "Multi-Day Safe Banker Treble",
+            "Highest Confidence",
+            "Highest-confidence mathematical selections across recent matchdays.",
+            "banker",
+            "Recent",
+        )
+        if cross_slip:
+            historical_slips.append(cross_slip)
+
+    filtered_slips = historical_slips
+    if outcome and outcome.upper() == "WON":
+        filtered_slips = [s for s in historical_slips if s["outcome_status"] == "WON"]
+    elif outcome and outcome.upper() == "LOST":
+        filtered_slips = [s for s in historical_slips if s["outcome_status"] == "LOST"]
+
+    slips_total = len(historical_slips)
+    slips_won = sum(1 for s in historical_slips if s["outcome_status"] == "WON")
+    slips_lost = sum(1 for s in historical_slips if s["outcome_status"] == "LOST")
+    slips_win_rate = round((slips_won / max(1, slips_total)) * 100, 1) if slips_total > 0 else 0.0
+    slips_net_units = round(sum(s["unit_pnl"] for s in historical_slips), 2)
+
     result = {
         "summary": {
             "total_predictions": total_evaluated,
@@ -1421,8 +1573,14 @@ def get_prediction_history(
             "roi_pct": roi_pct,
             "avg_odds": avg_odds,
             "banker_win_rate": banker_win_rate,
+            "total_slips": slips_total,
+            "slips_won": slips_won,
+            "slips_lost": slips_lost,
+            "slips_win_rate": slips_win_rate,
+            "slips_net_units": f"+{slips_net_units}u" if slips_net_units > 0 else f"{slips_net_units}u",
         },
         "history": limited_items,
+        "historical_slips": filtered_slips,
         "days": days,
         "league_filter": league,
         "outcome_filter": outcome or "ALL",

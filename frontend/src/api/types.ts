@@ -144,6 +144,40 @@ export interface HistoricalPredictionItem {
   audit_note: string;
 }
 
+export interface HistoricalSlipPick {
+  match_id: number;
+  fixture: string;
+  home_team: string;
+  away_team: string;
+  league_code: string;
+  league_name: string;
+  league_flag: string;
+  pick: string;
+  market: string;
+  odds: number;
+  probability: number;
+  final_score: string;
+  status: 'WON' | 'LOST' | 'VOID' | string;
+  audit_note: string;
+}
+
+export interface HistoricalSlipItem {
+  id: string;
+  title: string;
+  type: string;
+  badge: string;
+  description: string;
+  date: string;
+  total_odds: number;
+  win_probability: number;
+  selections_count: number;
+  outcome_status: 'WON' | 'LOST' | 'VOID' | string;
+  unit_return: string;
+  unit_pnl: number;
+  audit_note: string;
+  picks: HistoricalSlipPick[];
+}
+
 export interface PredictionHistorySummary {
   total_predictions: number;
   won_count: number;
@@ -154,11 +188,17 @@ export interface PredictionHistorySummary {
   roi_pct: number;
   avg_odds: number;
   banker_win_rate: number;
+  total_slips?: number;
+  slips_won?: number;
+  slips_lost?: number;
+  slips_win_rate?: number;
+  slips_net_units?: string;
 }
 
 export interface PredictionHistoryResponse {
   summary: PredictionHistorySummary;
   history: HistoricalPredictionItem[];
+  historical_slips?: HistoricalSlipItem[];
   days: number;
   league_filter?: string | null;
   outcome_filter?: string;

@@ -24,8 +24,14 @@ import {
   History,
   BarChart3,
   RotateCcw,
+  Ticket,
 } from 'lucide-react';
-import { DailyRankedPrediction, DailyPredictionSlip, RankedPredictionOutcome } from '../../api/types';
+import {
+  DailyRankedPrediction,
+  DailyPredictionSlip,
+  RankedPredictionOutcome,
+  HistoricalSlipItem,
+} from '../../api/types';
 import { usePredictionHistory } from '../../api/queries';
 import { formatDayDisplay, formatDateTime } from '../../lib/utils';
 import { ShareSlipModal } from './ShareSlipModal';
@@ -58,11 +64,13 @@ export const DailyAIPredictionsSection: React.FC<DailyAIPredictionsSectionProps>
   const [sortMode, setSortMode] = useState<RankingSortMode>('RANK');
   const [selectedSlipForShare, setSelectedSlipForShare] = useState<DailyPredictionSlip | null>(null);
   const [copiedId, setCopiedId] = useState<number | null>(null);
+  const [copiedSlipId, setCopiedSlipId] = useState<string | null>(null);
 
   // Historical Track Record states
   const [historyDays, setHistoryDays] = useState<number>(7);
   const [historyLeague, setHistoryLeague] = useState<string>('ALL');
   const [historyOutcome, setHistoryOutcome] = useState<'ALL' | 'WON' | 'LOST'>('ALL');
+  const [historySubTab, setHistorySubTab] = useState<'SLIPS' | 'MATCHES'>('SLIPS');
 
   const { data: historyData, isLoading: isHistoryLoading, refetch: refetchHistory } = usePredictionHistory({
     days: historyDays,
@@ -71,6 +79,199 @@ export const DailyAIPredictionsSection: React.FC<DailyAIPredictionsSectionProps>
     limit: 60,
     tz: timeZone,
   });
+
+  // Effective Historical Slips (uses backend payload with robust client derivation fallback)
+  const effectiveHistoricalSlips = useMemo(() => {
+    if (historyData?.historical_slips && historyData.historical_slips.length > 0) {
+      return historyData.historical_slips;
+    }
+    const historyList = historyData?.history || [];
+    if (historyList.length === 0) return [];
+
+    const groups = new Map<string, typeof historyList>();
+    historyList.forEach((item) => {
+      const dKey = item.kickoff_at ? item.kickoff_at.slice(0, 10) : 'Recent';
+      if (!groups.has(dKey)) groups.set(dKey, []);
+      groups.get(dKey)!.push(item);
+    });
+
+    const slipsList: HistoricalSlipItem[] = [];
+    groups.forEach((items, dKey) => {
+      if (items.length >= 2) {
+        const sortedBankers = [...items].sort((a, b) => b.probability - a.probability);
+        const bCount = Math.min(3, sortedBankers.length);
+        const bPicks = sortedBankers.slice(0, bCount);
+        let combOdds = 1.0;
+        bPicks.forEach((p) => { combOdds *= p.odds; });
+        const avgProb = bPicks.reduce((acc, p) => acc + p.probability, 0) / bPicks.length;
+        const allWon = bPicks.every((p) => p.outcome_status === 'WON');
+        const unitPnl = allWon ? Math.round((combOdds - 1.0) * 100) / 100 : -1.0;
+
+        slipsList.push({
+          id: `hist-slip-${dKey}-banker`,
+          title: `Safe Banker ${bCount === 3 ? 'Treble' : 'Double'}`,
+          type: 'banker',
+          badge: '75%+ Probability',
+          description: `Top statistical certainty selections from ${dKey} matchday.`,
+          date: dKey,
+          total_odds: Math.round(combOdds * 100) / 100,
+          win_probability: Math.round(avgProb * 10) / 10,
+          selections_count: bCount,
+          outcome_status: allWon ? 'WON' : 'LOST',
+          unit_return: allWon ? `+${unitPnl}u` : `${unitPnl}u`,
+          unit_pnl: unitPnl,
+          audit_note: allWon
+            ? `All ${bCount} legs hit cleanly! Settled at ${combOdds.toFixed(2)}x payout.`
+            : `${bPicks.filter((p) => p.outcome_status === 'WON').length}/${bCount} legs won. Failed on ${bPicks.filter((p) => p.outcome_status !== 'WON').map((p) => p.fixture).join(', ')}.`,
+          picks: bPicks.map((p) => ({
+            match_id: p.match_id,
+            fixture: p.fixture,
+            home_team: p.home_team,
+            away_team: p.away_team,
+            league_code: p.league_code,
+            league_name: p.league_name,
+            league_flag: p.league_flag,
+            pick: p.pick,
+            market: p.market,
+            odds: p.odds,
+            probability: p.probability,
+            final_score: p.final_score,
+            status: p.outcome_status,
+            audit_note: p.audit_note,
+          })),
+        });
+
+        const goalPicks = items.filter((p) => p.category === 'GOALS' || p.market === 'Totals' || p.market === 'BTTS' || p.pick.includes('Over') || p.pick.includes('Both Teams'));
+        if (goalPicks.length >= 2) {
+          const gSubset = goalPicks.slice(0, 3);
+          let gOdds = 1.0;
+          gSubset.forEach((p) => { gOdds *= p.odds; });
+          const gProb = gSubset.reduce((acc, p) => acc + p.probability, 0) / gSubset.length;
+          const gWon = gSubset.every((p) => p.outcome_status === 'WON');
+          const gPnl = gWon ? Math.round((gOdds - 1.0) * 100) / 100 : -1.0;
+
+          slipsList.push({
+            id: `hist-slip-${dKey}-goals`,
+            title: 'Goals Galore Combo',
+            type: 'goals',
+            badge: 'Over Goals & BTTS',
+            description: `Curated high-scoring lines from ${dKey} matchday.`,
+            date: dKey,
+            total_odds: Math.round(gOdds * 100) / 100,
+            win_probability: Math.round(gProb * 10) / 10,
+            selections_count: gSubset.length,
+            outcome_status: gWon ? 'WON' : 'LOST',
+            unit_return: gWon ? `+${gPnl}u` : `${gPnl}u`,
+            unit_pnl: gPnl,
+            audit_note: gWon
+              ? `All ${gSubset.length} goal selections cleared! Full slip won @ ${gOdds.toFixed(2)}.`
+              : `${gSubset.filter((p) => p.outcome_status === 'WON').length}/${gSubset.length} legs won. Missed on ${gSubset.filter((p) => p.outcome_status !== 'WON').map((p) => p.fixture).join(', ')}.`,
+            picks: gSubset.map((p) => ({
+              match_id: p.match_id,
+              fixture: p.fixture,
+              home_team: p.home_team,
+              away_team: p.away_team,
+              league_code: p.league_code,
+              league_name: p.league_name,
+              league_flag: p.league_flag,
+              pick: p.pick,
+              market: p.market,
+              odds: p.odds,
+              probability: p.probability,
+              final_score: p.final_score,
+              status: p.outcome_status,
+              audit_note: p.audit_note,
+            })),
+          });
+        }
+      } else if (items.length === 1) {
+        const s = items[0];
+        const sWon = s.outcome_status === 'WON';
+        slipsList.push({
+          id: `hist-slip-${dKey}-single`,
+          title: `Single Banker: ${s.fixture}`,
+          type: 'single_match',
+          badge: 'Top Single Pick',
+          description: `Primary standalone recommendation on ${dKey}.`,
+          date: dKey,
+          total_odds: s.odds,
+          win_probability: s.probability,
+          selections_count: 1,
+          outcome_status: sWon ? 'WON' : 'LOST',
+          unit_return: s.unit_return,
+          unit_pnl: s.unit_pnl,
+          audit_note: s.audit_note,
+          picks: [{
+            match_id: s.match_id,
+            fixture: s.fixture,
+            home_team: s.home_team,
+            away_team: s.away_team,
+            league_code: s.league_code,
+            league_name: s.league_name,
+            league_flag: s.league_flag,
+            pick: s.pick,
+            market: s.market,
+            odds: s.odds,
+            probability: s.probability,
+            final_score: s.final_score,
+            status: s.outcome_status,
+            audit_note: s.audit_note,
+          }],
+        });
+      }
+    });
+
+    if (historyList.length >= 3 && slipsList.length < 3) {
+      const top3 = [...historyList].sort((a, b) => b.probability - a.probability).slice(0, 3);
+      let cOdds = 1.0;
+      top3.forEach((p) => { cOdds *= p.odds; });
+      const cProb = top3.reduce((acc, p) => acc + p.probability, 0) / top3.length;
+      const cWon = top3.every((p) => p.outcome_status === 'WON');
+      const cPnl = cWon ? Math.round((cOdds - 1.0) * 100) / 100 : -1.0;
+
+      slipsList.push({
+        id: 'hist-slip-cross-treble',
+        title: 'Multi-Day Safe Banker Treble',
+        type: 'banker',
+        badge: 'Highest Confidence',
+        description: 'Highest-confidence mathematical selections across recent matchdays.',
+        date: 'Recent',
+        total_odds: Math.round(cOdds * 100) / 100,
+        win_probability: Math.round(cProb * 10) / 10,
+        selections_count: 3,
+        outcome_status: cWon ? 'WON' : 'LOST',
+        unit_return: cWon ? `+${cPnl}u` : `${cPnl}u`,
+        unit_pnl: cPnl,
+        audit_note: cWon
+          ? `All 3 legs hit cleanly! Settled at ${cOdds.toFixed(2)}x payout.`
+          : `${top3.filter((p) => p.outcome_status === 'WON').length}/3 legs won. Missed on ${top3.filter((p) => p.outcome_status !== 'WON').map((p) => p.fixture).join(', ')}.`,
+        picks: top3.map((p) => ({
+          match_id: p.match_id,
+          fixture: p.fixture,
+          home_team: p.home_team,
+          away_team: p.away_team,
+          league_code: p.league_code,
+          league_name: p.league_name,
+          league_flag: p.league_flag,
+          pick: p.pick,
+          market: p.market,
+          odds: p.odds,
+          probability: p.probability,
+          final_score: p.final_score,
+          status: p.outcome_status,
+          audit_note: p.audit_note,
+        })),
+      });
+    }
+
+    if (historyOutcome === 'WON') {
+      return slipsList.filter((s) => s.outcome_status === 'WON');
+    }
+    if (historyOutcome === 'LOST') {
+      return slipsList.filter((s) => s.outcome_status === 'LOST');
+    }
+    return slipsList;
+  }, [historyData, historyOutcome]);
 
   // If backend rankedPredictions is not yet populated (e.g. while server cache refreshes), derive from slips.picks
   const effectivePredictions = useMemo(() => {
@@ -280,6 +481,52 @@ export const DailyAIPredictionsSection: React.FC<DailyAIPredictionsSectionProps>
       ],
     };
     setSelectedSlipForShare(mockSlip);
+  };
+
+  const handleShareHistoricalSlip = (hs: HistoricalSlipItem) => {
+    const modalSlip: DailyPredictionSlip = {
+      title: `${hs.title} (${hs.date})`,
+      type: hs.type,
+      badge: hs.badge,
+      description: hs.description,
+      total_odds: hs.total_odds,
+      win_probability: hs.win_probability,
+      selections_count: hs.selections_count,
+      outcome_status: (hs.outcome_status === 'WON' || hs.outcome_status === 'LOST') ? hs.outcome_status : 'PENDING',
+      risk_level: hs.type === 'banker' ? 'LOW' : 'BALANCED',
+      picks: hs.picks.map((p) => ({
+        match_id: p.match_id,
+        fixture: p.fixture,
+        league: p.league_name,
+        league_code: p.league_code,
+        pick: p.pick,
+        market: p.market,
+        probability: p.probability / 100,
+        odds: p.odds,
+        confidence: 'HIGH',
+        status: (p.status === 'WON' || p.status === 'LOST') ? p.status : 'PENDING',
+      })),
+    };
+    setSelectedSlipForShare(modalSlip);
+  };
+
+  const handleCopyHistoricalSlip = (hs: HistoricalSlipItem) => {
+    const legsText = hs.picks
+      .map(
+        (p, idx) =>
+          `  ${idx + 1}. ${p.fixture} (${p.league_name}) • ${p.pick} @ ${p.odds} [Score: ${p.final_score}] - ${
+            p.status === 'WON' ? '✅ WON' : '❌ LOST'
+          }`
+      )
+      .join('\n');
+    const text = `🎟️ TacticX AI Historical Slip [${hs.outcome_status === 'WON' ? 'WON ✅' : 'LOST ❌'}]\n📋 ${
+      hs.title
+    } (${hs.badge})\n📅 Date: ${hs.date}\n💰 Combined Odds: @${hs.total_odds}\n📊 Probability: ${
+      hs.win_probability
+    }%\n\nSelections:\n${legsText}\n\n📝 Settlement: ${hs.audit_note}\n⚡ Verified by TacticX AI Engine`;
+    navigator.clipboard.writeText(text);
+    setCopiedSlipId(hs.id);
+    setTimeout(() => setCopiedSlipId(null), 2500);
   };
 
   return (
@@ -946,12 +1193,16 @@ export const DailyAIPredictionsSection: React.FC<DailyAIPredictionsSectionProps>
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
               {/* Win Rate */}
               <div className="p-3 rounded-xl bg-[#0e121a] border border-[#202738] space-y-1">
-                <div className="text-[10px] font-mono text-slate-400 uppercase">Win Rate</div>
+                <div className="text-[10px] font-mono text-slate-400 uppercase">
+                  {historySubTab === 'SLIPS' ? 'Slips Win Rate' : 'Matches Win Rate'}
+                </div>
                 <div className="text-xl sm:text-2xl font-bold font-mono text-[#21e786]">
-                  {historyData?.summary?.win_rate ?? 0}%
+                  {historySubTab === 'SLIPS'
+                    ? `${effectiveHistoricalSlips.length > 0 ? Math.round((effectiveHistoricalSlips.filter((s) => s.outcome_status === 'WON').length / effectiveHistoricalSlips.length) * 100) : 0}%`
+                    : `${historyData?.summary?.win_rate ?? 0}%`}
                 </div>
                 <div className="text-[11px] font-sans text-slate-400">
-                  Overall Accuracy
+                  {historySubTab === 'SLIPS' ? 'Accumulators & Combos' : 'Overall Single Picks'}
                 </div>
               </div>
 
@@ -959,31 +1210,49 @@ export const DailyAIPredictionsSection: React.FC<DailyAIPredictionsSectionProps>
               <div className="p-3 rounded-xl bg-[#0e121a] border border-[#202738] space-y-1">
                 <div className="text-[10px] font-mono text-slate-400 uppercase">Record (W / L)</div>
                 <div className="text-xl sm:text-2xl font-bold font-mono text-white flex items-center gap-2">
-                  <span className="text-emerald-400">{historyData?.summary?.won_count ?? 0}W</span>
-                  <span className="text-slate-500">/</span>
-                  <span className="text-rose-400">{historyData?.summary?.lost_count ?? 0}L</span>
+                  {historySubTab === 'SLIPS' ? (
+                    <>
+                      <span className="text-emerald-400">{effectiveHistoricalSlips.filter((s) => s.outcome_status === 'WON').length}W</span>
+                      <span className="text-slate-500">/</span>
+                      <span className="text-rose-400">{effectiveHistoricalSlips.filter((s) => s.outcome_status === 'LOST').length}L</span>
+                    </>
+                  ) : (
+                    <>
+                      <span className="text-emerald-400">{historyData?.summary?.won_count ?? 0}W</span>
+                      <span className="text-slate-500">/</span>
+                      <span className="text-rose-400">{historyData?.summary?.lost_count ?? 0}L</span>
+                    </>
+                  )}
                 </div>
                 <div className="text-[11px] font-sans text-slate-400">
-                  {historyData?.summary?.total_predictions ?? 0} Matches Settled
+                  {historySubTab === 'SLIPS' ? `${effectiveHistoricalSlips.length} Slips Evaluated` : `${historyData?.summary?.total_predictions ?? 0} Matches Settled`}
                 </div>
               </div>
 
               {/* Net Profit Units */}
               <div className="p-3 rounded-xl bg-[#0e121a] border border-[#202738] space-y-1">
                 <div className="text-[10px] font-mono text-slate-400 uppercase">Net Return</div>
-                <div className={`text-xl sm:text-2xl font-bold font-mono ${
-                  (historyData?.summary?.net_units_num ?? 0) >= 0 ? 'text-emerald-400' : 'text-rose-400'
-                }`}>
-                  {historyData?.summary?.total_units ?? '+0.0u'}
+                <div
+                  className={`text-xl sm:text-2xl font-bold font-mono ${
+                    (historySubTab === 'SLIPS'
+                      ? effectiveHistoricalSlips.reduce((acc, s) => acc + s.unit_pnl, 0)
+                      : (historyData?.summary?.net_units_num ?? 0)) >= 0
+                      ? 'text-emerald-400'
+                      : 'text-rose-400'
+                  }`}
+                >
+                  {historySubTab === 'SLIPS'
+                    ? `${effectiveHistoricalSlips.reduce((acc, s) => acc + s.unit_pnl, 0) >= 0 ? '+' : ''}${effectiveHistoricalSlips.reduce((acc, s) => acc + s.unit_pnl, 0).toFixed(2)}u`
+                    : (historyData?.summary?.total_units ?? '+0.0u')}
                 </div>
                 <div className="text-[11px] font-sans text-slate-400">
-                  ROI: {historyData?.summary?.roi_pct ?? 0}%
+                  {historySubTab === 'SLIPS' ? 'Cumulative Slips PnL' : `ROI: ${historyData?.summary?.roi_pct ?? 0}%`}
                 </div>
               </div>
 
               {/* Banker Accuracy */}
               <div className="p-3 rounded-xl bg-[#0e121a] border border-[#202738] space-y-1">
-                <div className="text-[10px] font-mono text-slate-400 uppercase">Bankers Win Rate</div>
+                <div className="text-[10px] font-mono text-slate-400 uppercase">Bankers Accuracy</div>
                 <div className="text-xl sm:text-2xl font-bold font-mono text-amber-300">
                   {historyData?.summary?.banker_win_rate ?? 0}%
                 </div>
@@ -1047,136 +1316,365 @@ export const DailyAIPredictionsSection: React.FC<DailyAIPredictionsSectionProps>
             </div>
           </div>
 
-          {/* Historical Match Cards */}
-          {isHistoryLoading ? (
-            <div className="p-12 text-center text-xs font-mono text-slate-400 rounded-2xl border border-[#242938] bg-[#141822]">
-              Auditing historical predictions against canonical scorelines...
-            </div>
-          ) : !historyData?.history || historyData.history.length === 0 ? (
-            <div className="p-12 text-center rounded-2xl border border-[#242938] bg-[#141822] space-y-2">
-              <CheckCircle2 className="w-8 h-8 text-slate-500 mx-auto" />
-              <h4 className="font-bold text-sm text-white font-sans">No Historical Matches Found</h4>
-              <p className="text-xs text-slate-400 font-sans max-w-sm mx-auto">
-                No finished predictions matched your selected filters ({historyOutcome}, {historyLeague}, {historyDays}d). Try resetting filters.
-              </p>
-              <button
-                onClick={() => {
-                  setHistoryOutcome('ALL');
-                  setHistoryLeague('ALL');
-                  setHistoryDays(7);
-                }}
-                className="px-3.5 py-1.5 rounded-lg text-xs font-sans font-semibold bg-[#21e786] text-[#0a0d14]"
-              >
-                Reset History Filters
-              </button>
-            </div>
-          ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3.5">
-              {historyData.history.map((item) => {
-                const isWon = item.outcome_status === 'WON';
-                return (
-                  <div
-                    key={item.match_id}
-                    className={`rounded-2xl border p-4 space-y-3 shadow-sm transition-all ${
-                      isWon
-                        ? 'border-emerald-500/30 bg-gradient-to-b from-[#101918] to-[#0e141a]'
-                        : 'border-rose-500/30 bg-gradient-to-b from-[#1a1014] to-[#0e141a]'
-                    }`}
+          {/* Sub-tab Navigation: Slips History vs Matches History */}
+          <div className="flex items-center gap-2 border-b border-[#1e2536] pb-3">
+            <button
+              onClick={() => setHistorySubTab('SLIPS')}
+              className={`px-4 py-2 rounded-xl text-xs font-sans font-bold flex items-center gap-2 transition-all ${
+                historySubTab === 'SLIPS'
+                  ? 'bg-[#21e786] text-[#0a0d14] shadow-md'
+                  : 'bg-[#151924] text-slate-400 hover:text-white border border-[#232b3b]'
+              }`}
+            >
+              <Ticket className="w-4 h-4" />
+              <span>Suggested Multi-Leg Slips ({effectiveHistoricalSlips.length})</span>
+            </button>
+
+            <button
+              onClick={() => setHistorySubTab('MATCHES')}
+              className={`px-4 py-2 rounded-xl text-xs font-sans font-bold flex items-center gap-2 transition-all ${
+                historySubTab === 'MATCHES'
+                  ? 'bg-[#21e786] text-[#0a0d14] shadow-md'
+                  : 'bg-[#151924] text-slate-400 hover:text-white border border-[#232b3b]'
+              }`}
+            >
+              <Target className="w-4 h-4" />
+              <span>Individual Match Ledger ({historyData?.history?.length ?? 0})</span>
+            </button>
+          </div>
+
+          {/* Tab 1: Historical Slips & Accumulators */}
+          {historySubTab === 'SLIPS' && (
+            <div>
+              {isHistoryLoading ? (
+                <div className="p-12 text-center text-xs font-mono text-slate-400 rounded-2xl border border-[#242938] bg-[#141822]">
+                  Auditing historical accumulator slips against match results...
+                </div>
+              ) : effectiveHistoricalSlips.length === 0 ? (
+                <div className="p-12 text-center rounded-2xl border border-[#242938] bg-[#141822] space-y-2">
+                  <Ticket className="w-8 h-8 text-slate-500 mx-auto" />
+                  <h4 className="font-bold text-sm text-white font-sans">No Historical Slips Found</h4>
+                  <p className="text-xs text-slate-400 font-sans max-w-sm mx-auto">
+                    No accumulator slips matched your current filters ({historyOutcome}, {historyLeague}, {historyDays}d). Try resetting filters.
+                  </p>
+                  <button
+                    onClick={() => {
+                      setHistoryOutcome('ALL');
+                      setHistoryLeague('ALL');
+                      setHistoryDays(7);
+                    }}
+                    className="px-3.5 py-1.5 rounded-lg text-xs font-sans font-semibold bg-[#21e786] text-[#0a0d14]"
                   >
-                    {/* Header: League & Status Banner */}
-                    <div className="flex items-center justify-between gap-2">
-                      <div className="flex items-center gap-1.5 text-xs text-slate-400 font-sans">
-                        <span>{item.league_flag}</span>
-                        <span className="font-semibold text-slate-300">{item.league_name}</span>
-                      </div>
+                    Reset Filters
+                  </button>
+                </div>
+              ) : (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                  {effectiveHistoricalSlips.map((slip) => {
+                    const isSlipWon = slip.outcome_status === 'WON';
+                    return (
+                      <div
+                        key={slip.id}
+                        className={`rounded-2xl border p-4 space-y-3.5 shadow-sm transition-all flex flex-col justify-between ${
+                          isSlipWon
+                            ? 'border-emerald-500/35 bg-gradient-to-b from-[#0f1917] via-[#0d141c] to-[#0a0d14]'
+                            : 'border-rose-500/35 bg-gradient-to-b from-[#1a1015] via-[#0f121a] to-[#0a0d14]'
+                        }`}
+                      >
+                        <div className="space-y-3">
+                          {/* Header: Date, Badge, and Won/Lost Pill */}
+                          <div className="flex items-center justify-between gap-2">
+                            <div className="flex items-center gap-1.5 flex-wrap">
+                              <span className="text-[10px] font-mono font-bold px-2 py-0.5 rounded-full bg-[#171d2b] text-slate-300 border border-[#263145]">
+                                {slip.date}
+                              </span>
+                              <span className="text-[10px] font-sans font-semibold px-2 py-0.5 rounded-full bg-[#1b2232] text-amber-300 border border-amber-500/25">
+                                {slip.badge}
+                              </span>
+                            </div>
 
-                      <div className="flex items-center gap-1.5">
-                        <span
-                          className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-mono font-bold tracking-wide ${
-                            isWon
-                              ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/40'
-                              : 'bg-rose-500/20 text-rose-300 border border-rose-500/40'
-                          }`}
-                        >
-                          {isWon ? (
-                            <>
-                              <CheckCircle2 className="w-3 h-3 text-emerald-400" />
-                              <span>CORRECT • {item.unit_return}</span>
-                            </>
-                          ) : (
-                            <>
-                              <XCircle className="w-3 h-3 text-rose-400" />
-                              <span>WRONG • {item.unit_return}</span>
-                            </>
-                          )}
-                        </span>
-                      </div>
-                    </div>
-
-                    {/* Fixture & Final Score */}
-                    <div className="p-2.5 rounded-xl bg-[#0b0e14]/90 border border-[#1e2536] flex items-center justify-between gap-3">
-                      <div className="truncate min-w-0">
-                        <div className="flex items-center gap-2 truncate">
-                          <div className="flex items-center gap-1.5 truncate">
-                            <TeamLogo teamName={item.home_team} size="sm" />
-                            <span className="text-xs font-bold text-white truncate font-sans">{item.home_team}</span>
+                            <span
+                              className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-mono font-bold tracking-wide shrink-0 ${
+                                isSlipWon
+                                  ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/40'
+                                  : 'bg-rose-500/20 text-rose-300 border border-rose-500/40'
+                              }`}
+                            >
+                              {isSlipWon ? (
+                                <>
+                                  <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />
+                                  <span>SLIP WON • {slip.unit_return}</span>
+                                </>
+                              ) : (
+                                <>
+                                  <XCircle className="w-3.5 h-3.5 text-rose-400" />
+                                  <span>SLIP LOST • {slip.unit_return}</span>
+                                </>
+                              )}
+                            </span>
                           </div>
-                          <span className="text-[10px] text-slate-500 font-mono">vs</span>
-                          <div className="flex items-center gap-1.5 truncate">
-                            <TeamLogo teamName={item.away_team} size="sm" />
-                            <span className="text-xs font-bold text-white truncate font-sans">{item.away_team}</span>
+
+                          {/* Title & Multiplier */}
+                          <div className="flex items-start justify-between gap-2">
+                            <div>
+                              <h4 className="font-bold text-sm text-white font-sans flex items-center gap-1.5">
+                                <Ticket className="w-4 h-4 text-[#21e786]" />
+                                <span>{slip.title}</span>
+                              </h4>
+                              <p className="text-xs text-slate-400 font-sans mt-0.5 leading-snug">
+                                {slip.description}
+                              </p>
+                            </div>
+
+                            <div className="text-right shrink-0">
+                              <div className="text-[10px] font-mono text-slate-400 uppercase">Total Odds</div>
+                              <span className="text-xs font-mono font-bold px-2 py-1 rounded bg-[#0c1017] text-emerald-400 border border-emerald-800/80 inline-block">
+                                @{slip.total_odds.toFixed(2)}
+                              </span>
+                            </div>
+                          </div>
+
+                          {/* Selections / Legs Breakdown */}
+                          <div className="space-y-1.5 pt-1">
+                            <div className="text-[11px] font-mono text-slate-400 flex items-center justify-between">
+                              <span>Selections ({slip.selections_count} Legs):</span>
+                              <span>Leg Outcome</span>
+                            </div>
+
+                            {slip.picks.map((pick, pIdx) => {
+                              const legWon = pick.status === 'WON';
+                              return (
+                                <div
+                                  key={pIdx}
+                                  className={`p-2.5 rounded-xl border flex flex-col gap-1.5 text-xs font-sans transition-all ${
+                                    legWon
+                                      ? 'bg-[#0d1417]/80 border-emerald-900/30'
+                                      : 'bg-[#170e13]/80 border-rose-900/30'
+                                  }`}
+                                >
+                                  <div className="flex items-center justify-between gap-2">
+                                    <div className="flex items-center gap-1.5 min-w-0 truncate">
+                                      <span className="text-xs shrink-0">{pick.league_flag}</span>
+                                      <TeamLogo teamName={pick.home_team} size="xs" />
+                                      <span className="font-bold text-white truncate">{pick.home_team}</span>
+                                      <span className="text-slate-500 text-[10px]">vs</span>
+                                      <TeamLogo teamName={pick.away_team} size="xs" />
+                                      <span className="font-bold text-white truncate">{pick.away_team}</span>
+                                    </div>
+
+                                    <div className="flex items-center gap-1.5 shrink-0">
+                                      <span className="font-mono text-xs font-bold text-white px-1.5 py-0.2 rounded bg-[#090c12] border border-[#1f2636]">
+                                        {pick.final_score}
+                                      </span>
+                                      <span
+                                        className={`inline-flex items-center gap-0.5 text-[10px] font-mono font-bold px-1.5 py-0.2 rounded ${
+                                          legWon
+                                            ? 'bg-emerald-950 text-emerald-300 border border-emerald-800'
+                                            : 'bg-rose-950 text-rose-300 border border-rose-800'
+                                        }`}
+                                      >
+                                        {legWon ? 'WON' : 'LOST'}
+                                      </span>
+                                    </div>
+                                  </div>
+
+                                  <div className="flex items-center justify-between gap-2 pt-0.5 border-t border-[#1a2230]/60">
+                                    <span className="text-[#21e786] font-semibold text-[11px] truncate">
+                                      {pick.pick} <span className="text-slate-400 font-mono font-normal">({pick.market})</span>
+                                    </span>
+                                    <span className="font-mono text-slate-300 text-[11px] font-bold">
+                                      @{pick.odds.toFixed(2)}
+                                    </span>
+                                  </div>
+
+                                  {pick.audit_note && (
+                                    <p className="text-[10px] text-slate-400 font-sans leading-tight">
+                                      {pick.audit_note}
+                                    </p>
+                                  )}
+                                </div>
+                              );
+                            })}
                           </div>
                         </div>
-                        {item.kickoff_at && (
-                          <div className="text-[10px] font-mono text-slate-400 mt-0.5">
-                            {formatDateTime(item.kickoff_at, timeZone).full}
-                          </div>
-                        )}
-                      </div>
 
-                      {/* Prominent Full Time Score */}
-                      <div className="text-right shrink-0">
-                        <div className="text-[10px] font-mono text-slate-400 uppercase">Final Score</div>
-                        <div className="text-base font-bold font-mono text-white px-2 py-0.5 rounded bg-[#171c26] border border-[#262f40]">
-                          {item.final_score}
+                        {/* Settlement Note & Action Buttons */}
+                        <div className="pt-2.5 border-t border-[#1c2333] space-y-2">
+                          <div className="text-[11px] text-slate-300 font-sans leading-relaxed">
+                            <strong className="text-white">Settlement Audit: </strong>
+                            {slip.audit_note}
+                          </div>
+
+                          <div className="flex items-center justify-between gap-2 pt-1">
+                            <button
+                              onClick={() => handleCopyHistoricalSlip(slip)}
+                              className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-mono bg-[#181d28] hover:bg-[#202738] text-slate-300 hover:text-white border border-[#262f42] transition-colors"
+                              title="Copy slip details"
+                            >
+                              {copiedSlipId === slip.id ? (
+                                <>
+                                  <Check className="w-3 h-3 text-[#21e786]" />
+                                  <span className="text-[#21e786] font-bold">Copied</span>
+                                </>
+                              ) : (
+                                <>
+                                  <Copy className="w-3 h-3" />
+                                  <span>Copy Slip</span>
+                                </>
+                              )}
+                            </button>
+
+                            <button
+                              onClick={() => handleShareHistoricalSlip(slip)}
+                              className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-mono bg-[#21e786]/10 hover:bg-[#21e786]/20 text-[#21e786] border border-[#21e786]/30 transition-colors"
+                            >
+                              <Share2 className="w-3 h-3" />
+                              <span>Share Slip</span>
+                            </button>
+                          </div>
                         </div>
                       </div>
-                    </div>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
+          )}
 
-                    {/* Pick Details */}
-                    <div className="space-y-1">
-                      <div className="flex items-center justify-between text-xs font-sans">
-                        <span className="text-slate-400 text-[11px]">AI Recommended Pick:</span>
-                        <span className="font-mono text-slate-300 text-[11px]">
-                          Prob: <strong className="text-white">{item.probability}%</strong>
-                        </span>
-                      </div>
-
-                      <div className="p-2 rounded-xl bg-[#131722] border border-[#232c3e] flex items-center justify-between gap-2">
-                        <div>
-                          <div className="font-bold text-xs text-[#21e786] font-sans">
-                            {item.pick}
+          {/* Tab 2: Individual Matches History */}
+          {historySubTab === 'MATCHES' && (
+            <div>
+              {isHistoryLoading ? (
+                <div className="p-12 text-center text-xs font-mono text-slate-400 rounded-2xl border border-[#242938] bg-[#141822]">
+                  Auditing historical predictions against canonical scorelines...
+                </div>
+              ) : !historyData?.history || historyData.history.length === 0 ? (
+                <div className="p-12 text-center rounded-2xl border border-[#242938] bg-[#141822] space-y-2">
+                  <CheckCircle2 className="w-8 h-8 text-slate-500 mx-auto" />
+                  <h4 className="font-bold text-sm text-white font-sans">No Historical Matches Found</h4>
+                  <p className="text-xs text-slate-400 font-sans max-w-sm mx-auto">
+                    No finished predictions matched your selected filters ({historyOutcome}, {historyLeague}, {historyDays}d). Try resetting filters.
+                  </p>
+                  <button
+                    onClick={() => {
+                      setHistoryOutcome('ALL');
+                      setHistoryLeague('ALL');
+                      setHistoryDays(7);
+                    }}
+                    className="px-3.5 py-1.5 rounded-lg text-xs font-sans font-semibold bg-[#21e786] text-[#0a0d14]"
+                  >
+                    Reset History Filters
+                  </button>
+                </div>
+              ) : (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3.5">
+                  {historyData.history.map((item) => {
+                    const isWon = item.outcome_status === 'WON';
+                    return (
+                      <div
+                        key={item.match_id}
+                        className={`rounded-2xl border p-4 space-y-3 shadow-sm transition-all ${
+                          isWon
+                            ? 'border-emerald-500/30 bg-gradient-to-b from-[#101918] to-[#0e141a]'
+                            : 'border-rose-500/30 bg-gradient-to-b from-[#1a1014] to-[#0e141a]'
+                        }`}
+                      >
+                        {/* Header: League & Status Banner */}
+                        <div className="flex items-center justify-between gap-2">
+                          <div className="flex items-center gap-1.5 text-xs text-slate-400 font-sans">
+                            <span>{item.league_flag}</span>
+                            <span className="font-semibold text-slate-300">{item.league_name}</span>
                           </div>
-                          <div className="text-[10px] font-mono text-slate-400">
-                            {item.market}
+
+                          <div className="flex items-center gap-1.5">
+                            <span
+                              className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-mono font-bold tracking-wide ${
+                                isWon
+                                  ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/40'
+                                  : 'bg-rose-500/20 text-rose-300 border border-rose-500/40'
+                              }`}
+                            >
+                              {isWon ? (
+                                <>
+                                  <CheckCircle2 className="w-3 h-3 text-emerald-400" />
+                                  <span>CORRECT • {item.unit_return}</span>
+                                </>
+                              ) : (
+                                <>
+                                  <XCircle className="w-3 h-3 text-rose-400" />
+                                  <span>WRONG • {item.unit_return}</span>
+                                </>
+                              )}
+                            </span>
                           </div>
                         </div>
 
-                        <span className="font-mono text-xs font-bold px-2 py-1 rounded bg-[#0b0e14] text-white border border-[#1f2636]">
-                          @{item.odds.toFixed(2)}
-                        </span>
-                      </div>
-                    </div>
+                        {/* Fixture & Final Score */}
+                        <div className="p-2.5 rounded-xl bg-[#0b0e14]/90 border border-[#1e2536] flex items-center justify-between gap-3">
+                          <div className="truncate min-w-0">
+                            <div className="flex items-center gap-2 truncate">
+                              <div className="flex items-center gap-1.5 truncate">
+                                <TeamLogo teamName={item.home_team} size="sm" />
+                                <span className="text-xs font-bold text-white truncate font-sans">{item.home_team}</span>
+                              </div>
+                              <span className="text-[10px] text-slate-500 font-mono">vs</span>
+                              <div className="flex items-center gap-1.5 truncate">
+                                <TeamLogo teamName={item.away_team} size="sm" />
+                                <span className="text-xs font-bold text-white truncate font-sans">{item.away_team}</span>
+                              </div>
+                            </div>
+                            {item.kickoff_at && (
+                              <div className="text-[10px] font-mono text-slate-400 mt-0.5">
+                                {formatDateTime(item.kickoff_at, timeZone).full}
+                              </div>
+                            )}
+                          </div>
 
-                    {/* Post-Match Settlement Note */}
-                    <div className="pt-2 border-t border-[#1c2230] text-xs font-sans text-slate-300">
-                      <p className="text-[11px] leading-relaxed text-slate-300">
-                        {item.audit_note}
-                      </p>
-                    </div>
-                  </div>
-                );
-              })}
+                          {/* Prominent Full Time Score */}
+                          <div className="text-right shrink-0">
+                            <div className="text-[10px] font-mono text-slate-400 uppercase">Final Score</div>
+                            <div className="text-base font-bold font-mono text-white px-2 py-0.5 rounded bg-[#171c26] border border-[#262f42]">
+                              {item.final_score}
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* Pick Details */}
+                        <div className="space-y-1">
+                          <div className="flex items-center justify-between text-xs font-sans">
+                            <span className="text-slate-400 text-[11px]">AI Recommended Pick:</span>
+                            <span className="font-mono text-slate-300 text-[11px]">
+                              Prob: <strong className="text-white">{item.probability}%</strong>
+                            </span>
+                          </div>
+
+                          <div className="p-2 rounded-xl bg-[#131722] border border-[#232c3e] flex items-center justify-between gap-2">
+                            <div>
+                              <div className="font-bold text-xs text-[#21e786] font-sans">
+                                {item.pick}
+                              </div>
+                              <div className="text-[10px] font-mono text-slate-400">
+                                {item.market}
+                              </div>
+                            </div>
+
+                            <span className="font-mono text-xs font-bold px-2 py-1 rounded bg-[#0b0e14] text-white border border-[#1f2636]">
+                              @{item.odds.toFixed(2)}
+                            </span>
+                          </div>
+                        </div>
+
+                        {/* Post-Match Settlement Note */}
+                        <div className="pt-2 border-t border-[#1c2230] text-xs font-sans text-slate-300">
+                          <p className="text-[11px] leading-relaxed text-slate-300">
+                            {item.audit_note}
+                          </p>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
             </div>
           )}
         </div>
