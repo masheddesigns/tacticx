@@ -47,7 +47,9 @@ export function usePredictionHistory(params?: {
   return useQuery({
     queryKey: QUERY_KEYS.predictionHistory(params),
     queryFn: ({ signal }) => apiClient.getPredictionHistory({ ...params, signal }),
-    staleTime: 25 * 1000,
+    staleTime: 60 * 1000,
+    retry: 2,
+    placeholderData: (prev) => prev,
   });
 }
 

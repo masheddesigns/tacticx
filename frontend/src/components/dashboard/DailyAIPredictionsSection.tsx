@@ -87,8 +87,15 @@ export const DailyAIPredictionsSection: React.FC<DailyAIPredictionsSectionProps>
 
   // Effective Historical Slips (uses backend payload with robust client derivation fallback)
   const effectiveHistoricalSlips = useMemo(() => {
-    if (historyData?.historical_slips && historyData.historical_slips.length > 0) {
-      return historyData.historical_slips;
+    let rawSlips = historyData?.historical_slips || [];
+    if (rawSlips.length > 0) {
+      if (historyOutcome === 'WON') {
+        return rawSlips.filter((s) => s.outcome_status === 'WON');
+      }
+      if (historyOutcome === 'LOST') {
+        return rawSlips.filter((s) => s.outcome_status === 'LOST');
+      }
+      return rawSlips;
     }
     const historyList = historyData?.history || [];
     if (historyList.length === 0) return [];
@@ -1229,17 +1236,21 @@ export const DailyAIPredictionsSection: React.FC<DailyAIPredictionsSectionProps>
               {/* Quick Lookback Selector */}
               <div className="flex items-center gap-1.5 text-xs font-mono">
                 <span className="text-slate-400">Window:</span>
-                {[3, 7, 14, 30].map((d) => (
+                {[3, 7, 14, 30, 60].map((d) => (
                   <button
                     key={d}
                     onClick={() => setHistoryDays(d)}
-                    className={`px-2.5 py-1 rounded-lg transition-all ${
+                    disabled={isHistoryLoading && historyDays === d}
+                    className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-lg transition-all ${
                       historyDays === d
                         ? 'bg-[#21e786] text-[#0a0d14] font-bold shadow-sm'
                         : 'bg-[#181d28] text-slate-400 hover:text-white border border-[#232a3a]'
                     }`}
                   >
-                    {d}d
+                    <span>{d}d</span>
+                    {isHistoryLoading && historyDays === d && (
+                      <span className="w-2.5 h-2.5 border-2 border-[#0a0d14] border-t-transparent rounded-full animate-spin" />
+                    )}
                   </button>
                 ))}
               </div>
@@ -1403,8 +1414,11 @@ export const DailyAIPredictionsSection: React.FC<DailyAIPredictionsSectionProps>
           {historySubTab === 'SLIPS' && (
             <div>
               {isHistoryLoading ? (
-                <div className="p-12 text-center text-xs font-mono text-slate-400 rounded-2xl border border-[#242938] bg-[#141822]">
-                  Auditing historical accumulator slips against match results...
+                <div className="p-12 text-center rounded-2xl border border-[#242938] bg-[#141822] space-y-3">
+                  <div className="w-8 h-8 mx-auto rounded-full border-2 border-[#21e786] border-t-transparent animate-spin" />
+                  <p className="text-xs font-mono text-slate-300">
+                    Auditing historical {historyDays}-day accumulator slips against official scorelines...
+                  </p>
                 </div>
               ) : effectiveHistoricalSlips.length === 0 ? (
                 <div className="p-12 text-center rounded-2xl border border-[#242938] bg-[#141822] space-y-2">
@@ -1601,8 +1615,11 @@ export const DailyAIPredictionsSection: React.FC<DailyAIPredictionsSectionProps>
           {historySubTab === 'MATCHES' && (
             <div>
               {isHistoryLoading ? (
-                <div className="p-12 text-center text-xs font-mono text-slate-400 rounded-2xl border border-[#242938] bg-[#141822]">
-                  Auditing historical predictions against canonical scorelines...
+                <div className="p-12 text-center rounded-2xl border border-[#242938] bg-[#141822] space-y-3">
+                  <div className="w-8 h-8 mx-auto rounded-full border-2 border-[#21e786] border-t-transparent animate-spin" />
+                  <p className="text-xs font-mono text-slate-300">
+                    Auditing historical {historyDays}-day predictions against canonical scorelines...
+                  </p>
                 </div>
               ) : !historyData?.history || historyData.history.length === 0 ? (
                 <div className="p-12 text-center rounded-2xl border border-[#242938] bg-[#141822] space-y-2">

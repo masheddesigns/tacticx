@@ -1142,7 +1142,7 @@ _PREDICTION_HISTORY_CACHE: Dict[str, Any] = {}
 
 @router.get("/prediction-history", summary="Historical prediction track record with audited outcomes (won vs lost)")
 def get_prediction_history(
-    days: int = Query(7, ge=1, le=30, description="Lookback window in days"),
+    days: int = Query(7, ge=1, le=90, description="Lookback window in days"),
     league: Optional[str] = Query(None, description="Filter by league code or name"),
     outcome: Optional[str] = Query("ALL", description="Filter outcome: ALL | WON | LOST"),
     limit: int = Query(60, ge=1, le=150, description="Max historical matches to evaluate"),
@@ -1162,7 +1162,7 @@ def get_prediction_history(
 
     cache_key = f"{days}_{league or 'all'}_{outcome or 'all'}_{limit}_{tz or 'IST'}"
     cached = _PREDICTION_HISTORY_CACHE.get(cache_key)
-    if cached and (time.time() - cached["ts"] < 25):
+    if cached and (time.time() - cached["ts"] < 600):
         return cached["data"]
 
     now_utc = datetime.now(timezone.utc)
@@ -1183,7 +1183,7 @@ def get_prediction_history(
         if lg:
             q = q.filter(Match.league_id == lg.id)
 
-    matches = q.order_by(Match.kickoff_at.desc()).limit(limit * 2).all()
+    matches = q.order_by(Match.kickoff_at.desc()).limit(min(limit, 60)).all()
 
     FLAG_MAP = {
         "EPL": "🏴󠁧󠁢󠁥󠁮󠁧󠁿", "LA_LIGA": "🇪🇸", "SERIE_A": "🇮🇹", "BUNDESLIGA": "🇩🇪", "LIGUE_1": "🇫🇷",
@@ -1218,26 +1218,51 @@ def get_prediction_history(
             h_score = m.home_score
             a_score = m.away_score
 
-            # Poisson pre-match prediction
-            try:
-                pred = poisson_model.predict(db, m.id, cutoff=m.kickoff_at or now_utc)
-                p_h = float(pred.home_win_probability)
-                p_d = float(pred.draw_probability)
-                p_a = float(pred.away_win_probability)
-                p_o15 = float(pred.over_1_5_probability)
-                p_o25 = float(pred.over_2_5_probability)
-                p_btts = float(pred.btts_yes_probability)
-                lam_h = float(getattr(pred, "expected_home_goals", None) or 1.4)
-                lam_a = float(getattr(pred, "expected_away_goals", None) or 1.1)
-            except Exception:
-                lam_h, lam_a = 1.4, 1.1
-                grid = [[(math.exp(-lam_h) * (lam_h ** i) / math.factorial(i)) * (math.exp(-lam_a) * (lam_a ** j) / math.factorial(j)) for j in range(10)] for i in range(10)]
-                p_h = sum(grid[i][j] for i in range(10) for j in range(10) if i > j)
-                p_d = sum(grid[i][j] for i in range(10) for j in range(10) if i == j)
-                p_a = sum(grid[i][j] for i in range(10) for j in range(10) if i < j)
-                p_o15 = sum(grid[i][j] for i in range(10) for j in range(10) if i + j >= 2)
-                p_o25 = sum(grid[i][j] for i in range(10) for j in range(10) if i + j >= 3)
-                p_btts = sum(grid[i][j] for i in range(10) for j in range(10) if i >= 1 and j >= 1)
+            # Check per-match cache
+            cached_m = _PRED_MATCH_CACHE.get(m.id)
+            if cached_m and cached_m.get("status") == m.status:
+                p_h = cached_m["p_h"]
+                p_d = cached_m["p_d"]
+                p_a = cached_m["p_a"]
+                p_o15 = cached_m["p_o15"]
+                p_o25 = cached_m["p_o25"]
+                p_btts = cached_m["p_btts"]
+                lam_h = cached_m["lam_h"]
+                lam_a = cached_m["lam_a"]
+            else:
+                # Poisson pre-match prediction
+                try:
+                    pred = poisson_model.predict(db, m.id, cutoff=m.kickoff_at or now_utc)
+                    p_h = float(pred.home_win_probability)
+                    p_d = float(pred.draw_probability)
+                    p_a = float(pred.away_win_probability)
+                    p_o15 = float(pred.over_1_5_probability)
+                    p_o25 = float(pred.over_2_5_probability)
+                    p_btts = float(pred.btts_yes_probability)
+                    lam_h = float(getattr(pred, "expected_home_goals", None) or 1.4)
+                    lam_a = float(getattr(pred, "expected_away_goals", None) or 1.1)
+                except Exception:
+                    lam_h, lam_a = 1.4, 1.1
+                    grid = [[(math.exp(-lam_h) * (lam_h ** i) / math.factorial(i)) * (math.exp(-lam_a) * (lam_a ** j) / math.factorial(j)) for j in range(10)] for i in range(10)]
+                    p_h = sum(grid[i][j] for i in range(10) for j in range(10) if i > j)
+                    p_d = sum(grid[i][j] for i in range(10) for j in range(10) if i == j)
+                    p_a = sum(grid[i][j] for i in range(10) for j in range(10) if i < j)
+                    p_o15 = sum(grid[i][j] for i in range(10) for j in range(10) if i + j >= 2)
+                    p_o25 = sum(grid[i][j] for i in range(10) for j in range(10) if i + j >= 3)
+                    p_btts = sum(grid[i][j] for i in range(10) for j in range(10) if i >= 1 and j >= 1)
+
+                _PRED_MATCH_CACHE[m.id] = {
+                    "ts": time.time(),
+                    "status": m.status,
+                    "p_h": p_h,
+                    "p_d": p_d,
+                    "p_a": p_a,
+                    "p_o15": p_o15,
+                    "p_o25": p_o25,
+                    "p_btts": p_btts,
+                    "lam_h": lam_h,
+                    "lam_a": lam_a,
+                }
 
             candidates = []
 
