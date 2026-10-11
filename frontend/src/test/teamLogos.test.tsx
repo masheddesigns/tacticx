@@ -19,14 +19,22 @@ describe('Team Logos & Crests', () => {
     expect(manCityLogo).toContain('8456.png');
   });
 
-  it('resolves API-Sports CDN URLs for Indian Super League and MLS clubs', () => {
+  it('resolves authentic FotMob CDN URLs for ISL, MLS, Argentina, and Brazil clubs', () => {
     const keralaBlasters = getTeamLogoUrl('Kerala Blasters FC');
-    expect(keralaBlasters).toContain('media.api-sports.io');
-    expect(keralaBlasters).toContain('3468.png');
+    expect(keralaBlasters).toContain('images.fotmob.com');
+    expect(keralaBlasters).toContain('578654.png');
 
     const interMiami = getTeamLogoUrl('Inter Miami CF');
-    expect(interMiami).toContain('media.api-sports.io');
-    expect(interMiami).toContain('1603.png');
+    expect(interMiami).toContain('images.fotmob.com');
+    expect(interMiami).toContain('960720.png');
+
+    const riverPlate = getTeamLogoUrl('River Plate');
+    expect(riverPlate).toContain('images.fotmob.com');
+    expect(riverPlate).toContain('10076.png');
+
+    const flamengo = getTeamLogoUrl('Flamengo');
+    expect(flamengo).toContain('images.fotmob.com');
+    expect(flamengo).toContain('9770.png');
   });
 
   it('normalizes accents, diacritics, and aliases correctly', () => {
