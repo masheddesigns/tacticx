@@ -29,7 +29,7 @@ import { CurrentSeasonBanner } from '../components/dashboard/CurrentSeasonBanner
 import { CompetitionCards, CompetitionData } from '../components/dashboard/CompetitionCards';
 import { MatchRow } from '../components/matches/MatchRow';
 import { DateSliderTabs } from '../components/matches/DateSliderTabs';
-import { DailyPredictionSlipsSection } from '../components/dashboard/DailyPredictionSlipsSection';
+import { DailyAIPredictionsSection } from '../components/dashboard/DailyAIPredictionsSection';
 import { getLeagueMeta } from './MatchExplorerPage';
 import { getRelativeDateLabel, getTodayString, getDayOffsetString, formatDayDisplay } from '../lib/utils';
 import { LoadingSpinner } from '../components/common/LoadingSpinner';
@@ -97,8 +97,8 @@ export const DashboardPage: React.FC = () => {
     page_size: 50,
   });
 
-  // Query daily prediction slips for currently active day
-  const { data: dailySlipsData, isLoading: dailySlipsLoading } = useDailySlips(selectedDate || todayStr);
+  // Query daily prediction slips & ranked predictions for currently active day in IST
+  const { data: dailySlipsData, isLoading: dailySlipsLoading } = useDailySlips(selectedDate || todayStr, timeZone);
 
   const availableLeagueCodes = leaguesData?.data?.map((l) => l.code) || [
     'EPL',
@@ -428,8 +428,9 @@ export const DashboardPage: React.FC = () => {
         </div>
       )}
 
-      {/* 3. Daily AI Prediction Slips (Banker, Multi-League Acca, Value) */}
-      <DailyPredictionSlipsSection
+      {/* 3. Daily AI Predictions & Rankings Section (Ranked Outcomes, Top Bankers, League-Wise) */}
+      <DailyAIPredictionsSection
+        rankedPredictions={dailySlipsData?.ranked_predictions || []}
         slips={dailySlipsData?.slips || []}
         dateStr={selectedDate || todayStr}
         timeZone={timeZone}

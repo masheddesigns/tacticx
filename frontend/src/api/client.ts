@@ -133,10 +133,12 @@ export const apiClient = {
 
   getDailySlips: async (params?: {
     date?: string;
+    tz?: string;
     signal?: AbortSignal;
   }): Promise<DailySlipsResponse> => {
     const query = new URLSearchParams();
     if (params?.date) query.set('date', params.date);
+    if (params?.tz) query.set('tz', params.tz);
     const qs = query.toString();
     return request<DailySlipsResponse>(`/matches/daily-slips${qs ? `?${qs}` : ''}`, {
       signal: params?.signal,

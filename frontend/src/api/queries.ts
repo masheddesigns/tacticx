@@ -23,13 +23,13 @@ export const QUERY_KEYS = {
   preMatchReadinessSummary: (params?: any) => ['preMatchReadinessSummary', params],
   predictionSnapshots: (matchId: number) => ['predictionSnapshots', matchId],
   predictionSnapshot: (predictionId: string) => ['predictionSnapshot', predictionId],
-  dailySlips: (date?: string) => ['dailySlips', date],
+  dailySlips: (date?: string, tz?: string) => ['dailySlips', date, tz],
 };
 
-export function useDailySlips(date?: string) {
+export function useDailySlips(date?: string, tz?: string) {
   return useQuery({
-    queryKey: QUERY_KEYS.dailySlips(date),
-    queryFn: ({ signal }) => apiClient.getDailySlips({ date, signal }),
+    queryKey: QUERY_KEYS.dailySlips(date, tz),
+    queryFn: ({ signal }) => apiClient.getDailySlips({ date, tz, signal }),
     staleTime: 8 * 1000,
     refetchInterval: 12 * 1000,
   });

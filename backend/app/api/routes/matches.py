@@ -317,19 +317,16 @@ def _compute_stat_projections_data(db: Session, m: Match, team_cache: Optional[d
 _DAILY_SLIPS_CACHE: Dict[str, Any] = {}
 
 
-@router.get("/daily-slips", summary="Curated 6 daily prediction slips (Banker, Acca, Props, Goals, Value, Mega)")
+@router.get("/daily-slips", summary="Curated daily prediction slips & ranked match predictions")
 def get_daily_slips(
-    date: Optional[str] = Query(None, description="YYYY-MM-DD date (defaults to current UTC day)"),
+    date: Optional[str] = Query(None, description="YYYY-MM-DD date (defaults to current day)"),
+    tz: Optional[str] = Query("IST", description="Timezone: IST | UTC"),
     db: Session = Depends(get_db),
 ):
-    """Generates 6 distinct, mathematically curated daily betting slips with projected match stats:
-    1. Safe Banker Treble: Highest-confidence predictive outcomes across all leagues (75%+ prob).
-    2. Cross-League Power Acca: Synergistic combo spanning EPL, La Liga, Serie A, Bundesliga, etc.
-    3. Corners & Cards Specialist: Prop market edge based on projected corners and referee booking rates.
-    4. Goals Galore Combo: Goal-line specialist slip (Over 1.5 / Over 2.5 & BTTS).
-    5. High Value Multiplier: Attractive odds (1.70 - 2.50) with significant positive model EV edge.
-    6. Mega 5-Fold Parlay: High compound accumulator returns across European competitions.
-    All odds incorporate standard 5% commercial bookmaker margin.
+    """Generates mathematically curated daily betting slips & match-by-match ranked predictions:
+    1. Ranked individual match predictions with AI Best Possible Outcome, EV edge & projected scores.
+    2. Curated combo accumulator slips (Safe Banker Treble, Cross-League Acca, Value Multiplier, etc.).
+    All calculations operate strictly in target timezone (default IST UTC+5:30) with 5% commercial margin.
     """
     from app.services.predictions.poisson import PoissonModel
     from datetime import datetime, timezone, timedelta
@@ -337,21 +334,31 @@ def get_daily_slips(
 
     target_date_str = date
     if not target_date_str:
-        target_date_str = datetime.now(timezone.utc).strftime("%Y-%m-%d")
+        if tz and tz.upper() in ["IST", "ASIA/KOLKATA", "+05:30", "5:30"]:
+            target_date_str = (datetime.now(timezone.utc) + timedelta(hours=5, minutes=30)).strftime("%Y-%m-%d")
+        else:
+            target_date_str = datetime.now(timezone.utc).strftime("%Y-%m-%d")
 
+    cache_key = f"{target_date_str}_{tz or 'IST'}"
     # Fast in-memory cache return (< 1ms)
-    cached = _DAILY_SLIPS_CACHE.get(target_date_str)
+    cached = _DAILY_SLIPS_CACHE.get(cache_key)
     if cached and (time.time() - cached["ts"] < 20):
         return cached["data"]
 
     _refresh_live_matches_if_needed(db)
 
     try:
-        day_start = datetime.strptime(target_date_str, "%Y-%m-%d").replace(tzinfo=timezone.utc)
+        day = datetime.strptime(target_date_str, "%Y-%m-%d").replace(tzinfo=timezone.utc)
     except ValueError:
         raise HTTPException(400, "date must be YYYY-MM-DD")
 
-    day_end = day_start + timedelta(days=1)
+    if tz and tz.upper() in ["IST", "ASIA/KOLKATA", "+05:30", "5:30"]:
+        day_start = day - timedelta(hours=5, minutes=30)
+        day_end = day_start + timedelta(days=1)
+    else:
+        day_start = day
+        day_end = day_start + timedelta(days=1)
+
     matches = db.query(Match).filter(
         Match.kickoff_at >= day_start,
         Match.kickoff_at < day_end
@@ -361,9 +368,10 @@ def get_daily_slips(
         empty_res = {
             "date": target_date_str,
             "total_matches": 0,
+            "ranked_predictions": [],
             "slips": [],
         }
-        _DAILY_SLIPS_CACHE[target_date_str] = {"ts": time.time(), "data": empty_res}
+        _DAILY_SLIPS_CACHE[cache_key] = {"ts": time.time(), "data": empty_res}
         return empty_res
 
     # Helper for commercial Parimatch odds (5% overround)
@@ -373,14 +381,21 @@ def get_daily_slips(
         commercial_p = min(0.98, p * (1 + margin))
         return round(1.0 / commercial_p, 2)
 
+    FLAG_MAP = {
+        "EPL": "🏴󠁧󠁢󠁥󠁮󠁧󠁿", "LA_LIGA": "🇪🇸", "SERIE_A": "🇮🇹", "BUNDESLIGA": "🇩🇪", "LIGUE_1": "🇫🇷",
+        "UCL": "🏆", "ISL": "🇮🇳", "MLS": "🇺🇸", "BRA_SERIE_A": "🇧🇷", "LIGA_ARG": "🇦🇷",
+        "NATIONS_LEAGUE": "🇪🇺", "FRIENDLIES": "🌍"
+    }
+
     all_picks = []
+    ranked_predictions = []
     team_stat_cache = {}
     poisson_model = PoissonModel()
 
-    # Sort matches by high-profile league hierarchy and evaluate top 12 matches for speed
-    priority_order = {1: 1, 6: 1.5, 2: 2, 3: 3, 4: 4, 5: 5, 7: 7, 8: 8, 9: 9, 10: 10, 11: 11, 12: 12}
+    # Prioritize official leagues and evaluate up to 40 matches across all competitions
+    priority_order = {1: 1, 6: 1.5, 2: 2, 3: 3, 4: 4, 5: 5, 10: 6, 7: 7, 9: 8, 8: 9, 11: 10, 12: 11}
     sorted_matches = sorted(matches, key=lambda x: priority_order.get(x.league_id, 99))
-    eval_matches = sorted_matches[:12]
+    eval_matches = sorted_matches[:40]
 
     for m in eval_matches:
         try:
@@ -419,6 +434,8 @@ def get_daily_slips(
                 p_o15 = float(pred.over_1_5_probability)
                 p_o25 = float(pred.over_2_5_probability)
                 p_btts = float(pred.btts_yes_probability)
+                lam_h = float(getattr(pred, "expected_home_goals", None) or 1.4)
+                lam_a = float(getattr(pred, "expected_away_goals", None) or 1.1)
             except Exception:
                 # Robust Poisson model fallback for UEFA Champions League and cup competitions
                 import math
@@ -433,6 +450,8 @@ def get_daily_slips(
                 p_o15 = sum(grid[i][j] for i in range(10) for j in range(10) if i + j >= 2)
                 p_o25 = sum(grid[i][j] for i in range(10) for j in range(10) if i + j >= 3)
                 p_btts = sum(grid[i][j] for i in range(10) for j in range(10) if i >= 1 and j >= 1)
+
+            proj_score = f"{int(round(lam_h))} - {int(round(lam_a))}"
 
             m_status = (m.status or "").upper()
             h_score = m.home_score
@@ -613,28 +632,162 @@ def get_daily_slips(
                     "status": _get_pick_status("Both Teams to Score (Yes)"),
                 })
 
-            # Candidate 6: Stat Props (Corners, Yellow Cards, Shots on Target)
-            for sm in proj_data.get("situation_markets", []):
-                cat = sm.get("category", "")
-                market_name = sm.get("market_name", "")
-                prob = sm.get("probability", 0.5)
-                # Keep high-reliability prop markets
-                if cat in ("corners", "cards", "shots") and prob >= 0.55:
-                    all_picks.append({
-                        "match_id": m.id,
-                        "fixture": f"{h_name} vs {a_name}",
-                        "league": lg_name,
-                        "league_code": lg_code,
-                        "pick": market_name,
-                        "market": f"Props ({cat.capitalize()})",
-                        "probability": round(prob, 3),
-                        "odds": _calc_odds(prob),
-                        "confidence": "HIGH" if prob >= 0.62 else "MEDIUM",
-                        "kickoff_at": m.kickoff_at.isoformat() if m.kickoff_at else None,
-                        "projected_stats": projected_stats_payload,
-                        "status": _get_pick_status(market_name),
-                    })
+            # Evaluate all candidate outcomes for this match to determine the single Best Possible Outcome
+            match_candidates = []
 
+            # 1. Home Win
+            p_h_ev = round(((p_h * _calc_odds(p_h)) - 1.0) * 100, 1)
+            match_candidates.append({
+                "pick": f"{h_name} to Win",
+                "market": "1X2 (Match Winner)",
+                "probability": round(p_h * 100, 1),
+                "odds": _calc_odds(p_h),
+                "confidence": "VERY HIGH" if p_h >= 0.70 else ("HIGH" if p_h >= 0.58 else "MEDIUM"),
+                "category": "BANKER" if p_h >= 0.70 else ("VALUE" if p_h_ev >= 5.0 else "MATCH_WINNER"),
+                "badge": "Top Home Banker" if p_h >= 0.70 else ("High Value Edge" if p_h_ev >= 5.0 else "Home Win"),
+                "ev_edge": f"+{p_h_ev}% Edge" if p_h_ev > 0 else f"{p_h_ev}% Edge",
+                "ai_score": round(min(99.0, max(50.0, (p_h * 68.0) + min(18.0, (_calc_odds(p_h) - 1.0) * 10.0) + max(0.0, p_h_ev * 0.5))), 1),
+                "status": _get_pick_status(f"{h_name} to Win"),
+            })
+
+            # 2. Away Win
+            p_a_ev = round(((p_a * _calc_odds(p_a)) - 1.0) * 100, 1)
+            match_candidates.append({
+                "pick": f"{a_name} to Win",
+                "market": "1X2 (Match Winner)",
+                "probability": round(p_a * 100, 1),
+                "odds": _calc_odds(p_a),
+                "confidence": "VERY HIGH" if p_a >= 0.65 else ("HIGH" if p_a >= 0.55 else "MEDIUM"),
+                "category": "BANKER" if p_a >= 0.65 else ("VALUE" if p_a_ev >= 5.0 else "MATCH_WINNER"),
+                "badge": "Top Away Banker" if p_a >= 0.65 else ("High Value Edge" if p_a_ev >= 5.0 else "Away Win"),
+                "ev_edge": f"+{p_a_ev}% Edge" if p_a_ev > 0 else f"{p_a_ev}% Edge",
+                "ai_score": round(min(99.0, max(50.0, (p_a * 68.0) + min(18.0, (_calc_odds(p_a) - 1.0) * 10.0) + max(0.0, p_a_ev * 0.5))), 1),
+                "status": _get_pick_status(f"{a_name} to Win"),
+            })
+
+            # 3. Double Chance (1X)
+            p_1x = min(0.98, p_h + p_d)
+            p_1x_ev = round(((p_1x * _calc_odds(p_1x)) - 1.0) * 100, 1)
+            match_candidates.append({
+                "pick": f"{h_name} or Draw (1X)",
+                "market": "Double Chance",
+                "probability": round(p_1x * 100, 1),
+                "odds": _calc_odds(p_1x),
+                "confidence": "VERY HIGH" if p_1x >= 0.80 else "HIGH",
+                "category": "SAFETY",
+                "badge": "Safe Buffer (1X)",
+                "ev_edge": f"+{p_1x_ev}% Edge" if p_1x_ev > 0 else f"{p_1x_ev}% Edge",
+                "ai_score": round(min(99.0, max(50.0, (p_1x * 62.0) + min(12.0, (_calc_odds(p_1x) - 1.0) * 10.0) + max(0.0, p_1x_ev * 0.4))), 1),
+                "status": _get_pick_status(f"{h_name} or Draw (1X)"),
+            })
+
+            # 4. Double Chance (X2)
+            p_x2 = min(0.98, p_d + p_a)
+            p_x2_ev = round(((p_x2 * _calc_odds(p_x2)) - 1.0) * 100, 1)
+            match_candidates.append({
+                "pick": f"{a_name} or Draw (X2)",
+                "market": "Double Chance",
+                "probability": round(p_x2 * 100, 1),
+                "odds": _calc_odds(p_x2),
+                "confidence": "VERY HIGH" if p_x2 >= 0.80 else "HIGH",
+                "category": "SAFETY",
+                "badge": "Safe Buffer (X2)",
+                "ev_edge": f"+{p_x2_ev}% Edge" if p_x2_ev > 0 else f"{p_x2_ev}% Edge",
+                "ai_score": round(min(99.0, max(50.0, (p_x2 * 62.0) + min(12.0, (_calc_odds(p_x2) - 1.0) * 10.0) + max(0.0, p_x2_ev * 0.4))), 1),
+                "status": _get_pick_status(f"{a_name} or Draw (X2)"),
+            })
+
+            # 5. Over 1.5 Goals
+            p_o15_ev = round(((p_o15 * _calc_odds(p_o15)) - 1.0) * 100, 1)
+            match_candidates.append({
+                "pick": "Over 1.5 Total Goals",
+                "market": "Totals",
+                "probability": round(p_o15 * 100, 1),
+                "odds": _calc_odds(p_o15),
+                "confidence": "VERY HIGH" if p_o15 >= 0.80 else "HIGH",
+                "category": "GOALS",
+                "badge": "Over 1.5 Lock",
+                "ev_edge": f"+{p_o15_ev}% Edge" if p_o15_ev > 0 else f"{p_o15_ev}% Edge",
+                "ai_score": round(min(99.0, max(50.0, (p_o15 * 63.0) + min(12.0, (_calc_odds(p_o15) - 1.0) * 10.0) + max(0.0, p_o15_ev * 0.4))), 1),
+                "status": _get_pick_status("Over 1.5 Total Goals"),
+            })
+
+            # 6. Over 2.5 Goals
+            p_o25_ev = round(((p_o25 * _calc_odds(p_o25)) - 1.0) * 100, 1)
+            match_candidates.append({
+                "pick": "Over 2.5 Total Goals",
+                "market": "Totals",
+                "probability": round(p_o25 * 100, 1),
+                "odds": _calc_odds(p_o25),
+                "confidence": "HIGH" if p_o25 >= 0.65 else "MEDIUM",
+                "category": "GOALS",
+                "badge": "Over 2.5 Goals",
+                "ev_edge": f"+{p_o25_ev}% Edge" if p_o25_ev > 0 else f"{p_o25_ev}% Edge",
+                "ai_score": round(min(99.0, max(50.0, (p_o25 * 60.0) + min(22.0, (_calc_odds(p_o25) - 1.0) * 12.0) + max(0.0, p_o25_ev * 0.5))), 1),
+                "status": _get_pick_status("Over 2.5 Goals"),
+            })
+
+            # 7. BTTS Yes
+            p_btts_ev = round(((p_btts * _calc_odds(p_btts)) - 1.0) * 100, 1)
+            match_candidates.append({
+                "pick": "Both Teams to Score (Yes)",
+                "market": "BTTS",
+                "probability": round(p_btts * 100, 1),
+                "odds": _calc_odds(p_btts),
+                "confidence": "HIGH" if p_btts >= 0.65 else "MEDIUM",
+                "category": "GOALS",
+                "badge": "BTTS (Yes)",
+                "ev_edge": f"+{p_btts_ev}% Edge" if p_btts_ev > 0 else f"{p_btts_ev}% Edge",
+                "ai_score": round(min(99.0, max(50.0, (p_btts * 60.0) + min(22.0, (_calc_odds(p_btts) - 1.0) * 12.0) + max(0.0, p_btts_ev * 0.5))), 1),
+                "status": _get_pick_status("Both Teams to Score (Yes)"),
+            })
+
+            # Sort match candidates to find the single Best Possible Outcome
+            match_candidates.sort(key=lambda x: x["ai_score"], reverse=True)
+            best_outcome = match_candidates[0]
+
+            # Choose up to 2 alternative viable picks from different markets
+            alt_picks = []
+            seen_mkts = {best_outcome["market"]}
+            for cand in match_candidates[1:]:
+                if cand["market"] not in seen_mkts:
+                    seen_mkts.add(cand["market"])
+                    alt_picks.append(cand)
+                    if len(alt_picks) == 2:
+                        break
+
+            # Formulate tailored AI statistical rationale
+            cat = best_outcome["category"]
+            if cat == "BANKER":
+                ai_insight = f"{best_outcome['pick']} carries top-tier model certainty ({best_outcome['probability']}%) projecting a {proj_score} scoreline with {best_outcome['ev_edge']} against market odds."
+            elif cat == "GOALS":
+                ai_insight = f"Dynamic offensive profiles project {round(lam_h + lam_a, 1)} combined expected goals, establishing {best_outcome['pick']} as premier mathematical value."
+            elif cat == "SAFETY":
+                ai_insight = f"High-confidence defensive hedge offering {best_outcome['probability']}% statistical coverage against unexpected upset variance."
+            elif cat == "VALUE":
+                ai_insight = f"Significant positive model discrepancy yielding {best_outcome['ev_edge']} over commercial bookmaker odds with {proj_score} projected scoreline."
+            else:
+                ai_insight = f"Calibrated Poisson model favors {best_outcome['pick']} with {best_outcome['probability']}% probability and {proj_score} projected outcome."
+
+            ranked_predictions.append({
+                "match_id": m.id,
+                "fixture": f"{h_name} vs {a_name}",
+                "home_team": h_name,
+                "away_team": a_name,
+                "league_code": lg_code,
+                "league_name": lg_name,
+                "league_flag": FLAG_MAP.get(lg_code, "⚽"),
+                "kickoff_at": m.kickoff_at.isoformat() if m.kickoff_at else None,
+                "status": m_status or "SCHEDULED",
+                "home_score": h_score,
+                "away_score": a_score,
+                "best_outcome": best_outcome,
+                "alternative_outcomes": alt_picks,
+                "projected_score": proj_score,
+                "projected_stats": projected_stats_payload,
+                "ai_insight": ai_insight,
+                "sort_score": best_outcome["ai_score"],
+            })
         except Exception:
             continue
 
@@ -898,12 +1051,19 @@ def get_daily_slips(
     for rank_idx, s in enumerate(valid_slips, 1):
         s["rank"] = rank_idx
 
+    # Sort match-by-match predictions: Rank #1, #2, #3... by AI Power Score
+    ranked_predictions.sort(key=lambda x: x["sort_score"], reverse=True)
+    for r_idx, rp in enumerate(ranked_predictions, 1):
+        rp["rank"] = r_idx
+        rp["is_nap_of_the_day"] = (r_idx == 1)
+
     result = {
         "date": target_date_str,
         "total_matches": len(matches),
+        "ranked_predictions": ranked_predictions,
         "slips": valid_slips,
     }
-    _DAILY_SLIPS_CACHE[target_date_str] = {"ts": time.time(), "data": result}
+    _DAILY_SLIPS_CACHE[cache_key] = {"ts": time.time(), "data": result}
     return result
 
 

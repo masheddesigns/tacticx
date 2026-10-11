@@ -74,9 +74,45 @@ export interface DailyPredictionSlip {
   picks: DailyPredictionPick[];
 }
 
+export interface RankedPredictionOutcome {
+  pick: string;
+  market: string;
+  probability: number;
+  odds: number;
+  confidence: 'VERY HIGH' | 'HIGH' | 'MEDIUM';
+  category: 'BANKER' | 'VALUE' | 'GOALS' | 'SAFETY' | 'MATCH_WINNER';
+  badge: string;
+  ev_edge: string;
+  ai_score: number;
+  status: 'WON' | 'LOST' | 'LIVE' | 'PENDING';
+}
+
+export interface DailyRankedPrediction {
+  rank: number;
+  is_nap_of_the_day?: boolean;
+  match_id: number;
+  fixture: string;
+  home_team: string;
+  away_team: string;
+  league_code: string;
+  league_name: string;
+  league_flag: string;
+  kickoff_at?: string | null;
+  status: string;
+  home_score?: number | null;
+  away_score?: number | null;
+  best_outcome: RankedPredictionOutcome;
+  alternative_outcomes: RankedPredictionOutcome[];
+  projected_score: string;
+  projected_stats?: DailyProjectedStats;
+  ai_insight: string;
+  sort_score: number;
+}
+
 export interface DailySlipsResponse {
   date: string;
   total_matches: number;
+  ranked_predictions?: DailyRankedPrediction[];
   slips: DailyPredictionSlip[];
 }
 
