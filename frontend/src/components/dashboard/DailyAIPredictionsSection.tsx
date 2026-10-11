@@ -29,6 +29,7 @@ import { DailyRankedPrediction, DailyPredictionSlip, RankedPredictionOutcome } f
 import { usePredictionHistory } from '../../api/queries';
 import { formatDayDisplay, formatDateTime } from '../../lib/utils';
 import { ShareSlipModal } from './ShareSlipModal';
+import { TeamLogo } from '../common/TeamLogo';
 
 export interface DailyAIPredictionsSectionProps {
   rankedPredictions?: DailyRankedPrediction[];
@@ -426,15 +427,23 @@ export const DailyAIPredictionsSection: React.FC<DailyAIPredictionsSectionProps>
                   </div>
 
                   <div>
-                    <h3 className="text-base sm:text-lg font-bold text-white font-sans flex items-center gap-2">
-                      <span>{napOfTheDay.fixture}</span>
+                    <h3 className="text-base sm:text-lg font-bold text-white font-sans flex items-center gap-2.5">
+                      <div className="flex items-center gap-2">
+                        <TeamLogo teamName={napOfTheDay.home_team} size="md" />
+                        <span>{napOfTheDay.home_team}</span>
+                      </div>
+                      <span className="text-slate-500 font-mono text-xs">vs</span>
+                      <div className="flex items-center gap-2">
+                        <TeamLogo teamName={napOfTheDay.away_team} size="md" />
+                        <span>{napOfTheDay.away_team}</span>
+                      </div>
                       {napOfTheDay.status === 'LIVE' && (
                         <span className="px-2 py-0.5 rounded-full bg-rose-500 text-white text-[10px] font-mono font-bold animate-pulse">
                           LIVE
                         </span>
                       )}
                     </h3>
-                    <p className="text-xs text-slate-300 font-sans max-w-2xl mt-1">
+                    <p className="text-xs text-slate-300 font-sans max-w-2xl mt-1.5">
                       {napOfTheDay.ai_insight}
                     </p>
                   </div>
@@ -682,10 +691,18 @@ export const DailyAIPredictionsSection: React.FC<DailyAIPredictionsSectionProps>
 
                     {/* Fixture Pairing */}
                     <div className="flex items-center justify-between gap-2 border-b border-[#202636] pb-2.5">
-                      <div className="font-bold text-sm text-white font-sans truncate">
-                        {pred.fixture}
+                      <div className="flex items-center gap-2 truncate">
+                        <div className="flex items-center gap-1.5 truncate">
+                          <TeamLogo teamName={pred.home_team} size="sm" />
+                          <span className="font-bold text-sm text-white font-sans truncate">{pred.home_team}</span>
+                        </div>
+                        <span className="text-xs text-slate-500 font-mono">vs</span>
+                        <div className="flex items-center gap-1.5 truncate">
+                          <TeamLogo teamName={pred.away_team} size="sm" />
+                          <span className="font-bold text-sm text-white font-sans truncate">{pred.away_team}</span>
+                        </div>
                       </div>
-                      <div className="text-[11px] font-mono text-slate-400 whitespace-nowrap">
+                      <div className="text-[11px] font-mono text-slate-400 whitespace-nowrap shrink-0">
                         Score Proj: <span className="text-[#21e786] font-bold">{pred.projected_score}</span>
                       </div>
                     </div>
@@ -833,20 +850,35 @@ export const DailyAIPredictionsSection: React.FC<DailyAIPredictionsSectionProps>
 
                     {/* Legs */}
                     <div className="space-y-1.5 pt-1">
-                      {slip.picks.map((pick, pIdx) => (
-                        <div
-                          key={pIdx}
-                          className="p-2 rounded-xl bg-[#0d1017] border border-[#1f2636] flex items-center justify-between gap-2 text-xs font-sans"
-                        >
-                          <div className="truncate">
-                            <div className="text-[11px] text-slate-400 truncate">{pick.fixture}</div>
-                            <div className="font-bold text-white text-xs truncate">{pick.pick}</div>
+                      {slip.picks.map((pick, pIdx) => {
+                        const [homeTeam, awayTeam] = pick.fixture.includes(' vs ')
+                          ? pick.fixture.split(' vs ')
+                          : [pick.fixture, ''];
+                        return (
+                          <div
+                            key={pIdx}
+                            className="p-2 rounded-xl bg-[#0d1017] border border-[#1f2636] flex items-center justify-between gap-2 text-xs font-sans"
+                          >
+                            <div className="truncate min-w-0">
+                              <div className="flex items-center gap-1.5 text-[11px] text-slate-400 truncate">
+                                {homeTeam && <TeamLogo teamName={homeTeam.trim()} size="xs" />}
+                                <span className="truncate">{homeTeam.trim()}</span>
+                                {awayTeam && (
+                                  <>
+                                    <span className="text-slate-600 text-[10px]">vs</span>
+                                    <TeamLogo teamName={awayTeam.trim()} size="xs" />
+                                    <span className="truncate">{awayTeam.trim()}</span>
+                                  </>
+                                )}
+                              </div>
+                              <div className="font-bold text-white text-xs truncate mt-0.5">{pick.pick}</div>
+                            </div>
+                            <span className="font-mono text-emerald-400 font-bold whitespace-nowrap text-[11px]">
+                              @{pick.odds.toFixed(2)}
+                            </span>
                           </div>
-                          <span className="font-mono text-emerald-400 font-bold whitespace-nowrap text-[11px]">
-                            @{pick.odds.toFixed(2)}
-                          </span>
-                        </div>
-                      ))}
+                        );
+                      })}
                     </div>
                   </div>
 
@@ -1083,12 +1115,20 @@ export const DailyAIPredictionsSection: React.FC<DailyAIPredictionsSectionProps>
 
                     {/* Fixture & Final Score */}
                     <div className="p-2.5 rounded-xl bg-[#0b0e14]/90 border border-[#1e2536] flex items-center justify-between gap-3">
-                      <div className="truncate">
-                        <div className="text-xs font-bold text-white truncate font-sans">
-                          {item.fixture}
+                      <div className="truncate min-w-0">
+                        <div className="flex items-center gap-2 truncate">
+                          <div className="flex items-center gap-1.5 truncate">
+                            <TeamLogo teamName={item.home_team} size="sm" />
+                            <span className="text-xs font-bold text-white truncate font-sans">{item.home_team}</span>
+                          </div>
+                          <span className="text-[10px] text-slate-500 font-mono">vs</span>
+                          <div className="flex items-center gap-1.5 truncate">
+                            <TeamLogo teamName={item.away_team} size="sm" />
+                            <span className="text-xs font-bold text-white truncate font-sans">{item.away_team}</span>
+                          </div>
                         </div>
                         {item.kickoff_at && (
-                          <div className="text-[10px] font-mono text-slate-400">
+                          <div className="text-[10px] font-mono text-slate-400 mt-0.5">
                             {formatDateTime(item.kickoff_at, timeZone).full}
                           </div>
                         )}

@@ -19,6 +19,7 @@ import {
 import { toPng, toBlob } from 'html-to-image';
 import { DailyPredictionSlip } from '../../api/types';
 import { formatDayDisplay } from '../../lib/utils';
+import { TeamLogo } from '../common/TeamLogo';
 
 export interface ShareSlipModalProps {
   isOpen: boolean;
@@ -202,8 +203,25 @@ export const ShareSlipModal: React.FC<ShareSlipModalProps> = ({
                           {Math.round(pick.probability * 100)}% Win Prob
                         </span>
                       </div>
-                      <div className="text-xs font-semibold text-slate-200 mt-0.5 truncate">
-                        {pick.fixture}
+                      <div className="flex items-center gap-1.5 text-xs font-semibold text-slate-200 mt-0.5 truncate">
+                        {(() => {
+                          const [home, away] = pick.fixture.includes(' vs ')
+                            ? pick.fixture.split(' vs ')
+                            : [pick.fixture, ''];
+                          return (
+                            <>
+                              {home && <TeamLogo teamName={home.trim()} size="xs" />}
+                              <span className="truncate">{home}</span>
+                              {away && (
+                                <>
+                                  <span className="text-slate-500 text-[10px]">vs</span>
+                                  <TeamLogo teamName={away.trim()} size="xs" />
+                                  <span className="truncate">{away}</span>
+                                </>
+                              )}
+                            </>
+                          );
+                        })()}
                       </div>
                       <div className="text-xs font-bold text-white mt-0.5 flex items-center gap-1">
                         <CheckCircle2 className="w-3.5 h-3.5 text-[#21e786] shrink-0" />

@@ -4,6 +4,7 @@ import { ChevronRight, Clock, Shield, CheckCircle2 } from 'lucide-react';
 import { MatchListItem } from '../../api/types';
 import { formatDateTime } from '../../lib/utils';
 import { Badge } from '../common/Badge';
+import { TeamLogo } from '../common/TeamLogo';
 
 export interface MatchRowProps {
   match: MatchListItem;
@@ -104,13 +105,7 @@ export const MatchRow: React.FC<MatchRowProps> = ({ match, timeZone = 'UTC' }) =
           <div className="flex-1 min-w-0 space-y-1.5">
             {/* Home Team */}
             <div className="flex items-center gap-2.5">
-              <span
-                className={`w-6 h-6 rounded-full flex items-center justify-center text-[10px] font-bold font-mono border shrink-0 ${getTeamColorStyle(
-                  match.home_team_name
-                )}`}
-              >
-                {homeInitials}
-              </span>
+              <TeamLogo teamName={match.home_team_name} size="md" />
               <span
                 className={`truncate text-xs sm:text-sm font-sans ${
                   isHomeWinner ? 'font-bold text-white' : isFinished ? 'text-slate-300 font-medium' : 'text-slate-100 font-medium'
@@ -123,13 +118,7 @@ export const MatchRow: React.FC<MatchRowProps> = ({ match, timeZone = 'UTC' }) =
 
             {/* Away Team */}
             <div className="flex items-center gap-2.5">
-              <span
-                className={`w-6 h-6 rounded-full flex items-center justify-center text-[10px] font-bold font-mono border shrink-0 ${getTeamColorStyle(
-                  match.away_team_name
-                )}`}
-              >
-                {awayInitials}
-              </span>
+              <TeamLogo teamName={match.away_team_name} size="md" />
               <span
                 className={`truncate text-xs sm:text-sm font-sans ${
                   isAwayWinner ? 'font-bold text-white' : isFinished ? 'text-slate-300 font-medium' : 'text-slate-100 font-medium'
