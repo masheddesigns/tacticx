@@ -20,6 +20,7 @@ import { toPng, toBlob } from 'html-to-image';
 import { DailyPredictionSlip } from '../../api/types';
 import { formatDayDisplay } from '../../lib/utils';
 import { TeamLogo } from '../common/TeamLogo';
+import { LeagueLogo } from '../common/LeagueLogo';
 
 export interface ShareSlipModalProps {
   isOpen: boolean;
@@ -197,6 +198,7 @@ export const ShareSlipModal: React.FC<ShareSlipModalProps> = ({
                   <div className="flex items-start justify-between gap-3">
                     <div className="min-w-0 flex-1">
                       <div className="flex items-center gap-1.5 text-[10px] font-mono text-slate-400">
+                        <LeagueLogo league={pick.league_code || pick.league} size="xs" />
                         <span>{pick.league}</span>
                         <span>•</span>
                         <span className="text-[#21e786] font-bold">

@@ -7,6 +7,7 @@ import { DateSliderTabs } from '../components/matches/DateSliderTabs';
 import { getRelativeDateLabel, getTodayString, getDayOffsetString, formatDayDisplay } from '../lib/utils';
 import { LoadingSpinner } from '../components/common/LoadingSpinner';
 import { ErrorCard } from '../components/common/ErrorCard';
+import { LeagueLogo } from '../components/common/LeagueLogo';
 
 export interface LeagueInfo {
   name: string;
@@ -424,7 +425,7 @@ export const MatchExplorerPage: React.FC = () => {
                           {/* FotMob League Banner Header */}
                           <div className="px-4 py-2 bg-[#12151d] border-b border-[#242938] flex items-center justify-between">
                             <div className="flex items-center gap-2.5">
-                              <span className="text-base select-none">{lMeta.flag}</span>
+                              <LeagueLogo league={leagueKey} size="sm" />
                               <div className="flex items-center gap-2">
                                 <span className="text-xs font-bold text-white tracking-wide font-sans">
                                   {lMeta.name}

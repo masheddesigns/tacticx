@@ -4,6 +4,7 @@ import { MatchSection, CutoffSection } from '../../api/types';
 import { formatDateTime } from '../../lib/utils';
 import { Badge } from '../common/Badge';
 import { TeamLogo } from '../common/TeamLogo';
+import { LeagueLogo } from '../common/LeagueLogo';
 
 export interface MatchHeaderProps {
   match: MatchSection;
@@ -53,6 +54,7 @@ export const MatchHeader: React.FC<MatchHeaderProps> = ({ match, cutoff, onShare
       {/* Top bar: Competition, Season, Status */}
       <div className="flex flex-wrap items-center justify-between gap-3 pb-4 border-b border-[#242938]">
         <div className="flex items-center gap-2.5">
+          <LeagueLogo league={compName} size="sm" />
           <Badge variant="purple" size="md">
             {compName}
           </Badge>

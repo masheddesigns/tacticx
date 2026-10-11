@@ -36,6 +36,7 @@ import { usePredictionHistory } from '../../api/queries';
 import { formatDayDisplay, formatDateTime } from '../../lib/utils';
 import { ShareSlipModal } from './ShareSlipModal';
 import { TeamLogo } from '../common/TeamLogo';
+import { LeagueLogo } from '../common/LeagueLogo';
 
 export interface DailyAIPredictionsSectionProps {
   rankedPredictions?: DailyRankedPrediction[];
@@ -668,9 +669,10 @@ export const DailyAIPredictionsSection: React.FC<DailyAIPredictionsSectionProps>
                       <Flame className="w-3.5 h-3.5 text-amber-400 fill-amber-400" />
                       <span>RANK #1 • AI BET OF THE DAY</span>
                     </span>
-                    <span className="text-xs text-slate-400 font-sans">
-                      {napOfTheDay.league_flag} {napOfTheDay.league_name}
-                    </span>
+                    <div className="flex items-center gap-1.5 text-xs text-slate-300 font-sans">
+                      <LeagueLogo league={napOfTheDay.league_code} size="xs" />
+                      <span>{napOfTheDay.league_name}</span>
+                    </div>
                   </div>
 
                   <div>
@@ -912,7 +914,7 @@ export const DailyAIPredictionsSection: React.FC<DailyAIPredictionsSectionProps>
                         </span>
 
                         <div className="flex items-center gap-1.5 text-xs text-slate-300 font-sans">
-                          <span>{pred.league_flag}</span>
+                          <LeagueLogo league={pred.league_code} size="xs" />
                           <span className="font-medium text-slate-200">{pred.league_name}</span>
                         </div>
                       </div>
@@ -1454,7 +1456,7 @@ export const DailyAIPredictionsSection: React.FC<DailyAIPredictionsSectionProps>
                                 >
                                   <div className="flex items-center justify-between gap-2">
                                     <div className="flex items-center gap-1.5 min-w-0 truncate">
-                                      <span className="text-xs shrink-0">{pick.league_flag}</span>
+                                      <LeagueLogo league={pick.league_code} size="xs" />
                                       <TeamLogo teamName={pick.home_team} size="xs" />
                                       <span className="font-bold text-white truncate">{pick.home_team}</span>
                                       <span className="text-slate-500 text-[10px]">vs</span>
@@ -1581,9 +1583,9 @@ export const DailyAIPredictionsSection: React.FC<DailyAIPredictionsSectionProps>
                       >
                         {/* Header: League & Status Banner */}
                         <div className="flex items-center justify-between gap-2">
-                          <div className="flex items-center gap-1.5 text-xs text-slate-400 font-sans">
-                            <span>{item.league_flag}</span>
-                            <span className="font-semibold text-slate-300">{item.league_name}</span>
+                          <div className="flex items-center gap-1.5 text-xs text-slate-300 font-sans">
+                            <LeagueLogo league={item.league_code} size="xs" />
+                            <span className="font-semibold text-slate-200">{item.league_name}</span>
                           </div>
 
                           <div className="flex items-center gap-1.5">

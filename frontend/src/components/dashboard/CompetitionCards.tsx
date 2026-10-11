@@ -1,8 +1,9 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { Trophy, Calendar, Eye, ArrowUpRight } from 'lucide-react';
+import { Calendar, Eye, ArrowUpRight } from 'lucide-react';
 import { formatDateTime } from '../../lib/utils';
 import { Badge } from '../common/Badge';
+import { LeagueLogo } from '../common/LeagueLogo';
 
 export interface CompetitionData {
   code: string;
@@ -31,10 +32,8 @@ export const CompetitionCards: React.FC<CompetitionCardsProps> = ({ competitions
           >
             <div>
               <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <div className="p-2 rounded-lg bg-[#0e1015] border border-[#242938] text-amber-400">
-                    <Trophy className="w-4 h-4" />
-                  </div>
+                <div className="flex items-center gap-3">
+                  <LeagueLogo league={comp.code} size="lg" className="shadow-md" />
                   <div>
                     <h3 className="font-bold text-sm text-white font-sans">{comp.name}</h3>
                     <span className="text-[11px] font-mono text-slate-400">{comp.code}</span>
