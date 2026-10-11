@@ -8,8 +8,9 @@ export default defineConfig({
     port: 3000,
     proxy: {
       '/api': {
-        target: 'http://localhost:18000',
+        target: process.env.VITE_BACKEND_URL || 'https://tacticx.onrender.com',
         changeOrigin: true,
+        secure: false,
       },
     },
   },
