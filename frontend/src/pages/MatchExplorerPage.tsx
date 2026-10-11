@@ -38,6 +38,18 @@ export function getLeagueMeta(leagueKey?: string | null): LeagueInfo {
   if (upper.includes('NATIONS_LEAGUE')) {
     return { name: 'UEFA Nations League', country: 'Europe', flag: '🇪🇺' };
   }
+  if (upper.includes('MLS') || upper.includes('MAJOR_LEAGUE_SOCCER')) {
+    return { name: 'Major League Soccer', country: 'USA', flag: '🇺🇸' };
+  }
+  if (upper.includes('LIGA_ARG') || upper.includes('ARGENTINA') || upper.includes('PROFESIONAL')) {
+    return { name: 'Liga Profesional', country: 'Argentina', flag: '🇦🇷' };
+  }
+  if (upper.includes('BRA_SERIE_A') || upper.includes('BRASIL') || upper.includes('SERIE_A_BRAZIL') || upper.includes('BRASILEIRÃO') || upper.includes('BRASILEIRAO')) {
+    return { name: 'Brasileirão Série A', country: 'Brazil', flag: '🇧🇷' };
+  }
+  if (upper.includes('ISL') || upper.includes('INDIAN_SUPER_LEAGUE') || upper.includes('INDIA')) {
+    return { name: 'Indian Super League', country: 'India', flag: '🇮🇳' };
+  }
   if (upper.includes('FRIENDLIES') || upper.includes('FRIENDLY')) {
     return { name: 'Club Friendlies', country: 'International', flag: '🌍' };
   }

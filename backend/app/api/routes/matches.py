@@ -369,7 +369,7 @@ def get_daily_slips(
     poisson_model = PoissonModel()
 
     # Sort matches by high-profile league hierarchy and evaluate top 12 matches for speed
-    priority_order = {1: 1, 6: 1.5, 2: 2, 3: 3, 4: 4, 5: 5, 7: 7, 8: 8}
+    priority_order = {1: 1, 6: 1.5, 2: 2, 3: 3, 4: 4, 5: 5, 7: 7, 8: 8, 9: 9, 10: 10, 11: 11, 12: 12}
     sorted_matches = sorted(matches, key=lambda x: priority_order.get(x.league_id, 99))
     eval_matches = sorted_matches[:12]
 

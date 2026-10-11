@@ -105,6 +105,10 @@ export const DashboardPage: React.FC = () => {
     'BUNDESLIGA',
     'LIGUE_1',
     'UCL',
+    'MLS',
+    'LIGA_ARG',
+    'BRA_SERIE_A',
+    'ISL',
     'NATIONS_LEAGUE',
     'FRIENDLIES',
   ];
@@ -122,7 +126,7 @@ export const DashboardPage: React.FC = () => {
     {
       code: 'LA_LIGA',
       name: 'La Liga',
-      season: '2023/24 Completed',
+      season: '2026/27 Season',
       fixtureCount: competitionsMap['LA_LIGA']?.fixture_count || 0,
       upcomingCount: competitionsMap['LA_LIGA']?.upcoming || 0,
       latestObservation: competitionsMap['LA_LIGA']?.latest_observation,
@@ -130,7 +134,7 @@ export const DashboardPage: React.FC = () => {
     {
       code: 'SERIE_A',
       name: 'Serie A',
-      season: '2023/24 Completed',
+      season: '2026/27 Season',
       fixtureCount: competitionsMap['SERIE_A']?.fixture_count || 0,
       upcomingCount: competitionsMap['SERIE_A']?.upcoming || 0,
       latestObservation: competitionsMap['SERIE_A']?.latest_observation,
@@ -138,7 +142,7 @@ export const DashboardPage: React.FC = () => {
     {
       code: 'BUNDESLIGA',
       name: 'Bundesliga',
-      season: '2023/24 Completed',
+      season: '2026/27 Season',
       fixtureCount: competitionsMap['BUNDESLIGA']?.fixture_count || 0,
       upcomingCount: competitionsMap['BUNDESLIGA']?.upcoming || 0,
       latestObservation: competitionsMap['BUNDESLIGA']?.latest_observation,
@@ -146,7 +150,7 @@ export const DashboardPage: React.FC = () => {
     {
       code: 'LIGUE_1',
       name: 'Ligue 1',
-      season: '2023/24 Completed',
+      season: '2026/27 Season',
       fixtureCount: competitionsMap['LIGUE_1']?.fixture_count || 0,
       upcomingCount: competitionsMap['LIGUE_1']?.upcoming || 0,
       latestObservation: competitionsMap['LIGUE_1']?.latest_observation,
@@ -154,10 +158,42 @@ export const DashboardPage: React.FC = () => {
     {
       code: 'UCL',
       name: 'UEFA Champions League',
-      season: '2024/25 Completed',
+      season: '2026/27 Group Stage',
       fixtureCount: competitionsMap['UCL']?.fixture_count || 0,
       upcomingCount: competitionsMap['UCL']?.upcoming || 0,
       latestObservation: competitionsMap['UCL']?.latest_observation,
+    },
+    {
+      code: 'MLS',
+      name: 'Major League Soccer',
+      season: '2026 Season',
+      fixtureCount: competitionsMap['MLS']?.fixture_count || 0,
+      upcomingCount: competitionsMap['MLS']?.upcoming || 0,
+      latestObservation: competitionsMap['MLS']?.latest_observation,
+    },
+    {
+      code: 'LIGA_ARG',
+      name: 'Liga Profesional',
+      season: '2026 Season',
+      fixtureCount: competitionsMap['LIGA_ARG']?.fixture_count || 0,
+      upcomingCount: competitionsMap['LIGA_ARG']?.upcoming || 0,
+      latestObservation: competitionsMap['LIGA_ARG']?.latest_observation,
+    },
+    {
+      code: 'BRA_SERIE_A',
+      name: 'Brasileirão Série A',
+      season: '2026 Season',
+      fixtureCount: competitionsMap['BRA_SERIE_A']?.fixture_count || 0,
+      upcomingCount: competitionsMap['BRA_SERIE_A']?.upcoming || 0,
+      latestObservation: competitionsMap['BRA_SERIE_A']?.latest_observation,
+    },
+    {
+      code: 'ISL',
+      name: 'Indian Super League',
+      season: '2026/27 Season',
+      fixtureCount: competitionsMap['ISL']?.fixture_count || 0,
+      upcomingCount: competitionsMap['ISL']?.upcoming || 0,
+      latestObservation: competitionsMap['ISL']?.latest_observation,
     },
     {
       code: 'NATIONS_LEAGUE',
@@ -200,10 +236,18 @@ export const DashboardPage: React.FC = () => {
     'LIGUE_1': 5,
     'UEFA Champions League': 6,
     'UCL': 6,
-    'UEFA Nations League': 7,
-    'NATIONS_LEAGUE': 7,
-    'International Friendlies': 8,
-    'FRIENDLIES': 8,
+    'Major League Soccer': 7,
+    'MLS': 7,
+    'Liga Profesional': 8,
+    'LIGA_ARG': 8,
+    'Brasileirão Série A': 9,
+    'BRA_SERIE_A': 9,
+    'Indian Super League': 10,
+    'ISL': 10,
+    'UEFA Nations League': 11,
+    'NATIONS_LEAGUE': 11,
+    'International Friendlies': 12,
+    'FRIENDLIES': 12,
   };
 
   // Group homepage matches by League (FotMob standard)
@@ -604,7 +648,7 @@ export const DashboardPage: React.FC = () => {
             <Database className="w-4 h-4 text-emerald-400" />
             <span>Supported Competitions Overview</span>
           </h2>
-          <span className="text-xs font-mono text-slate-400">8 Supported Competitions</span>
+          <span className="text-xs font-mono text-slate-400">12 Supported Competitions</span>
         </div>
 
         <CompetitionCards competitions={primaryCompetitions} />

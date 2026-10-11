@@ -96,6 +96,18 @@ def main():
             logger.info("seed_full_october_fixtures finished successfully.")
         except Exception as seed_err:
             logger.error(f"Error running seed_full_october_fixtures: {seed_err}")
+
+        # 4. Ensure Expanded Leagues (MLS, Liga Profesional, Brasileirão, ISL) are seeded
+        try:
+            try:
+                from scripts.seed_expanded_leagues import seed_expanded_leagues
+            except ImportError:
+                from backend.scripts.seed_expanded_leagues import seed_expanded_leagues
+            logger.info("Running seed_expanded_leagues for MLS, Liga Profesional, Brasileirão & ISL...")
+            seed_expanded_leagues(db)
+            logger.info("seed_expanded_leagues finished successfully.")
+        except Exception as exp_err:
+            logger.error(f"Error running seed_expanded_leagues: {exp_err}")
     except Exception as e:
         logger.error(f"Seeding check failed: {e}")
     finally:
