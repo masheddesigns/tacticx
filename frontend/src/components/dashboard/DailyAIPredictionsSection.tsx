@@ -44,6 +44,8 @@ export interface DailyAIPredictionsSectionProps {
   dateStr: string;
   timeZone: 'IST' | 'UTC' | 'local' | string;
   isLoading?: boolean;
+  error?: Error | null;
+  onRetry?: () => void;
   onDateChange?: (date: string) => void;
 }
 
@@ -57,6 +59,8 @@ export const DailyAIPredictionsSection: React.FC<DailyAIPredictionsSectionProps>
   dateStr,
   timeZone = 'IST',
   isLoading = false,
+  error = null,
+  onRetry,
   onDateChange,
 }) => {
   const [activeTab, setActiveTab] = useState<ViewTabMode>('RANKED_MATCHES');
@@ -561,19 +565,31 @@ export const DailyAIPredictionsSection: React.FC<DailyAIPredictionsSectionProps>
             <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[#171c28] border border-[#262f42] text-slate-300">
               <Target className="w-3.5 h-3.5 text-[#21e786]" />
               <span>Analyzed:</span>
-              <span className="text-white font-bold">{totalAnalyzed} Matches</span>
+              {isLoading ? (
+                <span className="inline-block w-8 h-3.5 bg-slate-700/60 rounded animate-pulse" />
+              ) : (
+                <span className="text-white font-bold">{totalAnalyzed} Matches</span>
+              )}
             </div>
 
             <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[#171c28] border border-[#262f42] text-slate-300">
               <Flame className="w-3.5 h-3.5 text-amber-400" />
               <span>Top Bankers:</span>
-              <span className="text-amber-300 font-bold">{topBankersCount} High-Win</span>
+              {isLoading ? (
+                <span className="inline-block w-8 h-3.5 bg-slate-700/60 rounded animate-pulse" />
+              ) : (
+                <span className="text-amber-300 font-bold">{topBankersCount} High-Win</span>
+              )}
             </div>
 
             <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[#171c28] border border-[#262f42] text-slate-300">
               <TrendingUp className="w-3.5 h-3.5 text-emerald-400" />
               <span>+EV Value:</span>
-              <span className="text-emerald-300 font-bold">{highValueCount} Picks</span>
+              {isLoading ? (
+                <span className="inline-block w-8 h-3.5 bg-slate-700/60 rounded animate-pulse" />
+              ) : (
+                <span className="text-emerald-300 font-bold">{highValueCount} Picks</span>
+              )}
             </div>
           </div>
         </div>
@@ -590,7 +606,7 @@ export const DailyAIPredictionsSection: React.FC<DailyAIPredictionsSectionProps>
               }`}
             >
               <Trophy className="w-3.5 h-3.5" />
-              <span>Active AI Picks ({activePredictions.length})</span>
+              <span>Active AI Picks {isLoading ? '…' : `(${activePredictions.length})`}</span>
             </button>
 
             <button
@@ -602,7 +618,7 @@ export const DailyAIPredictionsSection: React.FC<DailyAIPredictionsSectionProps>
               }`}
             >
               <Layers className="w-3.5 h-3.5" />
-              <span>Curated Slips & Accas ({activeSlips.length})</span>
+              <span>Curated Slips & Accas {isLoading ? '…' : `(${activeSlips.length})`}</span>
             </button>
 
             <button
@@ -863,8 +879,34 @@ export const DailyAIPredictionsSection: React.FC<DailyAIPredictionsSectionProps>
 
           {/* 3. Ranked Predictions Cards Grid */}
           {isLoading ? (
-            <div className="p-12 text-center text-slate-400 font-mono text-xs">
-              Calculating Poisson simulations and situational market rankings...
+            <div className="p-8 rounded-2xl border border-[#242938] bg-[#141822] text-center space-y-4">
+              <div className="w-10 h-10 mx-auto rounded-full border-2 border-[#21e786] border-t-transparent animate-spin" />
+              <div className="space-y-1">
+                <h4 className="text-sm font-semibold text-slate-200">
+                  Simulating Poisson Goals & Market Value...
+                </h4>
+                <p className="text-xs text-slate-400 max-w-md mx-auto">
+                  Running situational model simulations across fixtures to calculate statistical banker certainty, +EV edges, and projected scorelines.
+                </p>
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3 pt-2 text-left opacity-60">
+                <div className="h-32 rounded-xl bg-[#1a202c] animate-pulse border border-[#2b3548]" />
+                <div className="h-32 rounded-xl bg-[#1a202c] animate-pulse border border-[#2b3548]" />
+              </div>
+            </div>
+          ) : error ? (
+            <div className="p-8 text-center rounded-2xl border border-rose-900/40 bg-[#161218] space-y-3">
+              <XCircle className="w-8 h-8 text-rose-400 mx-auto" />
+              <h4 className="font-semibold text-sm text-slate-200">Unable to Load Predictions</h4>
+              <p className="text-xs text-rose-300">{error.message || 'Error communicating with AI engine.'}</p>
+              {onRetry && (
+                <button
+                  onClick={onRetry}
+                  className="px-4 py-1.5 rounded-lg bg-[#21e786] text-black font-bold text-xs hover:bg-[#1bc772] transition-colors"
+                >
+                  Retry Calculation
+                </button>
+              )}
             </div>
           ) : filteredPredictions.length === 0 ? (
             <div className="p-10 text-center rounded-2xl border border-[#242938] bg-[#141822] space-y-2">
@@ -1070,7 +1112,19 @@ export const DailyAIPredictionsSection: React.FC<DailyAIPredictionsSectionProps>
       {/* 3. TAB B: CURATED COMBO SLIPS & ACCAS */}
       {activeTab === 'COMBO_SLIPS' && (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {activeSlips.length === 0 ? (
+          {isLoading ? (
+            <div className="col-span-full p-8 rounded-2xl border border-[#242938] bg-[#141822] text-center space-y-4">
+              <div className="w-10 h-10 mx-auto rounded-full border-2 border-[#21e786] border-t-transparent animate-spin" />
+              <div className="space-y-1">
+                <h4 className="text-sm font-semibold text-slate-200">
+                  Building Mathematical Accumulator Slips...
+                </h4>
+                <p className="text-xs text-slate-400 max-w-md mx-auto">
+                  Curating multi-leg bankers, goals combos, and value accas across active fixtures.
+                </p>
+              </div>
+            </div>
+          ) : activeSlips.length === 0 ? (
             <div className="col-span-full p-10 text-center rounded-2xl border border-[#242938] bg-[#141822] text-slate-400 text-xs font-sans">
               No accumulator slips generated for this date.
             </div>

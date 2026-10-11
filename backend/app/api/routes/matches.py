@@ -320,6 +320,7 @@ def _compute_stat_projections_data(db: Session, m: Match, team_cache: Optional[d
 
 
 _DAILY_SLIPS_CACHE: Dict[str, Any] = {}
+_PRED_MATCH_CACHE: Dict[int, Dict[str, Any]] = {}
 
 
 @router.get("/daily-slips", summary="Curated daily prediction slips & ranked match predictions")
@@ -347,7 +348,7 @@ def get_daily_slips(
     cache_key = f"{target_date_str}_{tz or 'IST'}"
     # Fast in-memory cache return (< 1ms)
     cached = _DAILY_SLIPS_CACHE.get(cache_key)
-    if cached and (time.time() - cached["ts"] < 20):
+    if cached and (time.time() - cached["ts"] < 180):
         return cached["data"]
 
     _refresh_live_matches_if_needed(db)
@@ -397,10 +398,10 @@ def get_daily_slips(
     team_stat_cache = {}
     poisson_model = PoissonModel()
 
-    # Prioritize official leagues and evaluate up to 40 matches across all competitions
+    # Prioritize official leagues and evaluate up to 25 matches across all competitions
     priority_order = {1: 1, 6: 1.5, 2: 2, 3: 3, 4: 4, 5: 5, 10: 6, 7: 7, 9: 8, 8: 9, 11: 10, 12: 11}
     sorted_matches = sorted(matches, key=lambda x: priority_order.get(x.league_id, 99))
-    eval_matches = sorted_matches[:40]
+    eval_matches = sorted_matches[:25]
 
     for m in eval_matches:
         try:
@@ -413,48 +414,77 @@ def get_daily_slips(
             lg_code = league.code if league else "LEAGUE"
             lg_name = league.name if league else "Football"
 
-            # Compute stat projections
-            proj_data = _compute_stat_projections_data(db, m, team_cache=team_stat_cache)
-            comb = proj_data.get("combined_projections") or {}
-            t_proj = proj_data.get("team_projections") or {}
-            h_corn = t_proj.get("home", {}).get("corners", 5.0)
-            a_corn = t_proj.get("away", {}).get("corners", 4.5)
-            c_total = comb.get("corners_total", 9.5)
-            cards_total = comb.get("yellow_cards_total", 3.5)
-            sot_total = comb.get("shots_on_target", 8.5)
+            # Check per-match cache (10 min TTL or status change)
+            cached_m = _PRED_MATCH_CACHE.get(m.id)
+            if cached_m and cached_m.get("status") == m.status and (time.time() - cached_m.get("ts", 0) < 600):
+                projected_stats_payload = cached_m["projected_stats_payload"]
+                p_h = cached_m["p_h"]
+                p_d = cached_m["p_d"]
+                p_a = cached_m["p_a"]
+                p_o15 = cached_m["p_o15"]
+                p_o25 = cached_m["p_o25"]
+                p_btts = cached_m["p_btts"]
+                lam_h = cached_m["lam_h"]
+                lam_a = cached_m["lam_a"]
+                proj_data = cached_m.get("proj_data", {})
+            else:
+                # Compute stat projections
+                proj_data = _compute_stat_projections_data(db, m, team_cache=team_stat_cache)
+                comb = proj_data.get("combined_projections") or {}
+                t_proj = proj_data.get("team_projections") or {}
+                h_corn = t_proj.get("home", {}).get("corners", 5.0)
+                a_corn = t_proj.get("away", {}).get("corners", 4.5)
+                c_total = comb.get("corners_total", 9.5)
+                cards_total = comb.get("yellow_cards_total", 3.5)
+                sot_total = comb.get("shots_on_target", 8.5)
 
-            projected_stats_payload = {
-                "corners_total": round(c_total, 1),
-                "corners_home": round(h_corn, 1),
-                "corners_away": round(a_corn, 1),
-                "cards_total": round(cards_total, 1),
-                "shots_on_target": round(sot_total, 1),
-            }
+                projected_stats_payload = {
+                    "corners_total": round(c_total, 1),
+                    "corners_home": round(h_corn, 1),
+                    "corners_away": round(a_corn, 1),
+                    "cards_total": round(cards_total, 1),
+                    "shots_on_target": round(sot_total, 1),
+                }
 
-            try:
-                pred = poisson_model.predict(db, m.id, cutoff=m.kickoff_at or datetime.now(timezone.utc))
-                p_h = float(pred.home_win_probability)
-                p_d = float(pred.draw_probability)
-                p_a = float(pred.away_win_probability)
-                p_o15 = float(pred.over_1_5_probability)
-                p_o25 = float(pred.over_2_5_probability)
-                p_btts = float(pred.btts_yes_probability)
-                lam_h = float(getattr(pred, "expected_home_goals", None) or 1.4)
-                lam_a = float(getattr(pred, "expected_away_goals", None) or 1.1)
-            except Exception:
-                # Robust Poisson model fallback for UEFA Champions League and cup competitions
-                import math
-                h_sot = t_proj.get("home", {}).get("shots_on_target", 4.5)
-                a_sot = t_proj.get("away", {}).get("shots_on_target", 3.8)
-                lam_h = max(0.6, min(3.2, h_sot * 0.32))
-                lam_a = max(0.5, min(2.8, a_sot * 0.30))
-                grid = [[(math.exp(-lam_h) * (lam_h ** i) / math.factorial(i)) * (math.exp(-lam_a) * (lam_a ** j) / math.factorial(j)) for j in range(10)] for i in range(10)]
-                p_h = sum(grid[i][j] for i in range(10) for j in range(10) if i > j)
-                p_d = sum(grid[i][j] for i in range(10) for j in range(10) if i == j)
-                p_a = sum(grid[i][j] for i in range(10) for j in range(10) if i < j)
-                p_o15 = sum(grid[i][j] for i in range(10) for j in range(10) if i + j >= 2)
-                p_o25 = sum(grid[i][j] for i in range(10) for j in range(10) if i + j >= 3)
-                p_btts = sum(grid[i][j] for i in range(10) for j in range(10) if i >= 1 and j >= 1)
+                try:
+                    pred = poisson_model.predict(db, m.id, cutoff=m.kickoff_at or datetime.now(timezone.utc))
+                    p_h = float(pred.home_win_probability)
+                    p_d = float(pred.draw_probability)
+                    p_a = float(pred.away_win_probability)
+                    p_o15 = float(pred.over_1_5_probability)
+                    p_o25 = float(pred.over_2_5_probability)
+                    p_btts = float(pred.btts_yes_probability)
+                    lam_h = float(getattr(pred, "expected_home_goals", None) or 1.4)
+                    lam_a = float(getattr(pred, "expected_away_goals", None) or 1.1)
+                except Exception:
+                    # Robust Poisson model fallback for UEFA Champions League and cup competitions
+                    import math
+                    h_sot = t_proj.get("home", {}).get("shots_on_target", 4.5)
+                    a_sot = t_proj.get("away", {}).get("shots_on_target", 3.8)
+                    lam_h = max(0.6, min(3.2, h_sot * 0.32))
+                    lam_a = max(0.5, min(2.8, a_sot * 0.30))
+                    grid = [[(math.exp(-lam_h) * (lam_h ** i) / math.factorial(i)) * (math.exp(-lam_a) * (lam_a ** j) / math.factorial(j)) for j in range(10)] for i in range(10)]
+                    p_h = sum(grid[i][j] for i in range(10) for j in range(10) if i > j)
+                    p_d = sum(grid[i][j] for i in range(10) for j in range(10) if i == j)
+                    p_a = sum(grid[i][j] for i in range(10) for j in range(10) if i < j)
+                    p_o15 = sum(grid[i][j] for i in range(10) for j in range(10) if i + j >= 2)
+                    p_o25 = sum(grid[i][j] for i in range(10) for j in range(10) if i + j >= 3)
+                    p_btts = sum(grid[i][j] for i in range(10) for j in range(10) if i >= 1 and j >= 1)
+
+                _PRED_MATCH_CACHE[m.id] = {
+                    "ts": time.time(),
+                    "status": m.status,
+                    "projected_stats_payload": projected_stats_payload,
+                    "p_h": p_h,
+                    "p_d": p_d,
+                    "p_a": p_a,
+                    "p_o15": p_o15,
+                    "p_o25": p_o25,
+                    "p_btts": p_btts,
+                    "lam_h": lam_h,
+                    "lam_a": lam_a,
+                    "proj_data": proj_data,
+                }
 
             proj_score = f"{int(round(lam_h))} - {int(round(lam_a))}"
 

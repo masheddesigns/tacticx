@@ -98,7 +98,12 @@ export const DashboardPage: React.FC = () => {
   });
 
   // Query daily prediction slips & ranked predictions for currently active day in IST
-  const { data: dailySlipsData, isLoading: dailySlipsLoading } = useDailySlips(selectedDate || todayStr, timeZone);
+  const {
+    data: dailySlipsData,
+    isLoading: dailySlipsLoading,
+    error: dailySlipsError,
+    refetch: refetchDailySlips,
+  } = useDailySlips(selectedDate || todayStr, timeZone);
 
   const availableLeagueCodes = leaguesData?.data?.map((l) => l.code) || [
     'EPL',
@@ -435,6 +440,8 @@ export const DashboardPage: React.FC = () => {
         dateStr={selectedDate || todayStr}
         timeZone={timeZone}
         isLoading={dailySlipsLoading}
+        error={dailySlipsError as Error | undefined}
+        onRetry={() => refetchDailySlips()}
         onDateChange={handleSelectDay}
       />
 

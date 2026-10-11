@@ -31,8 +31,9 @@ export function useDailySlips(date?: string, tz?: string) {
   return useQuery({
     queryKey: QUERY_KEYS.dailySlips(date, tz),
     queryFn: ({ signal }) => apiClient.getDailySlips({ date, tz, signal }),
-    staleTime: 8 * 1000,
-    refetchInterval: 12 * 1000,
+    staleTime: 60 * 1000,
+    refetchInterval: 120 * 1000,
+    retry: 2,
   });
 }
 
