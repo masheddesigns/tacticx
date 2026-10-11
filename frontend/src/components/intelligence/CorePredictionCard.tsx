@@ -4,6 +4,7 @@ import { CorePredictionSection, CutoffSection } from '../../api/types';
 import { formatProbability, formatDecimalOdds } from '../../lib/utils';
 import { ProbabilityBar } from './ProbabilityBar';
 import { Badge } from '../common/Badge';
+import { TeamLogo } from '../common/TeamLogo';
 
 export interface CorePredictionCardProps {
   prediction: CorePredictionSection;
@@ -63,8 +64,9 @@ export const CorePredictionCard: React.FC<CorePredictionCardProps> = ({
         {/* Home */}
         <div className="p-3.5 rounded-lg bg-slate-900/80 border border-blue-900/40 text-center flex flex-col justify-between">
           <div>
-            <span className="text-[11px] font-mono font-semibold text-blue-400 uppercase tracking-wider block">
-              Home ({homeTeamName})
+            <span className="text-[11px] font-mono font-semibold text-blue-400 uppercase tracking-wider flex items-center justify-center gap-1.5">
+              <TeamLogo teamName={homeTeamName} size="xs" />
+              <span>Home ({homeTeamName})</span>
             </span>
             <div className="text-2xl font-mono font-bold text-slate-100 mt-1">
               {formatProbability(prediction.home)}
@@ -111,8 +113,9 @@ export const CorePredictionCard: React.FC<CorePredictionCardProps> = ({
         {/* Away */}
         <div className="p-3.5 rounded-lg bg-slate-900/80 border border-emerald-900/40 text-center flex flex-col justify-between">
           <div>
-            <span className="text-[11px] font-mono font-semibold text-emerald-400 uppercase tracking-wider block">
-              Away ({awayTeamName})
+            <span className="text-[11px] font-mono font-semibold text-emerald-400 uppercase tracking-wider flex items-center justify-center gap-1.5">
+              <TeamLogo teamName={awayTeamName} size="xs" />
+              <span>Away ({awayTeamName})</span>
             </span>
             <div className="text-2xl font-mono font-bold text-slate-100 mt-1">
               {formatProbability(prediction.away)}

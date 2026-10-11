@@ -3,7 +3,7 @@ import { getTeamMeta } from '../../lib/teamLogos';
 
 export interface TeamLogoProps {
   teamName?: string | null;
-  size?: 'xs' | 'sm' | 'md' | 'lg' | 'xl';
+  size?: 'xs' | 'sm' | 'md' | 'lg' | 'xl' | '2xl';
   className?: string;
   imgClassName?: string;
   showFallbackText?: boolean;
@@ -15,6 +15,7 @@ const SIZE_MAP = {
   md: { box: 'w-6 h-6', text: 'text-[11px]' },
   lg: { box: 'w-8 h-8', text: 'text-xs' },
   xl: { box: 'w-10 h-10', text: 'text-sm' },
+  '2xl': { box: 'w-14 h-14 sm:w-16 sm:h-16', text: 'text-base sm:text-lg' },
 };
 
 /**

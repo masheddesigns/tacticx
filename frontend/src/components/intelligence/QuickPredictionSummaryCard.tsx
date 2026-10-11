@@ -15,6 +15,7 @@ import {
 } from 'lucide-react';
 import { MatchIntelligence, StatProjectionsResponse, MatchStatComparisonResponse } from '../../api/types';
 import { probabilityToBookmakerOdds } from '../../lib/utils';
+import { TeamLogo } from '../common/TeamLogo';
 
 export interface QuickPredictionSummaryCardProps {
   intel: MatchIntelligence;
@@ -124,9 +125,15 @@ export const QuickPredictionSummaryCard: React.FC<QuickPredictionSummaryCardProp
           </div>
 
           <div className="flex items-center justify-between text-[11px] font-mono text-slate-400 pt-1">
-            <span>{homeTeamName.slice(0, 3).toUpperCase()}: {homeProb}%</span>
+            <span className="flex items-center gap-1.5">
+              <TeamLogo teamName={homeTeamName} size="xs" />
+              <span>{homeTeamName.slice(0, 3).toUpperCase()}: {homeProb}%</span>
+            </span>
             <span>Draw: {drawProb}%</span>
-            <span>{awayTeamName.slice(0, 3).toUpperCase()}: {awayProb}%</span>
+            <span className="flex items-center gap-1.5">
+              <TeamLogo teamName={awayTeamName} size="xs" />
+              <span>{awayTeamName.slice(0, 3).toUpperCase()}: {awayProb}%</span>
+            </span>
           </div>
 
           {/* Parimatch-style Betting Slip Odds Pills */}
@@ -233,8 +240,13 @@ export const QuickPredictionSummaryCard: React.FC<QuickPredictionSummaryCardProp
               <span className="text-slate-400 flex items-center gap-1 font-sans">
                 <Flag className="w-3 h-3 text-purple-400" /> Corners:
               </span>
-              <span className="text-white font-bold">
-                {cornersHome} - {cornersAway} ({cornersTot} total)
+              <span className="text-white font-bold flex items-center gap-1">
+                <TeamLogo teamName={homeTeamName} size="xs" />
+                <span>{cornersHome}</span>
+                <span className="text-slate-500">-</span>
+                <span>{cornersAway}</span>
+                <TeamLogo teamName={awayTeamName} size="xs" />
+                <span className="text-slate-400 font-normal">({cornersTot} tot)</span>
               </span>
             </div>
 

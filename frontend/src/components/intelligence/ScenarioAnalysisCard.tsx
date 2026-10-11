@@ -4,6 +4,7 @@ import { ScenarioItem } from '../../api/types';
 import { formatProbability, formatLambda } from '../../lib/utils';
 import { ProbabilityBar } from './ProbabilityBar';
 import { Badge } from '../common/Badge';
+import { TeamLogo } from '../common/TeamLogo';
 
 export interface ScenarioAnalysisCardProps {
   scenarios: ScenarioItem[];
@@ -104,7 +105,10 @@ export const ScenarioAnalysisCard: React.FC<ScenarioAnalysisCardProps> = ({
         {/* Changed Expected Goals & Probabilities Grid */}
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-2">
           <div className="p-3 rounded-lg bg-slate-900 border border-slate-800">
-            <span className="text-xs font-mono text-slate-400 block">Scenario Home λ</span>
+            <div className="flex items-center gap-1.5 mb-0.5">
+              <TeamLogo teamName={homeTeamName} size="xs" />
+              <span className="text-xs font-mono text-slate-300 font-semibold truncate">{homeTeamName} λ</span>
+            </div>
             <div className="text-xl font-mono font-bold text-blue-400 mt-0.5">
               {formatLambda(current.goals.home_lambda)}
             </div>
@@ -116,7 +120,10 @@ export const ScenarioAnalysisCard: React.FC<ScenarioAnalysisCardProps> = ({
           </div>
 
           <div className="p-3 rounded-lg bg-slate-900 border border-slate-800">
-            <span className="text-xs font-mono text-slate-400 block">Scenario Away λ</span>
+            <div className="flex items-center gap-1.5 mb-0.5">
+              <TeamLogo teamName={awayTeamName} size="xs" />
+              <span className="text-xs font-mono text-slate-300 font-semibold truncate">{awayTeamName} λ</span>
+            </div>
             <div className="text-xl font-mono font-bold text-emerald-400 mt-0.5">
               {formatLambda(current.goals.away_lambda)}
             </div>

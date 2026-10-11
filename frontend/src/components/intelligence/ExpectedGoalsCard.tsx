@@ -2,6 +2,7 @@ import React from 'react';
 import { Target, Info } from 'lucide-react';
 import { ExpectedGoalsSection } from '../../api/types';
 import { formatLambda } from '../../lib/utils';
+import { TeamLogo } from '../common/TeamLogo';
 
 export interface ExpectedGoalsCardProps {
   goals: ExpectedGoalsSection;
@@ -45,9 +46,12 @@ export const ExpectedGoalsCard: React.FC<ExpectedGoalsCardProps> = ({
         {/* Home Expected Goals */}
         <div className="p-4 rounded-lg bg-slate-900/70 border border-slate-800 flex flex-col justify-between">
           <div>
-            <span className="text-xs font-mono text-slate-400 block truncate" title={homeTeamName}>
-              Home λ ({homeTeamName})
-            </span>
+            <div className="flex items-center gap-2 mb-1">
+              <TeamLogo teamName={homeTeamName} size="xs" />
+              <span className="text-xs font-mono text-slate-300 font-semibold truncate" title={homeTeamName}>
+                {homeTeamName} (Home λ)
+              </span>
+            </div>
             <div className="text-2xl font-mono font-bold text-blue-400 mt-1">
               {formatLambda(homeLambda)}
             </div>
@@ -66,9 +70,12 @@ export const ExpectedGoalsCard: React.FC<ExpectedGoalsCardProps> = ({
         {/* Away Expected Goals */}
         <div className="p-4 rounded-lg bg-slate-900/70 border border-slate-800 flex flex-col justify-between">
           <div>
-            <span className="text-xs font-mono text-slate-400 block truncate" title={awayTeamName}>
-              Away λ ({awayTeamName})
-            </span>
+            <div className="flex items-center gap-2 mb-1">
+              <TeamLogo teamName={awayTeamName} size="xs" />
+              <span className="text-xs font-mono text-slate-300 font-semibold truncate" title={awayTeamName}>
+                {awayTeamName} (Away λ)
+              </span>
+            </div>
             <div className="text-2xl font-mono font-bold text-emerald-400 mt-1">
               {formatLambda(awayLambda)}
             </div>

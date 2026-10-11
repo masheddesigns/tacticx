@@ -3,6 +3,7 @@ import { Scale, Clock, Users, AlertCircle } from 'lucide-react';
 import { MarketSection } from '../../api/types';
 import { formatProbability, formatDateTime } from '../../lib/utils';
 import { Badge } from '../common/Badge';
+import { TeamLogo } from '../common/TeamLogo';
 
 export interface MarketComparisonCardProps {
   market: MarketSection;
@@ -24,9 +25,9 @@ export const MarketComparisonCard: React.FC<MarketComparisonCardProps> = ({
   const hasMarket = market.market_status === 'ok' && market.bookmaker_count && market.bookmaker_count > 0;
 
   const outcomes = [
-    { key: 'home', label: `Home (${homeTeamName})` },
-    { key: 'draw', label: 'Draw' },
-    { key: 'away', label: `Away (${awayTeamName})` },
+    { key: 'home', label: `Home (${homeTeamName})`, team: homeTeamName },
+    { key: 'draw', label: 'Draw', team: undefined },
+    { key: 'away', label: `Away (${awayTeamName})`, team: awayTeamName },
   ];
 
   return (
@@ -80,9 +81,12 @@ export const MarketComparisonCard: React.FC<MarketComparisonCardProps> = ({
               return (
                 <div key={item.key} className="p-3.5 rounded-lg bg-slate-900/60 border border-slate-800 space-y-2">
                   <div className="flex items-center justify-between">
-                    <span className="text-xs font-mono font-semibold text-slate-200">{item.label}</span>
+                    <div className="flex items-center gap-1.5 min-w-0">
+                      {item.team && <TeamLogo teamName={item.team} size="xs" />}
+                      <span className="text-xs font-mono font-semibold text-slate-200 truncate">{item.label}</span>
+                    </div>
                     {magnitude && (
-                      <span className="text-[10px] font-mono px-1.5 py-0.2 rounded bg-slate-800 text-slate-400">
+                      <span className="text-[10px] font-mono px-1.5 py-0.2 rounded bg-slate-800 text-slate-400 shrink-0">
                         {magnitude.replace('_', ' ')}
                       </span>
                     )}

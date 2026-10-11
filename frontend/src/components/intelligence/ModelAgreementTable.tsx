@@ -3,6 +3,7 @@ import { GitCompare, HelpCircle } from 'lucide-react';
 import { ModelDisagreementSection } from '../../api/types';
 import { formatProbability } from '../../lib/utils';
 import { Badge } from '../common/Badge';
+import { TeamLogo } from '../common/TeamLogo';
 
 export interface ModelAgreementTableProps {
   disagreement: ModelDisagreementSection;
@@ -20,9 +21,9 @@ export const ModelAgreementTable: React.FC<ModelAgreementTableProps> = ({
 
   const modelKeys = ['elo', 'poisson', 'advanced', 'ensemble'];
   const outcomes = [
-    { key: 'home', label: `Home (${homeTeamName})` },
-    { key: 'draw', label: 'Draw' },
-    { key: 'away', label: `Away (${awayTeamName})` },
+    { key: 'home', label: `Home (${homeTeamName})`, team: homeTeamName },
+    { key: 'draw', label: 'Draw', team: undefined },
+    { key: 'away', label: `Away (${awayTeamName})`, team: awayTeamName },
   ];
 
   return (
@@ -67,7 +68,12 @@ export const ModelAgreementTable: React.FC<ModelAgreementTableProps> = ({
 
               return (
                 <tr key={item.key} className="hover:bg-slate-900/40 transition-colors">
-                  <td className="p-2.5 font-semibold text-slate-200">{item.label}</td>
+                  <td className="p-2.5 font-semibold text-slate-200">
+                    <div className="flex items-center gap-1.5">
+                      {item.team && <TeamLogo teamName={item.team} size="xs" />}
+                      <span>{item.label}</span>
+                    </div>
+                  </td>
 
                   {/* Individual Models */}
                   {modelKeys.map((k) => {

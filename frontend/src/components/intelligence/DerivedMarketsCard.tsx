@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Layers, ShieldCheck } from 'lucide-react';
 import { DerivedMarketsSection } from '../../api/types';
 import { formatProbability, formatDecimalOdds } from '../../lib/utils';
+import { TeamLogo } from '../common/TeamLogo';
 
 export interface DerivedMarketsCardProps {
   markets: DerivedMarketsSection;
@@ -212,9 +213,12 @@ export const DerivedMarketsCard: React.FC<DerivedMarketsCardProps> = ({
       {activeTab === 'team_totals' && (
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div className="p-3.5 rounded-lg bg-slate-900/60 border border-slate-800 space-y-2">
-            <span className="text-xs font-mono font-semibold text-blue-400 block truncate" title={homeTeamName}>
-              {homeTeamName} Individual Totals
-            </span>
+            <div className="flex items-center gap-2 mb-1">
+              <TeamLogo teamName={homeTeamName} size="xs" />
+              <span className="text-xs font-mono font-semibold text-blue-400 truncate" title={homeTeamName}>
+                {homeTeamName} Individual Totals
+              </span>
+            </div>
             <div className="space-y-1 text-xs font-mono">
               <div className="flex justify-between py-0.5 border-b border-slate-800/80">
                 <span className="text-slate-400">Over 0.5:</span>
@@ -232,9 +236,12 @@ export const DerivedMarketsCard: React.FC<DerivedMarketsCardProps> = ({
           </div>
 
           <div className="p-3.5 rounded-lg bg-slate-900/60 border border-slate-800 space-y-2">
-            <span className="text-xs font-mono font-semibold text-emerald-400 block truncate" title={awayTeamName}>
-              {awayTeamName} Individual Totals
-            </span>
+            <div className="flex items-center gap-2 mb-1">
+              <TeamLogo teamName={awayTeamName} size="xs" />
+              <span className="text-xs font-mono font-semibold text-emerald-400 truncate" title={awayTeamName}>
+                {awayTeamName} Individual Totals
+              </span>
+            </div>
             <div className="space-y-1 text-xs font-mono">
               <div className="flex justify-between py-0.5 border-b border-slate-800/80">
                 <span className="text-slate-400">Over 0.5:</span>

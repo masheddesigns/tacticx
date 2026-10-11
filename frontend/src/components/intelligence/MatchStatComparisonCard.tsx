@@ -14,6 +14,7 @@ import {
   ArrowRight,
 } from 'lucide-react';
 import { MatchStatComparisonResponse, ComparisonItem } from '../../api/types';
+import { TeamLogo } from '../common/TeamLogo';
 
 interface MatchStatComparisonCardProps {
   comparison?: MatchStatComparisonResponse;
@@ -346,13 +347,7 @@ export const MatchStatComparisonCard: React.FC<MatchStatComparisonCardProps> = (
         {/* Teams Header */}
         <div className="flex items-center justify-between pb-3 border-b border-slate-800">
           <div className="flex items-center gap-2.5 min-w-0">
-            <span
-              className={`w-7 h-7 rounded-full flex items-center justify-center text-[10px] font-bold font-mono border shrink-0 ${getTeamColorStyle(
-                home
-              )}`}
-            >
-              {homeInitials}
-            </span>
+            <TeamLogo teamName={home} size="md" />
             <span className="text-sm font-bold text-white truncate max-w-[120px] sm:max-w-[200px]" title={home}>
               {home}
             </span>
@@ -366,13 +361,7 @@ export const MatchStatComparisonCard: React.FC<MatchStatComparisonCardProps> = (
             <span className="text-sm font-bold text-white truncate max-w-[120px] sm:max-w-[200px] text-right" title={away}>
               {away}
             </span>
-            <span
-              className={`w-7 h-7 rounded-full flex items-center justify-center text-[10px] font-bold font-mono border shrink-0 ${getTeamColorStyle(
-                away
-              )}`}
-            >
-              {awayInitials}
-            </span>
+            <TeamLogo teamName={away} size="md" />
           </div>
         </div>
 

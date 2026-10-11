@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Target, Flag, AlertOctagon, HelpCircle, TrendingUp } from 'lucide-react';
 import { StatProjectionsResponse } from '../../api/types';
 import { formatProbability, formatDecimalOdds, getPayoutExplanation } from '../../lib/utils';
+import { TeamLogo } from '../common/TeamLogo';
 
 export interface SituationalStatsCardProps {
   projections?: StatProjectionsResponse | null;
@@ -89,8 +90,11 @@ export const SituationalStatsCard: React.FC<SituationalStatsCardProps> = ({
           {/* Home Team */}
           <div className="p-4 rounded-lg bg-slate-900/60 border border-blue-900/40 space-y-2.5">
             <div className="flex items-center justify-between pb-1.5 border-b border-slate-800">
-              <span className="font-bold text-xs text-blue-400 font-mono truncate">{homeTeamName} (Home)</span>
-              <span className="text-[10px] text-slate-400 font-mono">Projection</span>
+              <div className="flex items-center gap-2 min-w-0">
+                <TeamLogo teamName={homeTeamName} size="xs" />
+                <span className="font-bold text-xs text-blue-400 font-mono truncate">{homeTeamName} (Home)</span>
+              </div>
+              <span className="text-[10px] text-slate-400 font-mono shrink-0">Projection</span>
             </div>
             <div className="grid grid-cols-2 gap-2 text-xs font-mono">
               <div className="flex justify-between items-center bg-slate-950 p-2 rounded border border-slate-800/80">
@@ -121,8 +125,11 @@ export const SituationalStatsCard: React.FC<SituationalStatsCardProps> = ({
           {/* Away Team */}
           <div className="p-4 rounded-lg bg-slate-900/60 border border-emerald-900/40 space-y-2.5">
             <div className="flex items-center justify-between pb-1.5 border-b border-slate-800">
-              <span className="font-bold text-xs text-emerald-400 font-mono truncate">{awayTeamName} (Away)</span>
-              <span className="text-[10px] text-slate-400 font-mono">Projection</span>
+              <div className="flex items-center gap-2 min-w-0">
+                <TeamLogo teamName={awayTeamName} size="xs" />
+                <span className="font-bold text-xs text-emerald-400 font-mono truncate">{awayTeamName} (Away)</span>
+              </div>
+              <span className="text-[10px] text-slate-400 font-mono shrink-0">Projection</span>
             </div>
             <div className="grid grid-cols-2 gap-2 text-xs font-mono">
               <div className="flex justify-between items-center bg-slate-950 p-2 rounded border border-slate-800/80">

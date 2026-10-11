@@ -3,6 +3,7 @@ import { Shield, Clock, MapPin, Layers, Share2 } from 'lucide-react';
 import { MatchSection, CutoffSection } from '../../api/types';
 import { formatDateTime } from '../../lib/utils';
 import { Badge } from '../common/Badge';
+import { TeamLogo } from '../common/TeamLogo';
 
 export interface MatchHeaderProps {
   match: MatchSection;
@@ -106,13 +107,7 @@ export const MatchHeader: React.FC<MatchHeaderProps> = ({ match, cutoff, onShare
             </h1>
           </div>
 
-          <div
-            className={`w-14 h-14 sm:w-16 sm:h-16 rounded-2xl flex items-center justify-center text-lg sm:text-xl font-black font-mono border-2 shadow-md shrink-0 ${getTeamColorStyle(
-              homeName
-            )}`}
-          >
-            {homeInitials}
-          </div>
+          <TeamLogo teamName={homeName} size="2xl" />
         </div>
 
         {/* Center: FotMob Score / Kickoff Pill (1 col) */}
@@ -145,13 +140,7 @@ export const MatchHeader: React.FC<MatchHeaderProps> = ({ match, cutoff, onShare
 
         {/* Away Team (Right 3 cols) */}
         <div className="md:col-span-3 flex items-center md:justify-start gap-4 text-left order-2 md:order-3">
-          <div
-            className={`w-14 h-14 sm:w-16 sm:h-16 rounded-2xl flex items-center justify-center text-lg sm:text-xl font-black font-mono border-2 shadow-md shrink-0 ${getTeamColorStyle(
-              awayName
-            )}`}
-          >
-            {awayInitials}
-          </div>
+          <TeamLogo teamName={awayName} size="2xl" />
 
           <div className="min-w-0">
             <span className="text-[11px] uppercase tracking-wider font-mono text-slate-400 block mb-0.5">

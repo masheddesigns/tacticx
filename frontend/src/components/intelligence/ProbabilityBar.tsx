@@ -1,5 +1,6 @@
 import React from 'react';
 import { formatProbability } from '../../lib/utils';
+import { TeamLogo } from '../common/TeamLogo';
 
 export interface ProbabilityBarProps {
   home: number | null | undefined;
@@ -78,25 +79,22 @@ export const ProbabilityBar: React.FC<ProbabilityBarProps> = ({
 
       {/* Accessible Outcome Legend */}
       <div className="flex items-center justify-between text-xs font-mono pt-1 text-slate-300">
-        <div className="flex items-center gap-1.5">
-          <span className="w-2.5 h-2.5 rounded-sm bg-blue-500 inline-block" aria-hidden="true" />
-          <span className="text-slate-400">Home:</span>
-          <span className="font-semibold text-slate-100">{formatProbability(h)}</span>
-          <span className="text-[10px] text-slate-400">({h.toFixed(3)})</span>
+        <div className="flex items-center gap-1.5 min-w-0">
+          <TeamLogo teamName={homeTeamName} size="xs" />
+          <span className="text-slate-400 truncate">Home ({homeTeamName}):</span>
+          <span className="font-semibold text-slate-100 shrink-0">{formatProbability(h)}</span>
         </div>
 
-        <div className="flex items-center gap-1.5">
-          <span className="w-2.5 h-2.5 rounded-sm bg-slate-400 inline-block" aria-hidden="true" />
+        <div className="flex items-center gap-1.5 shrink-0 px-2">
+          <span className="w-2 h-2 rounded-full bg-slate-400 inline-block" aria-hidden="true" />
           <span className="text-slate-400">Draw:</span>
           <span className="font-semibold text-slate-100">{formatProbability(d)}</span>
-          <span className="text-[10px] text-slate-400">({d.toFixed(3)})</span>
         </div>
 
-        <div className="flex items-center gap-1.5">
-          <span className="w-2.5 h-2.5 rounded-sm bg-emerald-500 inline-block" aria-hidden="true" />
-          <span className="text-slate-400">Away:</span>
-          <span className="font-semibold text-slate-100">{formatProbability(a)}</span>
-          <span className="text-[10px] text-slate-400">({a.toFixed(3)})</span>
+        <div className="flex items-center gap-1.5 min-w-0 justify-end">
+          <TeamLogo teamName={awayTeamName} size="xs" />
+          <span className="text-slate-400 truncate">Away ({awayTeamName}):</span>
+          <span className="font-semibold text-slate-100 shrink-0">{formatProbability(a)}</span>
         </div>
       </div>
     </div>

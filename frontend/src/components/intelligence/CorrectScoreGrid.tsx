@@ -3,6 +3,7 @@ import { Grid, Sparkles, AlertCircle } from 'lucide-react';
 import { CorrectScoreSection } from '../../api/types';
 import { formatProbability } from '../../lib/utils';
 import { Badge } from '../common/Badge';
+import { TeamLogo } from '../common/TeamLogo';
 
 export interface CorrectScoreGridProps {
   correctScore: CorrectScoreSection;
@@ -75,9 +76,18 @@ export const CorrectScoreGrid: React.FC<CorrectScoreGridProps> = ({
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
         {/* Heatmap Grid (4x4) */}
         <div className="lg:col-span-7 space-y-3">
-          <span className="text-xs font-mono text-slate-300 block">
-            Grid Heatmap (Home vs Away goals)
-          </span>
+          <div className="flex flex-wrap items-center gap-2 text-xs font-mono text-slate-300">
+            <span className="font-semibold">Grid Heatmap:</span>
+            <div className="flex items-center gap-1.5 text-blue-400 font-semibold bg-slate-900 px-2 py-0.5 rounded border border-slate-800">
+              <TeamLogo teamName={homeTeamName} size="xs" />
+              <span>{homeTeamName} (Rows)</span>
+            </div>
+            <span className="text-slate-500">vs</span>
+            <div className="flex items-center gap-1.5 text-emerald-400 font-semibold bg-slate-900 px-2 py-0.5 rounded border border-slate-800">
+              <TeamLogo teamName={awayTeamName} size="xs" />
+              <span>{awayTeamName} (Cols)</span>
+            </div>
+          </div>
 
           <div className="overflow-x-auto">
             <table className="w-full text-xs font-mono border-collapse" aria-label="Scoreline Heatmap">

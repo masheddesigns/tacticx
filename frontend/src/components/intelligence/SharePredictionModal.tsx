@@ -21,6 +21,7 @@ import {
   StatProjectionsResponse,
 } from '../../api/types';
 import { formatDateTime, probabilityToBookmakerOdds } from '../../lib/utils';
+import { TeamLogo } from '../common/TeamLogo';
 
 export interface SharePredictionModalProps {
   isOpen: boolean;
@@ -281,13 +282,7 @@ export const SharePredictionModal: React.FC<SharePredictionModalProps> = ({
             <div className="grid grid-cols-7 items-center gap-3 text-center">
               {/* Home Team */}
               <div className="col-span-3 flex flex-col items-center">
-                <div
-                  className={`w-12 h-12 rounded-xl flex items-center justify-center text-sm font-black font-mono border-2 shadow-md ${getTeamColorStyle(
-                    homeTeamName
-                  )}`}
-                >
-                  {homeInitials}
-                </div>
+                <TeamLogo teamName={homeTeamName} size="xl" className="shadow-md" />
                 <span className="font-bold text-xs text-white mt-1.5 truncate max-w-[120px]" title={homeTeamName}>
                   {homeTeamName}
                 </span>
@@ -311,13 +306,7 @@ export const SharePredictionModal: React.FC<SharePredictionModalProps> = ({
 
               {/* Away Team */}
               <div className="col-span-3 flex flex-col items-center">
-                <div
-                  className={`w-12 h-12 rounded-xl flex items-center justify-center text-sm font-black font-mono border-2 shadow-md ${getTeamColorStyle(
-                    awayTeamName
-                  )}`}
-                >
-                  {awayInitials}
-                </div>
+                <TeamLogo teamName={awayTeamName} size="xl" className="shadow-md" />
                 <span className="font-bold text-xs text-white mt-1.5 truncate max-w-[120px]" title={awayTeamName}>
                   {awayTeamName}
                 </span>
