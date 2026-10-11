@@ -230,7 +230,7 @@ def seed_expanded_leagues(db: Session) -> Dict[str, int]:
         existing = db.query(League).filter_by(code=l_data["code"]).first()
         if not existing:
             id_in_use = db.query(League).filter_by(id=l_data["id"]).first()
-            lid = l_data["id"] if not id_in_use else (db.query(text("coalesce(max(id), 20) FROM leagues")).scalar() + 1)
+            lid = l_data["id"] if not id_in_use else (db.execute(text("SELECT coalesce(max(id), 20) FROM leagues")).scalar() + 1)
             new_l = League(
                 id=lid,
                 code=l_data["code"],
@@ -259,7 +259,7 @@ def seed_expanded_leagues(db: Session) -> Dict[str, int]:
     db.commit()
 
     # 3. Ensure Teams exist
-    max_team_id = db.query(text("coalesce(max(id), 300) FROM teams")).scalar() or 300
+    max_team_id = db.execute(text("SELECT coalesce(max(id), 300) FROM teams")).scalar() or 300
     team_map: Dict[str, Dict[str, Team]] = {}
 
     for l_code, teams_data in NEW_TEAMS.items():
@@ -302,33 +302,23 @@ def seed_expanded_leagues(db: Session) -> Dict[str, int]:
         prev_ids = [m.id for m in prev_matches]
         print(f"Purging {len(prev_ids)} previous matches for expanded leagues to ensure pure authentic data...")
         id_str = f"({', '.join(str(i) for i in prev_ids)})"
-        for tbl in [
-            "odds_selections",
-            "odds_snapshots",
-            "pre_match_prediction_snapshots",
-            "live_prediction_snapshots",
-            "predictions",
-            "match_statistics",
-            "match_events",
-            "lineups",
-            "evaluation_records",
-            "evaluation_jobs",
-            "match_lifecycle_events",
-            "matches",
+        for purge_sql in [
+            f"DELETE FROM odds_selections WHERE snapshot_id IN (SELECT id FROM odds_snapshots WHERE match_id IN {id_str})",
+            f"DELETE FROM odds_snapshots WHERE match_id IN {id_str}",
+            f"DELETE FROM pre_match_prediction_snapshots WHERE match_id IN {id_str}",
+            f"DELETE FROM predictions WHERE match_id IN {id_str}",
+            f"DELETE FROM match_statistics WHERE match_id IN {id_str}",
+            f"DELETE FROM matches WHERE id IN {id_str}",
         ]:
             try:
-                if tbl == "odds_selections":
-                    db.execute(text(f"DELETE FROM odds_selections WHERE snapshot_id IN (SELECT id FROM odds_snapshots WHERE match_id IN {id_str})"))
-                elif tbl == "matches":
-                    db.execute(text(f"DELETE FROM matches WHERE id IN {id_str}"))
-                else:
-                    db.execute(text(f"DELETE FROM {tbl} WHERE match_id IN {id_str}"))
+                db.execute(text(purge_sql))
                 db.commit()
-            except Exception:
+            except Exception as del_err:
                 db.rollback()
+                print(f"  Purge note: {del_err}")
         print("  Purge completed successfully.")
 
-    max_match_id = db.query(text("coalesce(max(id), 3000) FROM matches")).scalar() or 3000
+    max_match_id = db.execute(text("SELECT coalesce(max(id), 3000) FROM matches")).scalar() or 3000
     total_historical = 0
     total_scheduled = 0
 
