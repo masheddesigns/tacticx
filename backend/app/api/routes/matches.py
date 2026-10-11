@@ -33,7 +33,11 @@ def _match_out(m: Match, db: Session) -> MatchOut:
 def _filtered_query(db: Session, league: Optional[str], team: Optional[str], status: Optional[str]):
     q = db.query(Match)
     if league:
-        lg = db.query(League).filter(League.code == league).first()
+        l_clean = league.strip()
+        lg = db.query(League).filter(
+            (League.code.ilike(l_clean)) |
+            (League.name.ilike(f"%{l_clean}%"))
+        ).first()
         if not lg:
             return None, f"unknown league code: {league}"
         q = q.filter(Match.league_id == lg.id)
@@ -41,11 +45,12 @@ def _filtered_query(db: Session, league: Optional[str], team: Optional[str], sta
         ids = [t.id for t in db.query(Team).filter(Team.name.ilike(f"%{team}%")).all()]
         q = q.filter((Match.home_team_id.in_(ids)) | (Match.away_team_id.in_(ids)))
     if status:
+        st_clean = status.strip().upper()
         try:
-            MatchStatus(status)
+            MatchStatus(st_clean)
+            q = q.filter(Match.status == st_clean)
         except ValueError:
             return None, f"unknown status: {status}"
-        q = q.filter(Match.status == status)
     return q, None
 
 
