@@ -38,6 +38,7 @@ export function useDailySlips(date?: string) {
 export function useMatches(params?: {
   league?: string;
   date?: string;
+  tz?: string;
   team?: string;
   status?: string;
   page?: number;

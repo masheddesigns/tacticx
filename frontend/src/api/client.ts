@@ -107,6 +107,7 @@ export const apiClient = {
   getMatches: async (params?: {
     league?: string;
     date?: string;
+    tz?: string;
     team?: string;
     status?: string;
     page?: number;
@@ -117,6 +118,7 @@ export const apiClient = {
     const query = new URLSearchParams();
     if (params?.league) query.set('league', params.league);
     if (params?.date) query.set('date', params.date);
+    if (params?.tz) query.set('tz', params.tz);
     if (params?.team) query.set('team', params.team);
     if (params?.status) query.set('status', params.status);
     if (params?.sort_order) query.set('sort_order', params.sort_order);

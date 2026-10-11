@@ -67,11 +67,12 @@ def _refresh_live_matches_if_needed(db: Session, max_age_seconds: int = 8):
         pass
 
 
-@router.get("", summary="List matches (filters: league, date, team, status; paginated)")
+@router.get("", summary="List matches (filters: league, date, tz, team, status; paginated)")
 def list_matches(
     db: Session = Depends(get_db),
     league: Optional[str] = Query(None, description="League code, e.g. EPL"),
-    date: Optional[str] = Query(None, description="YYYY-MM-DD (kickoff date, UTC)"),
+    date: Optional[str] = Query(None, description="YYYY-MM-DD (kickoff date)"),
+    tz: Optional[str] = Query("IST", description="Timezone for date bucketing: IST | UTC"),
     team: Optional[str] = Query(None, description="Team name substring"),
     status: Optional[str] = Query(None, description="SCHEDULED|PRE_MATCH|LIVE|HALFTIME|FINISHED|..."),
     page: int = Query(1, ge=1),
@@ -89,7 +90,15 @@ def list_matches(
             day = datetime.strptime(date, "%Y-%m-%d").replace(tzinfo=timezone.utc)
         except ValueError:
             raise HTTPException(400, "date must be YYYY-MM-DD")
-        q = q.filter(Match.kickoff_at >= day, Match.kickoff_at < day + timedelta(days=1))
+        
+        # When timezone is IST (UTC+5:30), day 00:00:00 IST is 18:30:00 UTC of previous day
+        if tz and tz.upper() in ["IST", "ASIA/KOLKATA", "+05:30", "5:30"]:
+            day_start = day - timedelta(hours=5, minutes=30)
+            day_end = day_start + timedelta(days=1)
+        else:
+            day_start = day
+            day_end = day_start + timedelta(days=1)
+        q = q.filter(Match.kickoff_at >= day_start, Match.kickoff_at < day_end)
     total = q.count()
     order_clause = Match.kickoff_at.desc() if sort_order.lower() == "desc" else Match.kickoff_at.asc()
     rows = q.order_by(order_clause).offset((page - 1) * page_size).limit(page_size).all()

@@ -14,15 +14,15 @@ export interface MatchFiltersProps {
   filters: MatchFiltersState;
   onFilterChange: (newFilters: MatchFiltersState) => void;
   availableLeagues?: string[];
-  timeZone?: 'UTC' | 'local' | string;
-  onTimeZoneChange?: (tz: 'UTC' | 'local') => void;
+  timeZone?: 'IST' | 'UTC' | 'local' | string;
+  onTimeZoneChange?: (tz: 'IST' | 'UTC') => void;
 }
 
 export const MatchFilters: React.FC<MatchFiltersProps> = ({
   filters,
   onFilterChange,
   availableLeagues = ['EPL', 'LA_LIGA', 'SERIE_A', 'BUNDESLIGA', 'LIGUE_1', 'UCL', 'MLS', 'LIGA_ARG', 'BRA_SERIE_A', 'ISL', 'NATIONS_LEAGUE', 'FRIENDLIES'],
-  timeZone = 'UTC',
+  timeZone = 'IST',
   onTimeZoneChange,
 }) => {
   const todayStr = getTodayString(timeZone);
@@ -114,16 +114,16 @@ export const MatchFilters: React.FC<MatchFiltersProps> = ({
             <div className="flex items-center gap-1 text-xs font-mono bg-slate-900 px-2 py-1 rounded border border-slate-800">
               <span className="text-slate-400">Timezone:</span>
               <button
-                onClick={() => onTimeZoneChange('UTC')}
-                className={`px-1.5 py-0.5 rounded ${timeZone === 'UTC' ? 'bg-slate-800 text-emerald-400 font-bold' : 'text-slate-400'}`}
+                onClick={() => onTimeZoneChange('IST')}
+                className={`px-1.5 py-0.5 rounded ${timeZone === 'IST' ? 'bg-emerald-950/80 text-emerald-400 font-bold border border-emerald-500/40' : 'text-slate-400 hover:text-slate-300'}`}
               >
-                UTC
+                IST (+5:30)
               </button>
               <button
-                onClick={() => onTimeZoneChange('local')}
-                className={`px-1.5 py-0.5 rounded ${timeZone === 'local' ? 'bg-slate-800 text-emerald-400 font-bold' : 'text-slate-400'}`}
+                onClick={() => onTimeZoneChange('UTC')}
+                className={`px-1.5 py-0.5 rounded ${timeZone === 'UTC' ? 'bg-slate-800 text-emerald-400 font-bold' : 'text-slate-400 hover:text-slate-300'}`}
               >
-                Local
+                UTC
               </button>
             </div>
           )}

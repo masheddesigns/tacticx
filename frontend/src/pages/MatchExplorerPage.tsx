@@ -91,18 +91,22 @@ export const MatchExplorerPage: React.FC = () => {
   }, [searchParams]);
 
   const { data: leaguesData } = useLeagues();
-  const availableLeagueCodes = leaguesData?.data?.map((l) => l.code) || [
+  const availableLeagueCodes = leaguesData?.data?.map((l: { code: string }) => l.code) || [
     'EPL',
     'LA_LIGA',
     'SERIE_A',
     'BUNDESLIGA',
     'LIGUE_1',
     'UCL',
+    'MLS',
+    'LIGA_ARG',
+    'BRA_SERIE_A',
+    'ISL',
     'NATIONS_LEAGUE',
     'FRIENDLIES',
   ];
 
-  const [timeZone, setTimeZone] = useState<'UTC' | 'local'>('UTC');
+  const [timeZone, setTimeZone] = useState<'IST' | 'UTC'>('IST');
 
   const { data, isLoading, error, refetch, isFetching } = useMatches({
     page,
@@ -111,6 +115,7 @@ export const MatchExplorerPage: React.FC = () => {
     status: filters.status,
     date: filters.date,
     team: filters.team,
+    tz: timeZone,
     sort_order: filters.sort_order || 'asc',
   });
 
@@ -227,7 +232,7 @@ export const MatchExplorerPage: React.FC = () => {
                       </span>
                     </div>
                     <span className="text-[10px] font-mono text-slate-400">
-                      Showing in {timeZone === 'local' ? 'Local Browser Time' : 'UTC'}
+                      Showing in {timeZone === 'IST' ? 'IST (UTC+5:30)' : 'UTC'}
                     </span>
                   </div>
 

@@ -28,6 +28,7 @@ import {
 import { CurrentSeasonBanner } from '../components/dashboard/CurrentSeasonBanner';
 import { CompetitionCards, CompetitionData } from '../components/dashboard/CompetitionCards';
 import { MatchRow } from '../components/matches/MatchRow';
+import { DateSliderTabs } from '../components/matches/DateSliderTabs';
 import { DailyPredictionSlipsSection } from '../components/dashboard/DailyPredictionSlipsSection';
 import { getLeagueMeta } from './MatchExplorerPage';
 import { getRelativeDateLabel, getTodayString, getDayOffsetString, formatDayDisplay } from '../lib/utils';
@@ -36,14 +37,14 @@ import { ErrorCard } from '../components/common/ErrorCard';
 import { Badge } from '../components/common/Badge';
 
 export const DashboardPage: React.FC = () => {
-  const [timeZone, setTimeZone] = useState<'UTC' | 'local'>('UTC');
+  const [timeZone, setTimeZone] = useState<'IST' | 'UTC'>('IST');
 
-  // Dynamically calculate today, yesterday, tomorrow based on current date
+  // Dynamically calculate today, yesterday, tomorrow based on current date in IST
   const todayStr = getTodayString(timeZone);
   const yesterdayStr = getDayOffsetString(-1, timeZone);
   const tomorrowStr = getDayOffsetString(1, timeZone);
 
-  // FotMob Homepage Filter State: default to today or matches if today has none
+  // FotMob Homepage Filter State: default to today in IST
   const [selectedDate, setSelectedDate] = useState<string | undefined>(todayStr);
   const [selectedStatus, setSelectedStatus] = useState<string | undefined>(undefined);
   const [selectedLeague, setSelectedLeague] = useState<string | undefined>(undefined);
@@ -60,8 +61,8 @@ export const DashboardPage: React.FC = () => {
     return () => clearInterval(timer);
   }, [timeZone, todayStr, selectedDate]);
 
-  const handleToggleTimeZone = () => {
-    const nextTz = timeZone === 'UTC' ? 'local' : 'UTC';
+  const handleToggleTimeZone = (tz?: 'IST' | 'UTC') => {
+    const nextTz = tz || (timeZone === 'IST' ? 'UTC' : 'IST');
     setTimeZone(nextTz);
     setSelectedDate(getTodayString(nextTz));
   };
@@ -89,6 +90,7 @@ export const DashboardPage: React.FC = () => {
     isFetching: isMatchesFetching,
   } = useMatches({
     date: selectedDate,
+    tz: timeZone,
     status: selectedStatus,
     league: selectedLeague,
     team: searchQuery || undefined,
@@ -272,7 +274,7 @@ export const DashboardPage: React.FC = () => {
     setSelectedLeague(undefined);
   };
 
-  const handleSelectDay = (day: string) => {
+  const handleSelectDay = (day?: string) => {
     setSelectedDate(day);
     setSelectedStatus(undefined);
   };
@@ -337,172 +339,64 @@ export const DashboardPage: React.FC = () => {
         </div>
       </div>
 
-      {/* 2. FotMob Date Ribbon & Filter Navigator */}
-      <div className="rounded-2xl border border-[#242938] bg-[#161922] p-4 space-y-3.5 shadow-sm">
-        <div className="flex flex-wrap items-center justify-between gap-3 pb-3 border-b border-[#242938]">
-          {/* Day Navigation Tabs */}
-          <div className="flex flex-wrap items-center gap-1.5">
-            <button
-              onClick={handleSelectLive}
-              className={`px-3 py-1.5 rounded-lg text-xs font-sans font-semibold transition-all flex items-center gap-1.5 shadow-sm ${
-                selectedStatus === 'LIVE' && !selectedDate
-                  ? 'bg-[#ff4b4b] text-white font-bold animate-pulse'
-                  : 'bg-[#ff4b4b]/10 text-[#ff4b4b] hover:bg-[#ff4b4b]/20 border border-[#ff4b4b]/30'
-              }`}
-            >
-              <span className="w-2 h-2 rounded-full bg-[#ff4b4b] animate-ping inline-block" />
-              <span>Live ({liveMatches.length})</span>
-            </button>
+      {/* 2. FotMob Sliding Date Tab Bar */}
+      <DateSliderTabs
+        selectedDate={selectedDate}
+        onSelectDate={handleSelectDay}
+        selectedStatus={selectedStatus}
+        onSelectStatus={setSelectedStatus}
+        timeZone={timeZone}
+        onTimeZoneChange={handleToggleTimeZone}
+        liveCount={liveMatches.length}
+        minDate="2026-10-01"
+        maxDate="2026-11-30"
+      />
 
-            <button
-              onClick={() => handleSelectDay(yesterdayStr)}
-              className={`px-3 py-1.5 rounded-lg text-xs font-sans font-medium transition-colors ${
-                selectedDate === yesterdayStr
-                  ? 'bg-[#21e786] text-[#0e1015] font-bold shadow-sm'
-                  : 'bg-[#1e222e] text-slate-300 hover:bg-[#242938]'
-              }`}
-            >
-              Yesterday ({formatDayDisplay(yesterdayStr, timeZone)})
-            </button>
-
-            <button
-              onClick={() => handleSelectDay(todayStr)}
-              className={`px-3 py-1.5 rounded-lg text-xs font-sans font-medium transition-colors ${
-                selectedDate === todayStr
-                  ? 'bg-[#21e786] text-[#0e1015] font-bold shadow-sm'
-                  : 'bg-[#1e222e] text-slate-300 hover:bg-[#242938]'
-              }`}
-            >
-              Today ({formatDayDisplay(todayStr, timeZone)})
-            </button>
-
-            <button
-              onClick={() => handleSelectDay(tomorrowStr)}
-              className={`px-3 py-1.5 rounded-lg text-xs font-sans font-medium transition-colors ${
-                selectedDate === tomorrowStr
-                  ? 'bg-[#21e786] text-[#0e1015] font-bold shadow-sm'
-                  : 'bg-[#1e222e] text-slate-300 hover:bg-[#242938]'
-              }`}
-            >
-              Tomorrow ({formatDayDisplay(tomorrowStr, timeZone)})
-            </button>
-
-            <button
-              onClick={() => {
-                setSelectedStatus('SCHEDULED');
-                setSelectedDate(undefined);
-              }}
-              className={`px-3 py-1.5 rounded-lg text-xs font-sans font-medium transition-colors ${
-                selectedStatus === 'SCHEDULED' && !selectedDate
-                  ? 'bg-[#21e786] text-[#0e1015] font-bold shadow-sm'
-                  : 'bg-[#1e222e] text-slate-300 hover:bg-[#242938]'
-              }`}
-            >
-              All Upcoming
-            </button>
-
-            {/* Direct Calendar Date Picker */}
-            <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-sans font-medium bg-[#1e222e] hover:bg-[#242938] border border-[#242938] transition-colors">
-              <Calendar className="w-3.5 h-3.5 text-[#21e786]" />
-              <input
-                type="date"
-                value={selectedDate || ''}
-                min="2026-10-01"
-                max="2026-11-05"
-                onChange={(e) => {
-                  if (e.target.value) {
-                    handleSelectDay(e.target.value);
-                  }
-                }}
-                className="bg-transparent text-slate-200 focus:outline-none cursor-pointer [color-scheme:dark]"
-                title="Pick any matchday date"
-              />
-            </div>
-          </div>
-
-          {/* Timezone & Reset */}
-          <div className="flex items-center gap-2">
-            <div className="flex items-center gap-1 text-xs font-mono bg-[#161922] px-2.5 py-1 rounded-lg border border-[#242938]">
-              <span className="text-slate-400">TZ:</span>
-              <button
-                onClick={handleToggleTimeZone}
-                className="text-[#21e786] hover:underline font-semibold"
-              >
-                {timeZone === 'UTC' ? 'UTC' : 'Local'}
-              </button>
-            </div>
-
-            {(selectedStatus || selectedDate !== todayStr || selectedLeague || searchQuery) && (
-              <button
-                onClick={handleResetFilters}
-                className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-sans text-slate-400 hover:text-white bg-[#1e222e] border border-[#242938] transition-colors"
-              >
-                <RotateCcw className="w-3 h-3" />
-                <span>Reset</span>
-              </button>
-            )}
-          </div>
-        </div>
-
-        {/* Quick Matchday Shortcuts for October Top 5 Leagues & UCL */}
-        <div className="flex flex-wrap items-center gap-1.5 pt-1 text-xs">
-          <span className="text-[11px] font-mono text-slate-400 font-semibold flex items-center gap-1 mr-0.5">
-            <Sparkles className="w-3 h-3 text-[#21e786]" />
-            <span>Oct Matchdays:</span>
-          </span>
-          {[
-            { label: 'Oct 17 (Top 5 Slate)', date: '2026-10-17' },
-            { label: 'Oct 18 (Liverpool-Chelsea)', date: '2026-10-18' },
-            { label: 'Oct 20 (UCL MD3)', date: '2026-10-20' },
-            { label: 'Oct 21 (Barca-Bayern UCL)', date: '2026-10-21' },
-            { label: 'Oct 24 (El Clasico)', date: '2026-10-24' },
-            { label: 'Oct 25 (Arsenal-Liverpool)', date: '2026-10-25' },
-            { label: 'Oct 28 (Serie A & Cups)', date: '2026-10-28' },
-            { label: 'Oct 31 (Halloween Slate)', date: '2026-10-31' },
-          ].map((chip) => (
-            <button
-              key={chip.date}
-              onClick={() => handleSelectDay(chip.date)}
-              className={`px-2 py-0.5 rounded-md text-[11px] font-sans font-medium transition-all ${
-                selectedDate === chip.date
-                  ? 'bg-[#21e786] text-[#0e1015] font-bold shadow-sm'
-                  : 'bg-[#12151c] text-slate-300 hover:text-white hover:bg-[#1a1f2c] border border-[#242938]'
-              }`}
-            >
-              {chip.label}
-            </button>
-          ))}
-        </div>
-
-        {/* Search & Competition Filter */}
+      {/* 3. Search & Competition Filter */}
+      <div className="rounded-2xl border border-[#242938] bg-[#161922] p-3 sm:p-4 space-y-3 shadow-sm">
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
           <div className="relative sm:col-span-2">
             <Search className="absolute left-3 top-2.5 w-3.5 h-3.5 text-slate-500" />
             <input
               type="text"
-              placeholder="Search team or fixture..."
+              placeholder="Search clubs e.g. Arsenal, Real Madrid, Kerala Blasters, Flamengo…"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full bg-slate-900 border border-slate-700/80 rounded-lg pl-9 pr-3 py-2 text-xs text-slate-200 placeholder-slate-500 focus:outline-none focus:border-emerald-500/60 font-sans"
+              className="w-full pl-9 pr-4 py-2 rounded-xl text-xs bg-[#11141c] border border-[#242938] text-slate-100 placeholder-slate-500 focus:outline-none focus:border-[#21e786]/60 transition-colors"
             />
           </div>
 
-          <div>
+          <div className="flex items-center gap-2">
             <select
               value={selectedLeague || ''}
               onChange={(e) => setSelectedLeague(e.target.value || undefined)}
-              className="w-full bg-slate-900 border border-slate-700/80 rounded-lg px-3 py-2 text-xs text-slate-200 focus:outline-none focus:border-emerald-500/60 font-sans"
+              className="w-full px-3 py-2 rounded-xl text-xs bg-[#11141c] border border-[#242938] text-slate-200 focus:outline-none focus:border-[#21e786]/60 cursor-pointer"
             >
-              <option value="">All Competitions</option>
-              {availableLeagueCodes.map((lg) => (
-                <option key={lg} value={lg}>
-                  {lg.replace(/_/g, ' ')}
-                </option>
-              ))}
+              <option value="">All Leagues & Cups ({availableLeagueCodes.length})</option>
+              {availableLeagueCodes.map((code) => {
+                const meta = getLeagueMeta(code);
+                return (
+                  <option key={code} value={code}>
+                    {meta.flag} {meta.name}
+                  </option>
+                );
+              })}
             </select>
+
+            {(selectedStatus || selectedDate !== todayStr || selectedLeague || searchQuery) && (
+              <button
+                onClick={handleResetFilters}
+                className="inline-flex items-center gap-1 px-3 py-2 rounded-xl text-xs font-sans text-slate-300 hover:text-white bg-[#1e222e] hover:bg-[#252b3a] border border-[#242938] transition-colors flex-shrink-0"
+                title="Reset all filters to Today"
+              >
+                <RotateCcw className="w-3.5 h-3.5" />
+                <span className="hidden sm:inline">Reset</span>
+              </button>
+            )}
           </div>
         </div>
       </div>
+
 
       {/* 3. Real-Time Live In-Play Matches Banner (Whenever live games exist) */}
       {liveMatches.length > 0 && selectedStatus !== 'LIVE' && (

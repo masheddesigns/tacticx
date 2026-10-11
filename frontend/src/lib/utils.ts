@@ -77,11 +77,13 @@ export function formatLambda(value?: number | null, decimals = 2): string {
 }
 
 /**
- * Formats a timestamp into date, time, and full string according to user's timezone preference
+/**
+ * Formats a timestamp into date, time, and full string according to user's timezone preference.
+ * Defaults to IST (Indian Standard Time, Asia/Kolkata, UTC+5:30) matching FotMob India standard.
  */
 export function formatDateTime(
   isoString?: string | null,
-  timeZone: 'UTC' | 'local' | string = 'UTC'
+  timeZone: 'IST' | 'UTC' | 'local' | string = 'IST'
 ): { date: string; time: string; full: string } {
   if (!isoString) return { date: '—', time: '—', full: '—' };
   try {
@@ -89,20 +91,20 @@ export function formatDateTime(
     if (isNaN(d.getTime())) {
       return { date: isoString, time: '', full: isoString };
     }
-    const tzOption = timeZone === 'local' ? undefined : timeZone;
-    const date = d.toLocaleDateString(undefined, {
+    const tzOption = timeZone === 'IST' ? 'Asia/Kolkata' : (timeZone === 'local' ? undefined : (timeZone === 'UTC' ? 'UTC' : timeZone));
+    const date = d.toLocaleDateString('en-GB', {
       year: 'numeric',
       month: 'short',
       day: 'numeric',
       timeZone: tzOption,
     });
-    const time = d.toLocaleTimeString(undefined, {
+    const time = d.toLocaleTimeString('en-GB', {
       hour: '2-digit',
       minute: '2-digit',
       timeZone: tzOption,
       hour12: false,
     });
-    const tzLabel = timeZone === 'UTC' ? 'UTC' : (timeZone === 'local' ? 'Local' : timeZone);
+    const tzLabel = timeZone === 'IST' ? 'IST' : (timeZone === 'UTC' ? 'UTC' : (timeZone === 'local' ? 'Local' : timeZone));
     return { date, time: `${time} ${tzLabel}`, full: `${date} ${time} ${tzLabel}` };
   } catch {
     return { date: isoString, time: '', full: isoString };
@@ -110,36 +112,38 @@ export function formatDateTime(
 }
 
 /**
- * Returns formatted YYYY-MM-DD date string for today based on client or timezone
+ * Returns formatted YYYY-MM-DD date string for today based on client or timezone (default IST)
  */
-export function getTodayString(timeZone: 'UTC' | 'local' | string = 'local'): string {
+export function getTodayString(timeZone: 'IST' | 'UTC' | 'local' | string = 'IST'): string {
   const d = new Date();
-  const tzOption = timeZone === 'local' ? undefined : timeZone;
+  const tzOption = timeZone === 'IST' ? 'Asia/Kolkata' : (timeZone === 'local' ? undefined : (timeZone === 'UTC' ? 'UTC' : timeZone));
   return d.toLocaleDateString('en-CA', { timeZone: tzOption }); // returns YYYY-MM-DD
 }
 
 /**
- * Returns formatted YYYY-MM-DD string offset by a number of days (+1 tomorrow, -1 yesterday)
+ * Returns formatted YYYY-MM-DD string offset by a number of days (+1 tomorrow, -1 yesterday) in target TZ
  */
-export function getDayOffsetString(offsetDays: number, timeZone: 'UTC' | 'local' | string = 'local'): string {
-  const d = new Date();
-  d.setDate(d.getDate() + offsetDays);
-  const tzOption = timeZone === 'local' ? undefined : timeZone;
-  return d.toLocaleDateString('en-CA', { timeZone: tzOption });
+export function getDayOffsetString(offsetDays: number, timeZone: 'IST' | 'UTC' | 'local' | string = 'IST'): string {
+  const tzOption = timeZone === 'IST' ? 'Asia/Kolkata' : (timeZone === 'local' ? undefined : (timeZone === 'UTC' ? 'UTC' : timeZone));
+  const now = new Date();
+  const todayStr = now.toLocaleDateString('en-CA', { timeZone: tzOption });
+  const [y, m, day] = todayStr.split('-').map(Number);
+  const target = new Date(Date.UTC(y, m - 1, day + offsetDays, 12, 0, 0));
+  return target.toLocaleDateString('en-CA', { timeZone: 'UTC' });
 }
 
 /**
- * Formats a YYYY-MM-DD string into a short label like "Oct 10" or "Yesterday (Oct 9)"
+ * Formats a YYYY-MM-DD string into a short label like "11 Oct"
  */
-export function formatDayDisplay(dateStr: string, timeZone: 'UTC' | 'local' | string = 'local'): string {
+export function formatDayDisplay(dateStr: string, timeZone: 'IST' | 'UTC' | 'local' | string = 'IST'): string {
   try {
     const parts = dateStr.split('-');
     if (parts.length === 3) {
       const year = parseInt(parts[0], 10);
       const month = parseInt(parts[1], 10) - 1;
       const day = parseInt(parts[2], 10);
-      const d = new Date(year, month, day);
-      return d.toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
+      const d = new Date(Date.UTC(year, month, day, 12, 0, 0));
+      return d.toLocaleDateString('en-GB', { month: 'short', day: 'numeric', timeZone: 'UTC' });
     }
     return dateStr;
   } catch {
@@ -149,29 +153,31 @@ export function formatDayDisplay(dateStr: string, timeZone: 'UTC' | 'local' | st
 
 /**
  * Returns FotMob-style human-friendly date header for match lists:
- * "Today", "Tomorrow", "Yesterday", or formatted weekday e.g. "Saturday, Oct 3"
+ * "Today", "Tomorrow", "Yesterday", or formatted weekday e.g. "Sunday, 11 Oct" in IST
  */
-export function getRelativeDateLabel(isoString?: string | null, timeZone: 'UTC' | 'local' | string = 'UTC'): string {
+export function getRelativeDateLabel(isoString?: string | null, timeZone: 'IST' | 'UTC' | 'local' | string = 'IST'): string {
   if (!isoString) return 'Unscheduled';
   try {
     const matchDate = new Date(isoString);
     if (isNaN(matchDate.getTime())) return isoString;
 
     const refDate = new Date();
-    const tzOption = timeZone === 'local' ? undefined : timeZone;
+    const tzOption = timeZone === 'IST' ? 'Asia/Kolkata' : (timeZone === 'local' ? undefined : (timeZone === 'UTC' ? 'UTC' : timeZone));
 
     const matchDayStr = matchDate.toLocaleDateString('en-CA', { timeZone: tzOption }); // YYYY-MM-DD
     const todayStr = refDate.toLocaleDateString('en-CA', { timeZone: tzOption });
 
-    const refTime = new Date(todayStr).getTime();
-    const matchTime = new Date(matchDayStr).getTime();
-    const diffDays = Math.round((matchTime - refTime) / (1000 * 60 * 60 * 24));
+    const refParts = todayStr.split('-').map(Number);
+    const matchParts = matchDayStr.split('-').map(Number);
+    const refUtc = Date.UTC(refParts[0], refParts[1] - 1, refParts[2]);
+    const matchUtc = Date.UTC(matchParts[0], matchParts[1] - 1, matchParts[2]);
+    const diffDays = Math.round((matchUtc - refUtc) / (1000 * 60 * 60 * 24));
 
     if (diffDays === 0) return 'Today';
     if (diffDays === 1) return 'Tomorrow';
     if (diffDays === -1) return 'Yesterday';
 
-    return matchDate.toLocaleDateString(undefined, {
+    return matchDate.toLocaleDateString('en-GB', {
       weekday: 'long',
       month: 'short',
       day: 'numeric',
