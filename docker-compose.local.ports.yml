@@ -1,0 +1,21 @@
+# Local port remaps to avoid clashing with other dev services.
+# Used with: docker compose -p tacticx-p38 -f docker-compose.local.yml -f docker-compose.local.ports.yml up -d
+services:
+  tacticx-postgres:
+    # Internal-only: another local stack already publishes 5432.
+    ports: !override []
+  tacticx-redis:
+    # Internal-only: another local stack already publishes 6379.
+    ports: !override []
+  tacticx-api:
+    environment:
+      # Local stack: skip production gates (SECRET_KEY/CORS) like the old setup.
+      ENVIRONMENT: development
+    # Frontend nginx proxies to upstream hostname "backend".
+    networks:
+      tacticx-local:
+        aliases:
+          - backend
+    ports: !override ["127.0.0.1:18000:8000"]
+  tacticx-frontend:
+    ports: !override ["127.0.0.1:18080:80"]

@@ -446,6 +446,44 @@ class TestTeamIdentityGuard:
         assert _teams_match("Arsenal", "Chelsea") is False
         assert _teams_match("Real Madrid", "Barcelona") is False
 
+    def test_man_prefix_never_fuses(self):
+        from app.services.match_progression import _teams_match
+
+        assert _teams_match("Man United", "Man City") is False
+        assert _teams_match("Manchester United", "Manchester City") is False
+        assert _teams_match("Man United", "Manchester City") is False
+        assert _teams_match("Real Madrid", "Real Sociedad") is False
+
+    def test_alias_variants_still_match(self):
+        from app.services.match_progression import _teams_match
+
+        assert _teams_match("Man United", "Manchester United") is True
+        assert _teams_match("Man City", "Manchester City") is True
+        assert _teams_match("Hull City", "Hull") is True
+        assert _teams_match("Nottingham Forest", "Nott'm Forest") is True
+        assert _teams_match("Athletic Club", "Ath Bilbao") is True
+
+    def test_stale_live_finalized_without_synthetic_scores(self, db):
+        from app.services.match_progression import advance_match_lifecycles
+
+        league = _league(db, "EPL", "Premier League")
+        home, away = _teams(db, league, "P39STALE", "Stale Rovers", "Old Wanderers")
+        target = Match(
+            league_id=league.id, home_team_id=home.id, away_team_id=away.id,
+            kickoff_at=datetime.now(timezone.utc) - timedelta(hours=26),
+            status="LIVE", minute=63, home_score=1, away_score=0,
+            provider="test", provider_match_id="p39-P39STALE-target")
+        db.add(target)
+        db.commit()
+        db.refresh(target)
+
+        advance_match_lifecycles(db, target_match_id=target.id)
+
+        check = db.query(Match).filter_by(id=target.id).one()
+        assert check.status == "FINISHED"
+        assert check.minute == 90
+        assert (check.home_score, check.away_score) == (1, 0)
+
     def test_list_read_does_not_mutate_future_fixtures(self, db):
         from fastapi.testclient import TestClient
 

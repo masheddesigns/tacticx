@@ -160,10 +160,13 @@ def _teams_match(a: Optional[str], b: Optional[str]) -> bool:
     # TEAM_ALIASES exact matching and token overlap below.
     if min(len(na), len(nb)) >= 4 and (na in nb or nb in na):
         return True
-    # Check primary token overlap
+    # Check primary token overlap. Shared tokens must be non-trivial
+    # (length >= 4): short fragments like "man" must never fuse
+    # "Man United" with "Man City". Real abbreviations are covered by
+    # TEAM_ALIASES exact matching and the substring branch above.
     stop = {"fc", "sc", "cf", "ac", "as", "united", "city", "club", "real", "deportivo", "sporting", "1", "04", "07"}
-    ta = {w for w in na.split() if len(w) >= 3 and w not in stop}
-    tb = {w for w in nb.split() if len(w) >= 3 and w not in stop}
+    ta = {w for w in na.split() if len(w) >= 4 and w not in stop}
+    tb = {w for w in nb.split() if len(w) >= 4 and w not in stop}
     if ta and tb and (ta & tb):
         return True
     return False
@@ -750,6 +753,22 @@ def advance_match_lifecycles(
         if m.status == MatchStatus.FINISHED.value and m.home_score is not None and m.away_score is not None:
             finished_count += 1
             continue
+
+        # 3b. Stale-live finalization guard: a match stuck in a pre-fulltime
+        # state (e.g. ESPN event aged out of the feed) must never display
+        # LIVE past full time, and must never receive synthetic scores.
+        # Flip status only; scores are preserved (or stay NULL honestly).
+        if m.status in (MatchStatus.LIVE.value, MatchStatus.HALFTIME.value, MatchStatus.PRE_MATCH.value):
+            try:
+                ko = m.kickoff_at
+                ko_aware = ko if (ko and ko.tzinfo) else (ko.replace(tzinfo=timezone.utc) if ko else None)
+                if ko_aware and (now_utc - ko_aware) >= timedelta(minutes=130):
+                    m.status = MatchStatus.FINISHED.value
+                    m.minute = 90
+                    finished_count += 1
+                    continue
+            except Exception:
+                pass
 
         # 4. Dynamic timeline progression fallback for uncurated matches
         lam_h, lam_a = 1.45, 1.15
