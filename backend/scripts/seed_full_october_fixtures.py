@@ -108,6 +108,29 @@ def seed_all_fixtures():
         {"date": "2026-10-11 18:45:00+00", "league": 3, "home": t("Inter"), "away": t("Roma"), "p_id": "sa_2026_1011_int_rom"},
 
         # =========================================================================
+        # MIDWEEK 1: OCT 12 - OCT 15 (EUROPEAN DOMESTIC RESCHEDULED & MIDWEEK TIES)
+        # =========================================================================
+        # Monday Oct 12
+        {"date": "2026-10-12 16:30:00+00", "league": 1, "home": t("Aston Villa"), "away": t("Fulham"), "p_id": "epl_2026_1012_avl_ful"},
+        {"date": "2026-10-12 16:45:00+00", "league": 3, "home": t("Fiorentina"), "away": t("Lazio"), "p_id": "sa_2026_1012_fio_laz"},
+        {"date": "2026-10-12 17:00:00+00", "league": 2, "home": t("Villarreal"), "away": t("Las Palmas"), "p_id": "ll_2026_1012_vil_lpa"},
+        {"date": "2026-10-12 17:00:00+00", "league": 5, "home": t("Lyon"), "away": t("Nantes"), "p_id": "l1_2026_1012_lyo_nan"},
+
+        # Tuesday Oct 13
+        {"date": "2026-10-13 16:30:00+00", "league": 4, "home": t("RB Leipzig"), "away": t("Freiburg"), "p_id": "bl_2026_1013_rbl_scf"},
+        {"date": "2026-10-13 16:45:00+00", "league": 3, "home": t("Napoli"), "away": t("Monza"), "p_id": "sa_2026_1013_nap_mon"},
+        {"date": "2026-10-13 17:00:00+00", "league": 2, "home": t("Betis"), "away": t("Osasuna"), "p_id": "ll_2026_1013_bet_osa"},
+
+        # Wednesday Oct 14
+        {"date": "2026-10-14 16:30:00+00", "league": 1, "home": t("Brighton"), "away": t("Newcastle"), "p_id": "epl_2026_1014_bha_new"},
+        {"date": "2026-10-14 16:45:00+00", "league": 3, "home": t("Milan"), "away": t("Bologna"), "p_id": "sa_2026_1014_mil_bol"},
+        {"date": "2026-10-14 17:00:00+00", "league": 5, "home": t("Marseille"), "away": t("Nice"), "p_id": "l1_2026_1014_mar_nic"},
+
+        # Thursday Oct 15
+        {"date": "2026-10-15 16:45:00+00", "league": 3, "home": t("Torino"), "away": t("Cagliari"), "p_id": "sa_2026_1015_tor_cag"},
+        {"date": "2026-10-15 17:00:00+00", "league": 2, "home": t("Sociedad"), "away": t("Valencia"), "p_id": "ll_2026_1015_soc_val"},
+
+        # =========================================================================
         # WEEKEND 2: OCT 16 - OCT 19 (MATCHDAY 8 / 9)
         # =========================================================================
         # Friday Oct 16

@@ -763,6 +763,13 @@ def seed_expanded_leagues(db: Session) -> Dict[str, int]:
         # --- ISL Upcoming Schedule ---
         {
             "league": "ISL",
+            "kickoff": "2026-10-12 11:30:00+00",
+            "home": "Mumbai City", "away": "FC Goa",
+            "p_id": "isl_2026_1012_mcf_fcg",
+            "lam_h": 1.75, "lam_a": 1.30,
+        },
+        {
+            "league": "ISL",
             "kickoff": "2026-10-12 14:00:00+00",
             "home": "NorthEast United", "away": "Mohun Bagan",
             "p_id": "isl_2026_1012_neu_mbg",
@@ -770,10 +777,52 @@ def seed_expanded_leagues(db: Session) -> Dict[str, int]:
         },
         {
             "league": "ISL",
+            "kickoff": "2026-10-12 14:00:00+00",
+            "home": "Kerala Blasters", "away": "Jamshedpur FC",
+            "p_id": "isl_2026_1012_kbf_jfc",
+            "lam_h": 1.65, "lam_a": 1.15,
+        },
+        {
+            "league": "ISL",
+            "kickoff": "2026-10-13 11:30:00+00",
+            "home": "Chennaiyin FC", "away": "Inter Kashi",
+            "p_id": "isl_2026_1013_che_ika",
+            "lam_h": 1.60, "lam_a": 1.10,
+        },
+        {
+            "league": "ISL",
+            "kickoff": "2026-10-13 14:00:00+00",
+            "home": "East Bengal", "away": "Hyderabad FC",
+            "p_id": "isl_2026_1013_ebg_hfc",
+            "lam_h": 1.80, "lam_a": 0.95,
+        },
+        {
+            "league": "ISL",
+            "kickoff": "2026-10-14 11:30:00+00",
+            "home": "Bengaluru FC", "away": "Sporting Club Delhi",
+            "p_id": "isl_2026_1014_bfc_scd",
+            "lam_h": 1.70, "lam_a": 1.10,
+        },
+        {
+            "league": "ISL",
             "kickoff": "2026-10-14 14:00:00+00",
             "home": "Punjab FC", "away": "Odisha FC",
             "p_id": "isl_2026_1014_pun_odi",
             "lam_h": 1.35, "lam_a": 1.50,
+        },
+        {
+            "league": "ISL",
+            "kickoff": "2026-10-15 14:00:00+00",
+            "home": "FC Goa", "away": "Churchill Brothers",
+            "p_id": "isl_2026_1015_fcg_chu",
+            "lam_h": 1.85, "lam_a": 1.05,
+        },
+        {
+            "league": "ISL",
+            "kickoff": "2026-10-16 11:30:00+00",
+            "home": "Jamshedpur FC", "away": "Hyderabad FC",
+            "p_id": "isl_2026_1016_jfc_hfc",
+            "lam_h": 1.55, "lam_a": 1.05,
         },
         {
             "league": "ISL",
@@ -849,6 +898,20 @@ def seed_expanded_leagues(db: Session) -> Dict[str, int]:
         # --- MLS Upcoming Schedule ---
         {
             "league": "MLS",
+            "kickoff": "2026-10-12 17:30:00+00",
+            "home": "Orlando City", "away": "Charlotte FC",
+            "p_id": "mls_2026_1012_orl_clt",
+            "lam_h": 1.70, "lam_a": 1.15,
+        },
+        {
+            "league": "MLS",
+            "kickoff": "2026-10-13 18:00:00+00",
+            "home": "FC Cincinnati", "away": "Toronto FC",
+            "p_id": "mls_2026_1013_cin_tor",
+            "lam_h": 1.90, "lam_a": 1.05,
+        },
+        {
+            "league": "MLS",
             "kickoff": "2026-10-14 23:30:00+00",
             "home": "NY Red Bulls", "away": "NYCFC",
             "p_id": "mls_2026_1014_nyr_nyc",
@@ -867,6 +930,20 @@ def seed_expanded_leagues(db: Session) -> Dict[str, int]:
             "home": "FC Dallas", "away": "Colorado Rapids",
             "p_id": "mls_2026_1015_dal_col",
             "lam_h": 1.65, "lam_a": 1.30,
+        },
+        {
+            "league": "MLS",
+            "kickoff": "2026-10-15 18:00:00+00",
+            "home": "Nashville SC", "away": "Sporting KC",
+            "p_id": "mls_2026_1015_nsh_skc",
+            "lam_h": 1.60, "lam_a": 1.15,
+        },
+        {
+            "league": "MLS",
+            "kickoff": "2026-10-16 18:00:00+00",
+            "home": "Minnesota United", "away": "Vancouver Whitecaps",
+            "p_id": "mls_2026_1016_min_van",
+            "lam_h": 1.65, "lam_a": 1.35,
         },
         {
             "league": "MLS",
@@ -928,6 +1005,20 @@ def seed_expanded_leagues(db: Session) -> Dict[str, int]:
         # --- Brasileirão Série A Upcoming Schedule ---
         {
             "league": "BRA_SERIE_A",
+            "kickoff": "2026-10-12 17:30:00+00",
+            "home": "Santos", "away": "Vitória",
+            "p_id": "bra_2026_1012_san_vit",
+            "lam_h": 1.75, "lam_a": 1.05,
+        },
+        {
+            "league": "BRA_SERIE_A",
+            "kickoff": "2026-10-12 18:00:00+00",
+            "home": "Cruzeiro", "away": "Remo",
+            "p_id": "bra_2026_1012_cru_rem",
+            "lam_h": 1.85, "lam_a": 0.95,
+        },
+        {
+            "league": "BRA_SERIE_A",
             "kickoff": "2026-10-12 23:00:00+00",
             "home": "Coritiba", "away": "Botafogo",
             "p_id": "bra_2026_1012_cor_bot",
@@ -939,6 +1030,34 @@ def seed_expanded_leagues(db: Session) -> Dict[str, int]:
             "home": "Chapecoense", "away": "Athletico-PR",
             "p_id": "bra_2026_1012_cha_cap",
             "lam_h": 1.30, "lam_a": 1.45,
+        },
+        {
+            "league": "BRA_SERIE_A",
+            "kickoff": "2026-10-13 17:30:00+00",
+            "home": "Vasco", "away": "Bahia",
+            "p_id": "bra_2026_1013_vas_bah",
+            "lam_h": 1.55, "lam_a": 1.30,
+        },
+        {
+            "league": "BRA_SERIE_A",
+            "kickoff": "2026-10-14 17:30:00+00",
+            "home": "Flamengo", "away": "Atlético-MG",
+            "p_id": "bra_2026_1014_fla_cam",
+            "lam_h": 1.85, "lam_a": 1.25,
+        },
+        {
+            "league": "BRA_SERIE_A",
+            "kickoff": "2026-10-14 18:00:00+00",
+            "home": "São Paulo", "away": "Grêmio",
+            "p_id": "bra_2026_1014_sao_gre",
+            "lam_h": 1.65, "lam_a": 1.15,
+        },
+        {
+            "league": "BRA_SERIE_A",
+            "kickoff": "2026-10-15 17:30:00+00",
+            "home": "Internacional", "away": "Palmeiras",
+            "p_id": "bra_2026_1015_int_pal",
+            "lam_h": 1.45, "lam_a": 1.55,
         },
         {
             "league": "BRA_SERIE_A",
@@ -998,6 +1117,34 @@ def seed_expanded_leagues(db: Session) -> Dict[str, int]:
         },
 
         # --- Liga Profesional Argentina Upcoming Schedule ---
+        {
+            "league": "LIGA_ARG",
+            "kickoff": "2026-10-12 17:00:00+00",
+            "home": "Estudiantes", "away": "Huracán",
+            "p_id": "arg_2026_1012_est_hur",
+            "lam_h": 1.60, "lam_a": 1.10,
+        },
+        {
+            "league": "LIGA_ARG",
+            "kickoff": "2026-10-12 18:00:00+00",
+            "home": "Banfield", "away": "Tigre",
+            "p_id": "arg_2026_1012_ban_tig",
+            "lam_h": 1.45, "lam_a": 1.20,
+        },
+        {
+            "league": "LIGA_ARG",
+            "kickoff": "2026-10-13 18:00:00+00",
+            "home": "Barracas Central", "away": "Central Córdoba (SdE)",
+            "p_id": "arg_2026_1013_bar_cco",
+            "lam_h": 1.40, "lam_a": 1.15,
+        },
+        {
+            "league": "LIGA_ARG",
+            "kickoff": "2026-10-15 18:00:00+00",
+            "home": "Vélez", "away": "Estudiantes",
+            "p_id": "arg_2026_1015_vel_est",
+            "lam_h": 1.65, "lam_a": 1.15,
+        },
         {
             "league": "LIGA_ARG",
             "kickoff": "2026-10-16 22:00:00+00",

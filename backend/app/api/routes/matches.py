@@ -370,6 +370,24 @@ def get_daily_slips(
         Match.kickoff_at < day_end
     ).order_by(Match.kickoff_at).all()
 
+    # Ensure active/upcoming slates always have sufficient placeable fixtures (at least 6 active matches)
+    active_in_window = [
+        m for m in matches
+        if (m.status or "").upper() not in ("FINISHED", "POSTPONED", "CANCELLED", "ABANDONED")
+    ]
+    now_utc = datetime.now(timezone.utc)
+    if len(active_in_window) < 6 and day_end >= now_utc - timedelta(hours=12):
+        extra_matches = db.query(Match).filter(
+            Match.kickoff_at >= max(day_end, now_utc),
+            Match.kickoff_at < day_end + timedelta(hours=36),
+            Match.status == "SCHEDULED",
+        ).order_by(Match.kickoff_at).limit(12 - len(active_in_window)).all()
+        seen_ids = {m.id for m in matches}
+        for em in extra_matches:
+            if em.id not in seen_ids:
+                matches.append(em)
+                seen_ids.add(em.id)
+
     if not matches:
         empty_res = {
             "date": target_date_str,
@@ -398,9 +416,15 @@ def get_daily_slips(
     team_stat_cache = {}
     poisson_model = PoissonModel()
 
-    # Prioritize official leagues and evaluate up to 25 matches across all competitions
+    # Prioritize active (non-finished) matches first, then official league priority, evaluating up to 25 matches
     priority_order = {1: 1, 6: 1.5, 2: 2, 3: 3, 4: 4, 5: 5, 10: 6, 7: 7, 9: 8, 8: 9, 11: 10, 12: 11}
-    sorted_matches = sorted(matches, key=lambda x: priority_order.get(x.league_id, 99))
+    sorted_matches = sorted(
+        matches,
+        key=lambda x: (
+            1 if (x.status or "").upper() in ("FINISHED", "POSTPONED", "CANCELLED", "ABANDONED") else 0,
+            priority_order.get(x.league_id, 99),
+        ),
+    )
     eval_matches = sorted_matches[:25]
 
     for m in eval_matches:
