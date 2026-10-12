@@ -370,13 +370,15 @@ def get_daily_slips(
         Match.kickoff_at < day_end
     ).order_by(Match.kickoff_at).all()
 
-    # Ensure active/upcoming slates always have sufficient placeable fixtures (at least 6 active matches)
+    now_utc = datetime.now(timezone.utc)
+    is_past_date = (day_end <= now_utc)
+
+    # Ensure active/upcoming slates (Today / Future) always have sufficient placeable fixtures
     active_in_window = [
         m for m in matches
         if (m.status or "").upper() not in ("FINISHED", "POSTPONED", "CANCELLED", "ABANDONED")
     ]
-    now_utc = datetime.now(timezone.utc)
-    if len(active_in_window) < 6 and day_end >= now_utc - timedelta(hours=12):
+    if not is_past_date and len(active_in_window) < 6:
         extra_matches = db.query(Match).filter(
             Match.kickoff_at >= max(day_end, now_utc),
             Match.kickoff_at < day_end + timedelta(hours=36),
@@ -573,9 +575,10 @@ def get_daily_slips(
                     return "LIVE"
                 return "PENDING"
 
-            # Candidate picks for accumulator slips (STRICTLY for active/upcoming matches)
-            # Finished matches are eliminated so all slips contain only placeable, active bets!
-            if m_status != "FINISHED" and m_status not in ("POSTPONED", "CANCELLED", "ABANDONED"):
+            # Candidate picks for accumulator slips:
+            # For Today/Future (!is_past_date), exclude FINISHED matches so active slips contain only placeable bets.
+            # For Past Dates (is_past_date), include that date's finished matches so date-wise slips show settled outcomes.
+            if (is_past_date or m_status != "FINISHED") and m_status not in ("POSTPONED", "CANCELLED", "ABANDONED"):
                 # Candidate 1: Direct Win
                 if p_h >= 0.55:
                     all_picks.append({
@@ -1132,11 +1135,18 @@ def get_daily_slips(
     for rank_idx, s in enumerate(valid_slips, 1):
         s["rank"] = rank_idx
 
-    # Eliminate finished matches from active predictions so active bettors only see actionable upcoming games
-    active_predictions = [
-        rp for rp in ranked_predictions
-        if rp["status"] != "FINISHED" and rp["status"] not in ("POSTPONED", "CANCELLED", "ABANDONED")
-    ]
+    # For Today/Future, eliminate finished matches from active predictions so bettors only see upcoming games.
+    # For Past Dates, show that date's predictions settled with WON / LOST badges.
+    if is_past_date:
+        active_predictions = [
+            rp for rp in ranked_predictions
+            if rp["status"] not in ("POSTPONED", "CANCELLED", "ABANDONED")
+        ]
+    else:
+        active_predictions = [
+            rp for rp in ranked_predictions
+            if rp["status"] != "FINISHED" and rp["status"] not in ("POSTPONED", "CANCELLED", "ABANDONED")
+        ]
     settled_predictions_today = [
         rp for rp in ranked_predictions
         if rp["status"] == "FINISHED"
@@ -1166,38 +1176,58 @@ _PREDICTION_HISTORY_CACHE: Dict[str, Any] = {}
 
 @router.get("/prediction-history", summary="Historical prediction track record with audited outcomes (won vs lost)")
 def get_prediction_history(
-    days: int = Query(7, ge=1, le=90, description="Lookback window in days"),
+    date: Optional[str] = Query(None, description="Specific YYYY-MM-DD date in tz (or ALL)"),
+    days: int = Query(30, ge=1, le=90, description="Lookback window in days when date is not specified"),
     league: Optional[str] = Query(None, description="Filter by league code or name"),
     outcome: Optional[str] = Query("ALL", description="Filter outcome: ALL | WON | LOST"),
-    limit: int = Query(60, ge=1, le=150, description="Max historical matches to evaluate"),
+    limit: int = Query(100, ge=1, le=200, description="Max historical matches to evaluate"),
     tz: Optional[str] = Query("IST", description="Timezone: IST | UTC"),
     db: Session = Depends(get_db),
 ):
     """Provides an audited, transparent historical ledger of past AI match predictions and settlements:
-    - Queries matches that have ended with confirmed official full-time scorelines.
-    - Evaluates the pre-match AI Best Outcome against actual match results.
-    - Accurately settles each pick as WON (Correct) or LOST (Wrong) with unit returns and audit explanations.
-    - Aggregates overall performance metrics: Win Rate %, Net Units PnL, ROI %, and category breakdowns.
+    - Syncs live & recent scores before evaluating.
+    - Supports exact date-wise filtering (matching the top date bar) or all-dates view.
+    - Evaluates the pre-match AI Best Outcome against official full-time results.
+    - Accurately settles each pick and date-wise slip as WON (Correct) or LOST (Wrong).
     """
+    _refresh_live_matches_if_needed(db)
+
     from app.services.predictions.poisson import PoissonModel
     from datetime import datetime, timezone, timedelta
     import time
     import math
 
-    cache_key = f"{days}_{league or 'all'}_{outcome or 'all'}_{limit}_{tz or 'IST'}"
+    date_clean = (date or "").strip()
+    if date_clean.upper() == "ALL":
+        date_clean = ""
+
+    cache_key = f"{date_clean or 'all'}_{days}_{league or 'all'}_{outcome or 'all'}_{limit}_{tz or 'IST'}"
     cached = _PREDICTION_HISTORY_CACHE.get(cache_key)
-    if cached and (time.time() - cached["ts"] < 600):
+    if cached and (time.time() - cached["ts"] < 180):
         return cached["data"]
 
     now_utc = datetime.now(timezone.utc)
-    cutoff_dt = now_utc - timedelta(days=days)
+    is_ist = bool(tz and tz.upper() in ["IST", "ASIA/KOLKATA", "+05:30", "5:30"])
+    tz_offset = timedelta(hours=5, minutes=30) if is_ist else timedelta(0)
 
     q = db.query(Match).filter(
         Match.status == "FINISHED",
         Match.home_score.isnot(None),
         Match.away_score.isnot(None),
-        Match.kickoff_at >= cutoff_dt,
     )
+
+    if date_clean:
+        try:
+            day = datetime.fromisoformat(date_clean).replace(tzinfo=timezone.utc)
+            day_start = day - tz_offset
+            day_end = day_start + timedelta(days=1)
+            q = q.filter(Match.kickoff_at >= day_start, Match.kickoff_at < day_end)
+        except ValueError:
+            cutoff_dt = now_utc - timedelta(days=days)
+            q = q.filter(Match.kickoff_at >= cutoff_dt)
+    else:
+        cutoff_dt = now_utc - timedelta(days=days)
+        q = q.filter(Match.kickoff_at >= cutoff_dt)
 
     if league:
         l_clean = league.strip()
@@ -1207,7 +1237,7 @@ def get_prediction_history(
         if lg:
             q = q.filter(Match.league_id == lg.id)
 
-    matches = q.order_by(Match.kickoff_at.desc()).limit(min(limit, 60)).all()
+    matches = q.order_by(Match.kickoff_at.desc()).limit(min(limit, 150)).all()
 
     FLAG_MAP = {
         "EPL": "🏴󠁧󠁢󠁥󠁮󠁧󠁿", "LA_LIGA": "🇪🇸", "SERIE_A": "🇮🇹", "BUNDESLIGA": "🇩🇪", "LIGUE_1": "🇫🇷",
@@ -1441,6 +1471,12 @@ def get_prediction_history(
             outcome_status = "WON" if is_won else "LOST"
             unit_pnl = round(best_pick["odds"] - 1.0, 2) if is_won else -1.0
 
+            if m.kickoff_at:
+                local_dt = m.kickoff_at + tz_offset
+                local_date_str = local_dt.strftime("%Y-%m-%d")
+            else:
+                local_date_str = "Past"
+
             all_history_items.append({
                 "match_id": m.id,
                 "fixture": f"{h_name} vs {a_name}",
@@ -1450,6 +1486,7 @@ def get_prediction_history(
                 "league_name": lg_name,
                 "league_flag": FLAG_MAP.get(lg_code, "⚽"),
                 "kickoff_at": m.kickoff_at.isoformat() if m.kickoff_at else None,
+                "date": local_date_str,
                 "final_score": f"{h_score} - {a_score}",
                 "home_score": h_score,
                 "away_score": a_score,
@@ -1490,7 +1527,7 @@ def get_prediction_history(
     limited_items = filtered_items[:limit]
 
     # -------------------------------------------------------------
-    # BUILD HISTORICAL SLIPS (Accumulators, Doubles, Trebles)
+    # BUILD DATE-WISE HISTORICAL SLIPS (Accumulators, Doubles, Trebles)
     # -------------------------------------------------------------
     historical_slips = []
 
@@ -1552,14 +1589,15 @@ def get_prediction_history(
             "picks": slip_picks,
         }
 
-    # Group matches by day (kickoff_at date)
+    # Group matches by local timezone date (IST or UTC)
     date_groups: Dict[str, List[Dict[str, Any]]] = {}
     for item in all_history_items:
-        d_key = item["kickoff_at"][:10] if item.get("kickoff_at") else "Past"
+        d_key = item.get("date") or (item["kickoff_at"][:10] if item.get("kickoff_at") else "Past")
         date_groups.setdefault(d_key, []).append(item)
 
     for d_key, d_items in date_groups.items():
         if len(d_items) >= 2:
+            # 1. Safe Banker Treble / Double
             banker_candidates = sorted(d_items, key=lambda x: x["probability"], reverse=True)
             b_count = min(3, len(banker_candidates))
             b_slip = _make_historical_slip(
@@ -1573,7 +1611,11 @@ def get_prediction_history(
             if b_slip:
                 historical_slips.append(b_slip)
 
-            goal_picks = [p for p in d_items if p["category"] == "GOALS" or "Over" in p["pick"] or "BTTS" in p["pick"] or "Both Teams" in p["pick"]]
+            # 2. Goals Galore Combo
+            goal_picks = [
+                p for p in d_items
+                if p["category"] == "GOALS" or "Over" in p["pick"] or "BTTS" in p["pick"] or "Both Teams" in p["pick"]
+            ]
             if len(goal_picks) >= 2:
                 g_slip = _make_historical_slip(
                     goal_picks[:3],
@@ -1585,24 +1627,53 @@ def get_prediction_history(
                 )
                 if g_slip:
                     historical_slips.append(g_slip)
-            elif len(d_items) >= 4:
-                distinct_leagues = []
-                seen_lg = set()
-                for p in d_items:
-                    if p["league_code"] not in seen_lg:
-                        seen_lg.add(p["league_code"])
-                        distinct_leagues.append(p)
-                if len(distinct_leagues) >= 3:
-                    acc_slip = _make_historical_slip(
-                        distinct_leagues[:4],
-                        "Cross-League Power Acca",
-                        "Multi-League Combo",
-                        f"Multi-competition accumulator across {len(distinct_leagues[:4])} leagues on {d_key}.",
-                        "accumulator",
-                        d_key,
-                    )
-                    if acc_slip:
-                        historical_slips.append(acc_slip)
+
+            # 3. Cross-League Power Acca
+            distinct_leagues = []
+            seen_lg = set()
+            for p in d_items:
+                if p["league_code"] not in seen_lg:
+                    seen_lg.add(p["league_code"])
+                    distinct_leagues.append(p)
+            if len(distinct_leagues) >= 3:
+                acc_slip = _make_historical_slip(
+                    distinct_leagues[:4],
+                    "Cross-League Power Acca",
+                    "Multi-League Combo",
+                    f"Multi-competition accumulator across {len(distinct_leagues[:4])} leagues on {d_key}.",
+                    "accumulator",
+                    d_key,
+                )
+                if acc_slip:
+                    historical_slips.append(acc_slip)
+
+            # 4. High Value Multiplier (higher odds selections)
+            val_candidates = sorted(d_items, key=lambda x: x["odds"], reverse=True)
+            if len(val_candidates) >= 3:
+                v_slip = _make_historical_slip(
+                    val_candidates[:3],
+                    "High Value Multiplier",
+                    "Value Edge Combo",
+                    f"Higher-odds value selections from {d_key} fixtures.",
+                    "value",
+                    d_key,
+                )
+                if v_slip:
+                    historical_slips.append(v_slip)
+
+            # 5. Top Single Banker for the date
+            s_item = banker_candidates[0]
+            s_slip = _make_historical_slip(
+                [s_item],
+                f"Single Banker: {s_item['fixture']}",
+                "Top Single Pick",
+                f"Highest-confidence standalone match pick on {d_key}.",
+                "single_match",
+                d_key,
+            )
+            if s_slip:
+                historical_slips.append(s_slip)
+
         elif len(d_items) == 1:
             s_item = d_items[0]
             s_slip = _make_historical_slip(
@@ -1615,19 +1686,6 @@ def get_prediction_history(
             )
             if s_slip:
                 historical_slips.append(s_slip)
-
-    if len(all_history_items) >= 3 and len(historical_slips) < 3:
-        top_overall = sorted(all_history_items, key=lambda x: x["probability"], reverse=True)[:3]
-        cross_slip = _make_historical_slip(
-            top_overall,
-            "Multi-Day Safe Banker Treble",
-            "Highest Confidence",
-            "Highest-confidence mathematical selections across recent matchdays.",
-            "banker",
-            "Recent",
-        )
-        if cross_slip:
-            historical_slips.append(cross_slip)
 
     filtered_slips = historical_slips
     if outcome and outcome.upper() == "WON":
@@ -1660,6 +1718,8 @@ def get_prediction_history(
         },
         "history": limited_items,
         "historical_slips": filtered_slips,
+        "available_dates": sorted(list(date_groups.keys()), reverse=True),
+        "selected_date": date_clean or "ALL",
         "days": days,
         "league_filter": league,
         "outcome_filter": outcome or "ALL",

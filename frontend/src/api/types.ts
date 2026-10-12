@@ -142,6 +142,7 @@ export interface HistoricalPredictionItem {
   unit_return: string;
   unit_pnl: number;
   audit_note: string;
+  date?: string;
 }
 
 export interface HistoricalSlipPick {
@@ -199,6 +200,8 @@ export interface PredictionHistoryResponse {
   summary: PredictionHistorySummary;
   history: HistoricalPredictionItem[];
   historical_slips?: HistoricalSlipItem[];
+  available_dates?: string[];
+  selected_date?: string;
   days: number;
   league_filter?: string | null;
   outcome_filter?: string;

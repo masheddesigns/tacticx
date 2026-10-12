@@ -38,6 +38,7 @@ export function useDailySlips(date?: string, tz?: string) {
 }
 
 export function usePredictionHistory(params?: {
+  date?: string;
   days?: number;
   league?: string;
   outcome?: 'ALL' | 'WON' | 'LOST';
@@ -47,7 +48,8 @@ export function usePredictionHistory(params?: {
   return useQuery({
     queryKey: QUERY_KEYS.predictionHistory(params),
     queryFn: ({ signal }) => apiClient.getPredictionHistory({ ...params, signal }),
-    staleTime: 60 * 1000,
+    staleTime: 30 * 1000,
+    refetchInterval: 60 * 1000,
     retry: 2,
     placeholderData: (prev) => prev,
   });

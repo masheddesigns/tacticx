@@ -108,27 +108,23 @@ def seed_all_fixtures():
         {"date": "2026-10-11 18:45:00+00", "league": 3, "home": t("Inter"), "away": t("Roma"), "p_id": "sa_2026_1011_int_rom"},
 
         # =========================================================================
-        # MIDWEEK 1: OCT 12 - OCT 15 (EUROPEAN DOMESTIC RESCHEDULED & MIDWEEK TIES)
+        # MIDWEEK 1: OCT 12 - OCT 14 (SERIE A & UEFA CHAMPIONS LEAGUE OFFICIAL SLATE)
         # =========================================================================
         # Monday Oct 12
-        {"date": "2026-10-12 16:30:00+00", "league": 1, "home": t("Aston Villa"), "away": t("Fulham"), "p_id": "epl_2026_1012_avl_ful"},
-        {"date": "2026-10-12 16:45:00+00", "league": 3, "home": t("Fiorentina"), "away": t("Lazio"), "p_id": "sa_2026_1012_fio_laz"},
-        {"date": "2026-10-12 17:00:00+00", "league": 2, "home": t("Villarreal"), "away": t("Las Palmas"), "p_id": "ll_2026_1012_vil_lpa"},
-        {"date": "2026-10-12 17:00:00+00", "league": 5, "home": t("Lyon"), "away": t("Nantes"), "p_id": "l1_2026_1012_lyo_nan"},
+        {"date": "2026-10-12 18:45:00+00", "league": 3, "home": t("Torino"), "away": t("Udinese"), "p_id": "sa_2026_1012_tor_udi"},
 
-        # Tuesday Oct 13
-        {"date": "2026-10-13 16:30:00+00", "league": 4, "home": t("RB Leipzig"), "away": t("Freiburg"), "p_id": "bl_2026_1013_rbl_scf"},
-        {"date": "2026-10-13 16:45:00+00", "league": 3, "home": t("Napoli"), "away": t("Monza"), "p_id": "sa_2026_1013_nap_mon"},
-        {"date": "2026-10-13 17:00:00+00", "league": 2, "home": t("Betis"), "away": t("Osasuna"), "p_id": "ll_2026_1013_bet_osa"},
+        # Tuesday Oct 13 (UEFA Champions League)
+        {"date": "2026-10-13 16:45:00+00", "league": 6, "home": t("Lens"), "away": t("Sporting CP"), "p_id": "ucl_2026_1013_len_spo"},
+        {"date": "2026-10-13 19:00:00+00", "league": 6, "home": t("Arsenal"), "away": t("Lille"), "p_id": "ucl_2026_1013_ars_lil"},
+        {"date": "2026-10-13 19:00:00+00", "league": 6, "home": t("Ath Madrid"), "away": t("Man United"), "p_id": "ucl_2026_1013_atm_mun"},
+        {"date": "2026-10-13 19:00:00+00", "league": 6, "home": t("Inter"), "away": t("Club Brugge"), "p_id": "ucl_2026_1013_int_bru"},
+        {"date": "2026-10-13 19:00:00+00", "league": 6, "home": t("RB Leipzig"), "away": t("PSV Eindhoven"), "p_id": "ucl_2026_1013_rbl_psv"},
+        {"date": "2026-10-13 19:00:00+00", "league": 6, "home": t("Villarreal"), "away": t("Napoli"), "p_id": "ucl_2026_1013_vil_nap"},
 
-        # Wednesday Oct 14
-        {"date": "2026-10-14 16:30:00+00", "league": 1, "home": t("Brighton"), "away": t("Newcastle"), "p_id": "epl_2026_1014_bha_new"},
-        {"date": "2026-10-14 16:45:00+00", "league": 3, "home": t("Milan"), "away": t("Bologna"), "p_id": "sa_2026_1014_mil_bol"},
-        {"date": "2026-10-14 17:00:00+00", "league": 5, "home": t("Marseille"), "away": t("Nice"), "p_id": "l1_2026_1014_mar_nic"},
-
-        # Thursday Oct 15
-        {"date": "2026-10-15 16:45:00+00", "league": 3, "home": t("Torino"), "away": t("Cagliari"), "p_id": "sa_2026_1015_tor_cag"},
-        {"date": "2026-10-15 17:00:00+00", "league": 2, "home": t("Sociedad"), "away": t("Valencia"), "p_id": "ll_2026_1015_soc_val"},
+        # Wednesday Oct 14 (UEFA Champions League)
+        {"date": "2026-10-14 19:00:00+00", "league": 6, "home": t("Roma"), "away": t("Real Madrid"), "p_id": "ucl_2026_1014_rom_rma"},
+        {"date": "2026-10-14 19:00:00+00", "league": 6, "home": t("Man City"), "away": t("Paris SG"), "p_id": "ucl_2026_1014_mci_psg"},
+        {"date": "2026-10-14 19:00:00+00", "league": 6, "home": t("Slovan Bratislava"), "away": t("Stuttgart"), "p_id": "ucl_2026_1014_slo_vfb"},
 
         # =========================================================================
         # WEEKEND 2: OCT 16 - OCT 19 (MATCHDAY 8 / 9)

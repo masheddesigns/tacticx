@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import {
   Sparkles,
   Trophy,
@@ -33,7 +33,7 @@ import {
   HistoricalSlipItem,
 } from '../../api/types';
 import { usePredictionHistory } from '../../api/queries';
-import { formatDayDisplay, formatDateTime } from '../../lib/utils';
+import { formatDayDisplay, formatDateTime, getTodayString, getDayOffsetString } from '../../lib/utils';
 import { ShareSlipModal } from './ShareSlipModal';
 import { TeamLogo } from '../common/TeamLogo';
 import { LeagueLogo } from '../common/LeagueLogo';
@@ -71,17 +71,65 @@ export const DailyAIPredictionsSection: React.FC<DailyAIPredictionsSectionProps>
   const [copiedId, setCopiedId] = useState<number | null>(null);
   const [copiedSlipId, setCopiedSlipId] = useState<string | null>(null);
 
-  // Historical Track Record states
-  const [historyDays, setHistoryDays] = useState<number>(7);
+  const todayStr = useMemo(() => getTodayString(timeZone), [timeZone]);
+  const yesterdayStr = useMemo(() => getDayOffsetString(-1, timeZone), [timeZone]);
+  const tomorrowStr = useMemo(() => getDayOffsetString(1, timeZone), [timeZone]);
+  const isPastDate = Boolean(dateStr && dateStr < todayStr);
+
+  // Date-wise tabs matching the top-of-screen DateSliderTabs
+  const dateWiseTabs = useMemo(() => {
+    const list: Array<{
+      dateStr: string;
+      relativeLabel: string;
+      dayMonthLabel: string;
+      isPast: boolean;
+      isToday: boolean;
+    }> = [];
+    for (let offset = -5; offset <= 5; offset++) {
+      const dStr = getDayOffsetString(offset, timeZone);
+      const isToday = dStr === todayStr;
+      const isYesterday = dStr === yesterdayStr;
+      const isTomorrow = dStr === tomorrowStr;
+      const parts = dStr.split('-').map(Number);
+      const d = new Date(Date.UTC(parts[0], parts[1] - 1, parts[2], 12, 0, 0));
+      const dayNum = d.getUTCDate();
+      const monthShort = d.toLocaleDateString('en-GB', { month: 'short', timeZone: 'UTC' }).toUpperCase();
+      const weekdayShort = d.toLocaleDateString('en-GB', { weekday: 'short', timeZone: 'UTC' }).toUpperCase();
+      let relativeLabel = weekdayShort;
+      if (isToday) relativeLabel = 'TODAY';
+      else if (isYesterday) relativeLabel = 'YESTERDAY';
+      else if (isTomorrow) relativeLabel = 'TOMORROW';
+
+      list.push({
+        dateStr: dStr,
+        relativeLabel,
+        dayMonthLabel: `${dayNum} ${monthShort}`,
+        isPast: dStr < todayStr,
+        isToday,
+      });
+    }
+    return list;
+  }, [timeZone, todayStr, yesterdayStr, tomorrowStr]);
+
+  // Historical Track Record date-wise states (synced with top date bar)
+  const [historyDate, setHistoryDate] = useState<string>(dateStr <= todayStr ? dateStr : yesterdayStr);
   const [historyLeague, setHistoryLeague] = useState<string>('ALL');
   const [historyOutcome, setHistoryOutcome] = useState<'ALL' | 'WON' | 'LOST'>('ALL');
   const [historySubTab, setHistorySubTab] = useState<'SLIPS' | 'MATCHES'>('SLIPS');
 
+  // Sync historyDate when top-of-screen dateStr changes to a past or current date
+  useEffect(() => {
+    if (dateStr && dateStr <= todayStr) {
+      setHistoryDate(dateStr);
+    }
+  }, [dateStr, todayStr]);
+
   const { data: historyData, isLoading: isHistoryLoading, refetch: refetchHistory } = usePredictionHistory({
-    days: historyDays,
+    date: historyDate !== 'ALL' ? historyDate : undefined,
+    days: 30,
     league: historyLeague !== 'ALL' ? historyLeague : undefined,
     outcome: historyOutcome,
-    limit: 60,
+    limit: 100,
     tz: timeZone,
   });
 
@@ -89,6 +137,9 @@ export const DailyAIPredictionsSection: React.FC<DailyAIPredictionsSectionProps>
   const effectiveHistoricalSlips = useMemo(() => {
     let rawSlips = historyData?.historical_slips || [];
     if (rawSlips.length > 0) {
+      if (historyDate !== 'ALL') {
+        rawSlips = rawSlips.filter((s) => !s.date || s.date === historyDate || s.date === 'Recent');
+      }
       if (historyOutcome === 'WON') {
         return rawSlips.filter((s) => s.outcome_status === 'WON');
       }
@@ -102,7 +153,7 @@ export const DailyAIPredictionsSection: React.FC<DailyAIPredictionsSectionProps>
 
     const groups = new Map<string, typeof historyList>();
     historyList.forEach((item) => {
-      const dKey = item.kickoff_at ? item.kickoff_at.slice(0, 10) : 'Recent';
+      const dKey = item.date || (item.kickoff_at ? item.kickoff_at.slice(0, 10) : 'Recent');
       if (!groups.has(dKey)) groups.set(dKey, []);
       groups.get(dKey)!.push(item);
     });
@@ -276,14 +327,18 @@ export const DailyAIPredictionsSection: React.FC<DailyAIPredictionsSectionProps>
       });
     }
 
+    let out = slipsList;
+    if (historyDate !== 'ALL') {
+      out = out.filter((s) => !s.date || s.date === historyDate || s.date === 'Recent');
+    }
     if (historyOutcome === 'WON') {
-      return slipsList.filter((s) => s.outcome_status === 'WON');
+      return out.filter((s) => s.outcome_status === 'WON');
     }
     if (historyOutcome === 'LOST') {
-      return slipsList.filter((s) => s.outcome_status === 'LOST');
+      return out.filter((s) => s.outcome_status === 'LOST');
     }
-    return slipsList;
-  }, [historyData, historyOutcome]);
+    return out;
+  }, [historyData, historyOutcome, historyDate]);
 
   // If backend rankedPredictions is not yet populated (e.g. while server cache refreshes), derive from slips.picks
   const effectivePredictions = useMemo(() => {
@@ -369,21 +424,25 @@ export const DailyAIPredictionsSection: React.FC<DailyAIPredictionsSectionProps>
     return Array.from(map.values());
   }, [effectivePredictions]);
 
-  // Separate active upcoming predictions from finished matches
-  // Ended matches are completely eliminated from active bet lists!
+  // Separate active upcoming predictions from finished matches for Today/Future;
+  // For Past Dates selected in the top date bar, display that date's predictions & slips settled with outcomes.
   const activePredictions = useMemo(() => {
-    return effectivePredictions.filter((p) => p.status !== 'FINISHED');
-  }, [effectivePredictions]);
+    if (isPastDate) return effectivePredictions;
+    const upcoming = effectivePredictions.filter((p) => p.status !== 'FINISHED');
+    return upcoming.length > 0 ? upcoming : effectivePredictions;
+  }, [effectivePredictions, isPastDate]);
 
   const finishedPredictionsToday = useMemo(() => {
+    if (isPastDate) return [];
     return effectivePredictions.filter((p) => p.status === 'FINISHED');
-  }, [effectivePredictions]);
+  }, [effectivePredictions, isPastDate]);
 
-  // Slips with finished picks eliminated
+  // Slips: for Today/Future eliminate finished picks; for Past Dates show that date's slips
   const activeSlips = useMemo(() => {
+    if (isPastDate) return slips;
     const list = slips.filter((s) => !s.picks.some((p) => p.status === 'WON' || p.status === 'LOST'));
     return list.length > 0 ? list : slips;
-  }, [slips]);
+  }, [slips, isPastDate]);
 
   // Filter and sort active predictions only
   const filteredPredictions = useMemo(() => {
@@ -1116,164 +1175,260 @@ export const DailyAIPredictionsSection: React.FC<DailyAIPredictionsSectionProps>
         </div>
       )}
 
-      {/* 3. TAB B: CURATED COMBO SLIPS & ACCAS */}
+      {/* 3. TAB B: CURATED COMBO SLIPS & ACCAS (DATE-WISE) */}
       {activeTab === 'COMBO_SLIPS' && (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {isLoading ? (
-            <div className="col-span-full p-8 rounded-2xl border border-[#242938] bg-[#141822] text-center space-y-4">
-              <div className="w-10 h-10 mx-auto rounded-full border-2 border-[#21e786] border-t-transparent animate-spin" />
-              <div className="space-y-1">
-                <h4 className="text-sm font-semibold text-slate-200">
-                  Building Mathematical Accumulator Slips...
-                </h4>
-                <p className="text-xs text-slate-400 max-w-md mx-auto">
-                  Curating multi-leg bankers, goals combos, and value accas across active fixtures.
-                </p>
+        <div className="space-y-4">
+          {/* Date-Wise Slip Selector Bar (Matches Top of Screen) */}
+          <div className="rounded-2xl border border-[#242938] bg-[#141822] p-3 flex flex-wrap items-center justify-between gap-3">
+            <div className="flex items-center gap-2 text-xs font-sans">
+              <Calendar className="w-4 h-4 text-[#21e786]" />
+              <span className="font-bold text-white">Date-Wise Slips:</span>
+              <span className="text-slate-400 font-mono text-[11px]">
+                {formatDayDisplay(dateStr, timeZone)}
+              </span>
+            </div>
+
+            <div className="flex items-center gap-1.5 overflow-x-auto scrollbar-none pb-0.5">
+              {dateWiseTabs.map((tab) => {
+                const isSelected = tab.dateStr === dateStr;
+                return (
+                  <button
+                    key={tab.dateStr}
+                    onClick={() => onDateChange?.(tab.dateStr)}
+                    className={`px-2.5 py-1.5 rounded-xl text-[11px] font-mono transition-all whitespace-nowrap flex flex-col items-center leading-tight ${
+                      isSelected
+                        ? 'bg-[#21e786] text-[#0a0d14] font-bold shadow-sm'
+                        : 'bg-[#0e121a] text-slate-300 hover:text-white border border-[#222a3a]'
+                    }`}
+                  >
+                    <span className="text-[9px] uppercase tracking-wider opacity-85">{tab.relativeLabel}</span>
+                    <span className="font-bold">{tab.dayMonthLabel}</span>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {isLoading ? (
+              <div className="col-span-full p-8 rounded-2xl border border-[#242938] bg-[#141822] text-center space-y-4">
+                <div className="w-10 h-10 mx-auto rounded-full border-2 border-[#21e786] border-t-transparent animate-spin" />
+                <div className="space-y-1">
+                  <h4 className="text-sm font-semibold text-slate-200">
+                    Building Date-Wise Accumulator Slips...
+                  </h4>
+                  <p className="text-xs text-slate-400 max-w-md mx-auto">
+                    Curating multi-leg bankers, goals combos, and value accas for {formatDayDisplay(dateStr, timeZone)}.
+                  </p>
+                </div>
               </div>
-            </div>
-          ) : activeSlips.length === 0 ? (
-            <div className="col-span-full p-10 text-center rounded-2xl border border-[#242938] bg-[#141822] text-slate-400 text-xs font-sans">
-              No accumulator slips generated for this date.
-            </div>
-          ) : (
-            activeSlips.map((slip, sIdx) => {
-              return (
-                <div
-                  key={sIdx}
-                  className="rounded-2xl border border-[#242938] bg-[#141822] hover:bg-[#161b26] p-4 space-y-3.5 flex flex-col justify-between shadow-sm transition-all"
-                >
-                  <div className="space-y-2.5">
-                    {/* Top Row: Rank & Odds */}
-                    <div className="flex items-center justify-between gap-2">
-                      <span className="px-2 py-0.5 rounded-full bg-[#1b202e] text-[#21e786] text-xs font-mono font-bold border border-[#262f42]">
-                        Acca Rank #{slip.rank || sIdx + 1}
-                      </span>
-                      <span className="text-xs font-mono font-bold px-2 py-0.5 rounded bg-emerald-950/80 text-emerald-400 border border-emerald-800">
-                        Total @{slip.total_odds.toFixed(2)}
-                      </span>
-                    </div>
+            ) : activeSlips.length === 0 ? (
+              <div className="col-span-full p-10 text-center rounded-2xl border border-[#242938] bg-[#141822] text-slate-400 text-xs font-sans">
+                No accumulator slips generated for {formatDayDisplay(dateStr, timeZone)}.
+              </div>
+            ) : (
+              activeSlips.map((slip, sIdx) => {
+                const isSettledWon = slip.outcome_status === 'WON';
+                const isSettledLost = slip.outcome_status === 'LOST';
+                return (
+                  <div
+                    key={sIdx}
+                    className={`rounded-2xl border p-4 space-y-3.5 flex flex-col justify-between shadow-sm transition-all ${
+                      isSettledWon
+                        ? 'border-emerald-500/35 bg-gradient-to-b from-[#0f1917] via-[#141822] to-[#10141d]'
+                        : isSettledLost
+                        ? 'border-rose-500/35 bg-gradient-to-b from-[#1a1015] via-[#141822] to-[#10141d]'
+                        : 'border-[#242938] bg-[#141822] hover:bg-[#161b26]'
+                    }`}
+                  >
+                    <div className="space-y-2.5">
+                      {/* Top Row: Rank, Date & Odds / Outcome */}
+                      <div className="flex items-center justify-between gap-2 flex-wrap">
+                        <div className="flex items-center gap-1.5">
+                          <span className="px-2 py-0.5 rounded-full bg-[#1b202e] text-[#21e786] text-xs font-mono font-bold border border-[#262f42]">
+                            Acca Rank #{slip.rank || sIdx + 1}
+                          </span>
+                          <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-[#171d2b] text-slate-300 border border-[#263145]">
+                            {dateStr}
+                          </span>
+                        </div>
+                        <div className="flex items-center gap-1.5">
+                          {isSettledWon && (
+                            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-mono font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/40">
+                              <CheckCircle2 className="w-3 h-3 text-emerald-400" />
+                              <span>WON</span>
+                            </span>
+                          )}
+                          {isSettledLost && (
+                            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-mono font-bold bg-rose-500/20 text-rose-300 border border-rose-500/40">
+                              <XCircle className="w-3 h-3 text-rose-400" />
+                              <span>LOST</span>
+                            </span>
+                          )}
+                          <span className="text-xs font-mono font-bold px-2 py-0.5 rounded bg-emerald-950/80 text-emerald-400 border border-emerald-800">
+                            Total @{slip.total_odds.toFixed(2)}
+                          </span>
+                        </div>
+                      </div>
 
-                    <div>
-                      <h4 className="font-bold text-sm text-white font-sans">{slip.title}</h4>
-                      <p className="text-xs text-slate-400 font-sans mt-0.5">{slip.description}</p>
-                    </div>
+                      <div>
+                        <h4 className="font-bold text-sm text-white font-sans">{slip.title}</h4>
+                        <p className="text-xs text-slate-400 font-sans mt-0.5">{slip.description}</p>
+                      </div>
 
-                    {/* Legs */}
-                    <div className="space-y-2 pt-1">
-                      {slip.picks.map((pick, pIdx) => {
-                        const [homeTeam, awayTeam] = pick.fixture.includes(' vs ')
-                          ? pick.fixture.split(' vs ')
-                          : [pick.fixture, ''];
-                        const winProbPct = pick.probability > 1
-                          ? Math.round(pick.probability)
-                          : Math.round(pick.probability * 100);
-                        return (
-                          <div
-                            key={pIdx}
-                            className="p-2.5 rounded-xl bg-[#0d1017] border border-[#1f2636] flex flex-col gap-1.5 text-xs font-sans"
-                          >
-                            {/* Competition Header: League Logo + League Name */}
-                            <div className="flex items-center justify-between gap-2 pb-1 border-b border-[#181f2c]">
-                              <div className="flex items-center gap-1.5 min-w-0">
-                                <LeagueLogo league={pick.league_code || pick.league} size="xs" />
-                                <span className="text-[10px] font-mono font-semibold text-slate-300 truncate">
-                                  {pick.league || pick.league_code}
-                                </span>
-                              </div>
-                              <span className="text-[10px] font-mono text-[#21e786] font-semibold shrink-0">
-                                {winProbPct}% Win
-                              </span>
-                            </div>
-
-                            {/* Matchup & Recommended Pick */}
-                            <div className="flex items-center justify-between gap-2">
-                              <div className="truncate min-w-0 flex-1 space-y-0.5">
-                                <div className="flex items-center gap-1.5 text-[11px] text-slate-200 font-medium truncate">
-                                  {homeTeam && <TeamLogo teamName={homeTeam.trim()} size="xs" />}
-                                  <span className="truncate">{homeTeam.trim()}</span>
-                                  {awayTeam && (
-                                    <>
-                                      <span className="text-slate-500 text-[10px] font-mono">vs</span>
-                                      <TeamLogo teamName={awayTeam.trim()} size="xs" />
-                                      <span className="truncate">{awayTeam.trim()}</span>
-                                    </>
+                      {/* Legs */}
+                      <div className="space-y-2 pt-1">
+                        {slip.picks.map((pick, pIdx) => {
+                          const [homeTeam, awayTeam] = pick.fixture.includes(' vs ')
+                            ? pick.fixture.split(' vs ')
+                            : [pick.fixture, ''];
+                          const winProbPct = pick.probability > 1
+                            ? Math.round(pick.probability)
+                            : Math.round(pick.probability * 100);
+                          const legWon = pick.status === 'WON';
+                          const legLost = pick.status === 'LOST';
+                          return (
+                            <div
+                              key={pIdx}
+                              className={`p-2.5 rounded-xl border flex flex-col gap-1.5 text-xs font-sans ${
+                                legWon
+                                  ? 'bg-[#0d1417] border-emerald-900/40'
+                                  : legLost
+                                  ? 'bg-[#170e13] border-rose-900/40'
+                                  : 'bg-[#0d1017] border-[#1f2636]'
+                              }`}
+                            >
+                              {/* Competition Header: League Logo + League Name */}
+                              <div className="flex items-center justify-between gap-2 pb-1 border-b border-[#181f2c]">
+                                <div className="flex items-center gap-1.5 min-w-0">
+                                  <LeagueLogo league={pick.league_code || pick.league} size="xs" />
+                                  <span className="text-[10px] font-mono font-semibold text-slate-300 truncate">
+                                    {pick.league || pick.league_code}
+                                  </span>
+                                </div>
+                                <div className="flex items-center gap-1.5 shrink-0">
+                                  <span className="text-[10px] font-mono text-[#21e786] font-semibold">
+                                    {winProbPct}% Win
+                                  </span>
+                                  {(legWon || legLost) && (
+                                    <span
+                                      className={`text-[9px] font-mono font-bold px-1.5 py-0.2 rounded ${
+                                        legWon
+                                          ? 'bg-emerald-950 text-emerald-300 border border-emerald-800'
+                                          : 'bg-rose-950 text-rose-300 border border-rose-800'
+                                      }`}
+                                    >
+                                      {legWon ? 'WON' : 'LOST'}
+                                    </span>
                                   )}
                                 </div>
-                                <div className="font-bold text-white text-xs truncate">
-                                  {pick.pick}
-                                </div>
                               </div>
-                              <span className="font-mono text-emerald-400 font-bold whitespace-nowrap text-[11px] px-2 py-0.5 rounded bg-emerald-950/60 border border-emerald-800/50">
-                                @{pick.odds.toFixed(2)}
-                              </span>
+
+                              {/* Matchup & Recommended Pick */}
+                              <div className="flex items-center justify-between gap-2">
+                                <div className="truncate min-w-0 flex-1 space-y-0.5">
+                                  <div className="flex items-center gap-1.5 text-[11px] text-slate-200 font-medium truncate">
+                                    {homeTeam && <TeamLogo teamName={homeTeam.trim()} size="xs" />}
+                                    <span className="truncate">{homeTeam.trim()}</span>
+                                    {awayTeam && (
+                                      <>
+                                        <span className="text-slate-500 text-[10px] font-mono">vs</span>
+                                        <TeamLogo teamName={awayTeam.trim()} size="xs" />
+                                        <span className="truncate">{awayTeam.trim()}</span>
+                                      </>
+                                    )}
+                                  </div>
+                                  <div className="font-bold text-white text-xs truncate">
+                                    {pick.pick}
+                                  </div>
+                                </div>
+                                <span className="font-mono text-emerald-400 font-bold whitespace-nowrap text-[11px] px-2 py-0.5 rounded bg-emerald-950/60 border border-emerald-800/50">
+                                  @{pick.odds.toFixed(2)}
+                                </span>
+                              </div>
                             </div>
-                          </div>
-                        );
-                      })}
+                          );
+                        })}
+                      </div>
+                    </div>
+
+                    {/* Slip Footer */}
+                    <div className="pt-2 border-t border-[#1e2534] flex items-center justify-between gap-2">
+                      <span className="text-xs font-mono text-slate-400">
+                        Prob: <span className="text-white font-bold">{slip.win_probability}%</span>
+                      </span>
+
+                      <button
+                        onClick={() => setSelectedSlipForShare(slip)}
+                        className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-mono bg-[#21e786]/10 hover:bg-[#21e786]/20 text-[#21e786] border border-[#21e786]/30 transition-colors"
+                      >
+                        <Share2 className="w-3 h-3" />
+                        <span>Share Slip</span>
+                      </button>
                     </div>
                   </div>
-
-                  {/* Slip Footer */}
-                  <div className="pt-2 border-t border-[#1e2534] flex items-center justify-between gap-2">
-                    <span className="text-xs font-mono text-slate-400">
-                      Prob: <span className="text-white font-bold">{slip.win_probability}%</span>
-                    </span>
-
-                    <button
-                      onClick={() => setSelectedSlipForShare(slip)}
-                      className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-mono bg-[#21e786]/10 hover:bg-[#21e786]/20 text-[#21e786] border border-[#21e786]/30 transition-colors"
-                    >
-                      <Share2 className="w-3 h-3" />
-                      <span>Share Slip</span>
-                    </button>
-                  </div>
-                </div>
-              );
-            })
-          )}
+                );
+              })
+            )}
+          </div>
         </div>
       )}
 
-      {/* 4. TAB C: PREDICTION TRACK RECORD & AUDITED HISTORY */}
+      {/* 4. TAB C: PREDICTION TRACK RECORD & AUDITED HISTORY (DATE-WISE) */}
       {activeTab === 'PREDICTION_HISTORY' && (
         <div className="space-y-4">
           {/* Performance Summary Banner */}
           <div className="rounded-2xl border border-[#232b3d] bg-gradient-to-br from-[#121622] via-[#10141f] to-[#0c0f18] p-4 sm:p-5 shadow-lg space-y-4">
-            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+            <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
               <div>
                 <div className="flex items-center gap-2">
                   <span className="p-1.5 rounded-lg bg-emerald-500/10 text-emerald-400 border border-emerald-500/25">
                     <ShieldCheck className="w-4 h-4" />
                   </span>
                   <h3 className="font-bold text-white text-base font-sans">
-                    Prediction Settlement Ledger & Accuracy
+                    Prediction Settlement Ledger & Accuracy (Date-Wise)
                   </h3>
                 </div>
                 <p className="text-xs text-slate-400 font-sans mt-1">
-                  Immutable record of finished matches evaluated against official full-time scorelines. Every pick is settled as Won or Lost with honest unit tracking.
+                  Immutable date-wise record of finished matches and slips evaluated against official full-time scorelines.
                 </p>
               </div>
 
-              {/* Quick Lookback Selector */}
-              <div className="flex items-center gap-1.5 text-xs font-mono">
-                <span className="text-slate-400">Window:</span>
-                {[3, 7, 14, 30, 60].map((d) => (
-                  <button
-                    key={d}
-                    onClick={() => setHistoryDays(d)}
-                    disabled={isHistoryLoading && historyDays === d}
-                    className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-lg transition-all ${
-                      historyDays === d
-                        ? 'bg-[#21e786] text-[#0a0d14] font-bold shadow-sm'
-                        : 'bg-[#181d28] text-slate-400 hover:text-white border border-[#232a3a]'
-                    }`}
-                  >
-                    <span>{d}d</span>
-                    {isHistoryLoading && historyDays === d && (
-                      <span className="w-2.5 h-2.5 border-2 border-[#0a0d14] border-t-transparent rounded-full animate-spin" />
-                    )}
-                  </button>
-                ))}
+              {/* Date-Wise Selector (Matches Top of Screen Date Bar) */}
+              <div className="flex items-center gap-1.5 overflow-x-auto scrollbar-none pb-0.5">
+                {dateWiseTabs
+                  .filter((t) => t.dateStr <= todayStr)
+                  .map((tab) => {
+                    const isSelected = historyDate === tab.dateStr;
+                    return (
+                      <button
+                        key={tab.dateStr}
+                        onClick={() => {
+                          setHistoryDate(tab.dateStr);
+                          onDateChange?.(tab.dateStr);
+                        }}
+                        className={`px-2.5 py-1.5 rounded-xl text-[11px] font-mono transition-all whitespace-nowrap flex flex-col items-center leading-tight ${
+                          isSelected
+                            ? 'bg-[#21e786] text-[#0a0d14] font-bold shadow-sm'
+                            : 'bg-[#181d28] text-slate-300 hover:text-white border border-[#232a3a]'
+                        }`}
+                      >
+                        <span className="text-[9px] uppercase tracking-wider opacity-85">{tab.relativeLabel}</span>
+                        <span className="font-bold">{tab.dayMonthLabel}</span>
+                      </button>
+                    );
+                  })}
+                <button
+                  onClick={() => setHistoryDate('ALL')}
+                  className={`px-3 py-1.5 rounded-xl text-[11px] font-mono transition-all whitespace-nowrap flex flex-col items-center leading-tight ${
+                    historyDate === 'ALL'
+                      ? 'bg-[#21e786] text-[#0a0d14] font-bold shadow-sm'
+                      : 'bg-[#181d28] text-slate-300 hover:text-white border border-[#232a3a]'
+                  }`}
+                >
+                  <span className="text-[9px] uppercase tracking-wider opacity-85">ALL</span>
+                  <span className="font-bold">DATES</span>
+                </button>
               </div>
             </div>
 
@@ -1438,25 +1593,25 @@ export const DailyAIPredictionsSection: React.FC<DailyAIPredictionsSectionProps>
                 <div className="p-12 text-center rounded-2xl border border-[#242938] bg-[#141822] space-y-3">
                   <div className="w-8 h-8 mx-auto rounded-full border-2 border-[#21e786] border-t-transparent animate-spin" />
                   <p className="text-xs font-mono text-slate-300">
-                    Auditing historical {historyDays}-day accumulator slips against official scorelines...
+                    Auditing date-wise accumulator slips ({historyDate}) against official scorelines...
                   </p>
                 </div>
               ) : effectiveHistoricalSlips.length === 0 ? (
                 <div className="p-12 text-center rounded-2xl border border-[#242938] bg-[#141822] space-y-2">
                   <Ticket className="w-8 h-8 text-slate-500 mx-auto" />
-                  <h4 className="font-bold text-sm text-white font-sans">No Historical Slips Found</h4>
+                  <h4 className="font-bold text-sm text-white font-sans">No Settled Slips Found for {historyDate === 'ALL' ? 'Selected Filter' : formatDayDisplay(historyDate, timeZone)}</h4>
                   <p className="text-xs text-slate-400 font-sans max-w-sm mx-auto">
-                    No accumulator slips matched your current filters ({historyOutcome}, {historyLeague}, {historyDays}d). Try resetting filters.
+                    Select another date from the bar above (e.g. Yesterday 11 Oct or Sat 10 Oct) or view All Dates.
                   </p>
                   <button
                     onClick={() => {
                       setHistoryOutcome('ALL');
                       setHistoryLeague('ALL');
-                      setHistoryDays(7);
+                      setHistoryDate('ALL');
                     }}
                     className="px-3.5 py-1.5 rounded-lg text-xs font-sans font-semibold bg-[#21e786] text-[#0a0d14]"
                   >
-                    Reset Filters
+                    View All Dates
                   </button>
                 </div>
               ) : (
@@ -1651,25 +1806,25 @@ export const DailyAIPredictionsSection: React.FC<DailyAIPredictionsSectionProps>
                 <div className="p-12 text-center rounded-2xl border border-[#242938] bg-[#141822] space-y-3">
                   <div className="w-8 h-8 mx-auto rounded-full border-2 border-[#21e786] border-t-transparent animate-spin" />
                   <p className="text-xs font-mono text-slate-300">
-                    Auditing historical {historyDays}-day predictions against canonical scorelines...
+                    Auditing date-wise predictions ({historyDate}) against canonical scorelines...
                   </p>
                 </div>
               ) : !historyData?.history || historyData.history.length === 0 ? (
                 <div className="p-12 text-center rounded-2xl border border-[#242938] bg-[#141822] space-y-2">
                   <CheckCircle2 className="w-8 h-8 text-slate-500 mx-auto" />
-                  <h4 className="font-bold text-sm text-white font-sans">No Historical Matches Found</h4>
+                  <h4 className="font-bold text-sm text-white font-sans">No Settled Matches Found for {historyDate === 'ALL' ? 'Selected Filter' : formatDayDisplay(historyDate, timeZone)}</h4>
                   <p className="text-xs text-slate-400 font-sans max-w-sm mx-auto">
-                    No finished predictions matched your selected filters ({historyOutcome}, {historyLeague}, {historyDays}d). Try resetting filters.
+                    Select another date from the bar above (e.g. Yesterday 11 Oct or Sat 10 Oct) or view All Dates.
                   </p>
                   <button
                     onClick={() => {
                       setHistoryOutcome('ALL');
                       setHistoryLeague('ALL');
-                      setHistoryDays(7);
+                      setHistoryDate('ALL');
                     }}
                     className="px-3.5 py-1.5 rounded-lg text-xs font-sans font-semibold bg-[#21e786] text-[#0a0d14]"
                   >
-                    Reset History Filters
+                    View All Dates
                   </button>
                 </div>
               ) : (

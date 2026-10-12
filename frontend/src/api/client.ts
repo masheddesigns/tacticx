@@ -147,6 +147,7 @@ export const apiClient = {
   },
 
   getPredictionHistory: async (params?: {
+    date?: string;
     days?: number;
     league?: string;
     outcome?: 'ALL' | 'WON' | 'LOST';
@@ -155,6 +156,7 @@ export const apiClient = {
     signal?: AbortSignal;
   }): Promise<PredictionHistoryResponse> => {
     const query = new URLSearchParams();
+    if (params?.date) query.set('date', params.date);
     if (params?.days) query.set('days', String(params.days));
     if (params?.league) query.set('league', params.league);
     if (params?.outcome) query.set('outcome', params.outcome);
