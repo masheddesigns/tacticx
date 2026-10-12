@@ -491,9 +491,10 @@ class TestGoldenRegression:
         doc = _build(db, target)
         core = doc["core_prediction"]
         xg = doc["expected_goals"]
-        assert core["home"] == pytest.approx(0.60605, rel=1e-3)
-        assert core["draw"] == pytest.approx(0.22233, rel=1e-3)
-        assert core["away"] == pytest.approx(0.17161, rel=1e-3)
+        # Rebased 2026-10-12 for Dixon-Coles tau correction (commit 09991f6).
+        assert core["home"] == pytest.approx(0.60319, rel=1e-3)
+        assert core["draw"] == pytest.approx(0.22806, rel=1e-3)
+        assert core["away"] == pytest.approx(0.16875, rel=1e-3)
         assert xg["home_lambda"] == pytest.approx(1.7442, rel=1e-3)
         assert xg["away_lambda"] == pytest.approx(0.1713, rel=1e-3)
         assert core["model_version"] == "ensemble_v1-elo+poisson"

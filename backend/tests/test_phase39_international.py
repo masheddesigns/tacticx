@@ -413,9 +413,78 @@ class TestGoldenRegression:
         doc = _build(db, target)
         core = doc["core_prediction"]
         xg = doc["expected_goals"]
-        assert core["home"] == pytest.approx(0.60605, rel=1e-3)
-        assert core["draw"] == pytest.approx(0.22233, rel=1e-3)
-        assert core["away"] == pytest.approx(0.17161, rel=1e-3)
+        # Baseline rebased 2026-10-12 for Dixon-Coles tau correction (commit 09991f6):
+        # draws boosted 0.22233 -> 0.22806 at expense of home/away; lambdas unchanged.
+        assert core["home"] == pytest.approx(0.60319, rel=1e-3)
+        assert core["draw"] == pytest.approx(0.22806, rel=1e-3)
+        assert core["away"] == pytest.approx(0.16875, rel=1e-3)
         assert xg["home_lambda"] == pytest.approx(1.7442, rel=1e-3)
         assert xg["away_lambda"] == pytest.approx(0.1713, rel=1e-3)
         assert core["model_version"] == "ensemble_v1-elo+poisson"
+
+
+# -- team identity fusion guard -----------------------------------------------------------------------------------------------
+
+class TestTeamIdentityGuard:
+    def test_short_names_never_fuse(self):
+        from app.services.match_progression import _teams_match
+
+        assert _teams_match("H", "Chelsea") is False
+        assert _teams_match("A", "Arsenal") is False
+        assert _teams_match("FC", "Barcelona") is False
+        assert _teams_match("", "Arsenal") is False
+        assert _teams_match(None, "Arsenal") is False
+
+    def test_legitimate_variants_still_match(self):
+        from app.services.match_progression import _teams_match
+
+        assert _teams_match("Arsenal", "Arsenal") is True
+        assert _teams_match("Man City", "Manchester City") is True
+        assert _teams_match("Inter", "Inter Milan") is True
+        assert _teams_match("PSG", "Paris SG") is True
+        assert _teams_match("Hull", "Hull City") is True
+        assert _teams_match("Arsenal", "Chelsea") is False
+        assert _teams_match("Real Madrid", "Barcelona") is False
+
+    def test_list_read_does_not_mutate_future_fixtures(self, db):
+        from fastapi.testclient import TestClient
+
+        from app.main import app
+        from app.api.dependencies import get_db
+        import app.api.routes.matches as matches_routes
+
+        league = _league(db, "EPL", "Premier League")
+        home, away = _teams(db, league, "P39LF", "Arsenal", "Chelsea")
+        now = datetime.now(timezone.utc)
+        target = Match(
+            league_id=league.id, home_team_id=home.id, away_team_id=away.id,
+            kickoff_at=now + timedelta(hours=7), status="SCHEDULED",
+            provider="api_football", provider_match_id="p39-P39LF-target")
+        db.add(target)
+        db.commit()
+        db.refresh(target)
+
+        from sqlalchemy.orm import sessionmaker
+
+        TestingSession = sessionmaker(bind=db.bind)
+
+        def override():
+            session = TestingSession()
+            try:
+                yield session
+            finally:
+                session.close()
+
+        app.dependency_overrides[get_db] = override
+        try:
+            matches_routes._last_live_sync_at = 0
+            client = TestClient(app)
+            body = client.get(
+                "/api/v1/matches?date=2026-10-12&tz=IST&page_size=10").json()
+            assert body["meta"]["total"] >= 0
+        finally:
+            app.dependency_overrides.clear()
+        check = db.query(Match).filter_by(id=target.id).one()
+        assert check.status == "SCHEDULED"
+        assert check.home_score is None
+        assert check.away_score is None

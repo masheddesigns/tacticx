@@ -154,7 +154,11 @@ def _teams_match(a: Optional[str], b: Optional[str]) -> bool:
         return False
     if na == nb:
         return True
-    if na in nb or nb in na:
+    # Substring matching is only meaningful for names of real length:
+    # single/double/triple-character fragments (e.g. "h", "a") must never
+    # fuse unrelated teams. Legitimate abbreviations are covered by
+    # TEAM_ALIASES exact matching and token overlap below.
+    if min(len(na), len(nb)) >= 4 and (na in nb or nb in na):
         return True
     # Check primary token overlap
     stop = {"fc", "sc", "cf", "ac", "as", "united", "city", "club", "real", "deportivo", "sporting", "1", "04", "07"}

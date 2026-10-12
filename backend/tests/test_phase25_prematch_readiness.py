@@ -1189,9 +1189,11 @@ def test_golden_prediction_preservation(db: Session):
     total_prob = core["home"] + core["draw"] + core["away"]
     assert pytest.approx(1.0, rel=1e-5) == total_prob
 
-    assert pytest.approx(0.60605, rel=1e-3) == core["home"]
-    assert pytest.approx(0.22233, rel=1e-3) == core["draw"]
-    assert pytest.approx(0.17161, rel=1e-3) == core["away"]
+    # Rebased 2026-10-12 for Dixon-Coles tau correction (commit 09991f6):
+    # draws boosted 0.22233 -> 0.22806 at expense of home/away; lambdas unchanged.
+    assert pytest.approx(0.60319, rel=1e-3) == core["home"]
+    assert pytest.approx(0.22806, rel=1e-3) == core["draw"]
+    assert pytest.approx(0.16875, rel=1e-3) == core["away"]
     assert pytest.approx(1.7442, rel=1e-3) == xg["home_lambda"]
     assert pytest.approx(0.1713, rel=1e-3) == xg["away_lambda"]
     assert pytest.approx(1.9155, rel=1e-3) == xg["total_lambda"]
