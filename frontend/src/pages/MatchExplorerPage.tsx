@@ -146,7 +146,10 @@ export const MatchExplorerPage: React.FC = () => {
     'BUNDESLIGA',
     'LIGUE_1',
     'UCL',
-    // MLS / LIGA_ARG / BRA_SERIE_A / ISL hidden until real provider coverage lands.
+    'MLS',
+    'LIGA_ARG',
+    'BRA_SERIE_A',
+    'ISL',
     'NATIONS_LEAGUE',
     'FRIENDLIES',
   ];

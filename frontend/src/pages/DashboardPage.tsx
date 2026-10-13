@@ -112,7 +112,10 @@ export const DashboardPage: React.FC = () => {
     'BUNDESLIGA',
     'LIGUE_1',
     'UCL',
-    // MLS / LIGA_ARG / BRA_SERIE_A / ISL hidden until real provider coverage lands.
+    'MLS',
+    'LIGA_ARG',
+    'BRA_SERIE_A',
+    'ISL',
     'NATIONS_LEAGUE',
     'FRIENDLIES',
   ];
@@ -167,7 +170,38 @@ export const DashboardPage: React.FC = () => {
       upcomingCount: competitionsMap['UCL']?.upcoming || 0,
       latestObservation: competitionsMap['UCL']?.latest_observation,
     },
-    // MLS / LIGA_ARG / BRA_SERIE_A / ISL cards hidden until real provider coverage lands.
+    {
+      code: 'MLS',
+      name: 'Major League Soccer',
+      season: '2026 Season',
+      fixtureCount: competitionsMap['MLS']?.fixture_count || 0,
+      upcomingCount: competitionsMap['MLS']?.upcoming || 0,
+      latestObservation: competitionsMap['MLS']?.latest_observation,
+    },
+    {
+      code: 'LIGA_ARG',
+      name: 'Liga Profesional',
+      season: '2026 Season',
+      fixtureCount: competitionsMap['LIGA_ARG']?.fixture_count || 0,
+      upcomingCount: competitionsMap['LIGA_ARG']?.upcoming || 0,
+      latestObservation: competitionsMap['LIGA_ARG']?.latest_observation,
+    },
+    {
+      code: 'BRA_SERIE_A',
+      name: 'Brasileirão Série A',
+      season: '2026 Season',
+      fixtureCount: competitionsMap['BRA_SERIE_A']?.fixture_count || 0,
+      upcomingCount: competitionsMap['BRA_SERIE_A']?.upcoming || 0,
+      latestObservation: competitionsMap['BRA_SERIE_A']?.latest_observation,
+    },
+    {
+      code: 'ISL',
+      name: 'Indian Super League',
+      season: '2026/27 Season',
+      fixtureCount: competitionsMap['ISL']?.fixture_count || 0,
+      upcomingCount: competitionsMap['ISL']?.upcoming || 0,
+      latestObservation: competitionsMap['ISL']?.latest_observation,
+    },
     {
       code: 'NATIONS_LEAGUE',
       name: 'UEFA Nations League',

@@ -21,7 +21,7 @@ export interface MatchFiltersProps {
 export const MatchFilters: React.FC<MatchFiltersProps> = ({
   filters,
   onFilterChange,
-  availableLeagues = ['EPL', 'LA_LIGA', 'SERIE_A', 'BUNDESLIGA', 'LIGUE_1', 'UCL', 'NATIONS_LEAGUE', 'FRIENDLIES'],
+  availableLeagues = ['EPL', 'LA_LIGA', 'SERIE_A', 'BUNDESLIGA', 'LIGUE_1', 'UCL', 'MLS', 'LIGA_ARG', 'BRA_SERIE_A', 'ISL', 'NATIONS_LEAGUE', 'FRIENDLIES'],
   timeZone = 'IST',
   onTimeZoneChange,
 }) => {

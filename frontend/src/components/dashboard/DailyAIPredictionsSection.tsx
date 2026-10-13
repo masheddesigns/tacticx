@@ -1542,7 +1542,10 @@ export const DailyAIPredictionsSection: React.FC<DailyAIPredictionsSectionProps>
                   <option value="BUNDESLIGA">Bundesliga</option>
                   <option value="LIGUE_1">Ligue 1</option>
                   <option value="UCL">Champions League</option>
-                  {/* ISL / MLS / BRA_SERIE_A / LIGA_ARG hidden until real provider coverage lands. */}
+                  <option value="ISL">Indian Super League (ISL)</option>
+                  <option value="MLS">Major League Soccer (MLS)</option>
+                  <option value="BRA_SERIE_A">Brasileirão Série A</option>
+                  <option value="LIGA_ARG">Liga Profesional Argentina</option>
                 </select>
 
                 <button
