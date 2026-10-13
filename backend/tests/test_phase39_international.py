@@ -454,6 +454,14 @@ class TestTeamIdentityGuard:
         assert _teams_match("Man United", "Manchester City") is False
         assert _teams_match("Real Madrid", "Real Sociedad") is False
 
+    def test_shared_city_token_never_fuses(self):
+        from app.services.match_progression import _teams_match
+
+        assert _teams_match("Ath Madrid", "Real Madrid") is False
+        assert _teams_match("Atletico Madrid", "Real Madrid") is False
+        assert _teams_match("AC Milan", "Inter Milan") is False
+        assert _teams_match("Real Madrid", "Real Madrid") is True
+
     def test_alias_variants_still_match(self):
         from app.services.match_progression import _teams_match
 

@@ -160,14 +160,21 @@ def _teams_match(a: Optional[str], b: Optional[str]) -> bool:
     # TEAM_ALIASES exact matching and token overlap below.
     if min(len(na), len(nb)) >= 4 and (na in nb or nb in na):
         return True
-    # Check primary token overlap. Shared tokens must be non-trivial
-    # (length >= 4): short fragments like "man" must never fuse
-    # "Man United" with "Man City". Real abbreviations are covered by
+    # Check primary token overlap. The remaining token SETS must be equal:
+    # sharing a single token (typically a city name: "madrid", "london",
+    # "milan") must never fuse cross-city rivals such as
+    # Atletico Madrid with Real Madrid. Real abbreviations are covered by
     # TEAM_ALIASES exact matching and the substring branch above.
-    stop = {"fc", "sc", "cf", "ac", "as", "united", "city", "club", "real", "deportivo", "sporting", "1", "04", "07"}
+    stop = {"fc", "sc", "cf", "ac", "as", "united", "city", "club", "real", "deportivo", "sporting", "1", "04", "07",
+            # city names: shared hometowns must never fuse cross-city rivals
+            "madrid", "milan", "milano", "london", "paris", "barcelona", "munich", "munchen",
+            "dortmund", "berlin", "hamburg", "leipzig", "koln", "cologne", "bremen", "stuttgart",
+            "turin", "torino", "napoli", "naples", "rome", "roma", "sevilla", "seville",
+            "bilbao", "valencia", "lisbon", "lisboa", "porto", "amsterdam", "rotterdam",
+            "glasgow", "istanbul", "lyon", "marseille", "monaco", "manchester", "liverpool"}
     ta = {w for w in na.split() if len(w) >= 4 and w not in stop}
     tb = {w for w in nb.split() if len(w) >= 4 and w not in stop}
-    if ta and tb and (ta & tb):
+    if ta and tb and ta == tb:
         return True
     return False
 
