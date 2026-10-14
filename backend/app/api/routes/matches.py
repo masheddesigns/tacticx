@@ -367,12 +367,11 @@ def get_daily_slips(
 
     matches = db.query(Match).filter(
         Match.kickoff_at >= day_start,
-        Match.kickoff_at < day_start + timedelta(days=7),
+        Match.kickoff_at < day_end,
     ).order_by(Match.kickoff_at).all()
 
     now_utc = datetime.now(timezone.utc)
-    is_past_date = (day_start + timedelta(days=1) <= now_utc and
-                    day_start + timedelta(days=7) <= now_utc)
+    is_past_date = (day_end <= now_utc)
 
     if not matches:
         empty_res = {

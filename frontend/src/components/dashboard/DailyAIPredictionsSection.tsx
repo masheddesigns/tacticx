@@ -437,11 +437,13 @@ export const DailyAIPredictionsSection: React.FC<DailyAIPredictionsSectionProps>
     return effectivePredictions.filter((p) => p.status === 'FINISHED');
   }, [effectivePredictions, isPastDate]);
 
-  // Slips: for Today/Future eliminate finished picks; for Past Dates show that date's slips
+  // Slips: for Today/Future show every slip with fully-pending ones first
+  // (settled legs carry WON/LOST badges); for Past Dates show that date's slips
   const activeSlips = useMemo(() => {
     if (isPastDate) return slips;
-    const list = slips.filter((s) => !s.picks.some((p) => p.status === 'WON' || p.status === 'LOST'));
-    return list.length > 0 ? list : slips;
+    const pending = slips.filter((s) => !s.picks.some((p) => p.status === 'WON' || p.status === 'LOST'));
+    const settled = slips.filter((s) => s.picks.some((p) => p.status === 'WON' || p.status === 'LOST'));
+    return [...pending, ...settled];
   }, [slips, isPastDate]);
 
   // Filter and sort active predictions only
@@ -723,7 +725,7 @@ export const DailyAIPredictionsSection: React.FC<DailyAIPredictionsSectionProps>
               <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
               <span>
                 <strong className="text-white font-mono">{finishedPredictionsToday.length} matches</strong> finished earlier today.
-                Ended matches are eliminated from active betting slips so every slip is active and placeable.
+                Fully-pending slips are listed first; settled legs carry WON / LOST badges.
               </span>
             </div>
             <button
