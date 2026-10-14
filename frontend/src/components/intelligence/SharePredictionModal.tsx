@@ -58,6 +58,11 @@ const getTeamColorStyle = (name?: string | null): string => {
   return colors[Math.abs(hash) % colors.length];
 };
 
+// Transparent 1px fallback so a single blocked/tainted remote image
+// can never fail the whole export.
+const IMAGE_PLACEHOLDER =
+  'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==';
+
 export const SharePredictionModal: React.FC<SharePredictionModalProps> = ({
   isOpen,
   onClose,
@@ -143,6 +148,7 @@ export const SharePredictionModal: React.FC<SharePredictionModalProps> = ({
       const dataUrl = await toPng(cardRef.current, {
         cacheBust: true,
         pixelRatio: 2, // 2x high resolution
+        imagePlaceholder: IMAGE_PLACEHOLDER,
       });
       const link = document.createElement('a');
       link.download = fileName;
@@ -166,6 +172,7 @@ export const SharePredictionModal: React.FC<SharePredictionModalProps> = ({
       const blob = await toBlob(cardRef.current, {
         cacheBust: true,
         pixelRatio: 2,
+        imagePlaceholder: IMAGE_PLACEHOLDER,
       });
       if (blob && navigator.clipboard && window.ClipboardItem) {
         await navigator.clipboard.write([
@@ -195,6 +202,8 @@ export const SharePredictionModal: React.FC<SharePredictionModalProps> = ({
       setIsCapturing(true);
       const blob = await toBlob(cardRef.current, {
         pixelRatio: 2,
+        cacheBust: true,
+        imagePlaceholder: IMAGE_PLACEHOLDER,
       });
       if (blob && navigator.share && navigator.canShare) {
         const file = new File([blob], fileName, { type: 'image/png' });

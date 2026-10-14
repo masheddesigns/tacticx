@@ -42,6 +42,19 @@ export const ShareSlipModal: React.FC<ShareSlipModalProps> = ({
   const [copiedImage, setCopiedImage] = useState(false);
   const [statusMessage, setStatusMessage] = useState<string | null>(null);
 
+  // Transparent 1px fallback so a single blocked/tainted remote image
+  // (team/league CDN without CORS headers) can never fail the whole export.
+  const IMAGE_PLACEHOLDER =
+    'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==';
+
+  const captureOptions = {
+    quality: 0.95,
+    pixelRatio: 2,
+    backgroundColor: '#0e1015',
+    cacheBust: true,
+    imagePlaceholder: IMAGE_PLACEHOLDER,
+  };
+
   useEffect(() => {
     if (!isOpen) return;
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -59,11 +72,7 @@ export const ShareSlipModal: React.FC<ShareSlipModalProps> = ({
     if (!cardRef.current) return;
     try {
       setIsCapturing(true);
-      const dataUrl = await toPng(cardRef.current, {
-        quality: 0.95,
-        pixelRatio: 2,
-        backgroundColor: '#0e1015',
-      });
+      const dataUrl = await toPng(cardRef.current, captureOptions);
       const link = document.createElement('a');
       link.download = `tacticx-slip-${slip.type}-${dateStr}.png`;
       link.href = dataUrl;
@@ -82,10 +91,7 @@ export const ShareSlipModal: React.FC<ShareSlipModalProps> = ({
     if (!cardRef.current) return;
     try {
       setIsCapturing(true);
-      const blob = await toBlob(cardRef.current, {
-        pixelRatio: 2,
-        backgroundColor: '#0e1015',
-      });
+      const blob = await toBlob(cardRef.current, captureOptions);
       if (blob && navigator.clipboard?.write) {
         await navigator.clipboard.write([
           new ClipboardItem({ 'image/png': blob }),

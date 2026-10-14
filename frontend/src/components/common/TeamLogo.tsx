@@ -44,6 +44,8 @@ export const TeamLogo: React.FC<TeamLogoProps> = ({
           alt={teamName || 'Team Crest'}
           className={`w-full h-full object-contain p-0.5 transition-transform duration-200 group-hover:scale-105 ${imgClassName}`}
           loading="lazy"
+          crossOrigin="anonymous"
+          referrerPolicy="no-referrer"
           onError={() => setHasError(true)}
         />
       </div>

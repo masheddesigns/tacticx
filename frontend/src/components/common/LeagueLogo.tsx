@@ -89,6 +89,7 @@ export const LeagueLogo: React.FC<LeagueLogoProps> = ({
         alt={alt || `${displayName} logo`}
         className="w-full h-full object-contain filter drop-shadow-xs"
         loading="lazy"
+        crossOrigin="anonymous"
         referrerPolicy="no-referrer"
         onError={() => setHasError(true)}
       />
