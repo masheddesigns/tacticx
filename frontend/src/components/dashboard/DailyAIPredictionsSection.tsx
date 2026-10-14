@@ -350,7 +350,7 @@ export const DailyAIPredictionsSection: React.FC<DailyAIPredictionsSectionProps>
     const map = new Map<number, DailyRankedPrediction>();
     const FLAG_MAP: Record<string, string> = {
       EPL: '🏴󠁧󠁢󠁥󠁮󠁧󠁿', LA_LIGA: '🇪🇸', SERIE_A: '🇮🇹', BUNDESLIGA: '🇩🇪', LIGUE_1: '🇫🇷',
-      UCL: '🏆', ISL: '🇮🇳', MLS: '🇺🇸', BRA_SERIE_A: '🇧🇷', LIGA_ARG: '🇦🇷',
+      UCL: '🏆', UEL: '🇪🇺', UECL: '🏟️', ISL: '🇮🇳', MLS: '🇺🇸', BRA_SERIE_A: '🇧🇷', LIGA_ARG: '🇦🇷',
     };
 
     slips.forEach((slip) => {
@@ -1542,6 +1542,8 @@ export const DailyAIPredictionsSection: React.FC<DailyAIPredictionsSectionProps>
                   <option value="BUNDESLIGA">Bundesliga</option>
                   <option value="LIGUE_1">Ligue 1</option>
                   <option value="UCL">Champions League</option>
+                  <option value="UEL">Europa League</option>
+                  <option value="UECL">Conference League</option>
                   <option value="ISL">Indian Super League (ISL)</option>
                   <option value="MLS">Major League Soccer (MLS)</option>
                   <option value="BRA_SERIE_A">Brasileirão Série A</option>

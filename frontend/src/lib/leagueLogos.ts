@@ -10,9 +10,10 @@ export interface LeagueLogoMeta {
   shortName: string;
   country: string;
   flagEmoji: string;
-  fotmobId: number;
-  logoUrl: string;
-  darkLogoUrl: string;
+  // FotMob CDN assets are optional: entries without them fall back to flagEmoji.
+  fotmobId?: number;
+  logoUrl?: string;
+  darkLogoUrl?: string;
 }
 
 const LEAGUE_REGISTRY: Record<string, LeagueLogoMeta> = {
@@ -75,6 +76,20 @@ const LEAGUE_REGISTRY: Record<string, LeagueLogoMeta> = {
     fotmobId: 42,
     logoUrl: 'https://images.fotmob.com/image_resources/logo/leaguelogo/42.png',
     darkLogoUrl: 'https://images.fotmob.com/image_resources/logo/leaguelogo/dark/42.png',
+  },
+  UEL: {
+    code: 'UEL',
+    name: 'UEFA Europa League',
+    shortName: 'Europa League',
+    country: 'Europe',
+    flagEmoji: '🇪🇺',
+  },
+  UECL: {
+    code: 'UECL',
+    name: 'UEFA Conference League',
+    shortName: 'Conference League',
+    country: 'Europe',
+    flagEmoji: '🏟️',
   },
   MLS: {
     code: 'MLS',
@@ -158,6 +173,18 @@ const ALIAS_MAP: Record<string, string> = {
   'champions league': 'UCL',
   'uefa-champions-league': 'UCL',
 
+  // Europa League
+  'uel': 'UEL',
+  'uefa europa league': 'UEL',
+  'europa league': 'UEL',
+  'uefa-europa-league': 'UEL',
+
+  // Conference League
+  'uecl': 'UECL',
+  'uefa conference league': 'UECL',
+  'conference league': 'UECL',
+  'uefa-conference-league': 'UECL',
+
   // MLS
   'mls': 'MLS',
   'major league soccer': 'MLS',
@@ -233,7 +260,7 @@ export function getLeagueMeta(leagueCodeOrName?: string | null): LeagueLogoMeta 
 export function getLeagueLogoUrl(leagueCodeOrName?: string | null, dark: boolean = false): string | null {
   const meta = getLeagueMeta(leagueCodeOrName);
   if (!meta) return null;
-  return dark ? meta.darkLogoUrl : meta.logoUrl;
+  return (dark ? meta.darkLogoUrl : meta.logoUrl) ?? null;
 }
 
 /**

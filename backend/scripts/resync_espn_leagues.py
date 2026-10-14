@@ -19,6 +19,8 @@ from app.services.match_progression import _teams_match
 BASE = "https://sports.core.api.espn.com/v2/sports/soccer"
 LEAGUES = {
     "MLS": ("usa.1", 2026, "Major League Soccer", "USA"),
+    "UEL": ("uefa.europa", 2026, "UEFA Europa League", "Europe"),
+    "UECL": ("uefa.europa.conf", 2026, "UEFA Conference League", "Europe"),
     "ISL": ("ind.1", 2026, "Indian Super League", "India"),
     "LIGA_ARG": ("arg.1", 2026, "Liga Profesional Argentina", "Argentina"),
     "BRA_SERIE_A": ("bra.1", 2026, "Brasileirao Serie A", "Brazil"),

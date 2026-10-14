@@ -36,6 +36,8 @@ ESPN_LEAGUE_ENDPOINTS: Dict[str, str] = {
     "BUNDESLIGA": "ger.1",
     "LIGUE_1": "fra.1",
     "UCL": "uefa.champions",
+    "UEL": "uefa.europa",
+    "UECL": "uefa.europa.conf",
     "ISL": "ind.1",
     "BRA_SERIE_A": "bra.1",
     "LIGA_ARG": "arg.1",

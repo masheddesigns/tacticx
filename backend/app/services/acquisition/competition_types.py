@@ -25,6 +25,9 @@ COMPETITION_TYPES: Dict[str, str] = {
     # UCL is continental club football; grouped with domestic leagues for
     # pipeline purposes (round-robin history, standings reconstruction).
     "UCL": DOMESTIC_LEAGUE,
+    # UEL/UECL: same continental-club treatment as UCL.
+    "UEL": DOMESTIC_LEAGUE,
+    "UECL": DOMESTIC_LEAGUE,
     NATIONS_LEAGUE: UEFA_NATIONS_LEAGUE,
     FRIENDLIES: INTERNATIONAL_FRIENDLY,
 }
@@ -36,6 +39,8 @@ ORGANIZATIONS: Dict[str, str] = {
     "BUNDESLIGA": "Bundesliga",
     "LIGUE_1": "Ligue 1",
     "UCL": "UEFA",
+    "UEL": "UEFA",
+    "UECL": "UEFA",
     NATIONS_LEAGUE: "UEFA",
     FRIENDLIES: "International",
 }

@@ -33,6 +33,13 @@ export function getLeagueMeta(leagueKey?: string | null): LeagueInfo {
   if (upper.includes('LIGUE_1') || upper.includes('LIGUE1')) {
     return { name: 'Ligue 1', country: 'France', flag: '🇫🇷' };
   }
+  // NB: UEL/UECL checked before UCL ('UECL' contains 'UCL').
+  if (upper.includes('UEL') || upper.includes('EUROPA_LEAGUE')) {
+    return { name: 'UEFA Europa League', country: 'Europe', flag: '🇪🇺' };
+  }
+  if (upper.includes('UECL') || upper.includes('CONFERENCE_LEAGUE')) {
+    return { name: 'UEFA Conference League', country: 'Europe', flag: '🏟️' };
+  }
   if (upper.includes('UCL') || upper.includes('CHAMPIONS_LEAGUE')) {
     return { name: 'UEFA Champions League', country: 'Europe', flag: '🏆' };
   }
@@ -70,18 +77,22 @@ const LEAGUE_PRIORITY: Record<string, number> = {
   'LIGUE_1': 5,
   'UEFA Champions League': 6,
   'UCL': 6,
-  'Indian Super League': 7,
-  'ISL': 7,
-  'Major League Soccer': 8,
-  'MLS': 8,
-  'Brasileirão Série A': 9,
-  'BRA_SERIE_A': 9,
-  'Liga Profesional': 10,
-  'LIGA_ARG': 10,
-  'UEFA Nations League': 11,
-  'NATIONS_LEAGUE': 11,
-  'International Friendlies': 12,
-  'FRIENDLIES': 12,
+  'UEFA Europa League': 7,
+  'UEL': 7,
+  'UEFA Conference League': 8,
+  'UECL': 8,
+  'Indian Super League': 9,
+  'ISL': 9,
+  'Major League Soccer': 10,
+  'MLS': 10,
+  'Brasileirão Série A': 11,
+  'BRA_SERIE_A': 11,
+  'Liga Profesional': 12,
+  'LIGA_ARG': 12,
+  'UEFA Nations League': 13,
+  'NATIONS_LEAGUE': 13,
+  'International Friendlies': 14,
+  'FRIENDLIES': 14,
 };
 
 export interface MatchFiltersState {
@@ -146,6 +157,8 @@ export const MatchExplorerPage: React.FC = () => {
     'BUNDESLIGA',
     'LIGUE_1',
     'UCL',
+    'UEL',
+    'UECL',
     'MLS',
     'LIGA_ARG',
     'BRA_SERIE_A',
