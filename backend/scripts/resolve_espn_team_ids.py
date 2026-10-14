@@ -36,7 +36,8 @@ def head_ok(url):
 def main():
     db = get_session_local()()
     try:
-        targets = db.query(Team).filter(Team.provider == "espn", Team.logo_url.is_(None)).all()
+        # Any provider: seeded/manual rows reuse-matched by the backfill also need ESPN ids + crests.
+        targets = db.query(Team).filter(Team.logo_url.is_(None)).all()
         print(f"targets: {len(targets)}", flush=True)
         fixed = 0
         for t in targets:

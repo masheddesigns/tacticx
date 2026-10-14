@@ -86,6 +86,8 @@ TEAM_ALIASES: Dict[str, str] = {
     "vfb stuttgart": "stuttgart",
     "tsg hoffenheim": "hoffenheim",
     "hamburg sv": "hamburger sv",
+    "red bull salzburg": "rb salzburg",
+    "sparta praha": "sparta prague",
     "fc cologne": "fc koln",
     "1 fc koln": "fc koln",
     "sc freiburg": "freiburg",
