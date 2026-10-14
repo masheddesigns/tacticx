@@ -17,6 +17,8 @@ export interface MatchListItem {
   away_team_id?: number | null;
   home_team_name?: string | null;
   away_team_name?: string | null;
+  home_team_logo?: string | null;
+  away_team_logo?: string | null;
   kickoff_at?: string | null;
   status: string;
   minute?: number | null;
@@ -44,6 +46,8 @@ export interface DailyProjectedStats {
 
 export interface DailyPredictionPick {
   match_id: number;
+  home_team_logo?: string | null;
+  away_team_logo?: string | null;
   fixture: string;
   league: string;
   league_code: string;
@@ -97,6 +101,8 @@ export interface DailyRankedPrediction {
   league_code: string;
   league_name: string;
   league_flag: string;
+  home_team_logo?: string | null;
+  away_team_logo?: string | null;
   kickoff_at?: string | null;
   status: string;
   home_score?: number | null;
@@ -128,6 +134,8 @@ export interface HistoricalPredictionItem {
   league_name: string;
   league_flag: string;
   kickoff_at?: string | null;
+  home_team_logo?: string | null;
+  away_team_logo?: string | null;
   final_score: string;
   home_score: number;
   away_score: number;
@@ -157,6 +165,8 @@ export interface HistoricalSlipPick {
   market: string;
   odds: number;
   probability: number;
+  home_team_logo?: string | null;
+  away_team_logo?: string | null;
   final_score: string;
   status: 'WON' | 'LOST' | 'VOID' | string;
   audit_note: string;

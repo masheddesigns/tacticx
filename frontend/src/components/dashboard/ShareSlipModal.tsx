@@ -218,12 +218,12 @@ export const ShareSlipModal: React.FC<ShareSlipModalProps> = ({
                             : [pick.fixture, ''];
                           return (
                             <>
-                              {home && <TeamLogo teamName={home.trim()} size="xs" />}
+                              {home && <TeamLogo teamName={home.trim()} logoUrl={pick.home_team_logo} size="xs" />}
                               <span className="truncate">{home}</span>
                               {away && (
                                 <>
                                   <span className="text-slate-500 text-[10px]">vs</span>
-                                  <TeamLogo teamName={away.trim()} size="xs" />
+                                  <TeamLogo teamName={away.trim()} logoUrl={pick.away_team_logo} size="xs" />
                                   <span className="truncate">{away}</span>
                                 </>
                               )}

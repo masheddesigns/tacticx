@@ -44,6 +44,7 @@ class Team(Base):
     country: Mapped[Optional[str]] = mapped_column(String(64), nullable=True)
     provider: Mapped[str] = mapped_column(String(32), default="")
     provider_team_id: Mapped[str] = mapped_column(String(32), default="")
+    logo_url: Mapped[Optional[str]] = mapped_column(String(512), nullable=True)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
 
     __table_args__ = (UniqueConstraint("provider", "provider_team_id", name="uq_team_provider"),)

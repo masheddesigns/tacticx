@@ -762,12 +762,12 @@ export const DailyAIPredictionsSection: React.FC<DailyAIPredictionsSectionProps>
                   <div>
                     <h3 className="text-base sm:text-lg font-bold text-white font-sans flex items-center gap-2.5">
                       <div className="flex items-center gap-2">
-                        <TeamLogo teamName={napOfTheDay.home_team} size="md" />
+                        <TeamLogo teamName={napOfTheDay.home_team} logoUrl={napOfTheDay.home_team_logo} size="md" />
                         <span>{napOfTheDay.home_team}</span>
                       </div>
                       <span className="text-slate-500 font-mono text-xs">vs</span>
                       <div className="flex items-center gap-2">
-                        <TeamLogo teamName={napOfTheDay.away_team} size="md" />
+                        <TeamLogo teamName={napOfTheDay.away_team} logoUrl={napOfTheDay.away_team_logo} size="md" />
                         <span>{napOfTheDay.away_team}</span>
                       </div>
                       {napOfTheDay.status === 'LIVE' && (
@@ -1052,12 +1052,12 @@ export const DailyAIPredictionsSection: React.FC<DailyAIPredictionsSectionProps>
                     <div className="flex items-center justify-between gap-2 border-b border-[#202636] pb-2.5">
                       <div className="flex items-center gap-2 truncate">
                         <div className="flex items-center gap-1.5 truncate">
-                          <TeamLogo teamName={pred.home_team} size="sm" />
+                          <TeamLogo teamName={pred.home_team} logoUrl={pred.home_team_logo} size="sm" />
                           <span className="font-bold text-sm text-white font-sans truncate">{pred.home_team}</span>
                         </div>
                         <span className="text-xs text-slate-500 font-mono">vs</span>
                         <div className="flex items-center gap-1.5 truncate">
-                          <TeamLogo teamName={pred.away_team} size="sm" />
+                          <TeamLogo teamName={pred.away_team} logoUrl={pred.away_team_logo} size="sm" />
                           <span className="font-bold text-sm text-white font-sans truncate">{pred.away_team}</span>
                         </div>
                       </div>
@@ -1330,12 +1330,12 @@ export const DailyAIPredictionsSection: React.FC<DailyAIPredictionsSectionProps>
                               <div className="flex items-center justify-between gap-2">
                                 <div className="truncate min-w-0 flex-1 space-y-0.5">
                                   <div className="flex items-center gap-1.5 text-[11px] text-slate-200 font-medium truncate">
-                                    {homeTeam && <TeamLogo teamName={homeTeam.trim()} size="xs" />}
+                                    {homeTeam && <TeamLogo teamName={homeTeam.trim()} logoUrl={pick.home_team_logo} size="xs" />}
                                     <span className="truncate">{homeTeam.trim()}</span>
                                     {awayTeam && (
                                       <>
                                         <span className="text-slate-500 text-[10px] font-mono">vs</span>
-                                        <TeamLogo teamName={awayTeam.trim()} size="xs" />
+                                        <TeamLogo teamName={awayTeam.trim()} logoUrl={pick.away_team_logo} size="xs" />
                                         <span className="truncate">{awayTeam.trim()}</span>
                                       </>
                                     )}
@@ -1717,10 +1717,10 @@ export const DailyAIPredictionsSection: React.FC<DailyAIPredictionsSectionProps>
 
                                   <div className="flex items-center justify-between gap-2">
                                     <div className="flex items-center gap-1.5 min-w-0 truncate">
-                                      <TeamLogo teamName={pick.home_team} size="xs" />
+                                      <TeamLogo teamName={pick.home_team} logoUrl={pick.home_team_logo} size="xs" />
                                       <span className="font-bold text-white truncate">{pick.home_team}</span>
                                       <span className="text-slate-500 text-[10px]">vs</span>
-                                      <TeamLogo teamName={pick.away_team} size="xs" />
+                                      <TeamLogo teamName={pick.away_team} logoUrl={pick.away_team_logo} size="xs" />
                                       <span className="font-bold text-white truncate">{pick.away_team}</span>
                                     </div>
 
@@ -1879,12 +1879,12 @@ export const DailyAIPredictionsSection: React.FC<DailyAIPredictionsSectionProps>
                           <div className="truncate min-w-0">
                             <div className="flex items-center gap-2 truncate">
                               <div className="flex items-center gap-1.5 truncate">
-                                <TeamLogo teamName={item.home_team} size="sm" />
+                                <TeamLogo teamName={item.home_team} logoUrl={item.home_team_logo} size="sm" />
                                 <span className="text-xs font-bold text-white truncate font-sans">{item.home_team}</span>
                               </div>
                               <span className="text-[10px] text-slate-500 font-mono">vs</span>
                               <div className="flex items-center gap-1.5 truncate">
-                                <TeamLogo teamName={item.away_team} size="sm" />
+                                <TeamLogo teamName={item.away_team} logoUrl={item.away_team_logo} size="sm" />
                                 <span className="text-xs font-bold text-white truncate font-sans">{item.away_team}</span>
                               </div>
                             </div>

@@ -35,6 +35,8 @@ class MatchOut(BaseModel):
     away_team_id: Optional[int] = None
     home_team_name: Optional[str] = None
     away_team_name: Optional[str] = None
+    home_team_logo: Optional[str] = None
+    away_team_logo: Optional[str] = None
     kickoff_at: Optional[datetime] = None
     status: str
     minute: Optional[int] = None

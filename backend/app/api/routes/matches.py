@@ -23,6 +23,7 @@ def _match_out(m: Match, db: Session) -> MatchOut:
     return MatchOut(
         id=m.id, league_id=m.league_id, home_team_id=m.home_team_id, away_team_id=m.away_team_id,
         home_team_name=home.name if home else None, away_team_name=away.name if away else None,
+        home_team_logo=getattr(home, "logo_url", None), away_team_logo=getattr(away, "logo_url", None),
         kickoff_at=m.kickoff_at, status=m.status, minute=m.minute,
         home_score=m.home_score, away_score=m.away_score,
         league_code=league.code if league else None,
@@ -1188,8 +1189,38 @@ def get_daily_slips(
         "settled_predictions_today": settled_predictions_today,
         "slips": valid_slips,
     }
+    _stamp_team_logos(db, active_predictions, settled_predictions_today,
+                      [p for s in valid_slips for p in (s.get("picks") or [])])
     _DAILY_SLIPS_CACHE[cache_key] = {"ts": time.time(), "data": result}
     return result
+
+
+def _stamp_team_logos(db: Session, *item_lists: list) -> None:
+    """Attach home_team_logo/away_team_logo to prediction payload dicts.
+
+    Single bulk lookup per request: resolves each referenced match's teams
+    once, so slip cards and ranked rows render real crests without N+1s.
+    """
+    need_ids: set[int] = set()
+    for items in item_lists:
+        for it in items:
+            mid = it.get("match_id")
+            if mid is not None:
+                need_ids.add(mid)
+    if not need_ids:
+        return
+    logo_by_match: dict[int, tuple] = {}
+    for m in db.query(Match).filter(Match.id.in_(need_ids)).all():
+        home = db.get(Team, m.home_team_id) if m.home_team_id else None
+        away = db.get(Team, m.away_team_id) if m.away_team_id else None
+        logo_by_match[m.id] = (getattr(home, "logo_url", None),
+                               getattr(away, "logo_url", None))
+    for items in item_lists:
+        for it in items:
+            logos = logo_by_match.get(it.get("match_id"))
+            if logos:
+                it.setdefault("home_team_logo", logos[0])
+                it.setdefault("away_team_logo", logos[1])
 
 
 _PREDICTION_HISTORY_CACHE: Dict[str, Any] = {}
@@ -1720,6 +1751,9 @@ def get_prediction_history(
     slips_lost = sum(1 for s in historical_slips if s["outcome_status"] == "LOST")
     slips_win_rate = round((slips_won / max(1, slips_total)) * 100, 1) if slips_total > 0 else 0.0
     slips_net_units = round(sum(s["unit_pnl"] for s in historical_slips), 2)
+
+    _stamp_team_logos(db, limited_items,
+                      [p for s in filtered_slips for p in (s.get("picks") or [])])
 
     result = {
         "summary": {

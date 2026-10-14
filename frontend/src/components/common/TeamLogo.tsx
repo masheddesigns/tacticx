@@ -3,6 +3,8 @@ import { getTeamMeta } from '../../lib/teamLogos';
 
 export interface TeamLogoProps {
   teamName?: string | null;
+  /** Verified provider crest URL (DB). Preferred over the static registry. */
+  logoUrl?: string | null;
   size?: 'xs' | 'sm' | 'md' | 'lg' | 'xl' | '2xl';
   className?: string;
   imgClassName?: string;
@@ -25,6 +27,7 @@ const SIZE_MAP = {
  */
 export const TeamLogo: React.FC<TeamLogoProps> = ({
   teamName,
+  logoUrl: logoUrlProp,
   size = 'md',
   className = '',
   imgClassName = '',
@@ -32,15 +35,16 @@ export const TeamLogo: React.FC<TeamLogoProps> = ({
   const [hasError, setHasError] = useState(false);
   const meta = getTeamMeta(teamName);
   const sizeConfig = SIZE_MAP[size] || SIZE_MAP.md;
+  const logoUrl = logoUrlProp || meta.logoUrl;
 
-  if (meta.logoUrl && !hasError) {
+  if (logoUrl && !hasError) {
     return (
       <div
         className={`relative inline-flex items-center justify-center shrink-0 rounded-full bg-[#181d28]/80 border border-[#242c3c] overflow-hidden ${sizeConfig.box} ${className}`}
         title={teamName || 'Team'}
       >
         <img
-          src={meta.logoUrl}
+          src={logoUrl}
           alt={teamName || 'Team Crest'}
           className={`w-full h-full object-contain p-0.5 transition-transform duration-200 group-hover:scale-105 ${imgClassName}`}
           loading="lazy"

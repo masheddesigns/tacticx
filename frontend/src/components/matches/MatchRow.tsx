@@ -105,7 +105,7 @@ export const MatchRow: React.FC<MatchRowProps> = ({ match, timeZone = 'UTC' }) =
           <div className="flex-1 min-w-0 space-y-1.5">
             {/* Home Team */}
             <div className="flex items-center gap-2.5">
-              <TeamLogo teamName={match.home_team_name} size="md" />
+              <TeamLogo teamName={match.home_team_name} logoUrl={match.home_team_logo} size="md" />
               <span
                 className={`truncate text-xs sm:text-sm font-sans ${
                   isHomeWinner ? 'font-bold text-white' : isFinished ? 'text-slate-300 font-medium' : 'text-slate-100 font-medium'
@@ -118,7 +118,7 @@ export const MatchRow: React.FC<MatchRowProps> = ({ match, timeZone = 'UTC' }) =
 
             {/* Away Team */}
             <div className="flex items-center gap-2.5">
-              <TeamLogo teamName={match.away_team_name} size="md" />
+              <TeamLogo teamName={match.away_team_name} logoUrl={match.away_team_logo} size="md" />
               <span
                 className={`truncate text-xs sm:text-sm font-sans ${
                   isAwayWinner ? 'font-bold text-white' : isFinished ? 'text-slate-300 font-medium' : 'text-slate-100 font-medium'
