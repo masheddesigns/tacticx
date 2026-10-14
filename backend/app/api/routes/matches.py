@@ -367,28 +367,12 @@ def get_daily_slips(
 
     matches = db.query(Match).filter(
         Match.kickoff_at >= day_start,
-        Match.kickoff_at < day_end
+        Match.kickoff_at < day_start + timedelta(days=7),
     ).order_by(Match.kickoff_at).all()
 
     now_utc = datetime.now(timezone.utc)
-    is_past_date = (day_end <= now_utc)
-
-    # Ensure active/upcoming slates (Today / Future) always have sufficient placeable fixtures
-    active_in_window = [
-        m for m in matches
-        if (m.status or "").upper() not in ("FINISHED", "POSTPONED", "CANCELLED", "ABANDONED")
-    ]
-    if not is_past_date and len(active_in_window) < 6:
-        extra_matches = db.query(Match).filter(
-            Match.kickoff_at >= max(day_end, now_utc),
-            Match.kickoff_at < day_end + timedelta(hours=36),
-            Match.status == "SCHEDULED",
-        ).order_by(Match.kickoff_at).limit(12 - len(active_in_window)).all()
-        seen_ids = {m.id for m in matches}
-        for em in extra_matches:
-            if em.id not in seen_ids:
-                matches.append(em)
-                seen_ids.add(em.id)
+    is_past_date = (day_start + timedelta(days=1) <= now_utc and
+                    day_start + timedelta(days=7) <= now_utc)
 
     if not matches:
         empty_res = {
@@ -409,7 +393,7 @@ def get_daily_slips(
 
     FLAG_MAP = {
         "EPL": "🏴󠁧󠁢󠁥󠁮󠁧󠁿", "LA_LIGA": "🇪🇸", "SERIE_A": "🇮🇹", "BUNDESLIGA": "🇩🇪", "LIGUE_1": "🇫🇷",
-        "UCL": "🏆", "ISL": "🇮🇳", "MLS": "🇺🇸", "BRA_SERIE_A": "🇧🇷", "LIGA_ARG": "🇦🇷",
+        "UCL": "🏆", "UEL": "🇪🇺", "UECL": "🏟️", "ISL": "🇮🇳", "MLS": "🇺🇸", "BRA_SERIE_A": "🇧🇷", "LIGA_ARG": "🇦🇷",
         "NATIONS_LEAGUE": "🇪🇺", "FRIENDLIES": "🌍"
     }
 
@@ -425,7 +409,7 @@ def get_daily_slips(
     # Brasileirao) on busy multi-league days.
     # NOTE: priority is keyed by league CODE, not DB id (ids are not stable
     # across environments/backfills).
-    priority_order = {"EPL": 1, "UCL": 1.5, "LA_LIGA": 2, "SERIE_A": 3,
+    priority_order = {"EPL": 1, "UCL": 1.5, "UEL": 1.6, "UECL": 1.7, "LA_LIGA": 2, "SERIE_A": 3,
                       "BUNDESLIGA": 4, "LIGUE_1": 5, "ISL": 6,
                       "NATIONS_LEAGUE": 7, "MLS": 8, "FRIENDLIES": 9,
                       "LIGA_ARG": 10, "BRA_SERIE_A": 11}
@@ -443,8 +427,11 @@ def get_daily_slips(
         )
 
     sorted_matches = sorted(matches, key=_sort_key)
-    EVAL_CAP = 40
-    MIN_PER_LEAGUE = 2
+    # Week-wide coverage: every league with active matches gets at least 3
+    # evaluated, then priority fill to the cap. Per-match compute is ~20ms,
+    # so a 400 cap stays within API latency budgets (cache: 180s).
+    EVAL_CAP = 400
+    MIN_PER_LEAGUE = 3
     eval_matches = []
     seen = set()
     active_by_league = {}
@@ -1276,7 +1263,7 @@ def get_prediction_history(
 
     FLAG_MAP = {
         "EPL": "🏴󠁧󠁢󠁥󠁮󠁧󠁿", "LA_LIGA": "🇪🇸", "SERIE_A": "🇮🇹", "BUNDESLIGA": "🇩🇪", "LIGUE_1": "🇫🇷",
-        "UCL": "🏆", "ISL": "🇮🇳", "MLS": "🇺🇸", "BRA_SERIE_A": "🇧🇷", "LIGA_ARG": "🇦🇷",
+        "UCL": "🏆", "UEL": "🇪🇺", "UECL": "🏟️", "ISL": "🇮🇳", "MLS": "🇺🇸", "BRA_SERIE_A": "🇧🇷", "LIGA_ARG": "🇦🇷",
         "NATIONS_LEAGUE": "🇪🇺", "FRIENDLIES": "🌍"
     }
 
@@ -1307,9 +1294,10 @@ def get_prediction_history(
             h_score = m.home_score
             a_score = m.away_score
 
-            # Check per-match cache
+            # Check per-match cache (10 min TTL or status change; TTL matters:
+            # scores can be corrected while status stays FINISHED)
             cached_m = _PRED_MATCH_CACHE.get(m.id)
-            if cached_m and cached_m.get("status") == m.status:
+            if cached_m and cached_m.get("status") == m.status and (time.time() - cached_m.get("ts", 0) < 600):
                 p_h = cached_m["p_h"]
                 p_d = cached_m["p_d"]
                 p_a = cached_m["p_a"]
