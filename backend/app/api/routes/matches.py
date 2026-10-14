@@ -418,16 +418,51 @@ def get_daily_slips(
     team_stat_cache = {}
     poisson_model = PoissonModel()
 
-    # Prioritize active (non-finished) matches first, then official league priority, evaluating up to 25 matches
-    priority_order = {1: 1, 6: 1.5, 2: 2, 3: 3, 4: 4, 5: 5, 10: 6, 7: 7, 9: 8, 8: 9, 11: 10, 12: 11}
-    sorted_matches = sorted(
-        matches,
-        key=lambda x: (
+    # Prioritize active (non-finished) matches first, then official league priority.
+    # Fair-coverage selection: every league with active matches gets at least
+    # 2 evaluated (round-robin by league priority), then fill to the cap by
+    # priority order. A flat top-N cut starves late-priority leagues (MLS,
+    # Brasileirao) on busy multi-league days.
+    # NOTE: priority is keyed by league CODE, not DB id (ids are not stable
+    # across environments/backfills).
+    priority_order = {"EPL": 1, "UCL": 1.5, "LA_LIGA": 2, "SERIE_A": 3,
+                      "BUNDESLIGA": 4, "LIGUE_1": 5, "ISL": 6,
+                      "NATIONS_LEAGUE": 7, "MLS": 8, "FRIENDLIES": 9,
+                      "LIGA_ARG": 10, "BRA_SERIE_A": 11}
+    league_code_of = {}
+    for _m in matches:
+        if _m.id not in league_code_of:
+            _lg = db.get(League, _m.league_id) if _m.league_id else None
+            league_code_of[_m.id] = _lg.code if _lg else "LEAGUE"
+
+    def _sort_key(x):
+        return (
             1 if (x.status or "").upper() in ("FINISHED", "POSTPONED", "CANCELLED", "ABANDONED") else 0,
-            priority_order.get(x.league_id, 99),
-        ),
-    )
-    eval_matches = sorted_matches[:25]
+            priority_order.get(league_code_of.get(x.id, "LEAGUE"), 99),
+            x.kickoff_at.isoformat() if x.kickoff_at else "",
+        )
+
+    sorted_matches = sorted(matches, key=_sort_key)
+    EVAL_CAP = 40
+    MIN_PER_LEAGUE = 2
+    eval_matches = []
+    seen = set()
+    active_by_league = {}
+    for x in sorted_matches:
+        if (x.status or "").upper() in ("FINISHED", "POSTPONED", "CANCELLED", "ABANDONED"):
+            continue
+        active_by_league.setdefault(league_code_of.get(x.id, "LEAGUE"), []).append(x)
+    for _code in sorted(active_by_league.keys(),
+                        key=lambda c: priority_order.get(c, 99)):
+        for x in active_by_league[_code][:MIN_PER_LEAGUE]:
+            eval_matches.append(x)
+            seen.add(x.id)
+    for x in sorted_matches:
+        if len(eval_matches) >= EVAL_CAP:
+            break
+        if x.id not in seen:
+            eval_matches.append(x)
+            seen.add(x.id)
 
     for m in eval_matches:
         try:
