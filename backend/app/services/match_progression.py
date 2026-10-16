@@ -635,24 +635,62 @@ _phantom_purged = False
 
 
 def purge_phantom_fixtures_if_needed(db: Session) -> None:
-    global _phantom_purged
-    if _phantom_purged:
-        return
-    _phantom_purged = True
+    from sqlalchemy import text
     try:
-        from sqlalchemy import text
+        # Find matches to purge: by PHANTOM_PROVIDER_IDS, or specific phantom matches
+        phantom_matches = []
         for pid in PHANTOM_PROVIDER_IDS:
             m = db.query(Match).filter_by(provider_match_id=pid).first()
-            if m:
-                mid = m.id
-                db.execute(text("DELETE FROM odds_selections WHERE snapshot_id IN (SELECT id FROM odds_snapshots WHERE match_id = :mid)"), {"mid": mid})
-                db.execute(text("DELETE FROM odds_snapshots WHERE match_id = :mid"), {"mid": mid})
-                db.execute(text("DELETE FROM pre_match_prediction_snapshots WHERE match_id = :mid"), {"mid": mid})
-                db.execute(text("DELETE FROM match_statistics WHERE match_id = :mid"), {"mid": mid})
-                db.execute(text("DELETE FROM mirofish_scenario_runs WHERE match_id = :mid"), {"mid": mid})
-                db.execute(text("DELETE FROM intelligence_snapshots WHERE match_id = :mid"), {"mid": mid})
-                db.execute(text("DELETE FROM predictions WHERE match_id = :mid"), {"mid": mid})
+            if m and m not in phantom_matches:
+                phantom_matches.append(m)
+
+        # Also find phantom matches by team names on Oct 16 (e.g. Jamshedpur FC vs Hyderabad FC)
+        team_name_map = {t.id: t.name for t in db.query(Team).all()}
+        oct16_start = datetime(2026, 10, 16, 0, 0, tzinfo=timezone.utc)
+        oct16_end = datetime(2026, 10, 16, 23, 59, tzinfo=timezone.utc)
+        for m in db.query(Match).filter(Match.kickoff_at >= oct16_start, Match.kickoff_at <= oct16_end).all():
+            hn = team_name_map.get(m.home_team_id, "")
+            an = team_name_map.get(m.away_team_id, "")
+            if ("Jamshedpur" in hn and "Hyderabad" in an) or ("Minnesota" in hn and "Vancouver" in an):
+                if m not in phantom_matches:
+                    phantom_matches.append(m)
+
+        child_deletes = [
+            "DELETE FROM odds_selections WHERE snapshot_id IN (SELECT id FROM odds_snapshots WHERE match_id = :mid)",
+            "DELETE FROM odds_snapshots WHERE match_id = :mid",
+            "DELETE FROM match_source_mappings WHERE match_id = :mid",
+            "DELETE FROM lineups WHERE match_id = :mid",
+            "DELETE FROM match_statistics WHERE match_id = :mid",
+            "DELETE FROM pre_match_prediction_snapshots WHERE match_id = :mid",
+            "DELETE FROM pre_match_readiness_records WHERE match_id = :mid",
+            "DELETE FROM mirofish_scenario_runs WHERE match_id = :mid",
+            "DELETE FROM player_feature_snapshots WHERE match_id = :mid",
+            "DELETE FROM evaluation_records WHERE match_id = :mid",
+            "DELETE FROM prediction_resolution_audits WHERE match_id = :mid",
+            "DELETE FROM prediction_version_transitions WHERE match_id = :mid",
+            "DELETE FROM prediction_versions WHERE match_id = :mid",
+            "DELETE FROM intelligence_v2_snapshots WHERE match_id = :mid",
+            "DELETE FROM intelligence_snapshots WHERE match_id = :mid",
+            "DELETE FROM raw_payloads WHERE match_id = :mid",
+            "DELETE FROM data_point_provenance WHERE match_id = :mid",
+            "DELETE FROM predictions WHERE match_id = :mid",
+        ]
+
+        for m in phantom_matches:
+            mid = m.id
+            for stmt in child_deletes:
+                try:
+                    sp = db.begin_nested()
+                    db.execute(text(stmt), {"mid": mid})
+                    sp.commit()
+                except Exception:
+                    sp.rollback()
+            try:
+                sp = db.begin_nested()
                 db.execute(text("DELETE FROM matches WHERE id = :mid"), {"mid": mid})
+                sp.commit()
+            except Exception:
+                sp.rollback()
         db.commit()
     except Exception:
         db.rollback()
@@ -766,9 +804,7 @@ def advance_match_lifecycles(
             continue
 
         # 3b. Stale-live finalization guard: a match stuck in a pre-fulltime
-        # state (e.g. ESPN event aged out of the feed) must never display
-        # LIVE past full time, and must never receive synthetic scores.
-        # Flip status only; scores are preserved (or stay NULL honestly).
+        # state must never display LIVE past full time, and must never receive synthetic scores.
         if m.status in (MatchStatus.LIVE.value, MatchStatus.HALFTIME.value, MatchStatus.PRE_MATCH.value):
             try:
                 ko = m.kickoff_at
@@ -781,27 +817,16 @@ def advance_match_lifecycles(
             except Exception:
                 pass
 
-        # 4. Dynamic timeline progression fallback for uncurated matches
-        lam_h, lam_a = 1.45, 1.15
-        st, minute, cur_h, cur_a, h_mins, a_mins = get_match_progression_state(
-            m.id, m.kickoff_at, now_utc, lam_h, lam_a
-        )
-
-        m.status = st
-        m.minute = minute
-        if cur_h is not None:
-            m.home_score = cur_h
-        if cur_a is not None:
-            m.away_score = cur_a
-
-        if st in (MatchStatus.LIVE.value, MatchStatus.HALFTIME.value):
-            live_count += 1
-        elif st == MatchStatus.FINISHED.value:
-            finished_count += 1
-            try:
-                ensure_match_statistics(db, m, lam_h, lam_a, h_mins, a_mins)
-            except Exception:
-                pass
+        # 4. Strictly require real-world ESPN confirmation for LIVE status.
+        # Matches must NEVER be simulated or fabricated into LIVE state unless
+        # ESPN's live scoreboard API confirms they are currently in-play!
+        # If a match is currently set to LIVE or HALFTIME without ESPN verification, revert it to SCHEDULED.
+        if m.status in (MatchStatus.LIVE.value, MatchStatus.HALFTIME.value):
+            m.status = MatchStatus.SCHEDULED.value
+            m.minute = None
+            m.home_score = None
+            m.away_score = None
+            any_score_changed = True
 
     try:
         db.commit()
