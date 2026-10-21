@@ -10,7 +10,7 @@ from typing import Any
 def get_version_info() -> dict[str, Any]:
     """Return non-sensitive version, git commit, and environment metadata."""
     version = os.getenv("APP_VERSION", "0.1.0")
-    commit_sha = os.getenv("GIT_COMMIT_SHA", os.getenv("COMMIT_SHA", "unknown"))
+    commit_sha = os.getenv("RENDER_GIT_COMMIT", os.getenv("GIT_COMMIT_SHA", os.getenv("COMMIT_SHA", "unknown")))
 
     if commit_sha == "unknown":
         try:

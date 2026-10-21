@@ -683,20 +683,47 @@ def purge_phantom_fixtures_if_needed(db: Session) -> None:
         # Find matches to purge: by PHANTOM_PROVIDER_IDS, or specific phantom matches
         phantom_matches = []
         for pid in PHANTOM_PROVIDER_IDS:
-            m = db.query(Match).filter_by(provider_match_id=pid).first()
-            if m and m not in phantom_matches:
-                phantom_matches.append(m)
+            for m in db.query(Match).filter_by(provider_match_id=pid).all():
+                if m and m not in phantom_matches:
+                    phantom_matches.append(m)
 
-        # Also find phantom matches by team names on Oct 16 (e.g. Jamshedpur FC vs Hyderabad FC)
+        # Also find phantom matches by team names / pairings
         team_name_map = {t.id: t.name for t in db.query(Team).all()}
-        oct16_start = datetime(2026, 10, 16, 0, 0, tzinfo=timezone.utc)
-        oct16_end = datetime(2026, 10, 16, 23, 59, tzinfo=timezone.utc)
-        for m in db.query(Match).filter(Match.kickoff_at >= oct16_start, Match.kickoff_at <= oct16_end).all():
+        phantom_pairs = [
+            ("Forest", "Crystal Palace"),
+            ("Verona", "Monza"),
+            ("Monaco", "Red Star"),
+            ("Milan", "Club Brugge"),
+            ("Real Madrid", "Dortmund"),
+            ("Arsenal", "Shakhtar"),
+            ("Juventus", "Stuttgart"),
+            ("Paris SG", "PSV"),
+            ("Paris Saint-Germain", "PSV"),
+            ("Aston Villa", "Bologna"),
+            ("Girona", "Slovan"),
+            ("Sturm Graz", "Sporting"),
+            ("Atalanta", "Celtic"),
+            ("Brest", "Leverkusen"),
+            ("Barcelona", "Bayern"),
+            ("Leipzig", "Liverpool"),
+            ("Man City", "Sparta"),
+            ("Ath Madrid", "Lille"),
+            ("Young Boys", "Inter"),
+            ("Benfica", "Feyenoord"),
+            ("Salzburg", "Zagreb"),
+            ("Jamshedpur", "Hyderabad"),
+            ("Minnesota", "Vancouver"),
+        ]
+        oct_check_start = datetime(2026, 10, 16, 0, 0, tzinfo=timezone.utc)
+        oct_check_end = datetime(2026, 10, 22, 23, 59, tzinfo=timezone.utc)
+        for m in db.query(Match).filter(Match.kickoff_at >= oct_check_start, Match.kickoff_at <= oct_check_end).all():
             hn = team_name_map.get(m.home_team_id, "")
             an = team_name_map.get(m.away_team_id, "")
-            if ("Jamshedpur" in hn and "Hyderabad" in an) or ("Minnesota" in hn and "Vancouver" in an):
-                if m not in phantom_matches:
-                    phantom_matches.append(m)
+            for p1, p2 in phantom_pairs:
+                if (p1.lower() in hn.lower() and p2.lower() in an.lower()) or (p2.lower() in hn.lower() and p1.lower() in an.lower()):
+                    if m not in phantom_matches:
+                        phantom_matches.append(m)
+                    break
 
         child_deletes = [
             "DELETE FROM odds_selections WHERE snapshot_id IN (SELECT id FROM odds_snapshots WHERE match_id = :mid)",
@@ -791,12 +818,20 @@ def ensure_authentic_october_fixtures(db: Session) -> None:
 
         def resolve_or_create_team(c_name: str, c_short: str, c_country: str, c_lg: int, espn_id: str) -> Team:
             nonlocal max_tid
+            target_pid = f"espn-{espn_id}"
+            # 1. Match by provider id
             for t in all_teams:
-                if _teams_match(t.name, c_name) or _teams_match(t.short_name, c_short):
+                if t.provider_team_id == target_pid:
                     if not t.logo_url and espn_id:
                         t.logo_url = f"https://a.espncdn.com/i/teamlogos/soccer/500/{espn_id}.png"
-                        t.provider_team_id = f"espn-{espn_id}"
                     return t
+            # 2. Match by name or short_name
+            for t in all_teams:
+                if _teams_match(t.name, c_name) or _teams_match(t.short_name, c_short) or (c_short and c_short.lower() == (t.short_name or "").lower()):
+                    if not t.logo_url and espn_id:
+                        t.logo_url = f"https://a.espncdn.com/i/teamlogos/soccer/500/{espn_id}.png"
+                    return t
+            # 3. Create new team
             max_tid += 1
             new_t = Team(
                 id=max_tid,
@@ -805,12 +840,22 @@ def ensure_authentic_october_fixtures(db: Session) -> None:
                 short_name=c_short,
                 country=c_country,
                 provider="espn",
-                provider_team_id=f"espn-{espn_id}",
+                provider_team_id=target_pid,
                 logo_url=f"https://a.espncdn.com/i/teamlogos/soccer/500/{espn_id}.png",
             )
-            db.add(new_t)
-            all_teams.append(new_t)
-            return new_t
+            try:
+                sp = db.begin_nested()
+                db.add(new_t)
+                db.flush()
+                sp.commit()
+                all_teams.append(new_t)
+                return new_t
+            except Exception:
+                sp.rollback()
+                existing = db.query(Team).filter_by(provider="espn", provider_team_id=target_pid).first()
+                if existing:
+                    return existing
+                return all_teams[0]
 
         resolved_clubs = {}
         for c_name, c_short, c_country, c_lg, espn_id in clubs:
