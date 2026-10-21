@@ -951,51 +951,104 @@ def get_daily_slips(
 
     slips = []
 
-    # 0. UCL-DEDICATED SLIPS (When Champions League games are present)
-    ucl_banker_candidates = sorted(
-        [p for p in all_picks if p.get("league_code") == "UCL" and p["probability"] >= 0.65],
-        key=lambda x: x["probability"],
-        reverse=True
-    )
-    if len(ucl_banker_candidates) >= 2:
-        seen_ucl_b = set()
-        ucl_b_picks = []
-        for p in ucl_banker_candidates:
-            if p["match_id"] not in seen_ucl_b:
-                seen_ucl_b.add(p["match_id"])
-                ucl_b_picks.append(p)
-                if len(ucl_b_picks) == 3:
-                    break
-        if len(ucl_b_picks) >= 2:
+    # 0. ALL-GAMES UCL SLIPS (Single slip covering EVERY SINGLE UCL MATCH on the date)
+    ucl_matches = [rp for rp in ranked_predictions if rp.get("league_code") == "UCL"]
+    if ucl_matches:
+        all_ucl_banker_picks = []
+        for rp in ucl_matches:
+            best_pick_for_match = rp["best_outcome"]
+            all_ucl_banker_picks.append({
+                "match_id": rp["match_id"],
+                "fixture": rp["fixture"],
+                "pick": best_pick_for_match["pick"],
+                "market": best_pick_for_match["market"],
+                "probability": best_pick_for_match["probability"] / 100.0,
+                "odds": best_pick_for_match["odds"],
+                "league_code": "UCL",
+                "league_name": "UEFA Champions League",
+                "league_flag": "🏆",
+                "home_team": rp["home_team"],
+                "away_team": rp["away_team"],
+                "home_team_logo": rp.get("home_team_logo"),
+                "away_team_logo": rp.get("away_team_logo"),
+                "badge": best_pick_for_match.get("badge", "Banker"),
+                "status": best_pick_for_match.get("status", "PENDING"),
+                "category": best_pick_for_match.get("category", "BANKER"),
+            })
+
+        if all_ucl_banker_picks:
             slips.append(_combine_slip(
-                ucl_b_picks,
-                "🏆 UCL Pure Banker Slip",
-                "UCL Only (High Probability)",
-                f"Champions League exclusive banker parlay combining {len(ucl_b_picks)} highest-confidence European fixtures.",
+                all_ucl_banker_picks,
+                f"🏆 All-Games UCL Accumulator ({len(all_ucl_banker_picks)} Matches)",
+                "All UCL Games Banker",
+                f"Complete Champions League accumulator combining the #1 high-probability pick from every single UCL match ({len(all_ucl_banker_picks)} games).",
                 "banker"
             ))
 
-    ucl_val_candidates = sorted(
-        [p for p in all_picks if p.get("league_code") == "UCL" and p["odds"] >= 1.60],
-        key=lambda x: x["probability"] * x["odds"],
-        reverse=True
-    )
-    if len(ucl_val_candidates) >= 2:
-        seen_ucl_v = set()
-        ucl_v_picks = []
-        for p in ucl_val_candidates:
-            if p["match_id"] not in seen_ucl_v:
-                seen_ucl_v.add(p["match_id"])
-                ucl_v_picks.append(p)
-                if len(ucl_v_picks) == 3:
-                    break
-        if len(ucl_v_picks) >= 2:
+        # Also create All-Games UCL High-Odds Multiplier
+        all_ucl_high_odds_picks = []
+        for rp in ucl_matches:
+            cand_list = [rp["best_outcome"]] + rp.get("alternative_outcomes", [])
+            cand_list_by_odds = sorted(cand_list, key=lambda x: x["odds"], reverse=True)
+            chosen = cand_list_by_odds[0]
+            all_ucl_high_odds_picks.append({
+                "match_id": rp["match_id"],
+                "fixture": rp["fixture"],
+                "pick": chosen["pick"],
+                "market": chosen["market"],
+                "probability": chosen["probability"] / 100.0,
+                "odds": chosen["odds"],
+                "league_code": "UCL",
+                "league_name": "UEFA Champions League",
+                "league_flag": "🏆",
+                "home_team": rp["home_team"],
+                "away_team": rp["away_team"],
+                "home_team_logo": rp.get("home_team_logo"),
+                "away_team_logo": rp.get("away_team_logo"),
+                "badge": chosen.get("badge", "Value"),
+                "status": chosen.get("status", "PENDING"),
+                "category": chosen.get("category", "VALUE"),
+            })
+
+        if all_ucl_high_odds_picks and len(all_ucl_high_odds_picks) >= 2:
             slips.append(_combine_slip(
-                ucl_v_picks,
-                "🚀 UCL Mega Multiplier",
-                "UCL Only (High Odds)",
-                f"High-yield UEFA Champions League value accumulator with maximum mathematical edge.",
+                all_ucl_high_odds_picks,
+                f"🚀 All-Games UCL Mega Multiplier ({len(all_ucl_high_odds_picks)} Matches)",
+                "All UCL Games High Odds",
+                f"Maximum-yield Champions League parlay combining top-value high-odds markets across all {len(all_ucl_high_odds_picks)} matches.",
                 "value"
+            ))
+
+    # Also: ALL-MATCHES OF THE DAY SLIP (Every single game across all leagues!)
+    if len(ranked_predictions) > len(ucl_matches):
+        all_games_today_picks = []
+        for rp in ranked_predictions:
+            best_p = rp["best_outcome"]
+            all_games_today_picks.append({
+                "match_id": rp["match_id"],
+                "fixture": rp["fixture"],
+                "pick": best_p["pick"],
+                "market": best_p["market"],
+                "probability": best_p["probability"] / 100.0,
+                "odds": best_p["odds"],
+                "league_code": rp["league_code"],
+                "league_name": rp["league_name"],
+                "league_flag": rp["league_flag"],
+                "home_team": rp["home_team"],
+                "away_team": rp["away_team"],
+                "home_team_logo": rp.get("home_team_logo"),
+                "away_team_logo": rp.get("away_team_logo"),
+                "badge": best_p.get("badge", "Banker"),
+                "status": best_p.get("status", "PENDING"),
+                "category": best_p.get("category", "BANKER"),
+            })
+        if all_games_today_picks:
+            slips.append(_combine_slip(
+                all_games_today_picks,
+                f"🌐 All-Games Master Card ({len(all_games_today_picks)} Matches)",
+                "Complete Daily Slate",
+                f"Ultimate master parlay encompassing every single match playing on this date ({len(all_games_today_picks)} matches across all leagues).",
+                "mega"
             ))
 
     # 1. SAFE BANKER TREBLE (Highest Probability >= 75%, ultra-low variance)
