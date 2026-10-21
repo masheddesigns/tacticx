@@ -56,8 +56,10 @@ def trigger_seed_expanded(db: Session = Depends(get_db)):
 def trigger_fix_fixtures(db: Session = Depends(get_db)):
     try:
         from app.services.match_progression import purge_phantom_fixtures_if_needed, ensure_authentic_october_fixtures
+        from app.api.routes.matches import _DAILY_SLIPS_CACHE
         purge_phantom_fixtures_if_needed(db)
         ensure_authentic_october_fixtures(db)
+        _DAILY_SLIPS_CACHE.clear()
         return {"status": "success", "message": "Purged phantom fixtures and ensured authentic Oct 20-21 schedule"}
     except Exception as e:
         import traceback

@@ -951,6 +951,53 @@ def get_daily_slips(
 
     slips = []
 
+    # 0. UCL-DEDICATED SLIPS (When Champions League games are present)
+    ucl_banker_candidates = sorted(
+        [p for p in all_picks if p.get("league_code") == "UCL" and p["probability"] >= 0.65],
+        key=lambda x: x["probability"],
+        reverse=True
+    )
+    if len(ucl_banker_candidates) >= 2:
+        seen_ucl_b = set()
+        ucl_b_picks = []
+        for p in ucl_banker_candidates:
+            if p["match_id"] not in seen_ucl_b:
+                seen_ucl_b.add(p["match_id"])
+                ucl_b_picks.append(p)
+                if len(ucl_b_picks) == 3:
+                    break
+        if len(ucl_b_picks) >= 2:
+            slips.append(_combine_slip(
+                ucl_b_picks,
+                "🏆 UCL Pure Banker Slip",
+                "UCL Only (High Probability)",
+                f"Champions League exclusive banker parlay combining {len(ucl_b_picks)} highest-confidence European fixtures.",
+                "banker"
+            ))
+
+    ucl_val_candidates = sorted(
+        [p for p in all_picks if p.get("league_code") == "UCL" and p["odds"] >= 1.60],
+        key=lambda x: x["probability"] * x["odds"],
+        reverse=True
+    )
+    if len(ucl_val_candidates) >= 2:
+        seen_ucl_v = set()
+        ucl_v_picks = []
+        for p in ucl_val_candidates:
+            if p["match_id"] not in seen_ucl_v:
+                seen_ucl_v.add(p["match_id"])
+                ucl_v_picks.append(p)
+                if len(ucl_v_picks) == 3:
+                    break
+        if len(ucl_v_picks) >= 2:
+            slips.append(_combine_slip(
+                ucl_v_picks,
+                "🚀 UCL Mega Multiplier",
+                "UCL Only (High Odds)",
+                f"High-yield UEFA Champions League value accumulator with maximum mathematical edge.",
+                "value"
+            ))
+
     # 1. SAFE BANKER TREBLE (Highest Probability >= 75%, ultra-low variance)
     banker_candidates = sorted(
         [p for p in all_picks if p["probability"] >= 0.70],
