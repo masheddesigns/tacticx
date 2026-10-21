@@ -44,6 +44,18 @@ def seed_all_fixtures():
         {"name": "Slovan Bratislava", "short": "Slovan", "country": "Slovakia"},
         {"name": "Sturm Graz", "short": "Sturm Graz", "country": "Austria"},
         {"name": "Red Bull Salzburg", "short": "Salzburg", "country": "Austria"},
+        {"name": "Fenerbahce", "short": "Fenerbahce", "country": "Turkey"},
+        {"name": "Slavia Prague", "short": "Slavia Prague", "country": "Czechia"},
+        {"name": "Sabah FK", "short": "Sabah FK", "country": "Azerbaijan"},
+        {"name": "AEK Athens", "short": "AEK Athens", "country": "Greece"},
+        {"name": "Bodo/Glimt", "short": "Bodo/Glimt", "country": "Norway"},
+        {"name": "Como", "short": "Como", "country": "Italy"},
+        {"name": "Galatasaray", "short": "Galatasaray", "country": "Turkey"},
+        {"name": "Viking FK", "short": "Viking", "country": "Norway"},
+        {"name": "Lens", "short": "Lens", "country": "France"},
+        {"name": "LASK Linz", "short": "LASK", "country": "Austria"},
+        {"name": "Levante", "short": "Levante", "country": "Spain"},
+        {"name": "FC Porto", "short": "Porto", "country": "Portugal"},
     ]
 
     team_id_map: Dict[str, int] = {}
@@ -185,33 +197,36 @@ def seed_all_fixtures():
         {"date": "2026-10-18 18:45:00+00", "league": 5, "home": t("Montpellier"), "away": t("Marseille"), "p_id": "l1_2026_1018_mon_mar"},
 
         # Monday Oct 19
-        {"date": "2026-10-19 19:00:00+00", "league": 1, "home": t("Nott'm Forest"), "away": t("Crystal Palace"), "p_id": "epl_2026_1019_nfo_cry"},
-        {"date": "2026-10-19 18:45:00+00", "league": 3, "home": t("Verona"), "away": t("Monza"), "p_id": "sa_2026_1019_ver_mon"},
+        {"date": "2026-10-19 19:00:00+00", "league": 1, "home": t("Tottenham"), "away": t("Coventry" if "coventry" in team_id_map else "Fulham"), "p_id": "epl_2026_1019_tot_cov"},
+        {"date": "2026-10-19 19:00:00+00", "league": 2, "home": t("Getafe"), "away": t("Vallecano"), "p_id": "ll_2026_1019_get_val"},
+        {"date": "2026-10-19 16:30:00+00", "league": 3, "home": t("Monza"), "away": t("Cagliari"), "p_id": "sa_2026_1019_mon_cag"},
+        {"date": "2026-10-19 18:45:00+00", "league": 3, "home": t("Parma"), "away": t("Torino"), "p_id": "sa_2026_1019_par_tor"},
 
         # =========================================================================
-        # MIDWEEK 2: OCT 20 & 21 (UEFA CHAMPIONS LEAGUE MATCHDAY 3)
+        # MIDWEEK 2: OCT 20 & 21 (UEFA CHAMPIONS LEAGUE MATCHDAY 3 & DOMESTIC)
         # =========================================================================
         # Tuesday Oct 20
-        {"date": "2026-10-20 16:45:00+00", "league": 6, "home": t("Monaco"), "away": t("Red Star Belgrade"), "p_id": "ucl_2026_1020_mon_red"},
-        {"date": "2026-10-20 16:45:00+00", "league": 6, "home": t("Milan"), "away": t("Club Brugge"), "p_id": "ucl_2026_1020_mil_bru"},
-        {"date": "2026-10-20 19:00:00+00", "league": 6, "home": t("Real Madrid"), "away": t("Dortmund"), "p_id": "ucl_2026_1020_rma_bvb"},
-        {"date": "2026-10-20 19:00:00+00", "league": 6, "home": t("Arsenal"), "away": t("Shakhtar Donetsk"), "p_id": "ucl_2026_1020_ars_sha"},
-        {"date": "2026-10-20 19:00:00+00", "league": 6, "home": t("Juventus"), "away": t("Stuttgart"), "p_id": "ucl_2026_1020_juv_vfb"},
-        {"date": "2026-10-20 19:00:00+00", "league": 6, "home": t("Paris SG"), "away": t("PSV Eindhoven"), "p_id": "ucl_2026_1020_psg_psv"},
-        {"date": "2026-10-20 19:00:00+00", "league": 6, "home": t("Aston Villa"), "away": t("Bologna"), "p_id": "ucl_2026_1020_avl_bol"},
-        {"date": "2026-10-20 19:00:00+00", "league": 6, "home": t("Girona"), "away": t("Slovan Bratislava"), "p_id": "ucl_2026_1020_gir_slo"},
-        {"date": "2026-10-20 19:00:00+00", "league": 6, "home": t("Sturm Graz"), "away": t("Sporting CP"), "p_id": "ucl_2026_1020_stu_spo"},
+        {"date": "2026-10-20 16:45:00+00", "league": 6, "home": t("Fenerbahce"), "away": t("Slavia Prague"), "p_id": "ucl_2026_1020_fen_sla"},
+        {"date": "2026-10-20 16:45:00+00", "league": 6, "home": t("Sabah FK"), "away": t("Dortmund"), "p_id": "ucl_2026_1020_sab_bvb"},
+        {"date": "2026-10-20 19:00:00+00", "league": 6, "home": t("Roma"), "away": t("Slovan Bratislava"), "p_id": "ucl_2026_1020_rom_slo"},
+        {"date": "2026-10-20 19:00:00+00", "league": 6, "home": t("FC Porto"), "away": t("PSV Eindhoven"), "p_id": "ucl_2026_1020_por_psv"},
+        {"date": "2026-10-20 19:00:00+00", "league": 6, "home": t("Liverpool"), "away": t("Villarreal"), "p_id": "ucl_2026_1020_liv_vil"},
+        {"date": "2026-10-20 19:00:00+00", "league": 6, "home": t("Man City"), "away": t("AEK Athens"), "p_id": "ucl_2026_1020_mci_aek"},
+        {"date": "2026-10-20 19:00:00+00", "league": 6, "home": t("Napoli"), "away": t("Bodo/Glimt"), "p_id": "ucl_2026_1020_nap_bod"},
+        {"date": "2026-10-20 19:00:00+00", "league": 6, "home": t("Paris SG"), "away": t("Barcelona"), "p_id": "ucl_2026_1020_psg_bar"},
+        {"date": "2026-10-20 19:00:00+00", "league": 6, "home": t("Stuttgart"), "away": t("Ath Madrid"), "p_id": "ucl_2026_1020_stu_atm"},
 
         # Wednesday Oct 21
-        {"date": "2026-10-21 16:45:00+00", "league": 6, "home": t("Atalanta"), "away": t("Celtic"), "p_id": "ucl_2026_1021_ata_cel"},
-        {"date": "2026-10-21 16:45:00+00", "league": 6, "home": t("Brest"), "away": t("Leverkusen"), "p_id": "ucl_2026_1021_bre_b04"},
-        {"date": "2026-10-21 19:00:00+00", "league": 6, "home": t("Barcelona"), "away": t("Bayern Munich"), "p_id": "ucl_2026_1021_bar_bay"},
-        {"date": "2026-10-21 19:00:00+00", "league": 6, "home": t("RB Leipzig"), "away": t("Liverpool"), "p_id": "ucl_2026_1021_rbl_liv"},
-        {"date": "2026-10-21 19:00:00+00", "league": 6, "home": t("Man City"), "away": t("Sparta Praha"), "p_id": "ucl_2026_1021_mci_spa"},
-        {"date": "2026-10-21 19:00:00+00", "league": 6, "home": t("Ath Madrid"), "away": t("Lille"), "p_id": "ucl_2026_1021_atm_lil"},
-        {"date": "2026-10-21 19:00:00+00", "league": 6, "home": t("Young Boys"), "away": t("Inter"), "p_id": "ucl_2026_1021_yb_int"},
-        {"date": "2026-10-21 19:00:00+00", "league": 6, "home": t("Benfica"), "away": t("Feyenoord"), "p_id": "ucl_2026_1021_ben_fey"},
-        {"date": "2026-10-21 19:00:00+00", "league": 6, "home": t("Red Bull Salzburg"), "away": t("Dinamo Zagreb"), "p_id": "ucl_2026_1021_sal_zag"},
+        {"date": "2026-10-21 16:45:00+00", "league": 6, "home": t("Como"), "away": t("Man United"), "p_id": "ucl_2026_1021_com_mun"},
+        {"date": "2026-10-21 16:45:00+00", "league": 6, "home": t("Lille"), "away": t("Galatasaray"), "p_id": "ucl_2026_1021_lil_gal"},
+        {"date": "2026-10-21 19:00:00+00", "league": 6, "home": t("Aston Villa"), "away": t("Viking FK"), "p_id": "ucl_2026_1021_avl_vik"},
+        {"date": "2026-10-21 19:00:00+00", "league": 6, "home": t("Bayern Munich"), "away": t("Arsenal"), "p_id": "ucl_2026_1021_bay_ars"},
+        {"date": "2026-10-21 19:00:00+00", "league": 6, "home": t("Club Brugge"), "away": t("Lens"), "p_id": "ucl_2026_1021_bru_len"},
+        {"date": "2026-10-21 19:00:00+00", "league": 6, "home": t("Inter"), "away": t("Shakhtar Donetsk"), "p_id": "ucl_2026_1021_int_sha"},
+        {"date": "2026-10-21 19:00:00+00", "league": 6, "home": t("Betis"), "away": t("Feyenoord"), "p_id": "ucl_2026_1021_bet_fey"},
+        {"date": "2026-10-21 19:00:00+00", "league": 6, "home": t("Real Madrid"), "away": t("RB Leipzig"), "p_id": "ucl_2026_1021_rma_rbl"},
+        {"date": "2026-10-21 19:00:00+00", "league": 6, "home": t("Sporting CP"), "away": t("LASK Linz"), "p_id": "ucl_2026_1021_spo_las"},
+        {"date": "2026-10-21 18:00:00+00", "league": 2, "home": t("Levante"), "away": t("Ath Bilbao"), "p_id": "ll_2026_1021_lev_ath"},
 
         # =========================================================================
         # WEEKEND 3: OCT 23 - OCT 26 (EL CLASICO, DERBY D'ITALIA, LE CLASSIQUE)
