@@ -52,15 +52,15 @@ def trigger_seed_expanded(db: Session = Depends(get_db)):
         return {"status": "error", "message": str(e), "traceback": traceback.format_exc()}
 
 
-@router.post("/fix-fixtures", summary="Purge fabricated fixtures and ensure authentic Oct 20-21 schedule")
+@router.post("/fix-fixtures", summary="Purge fabricated fixtures and ensure authentic schedule from ESPN")
 def trigger_fix_fixtures(db: Session = Depends(get_db)):
     try:
-        from app.services.match_progression import purge_phantom_fixtures_if_needed, ensure_authentic_october_fixtures
+        from app.services.match_progression import purge_phantom_fixtures_if_needed, sync_espn_live_and_recent
         from app.api.routes.matches import _DAILY_SLIPS_CACHE
         purge_phantom_fixtures_if_needed(db)
-        ensure_authentic_october_fixtures(db)
+        sync_espn_live_and_recent(db, max_age_seconds=0)
         _DAILY_SLIPS_CACHE.clear()
-        return {"status": "success", "message": "Purged phantom fixtures and ensured authentic Oct 20-21 schedule"}
+        return {"status": "success", "message": "Purged phantom fixtures and synced authentic ESPN schedule"}
     except Exception as e:
         import traceback
         return {"status": "error", "message": str(e), "traceback": traceback.format_exc()}

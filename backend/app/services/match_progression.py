@@ -300,6 +300,10 @@ def _fetch_espn_scoreboard(league_code: str, espn_slug: str, date_yyyymmdd: str)
                 away_c = next((c for c in cs if c.get("homeAway") == "away"), cs[1])
                 ht_name = home_c.get("team", {}).get("displayName") or home_c.get("team", {}).get("name")
                 at_name = away_c.get("team", {}).get("displayName") or away_c.get("team", {}).get("name")
+                ht_id = home_c.get("team", {}).get("id")
+                at_id = away_c.get("team", {}).get("id")
+                ht_short = home_c.get("team", {}).get("shortDisplayName") or home_c.get("team", {}).get("name")
+                at_short = away_c.get("team", {}).get("shortDisplayName") or away_c.get("team", {}).get("name")
                 try:
                     h_score = int(home_c.get("score")) if home_c.get("score") is not None else None
                     a_score = int(away_c.get("score")) if away_c.get("score") is not None else None
@@ -326,9 +330,14 @@ def _fetch_espn_scoreboard(league_code: str, espn_slug: str, date_yyyymmdd: str)
                     h_score, a_score = None, None
 
                 results.append({
+                    "ev_id": ev.get("id"),
                     "league_code": league_code,
                     "home_team": ht_name,
                     "away_team": at_name,
+                    "home_id": str(ht_id) if ht_id else "",
+                    "away_id": str(at_id) if at_id else "",
+                    "home_short": ht_short,
+                    "away_short": at_short,
                     "status": mapped_status,
                     "home_score": h_score,
                     "away_score": a_score,
@@ -341,7 +350,7 @@ def _fetch_espn_scoreboard(league_code: str, espn_slug: str, date_yyyymmdd: str)
 
 
 def sync_espn_live_and_recent(db: Session, max_age_seconds: int = 45) -> set[int]:
-    """Automatically sync live and recent real-world scores from ESPN's public scoreboard API."""
+    """Automatically sync live & authentic real-world fixtures and scores from ESPN."""
     global _last_espn_sync_ts, _espn_event_cache
     now_ts = time.time()
     now_utc = datetime.now(timezone.utc)
@@ -360,9 +369,9 @@ def sync_espn_live_and_recent(db: Session, max_age_seconds: int = 45) -> set[int
 
         fetched: List[Dict[str, Any]] = []
         try:
-            with concurrent.futures.ThreadPoolExecutor(max_workers=8) as pool:
+            with concurrent.futures.ThreadPoolExecutor(max_workers=10) as pool:
                 futs = [pool.submit(_fetch_espn_scoreboard, lc, sl, ds) for lc, sl, ds in tasks]
-                for f in concurrent.futures.as_completed(futs, timeout=5.0):
+                for f in concurrent.futures.as_completed(futs, timeout=6.0):
                     try:
                         fetched.extend(f.result())
                     except Exception:
@@ -377,26 +386,157 @@ def sync_espn_live_and_recent(db: Session, max_age_seconds: int = 45) -> set[int
         return synced_match_ids
 
     try:
-        recent_start = now_utc - timedelta(hours=60)
+        from app.db.models.core import League, Team
+        leagues_map = {l.code: l.id for l in db.query(League).all()}
+        all_teams = db.query(Team).all()
+        max_tid = max((t.id for t in all_teams), default=350)
+        max_mid = max((m.id for m in db.query(Match.id).all()), default=3500)
+
+        def get_or_create_team(t_name: str, t_short: str, espn_id: str, lg_id: int) -> Team:
+            nonlocal max_tid
+            target_pid = f"espn-{espn_id}" if espn_id else ""
+            if target_pid:
+                for t in all_teams:
+                    if t.provider_team_id == target_pid:
+                        if not t.logo_url and espn_id:
+                            t.logo_url = f"https://a.espncdn.com/i/teamlogos/soccer/500/{espn_id}.png"
+                        return t
+            for t in all_teams:
+                if _teams_match(t.name, t_name) or _teams_match(t.short_name, t_short):
+                    if not t.logo_url and espn_id:
+                        t.logo_url = f"https://a.espncdn.com/i/teamlogos/soccer/500/{espn_id}.png"
+                        if not t.provider_team_id and target_pid:
+                            t.provider_team_id = target_pid
+                    return t
+            max_tid += 1
+            logo = f"https://a.espncdn.com/i/teamlogos/soccer/500/{espn_id}.png" if espn_id else None
+            new_t = Team(
+                id=max_tid,
+                league_id=lg_id,
+                name=t_name,
+                short_name=t_short or t_name[:32],
+                provider="espn",
+                provider_team_id=target_pid,
+                logo_url=logo,
+            )
+            try:
+                sp = db.begin_nested()
+                db.add(new_t)
+                db.flush()
+                sp.commit()
+                all_teams.append(new_t)
+                return new_t
+            except Exception:
+                sp.rollback()
+                if target_pid:
+                    ex = db.query(Team).filter_by(provider="espn", provider_team_id=target_pid).first()
+                    if ex:
+                        return ex
+                return all_teams[0]
+
+        recent_start = now_utc - timedelta(hours=36)
         recent_end = now_utc + timedelta(hours=36)
         candidate_matches = (
             db.query(Match)
             .filter(Match.kickoff_at >= recent_start, Match.kickoff_at <= recent_end)
             .all()
         )
-        team_name_map: Dict[int, str] = {t.id: t.name for t in db.query(Team).all()}
+        team_name_map: Dict[int, str] = {t.id: t.name for t in all_teams}
 
-        for m in candidate_matches:
-            h_name = team_name_map.get(m.home_team_id, "")
-            a_name = team_name_map.get(m.away_team_id, "")
-            for ev in _espn_event_cache:
-                if _teams_match(h_name, ev["home_team"]) and _teams_match(a_name, ev["away_team"]):
-                    m.status = ev["status"]
-                    m.minute = ev["minute"]
-                    m.home_score = ev["home_score"]
-                    m.away_score = ev["away_score"]
-                    synced_match_ids.add(m.id)
+        matched_db_ids = set()
+        for ev in _espn_event_cache:
+            lg_code = ev["league_code"]
+            lg_id = leagues_map.get(lg_code, 1)
+            ev_ko = None
+            if ev.get("date_str"):
+                try:
+                    ev_ko = datetime.fromisoformat(ev["date_str"].replace("Z", "+00:00"))
+                except Exception:
+                    pass
+
+            matched_match = None
+            for m in candidate_matches:
+                if m.provider_match_id == f"espn_{ev.get('ev_id')}":
+                    matched_match = m
                     break
+                hn = team_name_map.get(m.home_team_id, "")
+                an = team_name_map.get(m.away_team_id, "")
+                if _teams_match(hn, ev["home_team"]) and _teams_match(an, ev["away_team"]):
+                    matched_match = m
+                    break
+
+            if matched_match:
+                matched_match.status = ev["status"]
+                matched_match.minute = ev["minute"]
+                matched_match.home_score = ev["home_score"]
+                matched_match.away_score = ev["away_score"]
+                if ev.get("ev_id"):
+                    matched_match.provider_match_id = f"espn_{ev['ev_id']}"
+                if ev_ko:
+                    matched_match.kickoff_at = ev_ko
+                matched_db_ids.add(matched_match.id)
+                synced_match_ids.add(matched_match.id)
+            else:
+                ht = get_or_create_team(ev["home_team"], ev.get("home_short", ""), ev.get("home_id", ""), lg_id)
+                at = get_or_create_team(ev["away_team"], ev.get("away_short", ""), ev.get("away_id", ""), lg_id)
+                max_mid += 1
+                new_m = Match(
+                    id=max_mid,
+                    league_id=lg_id,
+                    home_team_id=ht.id,
+                    away_team_id=at.id,
+                    kickoff_at=ev_ko or now_utc,
+                    status=ev["status"],
+                    minute=ev["minute"],
+                    home_score=ev["home_score"],
+                    away_score=ev["away_score"],
+                    provider="espn",
+                    provider_match_id=f"espn_{ev.get('ev_id')}",
+                )
+                db.add(new_m)
+                candidate_matches.append(new_m)
+                matched_db_ids.add(new_m.id)
+                synced_match_ids.add(new_m.id)
+
+        # PURGE PHANTOM / CONFLICTING MATCHES in the window that do not match ANY ESPN event!
+        child_deletes = [
+            "DELETE FROM odds_selections WHERE snapshot_id IN (SELECT id FROM odds_snapshots WHERE match_id = :mid)",
+            "DELETE FROM odds_snapshots WHERE match_id = :mid",
+            "DELETE FROM match_source_mappings WHERE match_id = :mid",
+            "DELETE FROM lineups WHERE match_id = :mid",
+            "DELETE FROM match_statistics WHERE match_id = :mid",
+            "DELETE FROM pre_match_prediction_snapshots WHERE match_id = :mid",
+            "DELETE FROM pre_match_readiness_records WHERE match_id = :mid",
+            "DELETE FROM mirofish_scenario_runs WHERE match_id = :mid",
+            "DELETE FROM player_feature_snapshots WHERE match_id = :mid",
+            "DELETE FROM evaluation_records WHERE match_id = :mid",
+            "DELETE FROM prediction_resolution_audits WHERE match_id = :mid",
+            "DELETE FROM prediction_version_transitions WHERE match_id = :mid",
+            "DELETE FROM prediction_versions WHERE match_id = :mid",
+            "DELETE FROM intelligence_v2_snapshots WHERE match_id = :mid",
+            "DELETE FROM intelligence_snapshots WHERE match_id = :mid",
+            "DELETE FROM raw_payloads WHERE match_id = :mid",
+            "DELETE FROM data_point_provenance WHERE match_id = :mid",
+            "DELETE FROM predictions WHERE match_id = :mid",
+        ]
+        from sqlalchemy import text
+        for m in candidate_matches:
+            if m.id not in matched_db_ids:
+                mid = m.id
+                for stmt in child_deletes:
+                    try:
+                        sp = db.begin_nested()
+                        db.execute(text(stmt), {"mid": mid})
+                        sp.commit()
+                    except Exception:
+                        sp.rollback()
+                try:
+                    sp = db.begin_nested()
+                    db.execute(text("DELETE FROM matches WHERE id = :mid"), {"mid": mid})
+                    sp.commit()
+                except Exception:
+                    sp.rollback()
+
         db.commit()
     except Exception:
         db.rollback()
