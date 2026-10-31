@@ -56,6 +56,21 @@ def seed_all_fixtures():
         {"name": "LASK Linz", "short": "LASK", "country": "Austria"},
         {"name": "Levante", "short": "Levante", "country": "Spain"},
         {"name": "FC Porto", "short": "Porto", "country": "Portugal"},
+        {"name": "Málaga", "short": "Málaga", "country": "Spain"},
+        {"name": "Schalke 04", "short": "Schalke", "country": "Germany"},
+        {"name": "SC Paderborn 07", "short": "Paderborn", "country": "Germany"},
+        {"name": "Troyes", "short": "Troyes", "country": "France"},
+        {"name": "Le Mans", "short": "Le Mans", "country": "France"},
+        {"name": "Racing Santander", "short": "Santander", "country": "Spain"},
+        {"name": "Elche", "short": "Elche", "country": "Spain"},
+        {"name": "Venezia", "short": "Venezia", "country": "Italy"},
+        {"name": "Frosinone", "short": "Frosinone", "country": "Italy"},
+        {"name": "Hamburg SV", "short": "Hamburg", "country": "Germany"},
+        {"name": "Paris FC", "short": "Paris FC", "country": "France"},
+        {"name": "Coventry City", "short": "Coventry", "country": "England"},
+        {"name": "Hull City", "short": "Hull", "country": "England"},
+        {"name": "Sunderland", "short": "Sunderland", "country": "England"},
+        {"name": "Leeds United", "short": "Leeds", "country": "England"},
     ]
 
     team_id_map: Dict[str, int] = {}
@@ -307,48 +322,57 @@ def seed_all_fixtures():
         {"date": "2026-10-30 18:45:00+00", "league": 5, "home": t("Monaco"), "away": t("Brest"), "p_id": "l1_2026_1030_mon_bre"},
         {"date": "2026-10-30 19:00:00+00", "league": 2, "home": t("Alaves"), "away": t("Mallorca"), "p_id": "ll_2026_1030_ala_mal"},
 
-        # Saturday Oct 31
+        # Saturday Oct 31 (Authentic ESPN Slate)
         # Premier League
-        {"date": "2026-10-31 12:30:00+00", "league": 1, "home": t("Newcastle"), "away": t("Arsenal"), "p_id": "epl_2026_1031_new_ars"},
-        {"date": "2026-10-31 15:00:00+00", "league": 1, "home": t("Bournemouth"), "away": t("Man City"), "p_id": "epl_2026_1031_bou_mci"},
-        {"date": "2026-10-31 15:00:00+00", "league": 1, "home": t("Liverpool"), "away": t("Brighton"), "p_id": "epl_2026_1031_liv_bha"},
-        {"date": "2026-10-31 15:00:00+00", "league": 1, "home": t("Nott'm Forest"), "away": t("West Ham"), "p_id": "epl_2026_1031_nfo_whu"},
-        {"date": "2026-10-31 15:00:00+00", "league": 1, "home": t("Burnley"), "away": t("Everton"), "p_id": "epl_2026_1031_bur_eve"},
-        {"date": "2026-10-31 17:30:00+00", "league": 1, "home": t("Wolves"), "away": t("Crystal Palace"), "p_id": "epl_2026_1031_wol_cry"},
+        {"date": "2026-10-31 12:30:00+00", "league": 1, "home": t("Chelsea"), "away": t("Man United"), "p_id": "espn_401879248"},
+        {"date": "2026-10-31 15:00:00+00", "league": 1, "home": t("Bournemouth"), "away": t("Leeds"), "p_id": "espn_401879251"},
+        {"date": "2026-10-31 15:00:00+00", "league": 1, "home": t("Brentford"), "away": t("Nott'm Forest"), "p_id": "espn_401879249"},
+        {"date": "2026-10-31 15:00:00+00", "league": 1, "home": t("Coventry"), "away": t("Sunderland"), "p_id": "espn_401879247"},
+        {"date": "2026-10-31 15:00:00+00", "league": 1, "home": t("Hull"), "away": t("Ipswich"), "p_id": "espn_401878763"},
+        {"date": "2026-10-31 15:00:00+00", "league": 1, "home": t("Man City"), "away": t("Brighton"), "p_id": "espn_401879245"},
+        {"date": "2026-10-31 17:30:00+00", "league": 1, "home": t("Tottenham"), "away": t("Crystal Palace"), "p_id": "espn_401878761"},
+        {"date": "2026-10-31 20:00:00+00", "league": 1, "home": t("Aston Villa"), "away": t("Fulham"), "p_id": "espn_401879250"},
         # La Liga
-        {"date": "2026-10-31 13:00:00+00", "league": 2, "home": t("Osasuna"), "away": t("Betis"), "p_id": "ll_2026_1031_osa_bet"},
-        {"date": "2026-10-31 15:15:00+00", "league": 2, "home": t("Girona"), "away": t("Celta"), "p_id": "ll_2026_1031_gir_cel"},
-        {"date": "2026-10-31 17:30:00+00", "league": 2, "home": t("Villarreal"), "away": t("Vallecano"), "p_id": "ll_2026_1031_vil_ray"},
-        {"date": "2026-10-31 20:00:00+00", "league": 2, "home": t("Valencia"), "away": t("Real Madrid"), "p_id": "ll_2026_1031_val_rma"},
+        {"date": "2026-10-31 13:00:00+00", "league": 2, "home": t("Levante"), "away": t("Ath Madrid"), "p_id": "espn_401882820"},
+        {"date": "2026-10-31 15:15:00+00", "league": 2, "home": t("Vallecano"), "away": t("Celta"), "p_id": "espn_401882818"},
+        {"date": "2026-10-31 17:30:00+00", "league": 2, "home": t("Betis"), "away": t("Málaga"), "p_id": "espn_401882825"},
+        {"date": "2026-10-31 20:00:00+00", "league": 2, "home": t("Barcelona"), "away": t("Alaves"), "p_id": "espn_401882822"},
         # Serie A
-        {"date": "2026-10-31 14:00:00+00", "league": 3, "home": t("Bologna"), "away": t("Lecce"), "p_id": "sa_2026_1031_bol_lec"},
-        {"date": "2026-10-31 17:00:00+00", "league": 3, "home": t("Udinese"), "away": t("Juventus"), "p_id": "sa_2026_1031_udi_juv"},
-        {"date": "2026-10-31 19:45:00+00", "league": 3, "home": t("Monza"), "away": t("Milan"), "p_id": "sa_2026_1031_mon_mil"},
-        # Bundesliga - DERBY
-        {"date": "2026-10-31 14:30:00+00", "league": 4, "home": t("Bayern Munich"), "away": t("Union Berlin"), "p_id": "bl_2026_1031_bay_uni"},
-        {"date": "2026-10-31 14:30:00+00", "league": 4, "home": t("Ein Frankfurt"), "away": t("Bochum"), "p_id": "bl_2026_1031_sge_boc"},
-        {"date": "2026-10-31 14:30:00+00", "league": 4, "home": t("Hoffenheim"), "away": t("FC Koln"), "p_id": "bl_2026_1031_tsg_koe"},
-        {"date": "2026-10-31 14:30:00+00", "league": 4, "home": t("Wolfsburg"), "away": t("Augsburg"), "p_id": "bl_2026_1031_wob_fca"},
-        {"date": "2026-10-31 17:30:00+00", "league": 4, "home": t("Dortmund"), "away": t("RB Leipzig"), "p_id": "bl_2026_1031_dor_rbl"},
+        {"date": "2026-10-31 14:00:00+00", "league": 3, "home": t("Bologna"), "away": t("Monza"), "p_id": "espn_401874798"},
+        {"date": "2026-10-31 17:00:00+00", "league": 3, "home": t("Udinese"), "away": t("Roma"), "p_id": "espn_401874990"},
+        {"date": "2026-10-31 19:45:00+00", "league": 3, "home": t("Milan"), "away": t("Inter"), "p_id": "espn_401874795"},
+        # Bundesliga
+        {"date": "2026-10-31 14:30:00+00", "league": 4, "home": t("Leverkusen"), "away": t("Stuttgart"), "p_id": "espn_401884753"},
+        {"date": "2026-10-31 14:30:00+00", "league": 4, "home": t("M'gladbach"), "away": t("SC Paderborn"), "p_id": "espn_401884749"},
+        {"date": "2026-10-31 14:30:00+00", "league": 4, "home": t("Augsburg"), "away": t("Freiburg"), "p_id": "espn_401884751"},
+        {"date": "2026-10-31 14:30:00+00", "league": 4, "home": t("Schalke 04"), "away": t("RB Leipzig"), "p_id": "espn_401884747"},
+        {"date": "2026-10-31 14:30:00+00", "league": 4, "home": t("Werder Bremen"), "away": t("Hoffenheim"), "p_id": "espn_401884748"},
+        {"date": "2026-10-31 17:30:00+00", "league": 4, "home": t("Bayern Munich"), "away": t("Dortmund"), "p_id": "espn_401884754"},
         # Ligue 1
-        {"date": "2026-10-31 16:00:00+00", "league": 5, "home": t("Paris SG"), "away": t("Lens"), "p_id": "l1_2026_1031_psg_len"},
-        {"date": "2026-10-31 18:00:00+00", "league": 5, "home": t("Brest"), "away": t("Nice"), "p_id": "l1_2026_1031_bre_nic"},
-        {"date": "2026-10-31 20:00:00+00", "league": 5, "home": t("Lyon"), "away": t("Strasbourg"), "p_id": "l1_2026_1031_lyo_str"},
+        {"date": "2026-10-31 19:45:00+00", "league": 5, "home": t("Troyes"), "away": t("Le Mans"), "p_id": "espn_401876413"},
 
-        # Sunday Nov 1
+        # Sunday Nov 1 (Authentic ESPN Slate)
         # Premier League
-        {"date": "2026-11-01 14:00:00+00", "league": 1, "home": t("Tottenham"), "away": t("Aston Villa"), "p_id": "epl_2026_1101_tot_avl"},
-        {"date": "2026-11-01 16:30:00+00", "league": 1, "home": t("Man United"), "away": t("Chelsea"), "p_id": "epl_2026_1101_mun_che"},
+        {"date": "2026-11-01 16:30:00+00", "league": 1, "home": t("Liverpool"), "away": t("Arsenal"), "p_id": "espn_401879246"},
         # La Liga
-        {"date": "2026-11-01 13:00:00+00", "league": 2, "home": t("Ath Madrid"), "away": t("Las Palmas"), "p_id": "ll_2026_1101_atm_lpa"},
-        {"date": "2026-11-01 15:15:00+00", "league": 2, "home": t("Barcelona"), "away": t("Girona"), "p_id": "ll_2026_1101_bar_gir"},
-        {"date": "2026-11-01 17:30:00+00", "league": 2, "home": t("Sevilla"), "away": t("Sociedad"), "p_id": "ll_2026_1101_sev_soc"},
-        {"date": "2026-11-01 20:00:00+00", "league": 2, "home": t("Ath Bilbao"), "away": t("Betis"), "p_id": "ll_2026_1101_ath_bet"},
+        {"date": "2026-11-01 13:00:00+00", "league": 2, "home": t("Getafe"), "away": t("Sevilla"), "p_id": "espn_401882821"},
+        {"date": "2026-11-01 15:15:00+00", "league": 2, "home": t("Racing Santander"), "away": t("Real Madrid"), "p_id": "espn_401882819"},
+        {"date": "2026-11-01 17:30:00+00", "league": 2, "home": t("Elche"), "away": t("Valencia"), "p_id": "espn_401882823"},
+        {"date": "2026-11-01 20:00:00+00", "league": 2, "home": t("Ath Bilbao"), "away": t("Sociedad"), "p_id": "espn_401882826"},
         # Serie A
-        {"date": "2026-11-01 11:30:00+00", "league": 3, "home": t("Napoli"), "away": t("Atalanta"), "p_id": "sa_2026_1101_nap_ata"},
-        {"date": "2026-11-01 14:00:00+00", "league": 3, "home": t("Torino"), "away": t("Fiorentina"), "p_id": "sa_2026_1101_tor_fio"},
-        {"date": "2026-11-01 17:00:00+00", "league": 3, "home": t("Verona"), "away": t("Roma"), "p_id": "sa_2026_1101_ver_rom"},
-        {"date": "2026-11-01 19:45:00+00", "league": 3, "home": t("Inter"), "away": t("Empoli"), "p_id": "sa_2026_1101_int_emp"},
+        {"date": "2026-11-01 11:30:00+00", "league": 3, "home": t("Como"), "away": t("Venezia"), "p_id": "espn_401875002"},
+        {"date": "2026-11-01 14:00:00+00", "league": 3, "home": t("Frosinone"), "away": t("Torino"), "p_id": "espn_401874782"},
+        {"date": "2026-11-01 14:00:00+00", "league": 3, "home": t("Lazio"), "away": t("Cagliari"), "p_id": "espn_401874983"},
+        {"date": "2026-11-01 17:00:00+00", "league": 3, "home": t("Lecce"), "away": t("Genoa"), "p_id": "espn_401874968"},
+        {"date": "2026-11-01 19:45:00+00", "league": 3, "home": t("Juventus"), "away": t("Napoli"), "p_id": "espn_401874949"},
+        # Bundesliga
+        {"date": "2026-11-01 14:30:00+00", "league": 4, "home": t("Union Berlin"), "away": t("FC Koln"), "p_id": "espn_401884750"},
+        {"date": "2026-11-01 16:30:00+00", "league": 4, "home": t("Ein Frankfurt"), "away": t("Hamburg SV"), "p_id": "espn_401884752"},
+        # Ligue 1
+        {"date": "2026-11-01 14:00:00+00", "league": 5, "home": t("Strasbourg"), "away": t("Auxerre"), "p_id": "espn_401876414"},
+        {"date": "2026-11-01 16:15:00+00", "league": 5, "home": t("Lyon"), "away": t("Angers"), "p_id": "espn_401876418"},
+        {"date": "2026-11-01 16:15:00+00", "league": 5, "home": t("Paris FC"), "away": t("Monaco"), "p_id": "espn_401876415"},
+        {"date": "2026-11-01 19:45:00+00", "league": 5, "home": t("Marseille"), "away": t("Toulouse"), "p_id": "espn_401876417"},
     ]
 
     inserted_count = 0
