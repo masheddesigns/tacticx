@@ -362,6 +362,7 @@ def sync_espn_live_and_recent(db: Session, max_age_seconds: int = 45) -> set[int
             now_utc.strftime("%Y%m%d"),
             (now_utc + timedelta(days=1)).strftime("%Y%m%d"),
             (now_utc + timedelta(days=2)).strftime("%Y%m%d"),
+            (now_utc + timedelta(days=3)).strftime("%Y%m%d"),
         ]
         tasks = []
         for d_str in dates_to_check:
@@ -389,6 +390,35 @@ def sync_espn_live_and_recent(db: Session, max_age_seconds: int = 45) -> set[int
     try:
         from app.db.models.core import League, Team
         leagues_map = {l.code: l.id for l in db.query(League).all()}
+        if "UEL" not in leagues_map:
+            uel_lg = db.query(League).filter_by(code="UEL").first()
+            if not uel_lg:
+                uel_lg = League(id=13, code="UEL", name="UEFA Europa League", country="Europe", season="2026")
+                try:
+                    sp = db.begin_nested()
+                    db.add(uel_lg)
+                    db.flush()
+                    sp.commit()
+                except Exception:
+                    sp.rollback()
+                    uel_lg = db.query(League).filter_by(code="UEL").first()
+            if uel_lg:
+                leagues_map["UEL"] = uel_lg.id
+        if "UECL" not in leagues_map:
+            uecl_lg = db.query(League).filter_by(code="UECL").first()
+            if not uecl_lg:
+                uecl_lg = League(id=14, code="UECL", name="UEFA Conference League", country="Europe", season="2026")
+                try:
+                    sp = db.begin_nested()
+                    db.add(uecl_lg)
+                    db.flush()
+                    sp.commit()
+                except Exception:
+                    sp.rollback()
+                    uecl_lg = db.query(League).filter_by(code="UECL").first()
+            if uecl_lg:
+                leagues_map["UECL"] = uecl_lg.id
+
         all_teams = db.query(Team).all()
         max_tid = max((t.id for t in all_teams), default=350)
         max_mid = max((m.id for m in db.query(Match.id).all()), default=3500)
@@ -436,7 +466,7 @@ def sync_espn_live_and_recent(db: Session, max_age_seconds: int = 45) -> set[int
                 return all_teams[0]
 
         recent_start = now_utc - timedelta(hours=36)
-        recent_end = now_utc + timedelta(hours=48)
+        recent_end = now_utc + timedelta(hours=60)
         candidate_matches = (
             db.query(Match)
             .filter(Match.kickoff_at >= recent_start, Match.kickoff_at <= recent_end)
@@ -471,6 +501,8 @@ def sync_espn_live_and_recent(db: Session, max_age_seconds: int = 45) -> set[int
                 matched_match.minute = ev["minute"]
                 matched_match.home_score = ev["home_score"]
                 matched_match.away_score = ev["away_score"]
+                if lg_id and matched_match.league_id != lg_id:
+                    matched_match.league_id = lg_id
                 if ev.get("ev_id"):
                     matched_match.provider_match_id = f"espn_{ev['ev_id']}"
                 if ev_ko:
