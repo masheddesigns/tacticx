@@ -52,7 +52,8 @@ def trigger_seed_expanded(db: Session = Depends(get_db)):
         return {"status": "error", "message": str(e), "traceback": traceback.format_exc()}
 
 
-@router.post("/fix-fixtures", summary="Purge fabricated fixtures and ensure authentic schedule from ESPN")
+@router.get("/fix-fixtures", summary="Purge fabricated fixtures and ensure authentic schedule from ESPN (GET)")
+@router.post("/fix-fixtures", summary="Purge fabricated fixtures and ensure authentic schedule from ESPN (POST)")
 def trigger_fix_fixtures(db: Session = Depends(get_db)):
     try:
         from app.services.match_progression import purge_phantom_fixtures_if_needed, sync_espn_live_and_recent

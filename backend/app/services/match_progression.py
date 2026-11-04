@@ -13,6 +13,7 @@ import json
 import math
 import random
 import re
+import ssl
 import time
 import unicodedata
 import urllib.request
@@ -285,8 +286,13 @@ def _fetch_espn_scoreboard(league_code: str, espn_slug: str, date_yyyymmdd: str)
     url = f"https://site.api.espn.com/apis/site/v2/sports/soccer/{espn_slug}/scoreboard?dates={date_yyyymmdd}"
     results: List[Dict[str, Any]] = []
     try:
-        req = urllib.request.Request(url, headers={"User-Agent": "Mozilla/5.0"})
-        with urllib.request.urlopen(req, timeout=6.0) as resp:
+        ctx = ssl._create_unverified_context()
+        headers = {
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36",
+            "Accept": "application/json",
+        }
+        req = urllib.request.Request(url, headers=headers)
+        with urllib.request.urlopen(req, timeout=8.0, context=ctx) as resp:
             data = json.loads(resp.read().decode())
             for ev in data.get("events", []):
                 comp = (ev.get("competitions") or [{}])[0]
@@ -363,6 +369,8 @@ def sync_espn_live_and_recent(db: Session, max_age_seconds: int = 45) -> set[int
             (now_utc + timedelta(days=1)).strftime("%Y%m%d"),
             (now_utc + timedelta(days=2)).strftime("%Y%m%d"),
             (now_utc + timedelta(days=3)).strftime("%Y%m%d"),
+            (now_utc + timedelta(days=4)).strftime("%Y%m%d"),
+            (now_utc + timedelta(days=5)).strftime("%Y%m%d"),
         ]
         tasks = []
         for d_str in dates_to_check:
@@ -371,9 +379,9 @@ def sync_espn_live_and_recent(db: Session, max_age_seconds: int = 45) -> set[int
 
         fetched: List[Dict[str, Any]] = []
         try:
-            with concurrent.futures.ThreadPoolExecutor(max_workers=12) as pool:
+            with concurrent.futures.ThreadPoolExecutor(max_workers=16) as pool:
                 futs = [pool.submit(_fetch_espn_scoreboard, lc, sl, ds) for lc, sl, ds in tasks]
-                for f in concurrent.futures.as_completed(futs, timeout=12.0):
+                for f in concurrent.futures.as_completed(futs, timeout=18.0):
                     try:
                         fetched.extend(f.result())
                     except Exception:
@@ -466,7 +474,7 @@ def sync_espn_live_and_recent(db: Session, max_age_seconds: int = 45) -> set[int
                 return all_teams[0]
 
         recent_start = now_utc - timedelta(hours=36)
-        recent_end = now_utc + timedelta(hours=60)
+        recent_end = now_utc + timedelta(hours=110)
         candidate_matches = (
             db.query(Match)
             .filter(Match.kickoff_at >= recent_start, Match.kickoff_at <= recent_end)
