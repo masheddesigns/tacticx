@@ -591,9 +591,9 @@
       "league": 10,
       "home": "Barracas Central",
       "away": "Racing Club",
-      "status": "SCHEDULED",
-      "home_score": null,
-      "away_score": null,
+      "status": "FINISHED",
+      "home_score": 2,
+      "away_score": 0,
       "p_id": "espn_nov_3690"
     },
     {
@@ -611,9 +611,9 @@
       "league": 5,
       "home": "Toulouse",
       "away": "Strasbourg",
-      "status": "SCHEDULED",
-      "home_score": null,
-      "away_score": null,
+      "status": "FINISHED",
+      "home_score": 3,
+      "away_score": 1,
       "p_id": "espn_nov_3687"
     },
     {
@@ -621,9 +621,9 @@
       "league": 3,
       "home": "Venezia",
       "away": "Udinese",
-      "status": "SCHEDULED",
-      "home_score": null,
-      "away_score": null,
+      "status": "FINISHED",
+      "home_score": 2,
+      "away_score": 1,
       "p_id": "espn_nov_3688"
     },
     {
@@ -641,9 +641,9 @@
       "league": 1,
       "home": "Everton",
       "away": "Coventry",
-      "status": "SCHEDULED",
-      "home_score": null,
-      "away_score": null,
+      "status": "FINISHED",
+      "home_score": 3,
+      "away_score": 1,
       "p_id": "espn_nov_3684"
     },
     {
@@ -651,9 +651,9 @@
       "league": 10,
       "home": "Independiente Rivadavia",
       "away": "Deportivo Riestra",
-      "status": "SCHEDULED",
-      "home_score": null,
-      "away_score": null,
+      "status": "FINISHED",
+      "home_score": 2,
+      "away_score": 1,
       "p_id": "espn_nov_3691"
     },
     {
@@ -661,9 +661,9 @@
       "league": 10,
       "home": "San Lorenzo",
       "away": "Platense",
-      "status": "SCHEDULED",
-      "home_score": null,
-      "away_score": null,
+      "status": "FINISHED",
+      "home_score": 0,
+      "away_score": 2,
       "p_id": "espn_nov_3692"
     },
     {
@@ -671,9 +671,9 @@
       "league": 10,
       "home": "Uni\u00f3n (Santa Fe)",
       "away": "V\u00e9lez Sarsfield",
-      "status": "SCHEDULED",
-      "home_score": null,
-      "away_score": null,
+      "status": "FINISHED",
+      "home_score": 2,
+      "away_score": 0,
       "p_id": "espn_nov_3693"
     },
     {
@@ -681,9 +681,9 @@
       "league": 11,
       "home": "Vit\u00f3ria",
       "away": "Fluminense",
-      "status": "SCHEDULED",
-      "home_score": null,
-      "away_score": null,
+      "status": "FINISHED",
+      "home_score": 0,
+      "away_score": 3,
       "p_id": "espn_nov_3689"
     }
   ],
@@ -693,9 +693,9 @@
       "league": 10,
       "home": "Banfield",
       "away": "Atl\u00e9tico Tucum\u00e1n",
-      "status": "SCHEDULED",
-      "home_score": null,
-      "away_score": null,
+      "status": "FINISHED",
+      "home_score": 2,
+      "away_score": 2,
       "p_id": "espn_nov_3694"
     },
     {
@@ -703,9 +703,9 @@
       "league": 10,
       "home": "Tigre",
       "away": "Sarmiento (Jun\u00edn)",
-      "status": "SCHEDULED",
-      "home_score": null,
-      "away_score": null,
+      "status": "FINISHED",
+      "home_score": 1,
+      "away_score": 0,
       "p_id": "espn_nov_3695"
     },
     {
@@ -713,9 +713,9 @@
       "league": 12,
       "home": "Inter Kashi",
       "away": "Sporting Club Delhi",
-      "status": "SCHEDULED",
-      "home_score": null,
-      "away_score": null,
+      "status": "FINISHED",
+      "home_score": 0,
+      "away_score": 3,
       "p_id": "espn_nov_3711"
     },
     {
@@ -723,9 +723,9 @@
       "league": 1,
       "home": "Leeds United",
       "away": "Tottenham",
-      "status": "SCHEDULED",
-      "home_score": null,
-      "away_score": null,
+      "status": "FINISHED",
+      "home_score": 1,
+      "away_score": 0,
       "p_id": "espn_nov_3696"
     },
     {
@@ -733,9 +733,9 @@
       "league": 2,
       "home": "M\u00e1laga",
       "away": "Racing Santander",
-      "status": "SCHEDULED",
-      "home_score": null,
-      "away_score": null,
+      "status": "FINISHED",
+      "home_score": 1,
+      "away_score": 2,
       "p_id": "espn_nov_3700"
     },
     {
@@ -743,9 +743,9 @@
       "league": 12,
       "home": "Chennaiyin FC",
       "away": "East Bengal FC",
-      "status": "SCHEDULED",
-      "home_score": null,
-      "away_score": null,
+      "status": "FINISHED",
+      "home_score": 5,
+      "away_score": 3,
       "p_id": "espn_nov_3712"
     },
     {
@@ -753,9 +753,9 @@
       "league": 3,
       "home": "Cagliari",
       "away": "Frosinone",
-      "status": "SCHEDULED",
-      "home_score": null,
-      "away_score": null,
+      "status": "FINISHED",
+      "home_score": 1,
+      "away_score": 0,
       "p_id": "espn_nov_3734"
     },
     {
@@ -763,9 +763,9 @@
       "league": 3,
       "home": "Torino",
       "away": "Lecce",
-      "status": "SCHEDULED",
-      "home_score": null,
-      "away_score": null,
+      "status": "FINISHED",
+      "home_score": 1,
+      "away_score": 1,
       "p_id": "espn_nov_3735"
     },
     {
@@ -773,9 +773,9 @@
       "league": 4,
       "home": "Dortmund",
       "away": "SV Elversberg",
-      "status": "SCHEDULED",
-      "home_score": null,
-      "away_score": null,
+      "status": "FINISHED",
+      "home_score": 2,
+      "away_score": 1,
       "p_id": "espn_nov_3704"
     },
     {
@@ -783,9 +783,9 @@
       "league": 4,
       "home": "Mainz",
       "away": "Bayern Munich",
-      "status": "SCHEDULED",
-      "home_score": null,
-      "away_score": null,
+      "status": "FINISHED",
+      "home_score": 1,
+      "away_score": 2,
       "p_id": "espn_nov_3705"
     },
     {
@@ -793,9 +793,9 @@
       "league": 4,
       "home": "RB Leipzig",
       "away": "Augsburg",
-      "status": "SCHEDULED",
-      "home_score": null,
-      "away_score": null,
+      "status": "FINISHED",
+      "home_score": 5,
+      "away_score": 2,
       "p_id": "espn_nov_3706"
     },
     {
@@ -803,9 +803,9 @@
       "league": 4,
       "home": "SC Paderborn 07",
       "away": "Ein Frankfurt",
-      "status": "SCHEDULED",
-      "home_score": null,
-      "away_score": null,
+      "status": "FINISHED",
+      "home_score": 2,
+      "away_score": 2,
       "p_id": "espn_nov_3707"
     },
     {
@@ -813,9 +813,9 @@
       "league": 1,
       "home": "Arsenal",
       "away": "Hull",
-      "status": "SCHEDULED",
-      "home_score": null,
-      "away_score": null,
+      "status": "FINISHED",
+      "home_score": 1,
+      "away_score": 0,
       "p_id": "espn_nov_3697"
     },
     {
@@ -823,9 +823,9 @@
       "league": 1,
       "home": "Fulham",
       "away": "Newcastle",
-      "status": "SCHEDULED",
-      "home_score": null,
-      "away_score": null,
+      "status": "FINISHED",
+      "home_score": 1,
+      "away_score": 1,
       "p_id": "espn_nov_3698"
     },
     {
@@ -833,9 +833,9 @@
       "league": 2,
       "home": "Espanyol",
       "away": "Deportivo La Coruna",
-      "status": "SCHEDULED",
-      "home_score": null,
-      "away_score": null,
+      "status": "FINISHED",
+      "home_score": 0,
+      "away_score": 0,
       "p_id": "espn_nov_3701"
     },
     {
@@ -843,9 +843,9 @@
       "league": 3,
       "home": "Parma",
       "away": "Bologna",
-      "status": "SCHEDULED",
-      "home_score": null,
-      "away_score": null,
+      "status": "FINISHED",
+      "home_score": 1,
+      "away_score": 2,
       "p_id": "espn_nov_3736"
     },
     {
@@ -853,9 +853,9 @@
       "league": 1,
       "home": "Nott'm Forest",
       "away": "Man City",
-      "status": "SCHEDULED",
-      "home_score": null,
-      "away_score": null,
+      "status": "FINISHED",
+      "home_score": 3,
+      "away_score": 1,
       "p_id": "espn_nov_3699"
     },
     {
@@ -863,9 +863,9 @@
       "league": 2,
       "home": "Osasuna",
       "away": "Ath Bilbao",
-      "status": "SCHEDULED",
-      "home_score": null,
-      "away_score": null,
+      "status": "FINISHED",
+      "home_score": 1,
+      "away_score": 1,
       "p_id": "espn_nov_3702"
     },
     {
@@ -873,9 +873,9 @@
       "league": 4,
       "home": "Stuttgart",
       "away": "Werder Bremen",
-      "status": "SCHEDULED",
-      "home_score": null,
-      "away_score": null,
+      "status": "FINISHED",
+      "home_score": 1,
+      "away_score": 0,
       "p_id": "espn_nov_3708"
     },
     {
@@ -883,9 +883,9 @@
       "league": 10,
       "home": "Gimnasia La Plata",
       "away": "Independiente Rivadavia",
-      "status": "SCHEDULED",
-      "home_score": null,
-      "away_score": null,
+      "status": "FINISHED",
+      "home_score": 1,
+      "away_score": 1,
       "p_id": "espn_nov_3728"
     },
     {
@@ -893,9 +893,9 @@
       "league": 10,
       "home": "Talleres",
       "away": "Estudiantes R\u00edo Cuarto",
-      "status": "SCHEDULED",
-      "home_score": null,
-      "away_score": null,
+      "status": "FINISHED",
+      "home_score": 1,
+      "away_score": 1,
       "p_id": "espn_nov_3729"
     },
     {
@@ -903,9 +903,9 @@
       "league": 5,
       "home": "Auxerre",
       "away": "Paris FC",
-      "status": "SCHEDULED",
-      "home_score": null,
-      "away_score": null,
+      "status": "FINISHED",
+      "home_score": 0,
+      "away_score": 1,
       "p_id": "espn_nov_3709"
     },
     {
@@ -913,9 +913,9 @@
       "league": 3,
       "home": "Roma",
       "away": "Sassuolo",
-      "status": "SCHEDULED",
-      "home_score": null,
-      "away_score": null,
+      "status": "FINISHED",
+      "home_score": 3,
+      "away_score": 0,
       "p_id": "espn_nov_3737"
     },
     {
@@ -923,9 +923,9 @@
       "league": 2,
       "home": "Valencia",
       "away": "Real Madrid",
-      "status": "SCHEDULED",
-      "home_score": null,
-      "away_score": null,
+      "status": "FINISHED",
+      "home_score": 0,
+      "away_score": 3,
       "p_id": "espn_nov_3703"
     },
     {
@@ -933,9 +933,9 @@
       "league": 5,
       "home": "Paris SG",
       "away": "Troyes",
-      "status": "SCHEDULED",
-      "home_score": null,
-      "away_score": null,
+      "status": "FINISHED",
+      "home_score": 1,
+      "away_score": 0,
       "p_id": "espn_nov_3710"
     },
     {
@@ -943,9 +943,9 @@
       "league": 10,
       "home": "Argentinos Juniors",
       "away": "Hurac\u00e1n",
-      "status": "SCHEDULED",
-      "home_score": null,
-      "away_score": null,
+      "status": "FINISHED",
+      "home_score": 0,
+      "away_score": 2,
       "p_id": "espn_nov_3730"
     },
     {
@@ -953,9 +953,9 @@
       "league": 10,
       "home": "Boca Juniors",
       "away": "Defensa y Justicia",
-      "status": "SCHEDULED",
-      "home_score": null,
-      "away_score": null,
+      "status": "FINISHED",
+      "home_score": 1,
+      "away_score": 0,
       "p_id": "espn_nov_3731"
     },
     {
@@ -963,9 +963,9 @@
       "league": 10,
       "home": "Rosario Central",
       "away": "Estudiantes R\u00edo Cuarto",
-      "status": "SCHEDULED",
-      "home_score": null,
-      "away_score": null,
+      "status": "FINISHED",
+      "home_score": 2,
+      "away_score": 0,
       "p_id": "espn_nov_3732"
     },
     {
@@ -973,9 +973,9 @@
       "league": 9,
       "home": "CF Montr\u00e9al",
       "away": "Vancouver Whitecaps",
-      "status": "SCHEDULED",
-      "home_score": null,
-      "away_score": null,
+      "status": "FINISHED",
+      "home_score": 0,
+      "away_score": 2,
       "p_id": "espn_nov_3713"
     },
     {
@@ -983,9 +983,9 @@
       "league": 9,
       "home": "Chicago Fire",
       "away": "Columbus Crew",
-      "status": "SCHEDULED",
-      "home_score": null,
-      "away_score": null,
+      "status": "FINISHED",
+      "home_score": 3,
+      "away_score": 4,
       "p_id": "espn_nov_3714"
     },
     {
@@ -993,9 +993,9 @@
       "league": 9,
       "home": "D.C. United",
       "away": "New York City FC",
-      "status": "SCHEDULED",
-      "home_score": null,
-      "away_score": null,
+      "status": "FINISHED",
+      "home_score": 0,
+      "away_score": 1,
       "p_id": "espn_nov_3715"
     },
     {
@@ -1003,9 +1003,9 @@
       "league": 9,
       "home": "FC Cincinnati",
       "away": "Nashville SC",
-      "status": "SCHEDULED",
-      "home_score": null,
-      "away_score": null,
+      "status": "FINISHED",
+      "home_score": 0,
+      "away_score": 2,
       "p_id": "espn_nov_3716"
     },
     {
@@ -1013,9 +1013,9 @@
       "league": 9,
       "home": "Inter",
       "away": "Charlotte FC",
-      "status": "SCHEDULED",
-      "home_score": null,
-      "away_score": null,
+      "status": "FINISHED",
+      "home_score": 3,
+      "away_score": 3,
       "p_id": "espn_nov_3717"
     },
     {
@@ -1023,9 +1023,9 @@
       "league": 9,
       "home": "Orlando City SC",
       "away": "England U17",
-      "status": "SCHEDULED",
-      "home_score": null,
-      "away_score": null,
+      "status": "FINISHED",
+      "home_score": 1,
+      "away_score": 0,
       "p_id": "espn_nov_3718"
     },
     {
@@ -1033,9 +1033,9 @@
       "league": 9,
       "home": "Philadelphia Union",
       "away": "Toronto FC",
-      "status": "SCHEDULED",
-      "home_score": null,
-      "away_score": null,
+      "status": "FINISHED",
+      "home_score": 4,
+      "away_score": 1,
       "p_id": "espn_nov_3719"
     },
     {
@@ -1043,9 +1043,9 @@
       "league": 9,
       "home": "New York Red Bulls",
       "away": "Atlanta United",
-      "status": "SCHEDULED",
-      "home_score": null,
-      "away_score": null,
+      "status": "FINISHED",
+      "home_score": 3,
+      "away_score": 0,
       "p_id": "espn_nov_3720"
     }
   ],
@@ -1055,9 +1055,9 @@
       "league": 9,
       "home": "Austin FC",
       "away": "Portland Timbers",
-      "status": "SCHEDULED",
-      "home_score": null,
-      "away_score": null,
+      "status": "FINISHED",
+      "home_score": 0,
+      "away_score": 2,
       "p_id": "espn_nov_3721"
     },
     {
@@ -1065,9 +1065,9 @@
       "league": 9,
       "home": "FC Dallas",
       "away": "Colorado Rapids",
-      "status": "SCHEDULED",
-      "home_score": null,
-      "away_score": null,
+      "status": "FINISHED",
+      "home_score": 3,
+      "away_score": 1,
       "p_id": "espn_nov_3722"
     },
     {
@@ -1075,9 +1075,9 @@
       "league": 9,
       "home": "Houston Dynamo",
       "away": "St. Louis CITY SC",
-      "status": "SCHEDULED",
-      "home_score": null,
-      "away_score": null,
+      "status": "FINISHED",
+      "home_score": 0,
+      "away_score": 1,
       "p_id": "espn_nov_3723"
     },
     {
@@ -1085,9 +1085,9 @@
       "league": 9,
       "home": "Minnesota United",
       "away": "San Jose Earthquakes",
-      "status": "SCHEDULED",
-      "home_score": null,
-      "away_score": null,
+      "status": "FINISHED",
+      "home_score": 3,
+      "away_score": 1,
       "p_id": "espn_nov_3724"
     },
     {
@@ -1095,9 +1095,9 @@
       "league": 9,
       "home": "Real Salt Lake",
       "away": "LA Galaxy",
-      "status": "SCHEDULED",
-      "home_score": null,
-      "away_score": null,
+      "status": "FINISHED",
+      "home_score": 2,
+      "away_score": 1,
       "p_id": "espn_nov_3725"
     },
     {
@@ -1105,9 +1105,9 @@
       "league": 9,
       "home": "San Diego FC",
       "away": "Sporting Kansas City",
-      "status": "SCHEDULED",
-      "home_score": null,
-      "away_score": null,
+      "status": "FINISHED",
+      "home_score": 0,
+      "away_score": 1,
       "p_id": "espn_nov_3726"
     },
     {
@@ -1115,9 +1115,9 @@
       "league": 9,
       "home": "Seattle Sounders",
       "away": "Los Angeles FC",
-      "status": "SCHEDULED",
-      "home_score": null,
-      "away_score": null,
+      "status": "FINISHED",
+      "home_score": 2,
+      "away_score": 1,
       "p_id": "espn_nov_3727"
     },
     {
@@ -1125,9 +1125,9 @@
       "league": 10,
       "home": "Instituto (C\u00f3rdoba)",
       "away": "Newell's Old Boys",
-      "status": "SCHEDULED",
-      "home_score": null,
-      "away_score": null,
+      "status": "FINISHED",
+      "home_score": 2,
+      "away_score": 2,
       "p_id": "espn_nov_3733"
     },
     {
@@ -1135,9 +1135,9 @@
       "league": 3,
       "home": "Napoli",
       "away": "Lazio",
-      "status": "SCHEDULED",
-      "home_score": null,
-      "away_score": null,
+      "status": "FINISHED",
+      "home_score": 1,
+      "away_score": 1,
       "p_id": "espn_nov_3739"
     },
     {
@@ -1145,9 +1145,9 @@
       "league": 2,
       "home": "Elche",
       "away": "Betis",
-      "status": "SCHEDULED",
-      "home_score": null,
-      "away_score": null,
+      "status": "FINISHED",
+      "home_score": 0,
+      "away_score": 2,
       "p_id": "espn_nov_3758"
     },
     {
@@ -1155,9 +1155,9 @@
       "league": 3,
       "home": "Genoa",
       "away": "Milan",
-      "status": "SCHEDULED",
-      "home_score": null,
-      "away_score": null,
+      "status": "FINISHED",
+      "home_score": 1,
+      "away_score": 2,
       "p_id": "espn_nov_3740"
     },
     {
@@ -1165,9 +1165,9 @@
       "league": 3,
       "home": "Monza",
       "away": "Atalanta",
-      "status": "SCHEDULED",
-      "home_score": null,
-      "away_score": null,
+      "status": "FINISHED",
+      "home_score": 0,
+      "away_score": 1,
       "p_id": "espn_nov_3741"
     },
     {
@@ -1175,9 +1175,9 @@
       "league": 1,
       "home": "Brighton",
       "away": "Brentford",
-      "status": "SCHEDULED",
-      "home_score": null,
-      "away_score": null,
+      "status": "FINISHED",
+      "home_score": 2,
+      "away_score": 0,
       "p_id": "espn_nov_3744"
     },
     {
@@ -1185,9 +1185,9 @@
       "league": 1,
       "home": "Crystal Palace",
       "away": "Liverpool",
-      "status": "SCHEDULED",
-      "home_score": null,
-      "away_score": null,
+      "status": "FINISHED",
+      "home_score": 1,
+      "away_score": 3,
       "p_id": "espn_nov_3745"
     },
     {
@@ -1195,9 +1195,9 @@
       "league": 1,
       "home": "Ipswich",
       "away": "Bournemouth",
-      "status": "SCHEDULED",
-      "home_score": null,
-      "away_score": null,
+      "status": "FINISHED",
+      "home_score": 1,
+      "away_score": 2,
       "p_id": "espn_nov_3746"
     },
     {
@@ -1205,9 +1205,9 @@
       "league": 1,
       "home": "Sunderland",
       "away": "Chelsea",
-      "status": "SCHEDULED",
-      "home_score": null,
-      "away_score": null,
+      "status": "FINISHED",
+      "home_score": 1,
+      "away_score": 0,
       "p_id": "espn_nov_3747"
     },
     {
@@ -1215,9 +1215,9 @@
       "league": 5,
       "home": "Rennes",
       "away": "Lille",
-      "status": "SCHEDULED",
-      "home_score": null,
-      "away_score": null,
+      "status": "FINISHED",
+      "home_score": 1,
+      "away_score": 2,
       "p_id": "espn_nov_3749"
     },
     {
@@ -1225,9 +1225,9 @@
       "league": 4,
       "home": "FC Koln",
       "away": "Leverkusen",
-      "status": "SCHEDULED",
-      "home_score": null,
-      "away_score": null,
+      "status": "FINISHED",
+      "home_score": 1,
+      "away_score": 2,
       "p_id": "espn_nov_3755"
     },
     {
@@ -1235,9 +1235,9 @@
       "league": 2,
       "home": "Sociedad",
       "away": "Vallecano",
-      "status": "SCHEDULED",
-      "home_score": null,
-      "away_score": null,
+      "status": "FINISHED",
+      "home_score": 1,
+      "away_score": 0,
       "p_id": "espn_nov_3759"
     },
     {
@@ -1245,9 +1245,9 @@
       "league": 5,
       "home": "Angers",
       "away": "Nice",
-      "status": "SCHEDULED",
-      "home_score": null,
-      "away_score": null,
+      "status": "LIVE",
+      "home_score": 0,
+      "away_score": 1,
       "p_id": "espn_nov_3750"
     },
     {
@@ -1255,9 +1255,9 @@
       "league": 5,
       "home": "Brest",
       "away": "Lyon",
-      "status": "SCHEDULED",
-      "home_score": null,
-      "away_score": null,
+      "status": "LIVE",
+      "home_score": 1,
+      "away_score": 0,
       "p_id": "espn_nov_3751"
     },
     {
@@ -1265,9 +1265,9 @@
       "league": 5,
       "home": "Le Havre",
       "away": "Lorient",
-      "status": "SCHEDULED",
-      "home_score": null,
-      "away_score": null,
+      "status": "LIVE",
+      "home_score": 0,
+      "away_score": 1,
       "p_id": "espn_nov_3752"
     },
     {
@@ -1275,9 +1275,9 @@
       "league": 5,
       "home": "Le Mans",
       "away": "Monaco",
-      "status": "SCHEDULED",
-      "home_score": null,
-      "away_score": null,
+      "status": "LIVE",
+      "home_score": 0,
+      "away_score": 1,
       "p_id": "espn_nov_3753"
     },
     {
@@ -1285,9 +1285,9 @@
       "league": 1,
       "home": "Man United",
       "away": "Aston Villa",
-      "status": "SCHEDULED",
-      "home_score": null,
-      "away_score": null,
+      "status": "LIVE",
+      "home_score": 2,
+      "away_score": 2,
       "p_id": "espn_nov_3748"
     },
     {
@@ -1295,9 +1295,9 @@
       "league": 4,
       "home": "Freiburg",
       "away": "Union Berlin",
-      "status": "SCHEDULED",
-      "home_score": null,
-      "away_score": null,
+      "status": "LIVE",
+      "home_score": 0,
+      "away_score": 0,
       "p_id": "espn_nov_3756"
     },
     {
@@ -1305,9 +1305,9 @@
       "league": 3,
       "home": "Inter",
       "away": "Como",
-      "status": "SCHEDULED",
-      "home_score": null,
-      "away_score": null,
+      "status": "LIVE",
+      "home_score": 2,
+      "away_score": 0,
       "p_id": "espn_nov_3742"
     },
     {
@@ -1315,9 +1315,9 @@
       "league": 2,
       "home": "Celta",
       "away": "Levante",
-      "status": "SCHEDULED",
-      "home_score": null,
-      "away_score": null,
+      "status": "LIVE",
+      "home_score": 0,
+      "away_score": 0,
       "p_id": "espn_nov_3760"
     },
     {
@@ -1325,9 +1325,9 @@
       "league": 2,
       "home": "Villarreal",
       "away": "Getafe",
-      "status": "SCHEDULED",
-      "home_score": null,
-      "away_score": null,
+      "status": "LIVE",
+      "home_score": 0,
+      "away_score": 0,
       "p_id": "espn_nov_3761"
     },
     {
@@ -1379,6 +1379,460 @@
       "home_score": null,
       "away_score": null,
       "p_id": "espn_nov_3738"
+    }
+  ],
+  "2026-11-21": [
+    {
+      "date": "2026-11-21T12:30Z",
+      "league": 1,
+      "home": "Manchester City",
+      "away": "Fulham",
+      "status": "SCHEDULED",
+      "home_score": null,
+      "away_score": null,
+      "p_id": "espn_401879233"
+    },
+    {
+      "date": "2026-11-21T15:00Z",
+      "league": 1,
+      "home": "AFC Bournemouth",
+      "away": "Nottingham Forest",
+      "status": "SCHEDULED",
+      "home_score": null,
+      "away_score": null,
+      "p_id": "espn_401879238"
+    },
+    {
+      "date": "2026-11-21T15:00Z",
+      "league": 1,
+      "home": "Aston Villa",
+      "away": "Sunderland",
+      "status": "SCHEDULED",
+      "home_score": null,
+      "away_score": null,
+      "p_id": "espn_401878756"
+    },
+    {
+      "date": "2026-11-21T15:00Z",
+      "league": 1,
+      "home": "Chelsea",
+      "away": "Leeds United",
+      "status": "SCHEDULED",
+      "home_score": null,
+      "away_score": null,
+      "p_id": "espn_401879236"
+    },
+    {
+      "date": "2026-11-21T15:00Z",
+      "league": 1,
+      "home": "Coventry City",
+      "away": "Crystal Palace",
+      "status": "SCHEDULED",
+      "home_score": null,
+      "away_score": null,
+      "p_id": "espn_401879235"
+    },
+    {
+      "date": "2026-11-21T15:00Z",
+      "league": 1,
+      "home": "Tottenham Hotspur",
+      "away": "Ipswich Town",
+      "status": "SCHEDULED",
+      "home_score": null,
+      "away_score": null,
+      "p_id": "espn_401878754"
+    },
+    {
+      "date": "2026-11-21T17:30Z",
+      "league": 1,
+      "home": "Newcastle United",
+      "away": "Arsenal",
+      "status": "SCHEDULED",
+      "home_score": null,
+      "away_score": null,
+      "p_id": "espn_401879232"
+    },
+    {
+      "date": "2026-11-21T13:00Z",
+      "league": 2,
+      "home": "Alav\u00e9s",
+      "away": "Deportivo",
+      "status": "SCHEDULED",
+      "home_score": null,
+      "away_score": null,
+      "p_id": "espn_401882806"
+    },
+    {
+      "date": "2026-11-21T15:15Z",
+      "league": 2,
+      "home": "Rayo Vallecano",
+      "away": "Valencia",
+      "status": "SCHEDULED",
+      "home_score": null,
+      "away_score": null,
+      "p_id": "espn_401882799"
+    },
+    {
+      "date": "2026-11-21T17:30Z",
+      "league": 2,
+      "home": "Sevilla",
+      "away": "Real Betis",
+      "status": "SCHEDULED",
+      "home_score": null,
+      "away_score": null,
+      "p_id": "espn_401882797"
+    },
+    {
+      "date": "2026-11-21T20:00Z",
+      "league": 2,
+      "home": "Real Madrid",
+      "away": "Celta Vigo",
+      "status": "SCHEDULED",
+      "home_score": null,
+      "away_score": null,
+      "p_id": "espn_401882798"
+    },
+    {
+      "date": "2026-11-21T14:00Z",
+      "league": 3,
+      "home": "Como",
+      "away": "Cagliari",
+      "status": "SCHEDULED",
+      "home_score": null,
+      "away_score": null,
+      "p_id": "espn_401875056"
+    },
+    {
+      "date": "2026-11-21T14:00Z",
+      "league": 3,
+      "home": "Lazio",
+      "away": "Lecce",
+      "status": "SCHEDULED",
+      "home_score": null,
+      "away_score": null,
+      "p_id": "espn_401874981"
+    },
+    {
+      "date": "2026-11-21T17:00Z",
+      "league": 3,
+      "home": "Parma",
+      "away": "AS Roma",
+      "status": "SCHEDULED",
+      "home_score": null,
+      "away_score": null,
+      "p_id": "espn_401874967"
+    },
+    {
+      "date": "2026-11-21T19:45Z",
+      "league": 3,
+      "home": "Napoli",
+      "away": "Torino",
+      "status": "SCHEDULED",
+      "home_score": null,
+      "away_score": null,
+      "p_id": "espn_401875067"
+    },
+    {
+      "date": "2026-11-21T14:30Z",
+      "league": 4,
+      "home": "1. FC Union Berlin",
+      "away": "RB Leipzig",
+      "status": "SCHEDULED",
+      "home_score": null,
+      "away_score": null,
+      "p_id": "espn_401884732"
+    },
+    {
+      "date": "2026-11-21T14:30Z",
+      "league": 4,
+      "home": "Bayer Leverkusen",
+      "away": "SC Paderborn 07",
+      "status": "SCHEDULED",
+      "home_score": null,
+      "away_score": null,
+      "p_id": "espn_401884735"
+    },
+    {
+      "date": "2026-11-21T14:30Z",
+      "league": 4,
+      "home": "Borussia M\u00f6nchengladbach",
+      "away": "Borussia Dortmund",
+      "status": "SCHEDULED",
+      "home_score": null,
+      "away_score": null,
+      "p_id": "espn_401884731"
+    },
+    {
+      "date": "2026-11-21T14:30Z",
+      "league": 4,
+      "home": "Eintracht Frankfurt",
+      "away": "TSG Hoffenheim",
+      "status": "SCHEDULED",
+      "home_score": null,
+      "away_score": null,
+      "p_id": "espn_401884734"
+    },
+    {
+      "date": "2026-11-21T14:30Z",
+      "league": 4,
+      "home": "SV Elversberg",
+      "away": "SC Freiburg",
+      "status": "SCHEDULED",
+      "home_score": null,
+      "away_score": null,
+      "p_id": "espn_401884728"
+    },
+    {
+      "date": "2026-11-21T17:30Z",
+      "league": 4,
+      "home": "Schalke 04",
+      "away": "VfB Stuttgart",
+      "status": "SCHEDULED",
+      "home_score": null,
+      "away_score": null,
+      "p_id": "espn_401884729"
+    },
+    {
+      "date": "2026-11-21T16:15Z",
+      "league": 5,
+      "home": "Nice",
+      "away": "Paris Saint-Germain",
+      "status": "SCHEDULED",
+      "home_score": null,
+      "away_score": null,
+      "p_id": "espn_401876398"
+    },
+    {
+      "date": "2026-11-21T19:45Z",
+      "league": 5,
+      "home": "AS Monaco",
+      "away": "AJ Auxerre",
+      "status": "SCHEDULED",
+      "home_score": null,
+      "away_score": null,
+      "p_id": "espn_401876399"
+    },
+    {
+      "date": "2026-11-21T19:45Z",
+      "league": 5,
+      "home": "Lens",
+      "away": "Toulouse",
+      "status": "SCHEDULED",
+      "home_score": null,
+      "away_score": null,
+      "p_id": "espn_401876403"
+    },
+    {
+      "date": "2026-11-21T19:45Z",
+      "league": 5,
+      "home": "Lille",
+      "away": "Lyon",
+      "status": "SCHEDULED",
+      "home_score": null,
+      "away_score": null,
+      "p_id": "espn_401876402"
+    },
+    {
+      "date": "2026-11-21T19:45Z",
+      "league": 5,
+      "home": "Strasbourg",
+      "away": "Brest",
+      "status": "SCHEDULED",
+      "home_score": null,
+      "away_score": null,
+      "p_id": "espn_401876396"
+    },
+    {
+      "date": "2026-11-21T11:30Z",
+      "league": 12,
+      "home": "Chennaiyin FC",
+      "away": "Punjab FC",
+      "status": "SCHEDULED",
+      "home_score": null,
+      "away_score": null,
+      "p_id": "espn_401925410"
+    },
+    {
+      "date": "2026-11-21T14:00Z",
+      "league": 12,
+      "home": "NorthEast United FC",
+      "away": "FC GOA",
+      "status": "SCHEDULED",
+      "home_score": null,
+      "away_score": null,
+      "p_id": "espn_401925409"
+    }
+  ],
+  "2026-11-22": [
+    {
+      "date": "2026-11-22T14:00Z",
+      "league": 1,
+      "home": "Hull City",
+      "away": "Brighton & Hove Albion",
+      "status": "SCHEDULED",
+      "home_score": null,
+      "away_score": null,
+      "p_id": "espn_401879234"
+    },
+    {
+      "date": "2026-11-22T16:30Z",
+      "league": 1,
+      "home": "Liverpool",
+      "away": "Manchester United",
+      "status": "SCHEDULED",
+      "home_score": null,
+      "away_score": null,
+      "p_id": "espn_401878755"
+    },
+    {
+      "date": "2026-11-22T13:00Z",
+      "league": 2,
+      "home": "Barcelona",
+      "away": "Villarreal",
+      "status": "SCHEDULED",
+      "home_score": null,
+      "away_score": null,
+      "p_id": "espn_401882804"
+    },
+    {
+      "date": "2026-11-22T15:15Z",
+      "league": 2,
+      "home": "Racing Santander",
+      "away": "Real Sociedad",
+      "status": "SCHEDULED",
+      "home_score": null,
+      "away_score": null,
+      "p_id": "espn_401882800"
+    },
+    {
+      "date": "2026-11-22T17:30Z",
+      "league": 2,
+      "home": "Osasuna",
+      "away": "M\u00e1laga",
+      "status": "SCHEDULED",
+      "home_score": null,
+      "away_score": null,
+      "p_id": "espn_401882801"
+    },
+    {
+      "date": "2026-11-22T20:00Z",
+      "league": 2,
+      "home": "Getafe",
+      "away": "Atl\u00e9tico Madrid",
+      "status": "SCHEDULED",
+      "home_score": null,
+      "away_score": null,
+      "p_id": "espn_401882803"
+    },
+    {
+      "date": "2026-11-22T11:30Z",
+      "league": 3,
+      "home": "Juventus",
+      "away": "Venezia",
+      "status": "SCHEDULED",
+      "home_score": null,
+      "away_score": null,
+      "p_id": "espn_401875008"
+    },
+    {
+      "date": "2026-11-22T14:00Z",
+      "league": 3,
+      "home": "Bologna",
+      "away": "Udinese",
+      "status": "SCHEDULED",
+      "home_score": null,
+      "away_score": null,
+      "p_id": "espn_401875047"
+    },
+    {
+      "date": "2026-11-22T14:00Z",
+      "league": 3,
+      "home": "Sassuolo",
+      "away": "Genoa",
+      "status": "SCHEDULED",
+      "home_score": null,
+      "away_score": null,
+      "p_id": "espn_401874960"
+    },
+    {
+      "date": "2026-11-22T17:00Z",
+      "league": 3,
+      "home": "AC Milan",
+      "away": "Frosinone",
+      "status": "SCHEDULED",
+      "home_score": null,
+      "away_score": null,
+      "p_id": "espn_401874989"
+    },
+    {
+      "date": "2026-11-22T19:45Z",
+      "league": 3,
+      "home": "Atalanta",
+      "away": "Internazionale",
+      "status": "SCHEDULED",
+      "home_score": null,
+      "away_score": null,
+      "p_id": "espn_401875001"
+    },
+    {
+      "date": "2026-11-22T14:30Z",
+      "league": 4,
+      "home": "FC Augsburg",
+      "away": "Mainz",
+      "status": "SCHEDULED",
+      "home_score": null,
+      "away_score": null,
+      "p_id": "espn_401884733"
+    },
+    {
+      "date": "2026-11-22T16:30Z",
+      "league": 4,
+      "home": "Werder Bremen",
+      "away": "Hamburg SV",
+      "status": "SCHEDULED",
+      "home_score": null,
+      "away_score": null,
+      "p_id": "espn_401884730"
+    },
+    {
+      "date": "2026-11-22T14:00Z",
+      "league": 5,
+      "home": "Paris FC",
+      "away": "Angers",
+      "status": "SCHEDULED",
+      "home_score": null,
+      "away_score": null,
+      "p_id": "espn_401876397"
+    },
+    {
+      "date": "2026-11-22T16:15Z",
+      "league": 5,
+      "home": "Lorient",
+      "away": "Stade Rennais",
+      "status": "SCHEDULED",
+      "home_score": null,
+      "away_score": null,
+      "p_id": "espn_401876401"
+    },
+    {
+      "date": "2026-11-22T19:45Z",
+      "league": 5,
+      "home": "Marseille",
+      "away": "Le Mans",
+      "status": "SCHEDULED",
+      "home_score": null,
+      "away_score": null,
+      "p_id": "espn_401876400"
+    },
+    {
+      "date": "2026-11-22T14:00Z",
+      "league": 12,
+      "home": "Churchill Brothers",
+      "away": "Mohun Bagan Super Giant",
+      "status": "SCHEDULED",
+      "home_score": null,
+      "away_score": null,
+      "p_id": "espn_401925408"
     }
   ]
 }
