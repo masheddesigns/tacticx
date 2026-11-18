@@ -55,26 +55,6 @@
     {
       "date": "2026-11-04T20:00:00Z",
       "league": 6,
-      "home": "Slavia Prague",
-      "away": "Arsenal",
-      "status": "FINISHED",
-      "home_score": 1,
-      "away_score": 2,
-      "p_id": "espn_nov_3640"
-    },
-    {
-      "date": "2026-11-04T20:00:00Z",
-      "league": 6,
-      "home": "Viking FK",
-      "away": "Sabah FK",
-      "status": "FINISHED",
-      "home_score": 4,
-      "away_score": 1,
-      "p_id": "espn_nov_3641"
-    },
-    {
-      "date": "2026-11-04T20:00:00Z",
-      "league": 6,
       "home": "Dortmund",
       "away": "Betis",
       "status": "FINISHED",
@@ -121,6 +101,26 @@
       "home_score": 2,
       "away_score": 3,
       "p_id": "espn_nov_3639"
+    },
+    {
+      "date": "2026-11-04T20:00:00Z",
+      "league": 6,
+      "home": "Slavia Prague",
+      "away": "Arsenal",
+      "status": "FINISHED",
+      "home_score": 1,
+      "away_score": 2,
+      "p_id": "espn_nov_3640"
+    },
+    {
+      "date": "2026-11-04T20:00:00Z",
+      "league": 6,
+      "home": "Viking FK",
+      "away": "Sabah FK",
+      "status": "FINISHED",
+      "home_score": 4,
+      "away_score": 1,
+      "p_id": "espn_nov_3641"
     },
     {
       "date": "2026-11-04T22:30:00Z",
@@ -183,6 +183,86 @@
       "home_score": 3,
       "away_score": 2,
       "p_id": "espn_nov_3643"
+    },
+    {
+      "date": "2026-11-05T17:45:00Z",
+      "league": 13,
+      "home": "Anderlecht",
+      "away": "Red Bull Salzburg",
+      "status": "FINISHED",
+      "home_score": 2,
+      "away_score": 0,
+      "p_id": "espn_nov_3667"
+    },
+    {
+      "date": "2026-11-05T17:45:00Z",
+      "league": 13,
+      "home": "Crystal Palace",
+      "away": "Hoffenheim",
+      "status": "FINISHED",
+      "home_score": 1,
+      "away_score": 1,
+      "p_id": "espn_nov_3668"
+    },
+    {
+      "date": "2026-11-05T17:45:00Z",
+      "league": 13,
+      "home": "Levski Sofia",
+      "away": "Jagiellonia Bialystok",
+      "status": "FINISHED",
+      "home_score": 1,
+      "away_score": 0,
+      "p_id": "espn_nov_3669"
+    },
+    {
+      "date": "2026-11-05T17:45:00Z",
+      "league": 13,
+      "home": "Lille",
+      "away": "Viktoria Plzen",
+      "status": "FINISHED",
+      "home_score": 0,
+      "away_score": 1,
+      "p_id": "espn_nov_3670"
+    },
+    {
+      "date": "2026-11-05T17:45:00Z",
+      "league": 13,
+      "home": "Milan",
+      "away": "Ferencvaros",
+      "status": "FINISHED",
+      "home_score": 0,
+      "away_score": 2,
+      "p_id": "espn_nov_3666"
+    },
+    {
+      "date": "2026-11-05T17:45:00Z",
+      "league": 13,
+      "home": "NEC Nijmegen",
+      "away": "Omonia Nicosia",
+      "status": "FINISHED",
+      "home_score": 3,
+      "away_score": 1,
+      "p_id": "espn_nov_3671"
+    },
+    {
+      "date": "2026-11-05T17:45:00Z",
+      "league": 13,
+      "home": "Sociedad",
+      "away": "Lyon",
+      "status": "FINISHED",
+      "home_score": 1,
+      "away_score": 1,
+      "p_id": "espn_nov_3672"
+    },
+    {
+      "date": "2026-11-05T17:45:00Z",
+      "league": 13,
+      "home": "Sparta Praha",
+      "away": "Bournemouth",
+      "status": "FINISHED",
+      "home_score": 1,
+      "away_score": 3,
+      "p_id": "espn_nov_3673"
     },
     {
       "date": "2026-11-05T17:45:00Z",
@@ -275,86 +355,6 @@
       "p_id": "espn_nov_3656"
     },
     {
-      "date": "2026-11-05T17:45:00Z",
-      "league": 13,
-      "home": "Milan",
-      "away": "Ferencvaros",
-      "status": "FINISHED",
-      "home_score": 0,
-      "away_score": 2,
-      "p_id": "espn_nov_3666"
-    },
-    {
-      "date": "2026-11-05T17:45:00Z",
-      "league": 13,
-      "home": "Anderlecht",
-      "away": "Red Bull Salzburg",
-      "status": "FINISHED",
-      "home_score": 2,
-      "away_score": 0,
-      "p_id": "espn_nov_3667"
-    },
-    {
-      "date": "2026-11-05T17:45:00Z",
-      "league": 13,
-      "home": "Crystal Palace",
-      "away": "Hoffenheim",
-      "status": "FINISHED",
-      "home_score": 1,
-      "away_score": 1,
-      "p_id": "espn_nov_3668"
-    },
-    {
-      "date": "2026-11-05T17:45:00Z",
-      "league": 13,
-      "home": "Levski Sofia",
-      "away": "Jagiellonia Bialystok",
-      "status": "FINISHED",
-      "home_score": 1,
-      "away_score": 0,
-      "p_id": "espn_nov_3669"
-    },
-    {
-      "date": "2026-11-05T17:45:00Z",
-      "league": 13,
-      "home": "Lille",
-      "away": "Viktoria Plzen",
-      "status": "FINISHED",
-      "home_score": 0,
-      "away_score": 1,
-      "p_id": "espn_nov_3670"
-    },
-    {
-      "date": "2026-11-05T17:45:00Z",
-      "league": 13,
-      "home": "NEC Nijmegen",
-      "away": "Omonia Nicosia",
-      "status": "FINISHED",
-      "home_score": 3,
-      "away_score": 1,
-      "p_id": "espn_nov_3671"
-    },
-    {
-      "date": "2026-11-05T17:45:00Z",
-      "league": 13,
-      "home": "Sociedad",
-      "away": "Lyon",
-      "status": "FINISHED",
-      "home_score": 1,
-      "away_score": 1,
-      "p_id": "espn_nov_3672"
-    },
-    {
-      "date": "2026-11-05T17:45:00Z",
-      "league": 13,
-      "home": "Sparta Praha",
-      "away": "Bournemouth",
-      "status": "FINISHED",
-      "home_score": 1,
-      "away_score": 3,
-      "p_id": "espn_nov_3673"
-    },
-    {
       "date": "2026-11-05T18:00:00Z",
       "league": 10,
       "home": "Aldosivi",
@@ -366,13 +366,33 @@
     },
     {
       "date": "2026-11-05T20:00:00Z",
-      "league": 14,
-      "home": "Monaco",
-      "away": "FC Nordsj\u00e6lland",
+      "league": 13,
+      "home": "AZ Alkmaar",
+      "away": "Juventus",
       "status": "FINISHED",
-      "home_score": 2,
-      "away_score": 0,
-      "p_id": "espn_nov_3657"
+      "home_score": 1,
+      "away_score": 2,
+      "p_id": "espn_nov_3674"
+    },
+    {
+      "date": "2026-11-05T20:00:00Z",
+      "league": 13,
+      "home": "Benfica",
+      "away": "Lech Poznan",
+      "status": "FINISHED",
+      "home_score": 3,
+      "away_score": 1,
+      "p_id": "espn_nov_3676"
+    },
+    {
+      "date": "2026-11-05T20:00:00Z",
+      "league": 13,
+      "home": "Celta",
+      "away": "Uni\u00f3n (Santa Fe)",
+      "status": "FINISHED",
+      "home_score": 1,
+      "away_score": 2,
+      "p_id": "espn_nov_3677"
     },
     {
       "date": "2026-11-05T20:00:00Z",
@@ -393,6 +413,16 @@
       "home_score": 0,
       "away_score": 2,
       "p_id": "espn_nov_3679"
+    },
+    {
+      "date": "2026-11-05T20:00:00Z",
+      "league": 13,
+      "home": "Leverkusen",
+      "away": "Marseille",
+      "status": "FINISHED",
+      "home_score": 0,
+      "away_score": 1,
+      "p_id": "espn_nov_3675"
     },
     {
       "date": "2026-11-05T20:00:00Z",
@@ -477,6 +507,16 @@
     {
       "date": "2026-11-05T20:00:00Z",
       "league": 14,
+      "home": "Monaco",
+      "away": "FC Nordsj\u00e6lland",
+      "status": "FINISHED",
+      "home_score": 2,
+      "away_score": 0,
+      "p_id": "espn_nov_3657"
+    },
+    {
+      "date": "2026-11-05T20:00:00Z",
+      "league": 14,
       "home": "Panathinaikos",
       "away": "CSKA Sofia",
       "status": "FINISHED",
@@ -503,46 +543,6 @@
       "home_score": 1,
       "away_score": 1,
       "p_id": "espn_nov_3665"
-    },
-    {
-      "date": "2026-11-05T20:00:00Z",
-      "league": 13,
-      "home": "AZ Alkmaar",
-      "away": "Juventus",
-      "status": "FINISHED",
-      "home_score": 1,
-      "away_score": 2,
-      "p_id": "espn_nov_3674"
-    },
-    {
-      "date": "2026-11-05T20:00:00Z",
-      "league": 13,
-      "home": "Leverkusen",
-      "away": "Marseille",
-      "status": "FINISHED",
-      "home_score": 0,
-      "away_score": 1,
-      "p_id": "espn_nov_3675"
-    },
-    {
-      "date": "2026-11-05T20:00:00Z",
-      "league": 13,
-      "home": "Benfica",
-      "away": "Lech Poznan",
-      "status": "FINISHED",
-      "home_score": 3,
-      "away_score": 1,
-      "p_id": "espn_nov_3676"
-    },
-    {
-      "date": "2026-11-05T20:00:00Z",
-      "league": 13,
-      "home": "Celta",
-      "away": "Uni\u00f3n (Santa Fe)",
-      "status": "FINISHED",
-      "home_score": 1,
-      "away_score": 2,
-      "p_id": "espn_nov_3677"
     },
     {
       "date": "2026-11-05T22:15:00Z",
@@ -608,16 +608,6 @@
     },
     {
       "date": "2026-11-06T19:45:00Z",
-      "league": 5,
-      "home": "Toulouse",
-      "away": "Strasbourg",
-      "status": "FINISHED",
-      "home_score": 3,
-      "away_score": 1,
-      "p_id": "espn_nov_3687"
-    },
-    {
-      "date": "2026-11-06T19:45:00Z",
       "league": 3,
       "home": "Venezia",
       "away": "Udinese",
@@ -627,14 +617,14 @@
       "p_id": "espn_nov_3688"
     },
     {
-      "date": "2026-11-06T20:00:00Z",
-      "league": 2,
-      "home": "Sevilla",
-      "away": "Alaves",
-      "status": "SCHEDULED",
-      "home_score": null,
-      "away_score": null,
-      "p_id": "espn_nov_3683"
+      "date": "2026-11-06T19:45:00Z",
+      "league": 5,
+      "home": "Toulouse",
+      "away": "Strasbourg",
+      "status": "FINISHED",
+      "home_score": 3,
+      "away_score": 1,
+      "p_id": "espn_nov_3687"
     },
     {
       "date": "2026-11-06T20:00:00Z",
@@ -645,6 +635,16 @@
       "home_score": 3,
       "away_score": 1,
       "p_id": "espn_nov_3684"
+    },
+    {
+      "date": "2026-11-06T20:00:00Z",
+      "league": 2,
+      "home": "Sevilla",
+      "away": "Alaves",
+      "status": "SCHEDULED",
+      "home_score": null,
+      "away_score": null,
+      "p_id": "espn_nov_3683"
     },
     {
       "date": "2026-11-06T22:15:00Z",
@@ -740,16 +740,6 @@
     },
     {
       "date": "2026-11-07T14:00:00Z",
-      "league": 12,
-      "home": "Chennaiyin FC",
-      "away": "East Bengal FC",
-      "status": "FINISHED",
-      "home_score": 5,
-      "away_score": 3,
-      "p_id": "espn_nov_3712"
-    },
-    {
-      "date": "2026-11-07T14:00:00Z",
       "league": 3,
       "home": "Cagliari",
       "away": "Frosinone",
@@ -767,6 +757,16 @@
       "home_score": 1,
       "away_score": 1,
       "p_id": "espn_nov_3735"
+    },
+    {
+      "date": "2026-11-07T14:00:00Z",
+      "league": 12,
+      "home": "Chennaiyin FC",
+      "away": "East Bengal FC",
+      "status": "FINISHED",
+      "home_score": 5,
+      "away_score": 3,
+      "p_id": "espn_nov_3712"
     },
     {
       "date": "2026-11-07T14:30:00Z",
@@ -880,6 +880,16 @@
     },
     {
       "date": "2026-11-07T18:00:00Z",
+      "league": 5,
+      "home": "Auxerre",
+      "away": "Paris FC",
+      "status": "FINISHED",
+      "home_score": 0,
+      "away_score": 1,
+      "p_id": "espn_nov_3709"
+    },
+    {
+      "date": "2026-11-07T18:00:00Z",
       "league": 10,
       "home": "Gimnasia La Plata",
       "away": "Independiente Rivadavia",
@@ -897,16 +907,6 @@
       "home_score": 1,
       "away_score": 1,
       "p_id": "espn_nov_3729"
-    },
-    {
-      "date": "2026-11-07T18:00:00Z",
-      "league": 5,
-      "home": "Auxerre",
-      "away": "Paris FC",
-      "status": "FINISHED",
-      "home_score": 0,
-      "away_score": 1,
-      "p_id": "espn_nov_3709"
     },
     {
       "date": "2026-11-07T19:45:00Z",
@@ -1021,6 +1021,16 @@
     {
       "date": "2026-11-07T21:00:00Z",
       "league": 9,
+      "home": "New York Red Bulls",
+      "away": "Atlanta United",
+      "status": "FINISHED",
+      "home_score": 3,
+      "away_score": 0,
+      "p_id": "espn_nov_3720"
+    },
+    {
+      "date": "2026-11-07T21:00:00Z",
+      "league": 9,
       "home": "Orlando City SC",
       "away": "England U17",
       "status": "FINISHED",
@@ -1037,16 +1047,6 @@
       "home_score": 4,
       "away_score": 1,
       "p_id": "espn_nov_3719"
-    },
-    {
-      "date": "2026-11-07T21:00:00Z",
-      "league": 9,
-      "home": "New York Red Bulls",
-      "away": "Atlanta United",
-      "status": "FINISHED",
-      "home_score": 3,
-      "away_score": 0,
-      "p_id": "espn_nov_3720"
     }
   ],
   "2026-11-08": [
@@ -1152,26 +1152,6 @@
     },
     {
       "date": "2026-11-08T14:00:00Z",
-      "league": 3,
-      "home": "Genoa",
-      "away": "Milan",
-      "status": "FINISHED",
-      "home_score": 1,
-      "away_score": 2,
-      "p_id": "espn_nov_3740"
-    },
-    {
-      "date": "2026-11-08T14:00:00Z",
-      "league": 3,
-      "home": "Monza",
-      "away": "Atalanta",
-      "status": "FINISHED",
-      "home_score": 0,
-      "away_score": 1,
-      "p_id": "espn_nov_3741"
-    },
-    {
-      "date": "2026-11-08T14:00:00Z",
       "league": 1,
       "home": "Brighton",
       "away": "Brentford",
@@ -1209,6 +1189,26 @@
       "home_score": 1,
       "away_score": 0,
       "p_id": "espn_nov_3747"
+    },
+    {
+      "date": "2026-11-08T14:00:00Z",
+      "league": 3,
+      "home": "Genoa",
+      "away": "Milan",
+      "status": "FINISHED",
+      "home_score": 1,
+      "away_score": 2,
+      "p_id": "espn_nov_3740"
+    },
+    {
+      "date": "2026-11-08T14:00:00Z",
+      "league": 3,
+      "home": "Monza",
+      "away": "Atalanta",
+      "status": "FINISHED",
+      "home_score": 0,
+      "away_score": 1,
+      "p_id": "espn_nov_3741"
     },
     {
       "date": "2026-11-08T14:00:00Z",
@@ -1381,76 +1381,744 @@
       "p_id": "espn_nov_3738"
     }
   ],
+  "2026-11-12": [
+    {
+      "date": "2026-11-12T17:00Z",
+      "league": 15,
+      "home": "Armenia",
+      "away": "Cyprus",
+      "status": "FINISHED",
+      "home_score": 1,
+      "away_score": 1,
+      "p_id": "espn_401861146"
+    },
+    {
+      "date": "2026-11-12T17:00Z",
+      "league": 15,
+      "home": "T\u00fcrkiye",
+      "away": "Belgium",
+      "status": "FINISHED",
+      "home_score": 1,
+      "away_score": 2,
+      "p_id": "espn_401861145"
+    },
+    {
+      "date": "2026-11-12T19:45Z",
+      "league": 15,
+      "home": "Albania",
+      "away": "Finland",
+      "status": "FINISHED",
+      "home_score": 2,
+      "away_score": 0,
+      "p_id": "espn_401861147"
+    },
+    {
+      "date": "2026-11-12T19:45Z",
+      "league": 15,
+      "home": "Czechia",
+      "away": "Spain",
+      "status": "FINISHED",
+      "home_score": 0,
+      "away_score": 2,
+      "p_id": "espn_401861148"
+    },
+    {
+      "date": "2026-11-12T19:45Z",
+      "league": 15,
+      "home": "England",
+      "away": "Croatia",
+      "status": "FINISHED",
+      "home_score": 2,
+      "away_score": 1,
+      "p_id": "espn_401861150"
+    },
+    {
+      "date": "2026-11-12T19:45Z",
+      "league": 15,
+      "home": "Italy",
+      "away": "France",
+      "status": "FINISHED",
+      "home_score": 3,
+      "away_score": 1,
+      "p_id": "espn_401861151"
+    },
+    {
+      "date": "2026-11-12T19:45Z",
+      "league": 15,
+      "home": "Montenegro",
+      "away": "Latvia",
+      "status": "FINISHED",
+      "home_score": 2,
+      "away_score": 1,
+      "p_id": "espn_401861152"
+    },
+    {
+      "date": "2026-11-12T19:45Z",
+      "league": 15,
+      "home": "San Marino",
+      "away": "Belarus",
+      "status": "FINISHED",
+      "home_score": 0,
+      "away_score": 2,
+      "p_id": "espn_401861149"
+    }
+  ],
+  "2026-11-13": [
+    {
+      "date": "2026-11-13T17:00Z",
+      "league": 15,
+      "home": "Moldova",
+      "away": "Kazakhstan",
+      "status": "FINISHED",
+      "home_score": 2,
+      "away_score": 1,
+      "p_id": "espn_401861162"
+    },
+    {
+      "date": "2026-11-13T19:45Z",
+      "league": 15,
+      "home": "Andorra",
+      "away": "Gibraltar",
+      "status": "FINISHED",
+      "home_score": 2,
+      "away_score": 0,
+      "p_id": "espn_401861155"
+    },
+    {
+      "date": "2026-11-13T19:45Z",
+      "league": 15,
+      "home": "Bulgaria",
+      "away": "Iceland",
+      "status": "FINISHED",
+      "home_score": 0,
+      "away_score": 5,
+      "p_id": "espn_401861157"
+    },
+    {
+      "date": "2026-11-13T19:45Z",
+      "league": 15,
+      "home": "Liechtenstein",
+      "away": "Azerbaijan",
+      "status": "FINISHED",
+      "home_score": 0,
+      "away_score": 1,
+      "p_id": "espn_401861153"
+    },
+    {
+      "date": "2026-11-13T19:45Z",
+      "league": 15,
+      "home": "Luxembourg",
+      "away": "Estonia",
+      "status": "FINISHED",
+      "home_score": 0,
+      "away_score": 1,
+      "p_id": "espn_401861154"
+    },
+    {
+      "date": "2026-11-13T19:45Z",
+      "league": 15,
+      "home": "Netherlands",
+      "away": "Greece",
+      "status": "FINISHED",
+      "home_score": 7,
+      "away_score": 0,
+      "p_id": "espn_401861159"
+    },
+    {
+      "date": "2026-11-13T19:45Z",
+      "league": 15,
+      "home": "Scotland",
+      "away": "North Macedonia",
+      "status": "FINISHED",
+      "home_score": 2,
+      "away_score": 1,
+      "p_id": "espn_401861161"
+    },
+    {
+      "date": "2026-11-13T19:45Z",
+      "league": 15,
+      "home": "Serbia",
+      "away": "Germany",
+      "status": "FINISHED",
+      "home_score": 1,
+      "away_score": 3,
+      "p_id": "espn_401861158"
+    },
+    {
+      "date": "2026-11-13T19:45Z",
+      "league": 15,
+      "home": "Slovakia",
+      "away": "Faroe Islands",
+      "status": "FINISHED",
+      "home_score": 2,
+      "away_score": 2,
+      "p_id": "espn_401861160"
+    },
+    {
+      "date": "2026-11-13T19:45Z",
+      "league": 15,
+      "home": "Slovenia",
+      "away": "Switzerland",
+      "status": "FINISHED",
+      "home_score": 0,
+      "away_score": 0,
+      "p_id": "espn_401861156"
+    }
+  ],
+  "2026-11-14": [
+    {
+      "date": "2026-11-14T14:00Z",
+      "league": 15,
+      "home": "Kosovo",
+      "away": "Israel",
+      "status": "FINISHED",
+      "home_score": 0,
+      "away_score": 0,
+      "p_id": "espn_401861163"
+    },
+    {
+      "date": "2026-11-14T17:00Z",
+      "league": 15,
+      "home": "Georgia",
+      "away": "Hungary",
+      "status": "FINISHED",
+      "home_score": 0,
+      "away_score": 2,
+      "p_id": "espn_401861164"
+    },
+    {
+      "date": "2026-11-14T17:00Z",
+      "league": 15,
+      "home": "Norway",
+      "away": "Wales",
+      "status": "FINISHED",
+      "home_score": 3,
+      "away_score": 1,
+      "p_id": "espn_401861165"
+    },
+    {
+      "date": "2026-11-14T19:45Z",
+      "league": 15,
+      "home": "Austria",
+      "away": "Republic of Ireland",
+      "status": "FINISHED",
+      "home_score": 1,
+      "away_score": 0,
+      "p_id": "espn_401861170"
+    },
+    {
+      "date": "2026-11-14T19:45Z",
+      "league": 15,
+      "home": "Northern Ireland",
+      "away": "Ukraine",
+      "status": "FINISHED",
+      "home_score": 1,
+      "away_score": 0,
+      "p_id": "espn_401861169"
+    },
+    {
+      "date": "2026-11-14T19:45Z",
+      "league": 15,
+      "home": "Portugal",
+      "away": "Denmark",
+      "status": "FINISHED",
+      "home_score": 1,
+      "away_score": 4,
+      "p_id": "espn_401861167"
+    },
+    {
+      "date": "2026-11-14T19:45Z",
+      "league": 15,
+      "home": "Romania",
+      "away": "Poland",
+      "status": "FINISHED",
+      "home_score": 2,
+      "away_score": 1,
+      "p_id": "espn_401861168"
+    },
+    {
+      "date": "2026-11-14T19:45Z",
+      "league": 15,
+      "home": "Sweden",
+      "away": "Bosnia-Herzegovina",
+      "status": "FINISHED",
+      "home_score": 3,
+      "away_score": 2,
+      "p_id": "espn_401861166"
+    },
+    {
+      "date": "2026-11-14T21:30Z",
+      "league": 11,
+      "home": "Mirassol",
+      "away": "Atl\u00e9tico-MG",
+      "status": "FINISHED",
+      "home_score": 0,
+      "away_score": 0,
+      "p_id": "espn_401841311"
+    },
+    {
+      "date": "2026-11-14T23:30Z",
+      "league": 11,
+      "home": "Chapecoense",
+      "away": "Vasco da Gama",
+      "status": "FINISHED",
+      "home_score": 0,
+      "away_score": 2,
+      "p_id": "espn_401841175"
+    }
+  ],
+  "2026-11-15": [
+    {
+      "date": "2026-11-15T14:00Z",
+      "league": 15,
+      "home": "Cyprus",
+      "away": "Montenegro",
+      "status": "FINISHED",
+      "home_score": 1,
+      "away_score": 4,
+      "p_id": "espn_401861172"
+    },
+    {
+      "date": "2026-11-15T14:00Z",
+      "league": 15,
+      "home": "Latvia",
+      "away": "Armenia",
+      "status": "FINISHED",
+      "home_score": 0,
+      "away_score": 0,
+      "p_id": "espn_401861171"
+    },
+    {
+      "date": "2026-11-15T17:00Z",
+      "league": 15,
+      "home": "Belarus",
+      "away": "Albania",
+      "status": "FINISHED",
+      "home_score": 0,
+      "away_score": 2,
+      "p_id": "espn_401861173"
+    },
+    {
+      "date": "2026-11-15T17:00Z",
+      "league": 15,
+      "home": "Finland",
+      "away": "San Marino",
+      "status": "FINISHED",
+      "home_score": 7,
+      "away_score": 2,
+      "p_id": "espn_401861174"
+    },
+    {
+      "date": "2026-11-15T19:45Z",
+      "league": 15,
+      "home": "Belgium",
+      "away": "Italy",
+      "status": "FINISHED",
+      "home_score": 4,
+      "away_score": 1,
+      "p_id": "espn_401861176"
+    },
+    {
+      "date": "2026-11-15T19:45Z",
+      "league": 15,
+      "home": "Croatia",
+      "away": "Czechia",
+      "status": "FINISHED",
+      "home_score": 2,
+      "away_score": 1,
+      "p_id": "espn_401861178"
+    },
+    {
+      "date": "2026-11-15T19:45Z",
+      "league": 15,
+      "home": "France",
+      "away": "T\u00fcrkiye",
+      "status": "FINISHED",
+      "home_score": 2,
+      "away_score": 1,
+      "p_id": "espn_401861177"
+    },
+    {
+      "date": "2026-11-15T19:45Z",
+      "league": 15,
+      "home": "Spain",
+      "away": "England",
+      "status": "FINISHED",
+      "home_score": 2,
+      "away_score": 3,
+      "p_id": "espn_401861175"
+    }
+  ],
+  "2026-11-16": [
+    {
+      "date": "2026-11-16T15:00Z",
+      "league": 15,
+      "home": "Faroe Islands",
+      "away": "Moldova",
+      "status": "FINISHED",
+      "home_score": 1,
+      "away_score": 0,
+      "p_id": "espn_401861180"
+    },
+    {
+      "date": "2026-11-16T15:00Z",
+      "league": 15,
+      "home": "Kazakhstan",
+      "away": "Slovakia",
+      "status": "FINISHED",
+      "home_score": 2,
+      "away_score": 2,
+      "p_id": "espn_401861181"
+    },
+    {
+      "date": "2026-11-16T17:00Z",
+      "league": 15,
+      "home": "Estonia",
+      "away": "Bulgaria",
+      "status": "FINISHED",
+      "home_score": 2,
+      "away_score": 1,
+      "p_id": "espn_401861183"
+    },
+    {
+      "date": "2026-11-16T17:00Z",
+      "league": 15,
+      "home": "Iceland",
+      "away": "Luxembourg",
+      "status": "FINISHED",
+      "home_score": 3,
+      "away_score": 0,
+      "p_id": "espn_401861182"
+    },
+    {
+      "date": "2026-11-16T17:00Z",
+      "league": 15,
+      "home": "Lithuania",
+      "away": "Liechtenstein",
+      "status": "FINISHED",
+      "home_score": 2,
+      "away_score": 1,
+      "p_id": "espn_401861184"
+    },
+    {
+      "date": "2026-11-16T19:45Z",
+      "league": 15,
+      "home": "Germany",
+      "away": "Netherlands",
+      "status": "FINISHED",
+      "home_score": 5,
+      "away_score": 0,
+      "p_id": "espn_401861185"
+    },
+    {
+      "date": "2026-11-16T19:45Z",
+      "league": 15,
+      "home": "Gibraltar",
+      "away": "Malta",
+      "status": "FINISHED",
+      "home_score": 1,
+      "away_score": 1,
+      "p_id": "espn_401861179"
+    },
+    {
+      "date": "2026-11-16T19:45Z",
+      "league": 15,
+      "home": "Greece",
+      "away": "Serbia",
+      "status": "FINISHED",
+      "home_score": 1,
+      "away_score": 0,
+      "p_id": "espn_401861188"
+    },
+    {
+      "date": "2026-11-16T19:45Z",
+      "league": 15,
+      "home": "North Macedonia",
+      "away": "Slovenia",
+      "status": "FINISHED",
+      "home_score": 0,
+      "away_score": 3,
+      "p_id": "espn_401861187"
+    },
+    {
+      "date": "2026-11-16T19:45Z",
+      "league": 15,
+      "home": "Switzerland",
+      "away": "Scotland",
+      "status": "FINISHED",
+      "home_score": 4,
+      "away_score": 0,
+      "p_id": "espn_401861186"
+    }
+  ],
+  "2026-11-17": [
+    {
+      "date": "2026-11-17T19:45Z",
+      "league": 15,
+      "home": "Bosnia-Herzegovina",
+      "away": "Romania",
+      "status": "FINISHED",
+      "home_score": 2,
+      "away_score": 1,
+      "p_id": "espn_401861196"
+    },
+    {
+      "date": "2026-11-17T19:45Z",
+      "league": 15,
+      "home": "Denmark",
+      "away": "Norway",
+      "status": "FINISHED",
+      "home_score": 2,
+      "away_score": 3,
+      "p_id": "espn_401861194"
+    },
+    {
+      "date": "2026-11-17T19:45Z",
+      "league": 15,
+      "home": "Hungary",
+      "away": "Northern Ireland",
+      "status": "FINISHED",
+      "home_score": 1,
+      "away_score": 1,
+      "p_id": "espn_401861191"
+    },
+    {
+      "date": "2026-11-17T19:45Z",
+      "league": 15,
+      "home": "Israel",
+      "away": "Austria",
+      "status": "FINISHED",
+      "home_score": 1,
+      "away_score": 1,
+      "p_id": "espn_401861193"
+    },
+    {
+      "date": "2026-11-17T19:45Z",
+      "league": 15,
+      "home": "Poland",
+      "away": "Sweden",
+      "status": "FINISHED",
+      "home_score": 1,
+      "away_score": 1,
+      "p_id": "espn_401861195"
+    },
+    {
+      "date": "2026-11-17T19:45Z",
+      "league": 15,
+      "home": "Republic of Ireland",
+      "away": "Kosovo",
+      "status": "FINISHED",
+      "home_score": 3,
+      "away_score": 0,
+      "p_id": "espn_401861192"
+    },
+    {
+      "date": "2026-11-17T19:45Z",
+      "league": 15,
+      "home": "Ukraine",
+      "away": "Georgia",
+      "status": "FINISHED",
+      "home_score": 1,
+      "away_score": 0,
+      "p_id": "espn_401861190"
+    },
+    {
+      "date": "2026-11-17T19:45Z",
+      "league": 15,
+      "home": "Wales",
+      "away": "Portugal",
+      "status": "FINISHED",
+      "home_score": 2,
+      "away_score": 3,
+      "p_id": "espn_401861189"
+    }
+  ],
+  "2026-11-18": [
+    {
+      "date": "2026-11-18T22:30Z",
+      "league": 11,
+      "home": "Coritiba",
+      "away": "Santos",
+      "status": "SCHEDULED",
+      "home_score": 0,
+      "away_score": 0,
+      "p_id": "espn_401841315"
+    },
+    {
+      "date": "2026-11-18T23:00Z",
+      "league": 11,
+      "home": "Remo",
+      "away": "Chapecoense",
+      "status": "SCHEDULED",
+      "home_score": 0,
+      "away_score": 0,
+      "p_id": "espn_401841310"
+    },
+    {
+      "date": "2026-11-18T23:30Z",
+      "league": 11,
+      "home": "Cruzeiro",
+      "away": "Palmeiras",
+      "status": "SCHEDULED",
+      "home_score": 0,
+      "away_score": 0,
+      "p_id": "espn_401841314"
+    },
+    {
+      "date": "2026-11-18T23:30Z",
+      "league": 11,
+      "home": "Flamengo",
+      "away": "Athletico-PR",
+      "status": "SCHEDULED",
+      "home_score": 0,
+      "away_score": 0,
+      "p_id": "espn_401841313"
+    }
+  ],
+  "2026-11-19": [
+    {
+      "date": "2026-11-19T00:30Z",
+      "league": 11,
+      "home": "Corinthians",
+      "away": "Botafogo",
+      "status": "SCHEDULED",
+      "home_score": 0,
+      "away_score": 0,
+      "p_id": "espn_401841316"
+    },
+    {
+      "date": "2026-11-19T00:30Z",
+      "league": 11,
+      "home": "Gr\u00eamio",
+      "away": "Bahia",
+      "status": "SCHEDULED",
+      "home_score": 0,
+      "away_score": 0,
+      "p_id": "espn_401841312"
+    },
+    {
+      "date": "2026-11-19T22:30Z",
+      "league": 11,
+      "home": "Vasco da Gama",
+      "away": "Internacional",
+      "status": "SCHEDULED",
+      "home_score": 0,
+      "away_score": 0,
+      "p_id": "espn_401841308"
+    },
+    {
+      "date": "2026-11-19T22:30Z",
+      "league": 11,
+      "home": "Vit\u00f3ria",
+      "away": "Red Bull Bragantino",
+      "status": "SCHEDULED",
+      "home_score": 0,
+      "away_score": 0,
+      "p_id": "espn_401841317"
+    }
+  ],
+  "2026-11-20": [
+    {
+      "date": "2026-11-20T00:30Z",
+      "league": 9,
+      "home": "Orlando City SC",
+      "away": "FC Cincinnati",
+      "status": "SCHEDULED",
+      "home_score": 0,
+      "away_score": 0,
+      "p_id": "espn_401933535"
+    },
+    {
+      "date": "2026-11-20T00:30Z",
+      "league": 11,
+      "home": "S\u00e3o Paulo",
+      "away": "Fluminense",
+      "status": "SCHEDULED",
+      "home_score": 0,
+      "away_score": 0,
+      "p_id": "espn_401841309"
+    },
+    {
+      "date": "2026-11-20T03:00Z",
+      "league": 9,
+      "home": "Seattle Sounders FC",
+      "away": "Real Salt Lake",
+      "status": "SCHEDULED",
+      "home_score": 0,
+      "away_score": 0,
+      "p_id": "espn_401933555"
+    },
+    {
+      "date": "2026-11-20T11:30Z",
+      "league": 12,
+      "home": "East Bengal FC",
+      "away": "Sporting Club Delhi",
+      "status": "SCHEDULED",
+      "home_score": 0,
+      "away_score": 0,
+      "p_id": "espn_401925412"
+    },
+    {
+      "date": "2026-11-20T14:00Z",
+      "league": 12,
+      "home": "Bengaluru FC",
+      "away": "Mumbai City FC",
+      "status": "SCHEDULED",
+      "home_score": 0,
+      "away_score": 0,
+      "p_id": "espn_401925411"
+    },
+    {
+      "date": "2026-11-20T19:45Z",
+      "league": 5,
+      "home": "Troyes",
+      "away": "Le Havre AC",
+      "status": "SCHEDULED",
+      "home_score": 0,
+      "away_score": 0,
+      "p_id": "espn_401876395"
+    },
+    {
+      "date": "2026-11-20T20:00Z",
+      "league": 2,
+      "home": "Athletic Club",
+      "away": "Espanyol",
+      "status": "SCHEDULED",
+      "home_score": 0,
+      "away_score": 0,
+      "p_id": "espn_401882805"
+    },
+    {
+      "date": "2026-11-20T23:00Z",
+      "league": 10,
+      "home": "V\u00e9lez Sarsfield",
+      "away": "Belgrano (C\u00f3rdoba)",
+      "status": "SCHEDULED",
+      "home_score": 0,
+      "away_score": 0,
+      "p_id": "espn_401933760"
+    }
+  ],
   "2026-11-21": [
+    {
+      "date": "2026-11-21T11:30Z",
+      "league": 12,
+      "home": "Chennaiyin FC",
+      "away": "Punjab FC",
+      "status": "SCHEDULED",
+      "home_score": 0,
+      "away_score": 0,
+      "p_id": "espn_401925410"
+    },
     {
       "date": "2026-11-21T12:30Z",
       "league": 1,
       "home": "Manchester City",
       "away": "Fulham",
       "status": "SCHEDULED",
-      "home_score": null,
-      "away_score": null,
+      "home_score": 0,
+      "away_score": 0,
       "p_id": "espn_401879233"
-    },
-    {
-      "date": "2026-11-21T15:00Z",
-      "league": 1,
-      "home": "AFC Bournemouth",
-      "away": "Nottingham Forest",
-      "status": "SCHEDULED",
-      "home_score": null,
-      "away_score": null,
-      "p_id": "espn_401879238"
-    },
-    {
-      "date": "2026-11-21T15:00Z",
-      "league": 1,
-      "home": "Aston Villa",
-      "away": "Sunderland",
-      "status": "SCHEDULED",
-      "home_score": null,
-      "away_score": null,
-      "p_id": "espn_401878756"
-    },
-    {
-      "date": "2026-11-21T15:00Z",
-      "league": 1,
-      "home": "Chelsea",
-      "away": "Leeds United",
-      "status": "SCHEDULED",
-      "home_score": null,
-      "away_score": null,
-      "p_id": "espn_401879236"
-    },
-    {
-      "date": "2026-11-21T15:00Z",
-      "league": 1,
-      "home": "Coventry City",
-      "away": "Crystal Palace",
-      "status": "SCHEDULED",
-      "home_score": null,
-      "away_score": null,
-      "p_id": "espn_401879235"
-    },
-    {
-      "date": "2026-11-21T15:00Z",
-      "league": 1,
-      "home": "Tottenham Hotspur",
-      "away": "Ipswich Town",
-      "status": "SCHEDULED",
-      "home_score": null,
-      "away_score": null,
-      "p_id": "espn_401878754"
-    },
-    {
-      "date": "2026-11-21T17:30Z",
-      "league": 1,
-      "home": "Newcastle United",
-      "away": "Arsenal",
-      "status": "SCHEDULED",
-      "home_score": null,
-      "away_score": null,
-      "p_id": "espn_401879232"
     },
     {
       "date": "2026-11-21T13:00Z",
@@ -1458,39 +2126,9 @@
       "home": "Alav\u00e9s",
       "away": "Deportivo",
       "status": "SCHEDULED",
-      "home_score": null,
-      "away_score": null,
+      "home_score": 0,
+      "away_score": 0,
       "p_id": "espn_401882806"
-    },
-    {
-      "date": "2026-11-21T15:15Z",
-      "league": 2,
-      "home": "Rayo Vallecano",
-      "away": "Valencia",
-      "status": "SCHEDULED",
-      "home_score": null,
-      "away_score": null,
-      "p_id": "espn_401882799"
-    },
-    {
-      "date": "2026-11-21T17:30Z",
-      "league": 2,
-      "home": "Sevilla",
-      "away": "Real Betis",
-      "status": "SCHEDULED",
-      "home_score": null,
-      "away_score": null,
-      "p_id": "espn_401882797"
-    },
-    {
-      "date": "2026-11-21T20:00Z",
-      "league": 2,
-      "home": "Real Madrid",
-      "away": "Celta Vigo",
-      "status": "SCHEDULED",
-      "home_score": null,
-      "away_score": null,
-      "p_id": "espn_401882798"
     },
     {
       "date": "2026-11-21T14:00Z",
@@ -1498,8 +2136,8 @@
       "home": "Como",
       "away": "Cagliari",
       "status": "SCHEDULED",
-      "home_score": null,
-      "away_score": null,
+      "home_score": 0,
+      "away_score": 0,
       "p_id": "espn_401875056"
     },
     {
@@ -1508,29 +2146,19 @@
       "home": "Lazio",
       "away": "Lecce",
       "status": "SCHEDULED",
-      "home_score": null,
-      "away_score": null,
+      "home_score": 0,
+      "away_score": 0,
       "p_id": "espn_401874981"
     },
     {
-      "date": "2026-11-21T17:00Z",
-      "league": 3,
-      "home": "Parma",
-      "away": "AS Roma",
+      "date": "2026-11-21T14:00Z",
+      "league": 12,
+      "home": "NorthEast United FC",
+      "away": "FC GOA",
       "status": "SCHEDULED",
-      "home_score": null,
-      "away_score": null,
-      "p_id": "espn_401874967"
-    },
-    {
-      "date": "2026-11-21T19:45Z",
-      "league": 3,
-      "home": "Napoli",
-      "away": "Torino",
-      "status": "SCHEDULED",
-      "home_score": null,
-      "away_score": null,
-      "p_id": "espn_401875067"
+      "home_score": 0,
+      "away_score": 0,
+      "p_id": "espn_401925409"
     },
     {
       "date": "2026-11-21T14:30Z",
@@ -1538,8 +2166,8 @@
       "home": "1. FC Union Berlin",
       "away": "RB Leipzig",
       "status": "SCHEDULED",
-      "home_score": null,
-      "away_score": null,
+      "home_score": 0,
+      "away_score": 0,
       "p_id": "espn_401884732"
     },
     {
@@ -1548,8 +2176,8 @@
       "home": "Bayer Leverkusen",
       "away": "SC Paderborn 07",
       "status": "SCHEDULED",
-      "home_score": null,
-      "away_score": null,
+      "home_score": 0,
+      "away_score": 0,
       "p_id": "espn_401884735"
     },
     {
@@ -1558,8 +2186,8 @@
       "home": "Borussia M\u00f6nchengladbach",
       "away": "Borussia Dortmund",
       "status": "SCHEDULED",
-      "home_score": null,
-      "away_score": null,
+      "home_score": 0,
+      "away_score": 0,
       "p_id": "espn_401884731"
     },
     {
@@ -1568,8 +2196,8 @@
       "home": "Eintracht Frankfurt",
       "away": "TSG Hoffenheim",
       "status": "SCHEDULED",
-      "home_score": null,
-      "away_score": null,
+      "home_score": 0,
+      "away_score": 0,
       "p_id": "espn_401884734"
     },
     {
@@ -1578,19 +2206,69 @@
       "home": "SV Elversberg",
       "away": "SC Freiburg",
       "status": "SCHEDULED",
-      "home_score": null,
-      "away_score": null,
+      "home_score": 0,
+      "away_score": 0,
       "p_id": "espn_401884728"
     },
     {
-      "date": "2026-11-21T17:30Z",
-      "league": 4,
-      "home": "Schalke 04",
-      "away": "VfB Stuttgart",
+      "date": "2026-11-21T15:00Z",
+      "league": 1,
+      "home": "AFC Bournemouth",
+      "away": "Nottingham Forest",
       "status": "SCHEDULED",
-      "home_score": null,
-      "away_score": null,
-      "p_id": "espn_401884729"
+      "home_score": 0,
+      "away_score": 0,
+      "p_id": "espn_401879238"
+    },
+    {
+      "date": "2026-11-21T15:00Z",
+      "league": 1,
+      "home": "Aston Villa",
+      "away": "Sunderland",
+      "status": "SCHEDULED",
+      "home_score": 0,
+      "away_score": 0,
+      "p_id": "espn_401878756"
+    },
+    {
+      "date": "2026-11-21T15:00Z",
+      "league": 1,
+      "home": "Chelsea",
+      "away": "Leeds United",
+      "status": "SCHEDULED",
+      "home_score": 0,
+      "away_score": 0,
+      "p_id": "espn_401879236"
+    },
+    {
+      "date": "2026-11-21T15:00Z",
+      "league": 1,
+      "home": "Coventry City",
+      "away": "Crystal Palace",
+      "status": "SCHEDULED",
+      "home_score": 0,
+      "away_score": 0,
+      "p_id": "espn_401879235"
+    },
+    {
+      "date": "2026-11-21T15:00Z",
+      "league": 1,
+      "home": "Tottenham Hotspur",
+      "away": "Ipswich Town",
+      "status": "SCHEDULED",
+      "home_score": 0,
+      "away_score": 0,
+      "p_id": "espn_401878754"
+    },
+    {
+      "date": "2026-11-21T15:15Z",
+      "league": 2,
+      "home": "Rayo Vallecano",
+      "away": "Valencia",
+      "status": "SCHEDULED",
+      "home_score": 0,
+      "away_score": 0,
+      "p_id": "espn_401882799"
     },
     {
       "date": "2026-11-21T16:15Z",
@@ -1598,9 +2276,89 @@
       "home": "Nice",
       "away": "Paris Saint-Germain",
       "status": "SCHEDULED",
-      "home_score": null,
-      "away_score": null,
+      "home_score": 0,
+      "away_score": 0,
       "p_id": "espn_401876398"
+    },
+    {
+      "date": "2026-11-21T17:00Z",
+      "league": 3,
+      "home": "Parma",
+      "away": "AS Roma",
+      "status": "SCHEDULED",
+      "home_score": 0,
+      "away_score": 0,
+      "p_id": "espn_401874967"
+    },
+    {
+      "date": "2026-11-21T17:30Z",
+      "league": 1,
+      "home": "Newcastle United",
+      "away": "Arsenal",
+      "status": "SCHEDULED",
+      "home_score": 0,
+      "away_score": 0,
+      "p_id": "espn_401879232"
+    },
+    {
+      "date": "2026-11-21T17:30Z",
+      "league": 2,
+      "home": "Sevilla",
+      "away": "Real Betis",
+      "status": "SCHEDULED",
+      "home_score": 0,
+      "away_score": 0,
+      "p_id": "espn_401882797"
+    },
+    {
+      "date": "2026-11-21T17:30Z",
+      "league": 4,
+      "home": "Schalke 04",
+      "away": "VfB Stuttgart",
+      "status": "SCHEDULED",
+      "home_score": 0,
+      "away_score": 0,
+      "p_id": "espn_401884729"
+    },
+    {
+      "date": "2026-11-21T18:00Z",
+      "league": 10,
+      "home": "Defensa y Justicia",
+      "away": "Barracas Central",
+      "status": "SCHEDULED",
+      "home_score": 0,
+      "away_score": 0,
+      "p_id": "espn_401933758"
+    },
+    {
+      "date": "2026-11-21T19:00Z",
+      "league": 9,
+      "home": "New England Revolution",
+      "away": "Philadelphia Union",
+      "status": "SCHEDULED",
+      "home_score": 0,
+      "away_score": 0,
+      "p_id": "espn_401933733"
+    },
+    {
+      "date": "2026-11-21T19:30Z",
+      "league": 11,
+      "home": "Palmeiras",
+      "away": "Flamengo",
+      "status": "SCHEDULED",
+      "home_score": 0,
+      "away_score": 0,
+      "p_id": "espn_401841322"
+    },
+    {
+      "date": "2026-11-21T19:45Z",
+      "league": 3,
+      "home": "Napoli",
+      "away": "Torino",
+      "status": "SCHEDULED",
+      "home_score": 0,
+      "away_score": 0,
+      "p_id": "espn_401875067"
     },
     {
       "date": "2026-11-21T19:45Z",
@@ -1608,8 +2366,8 @@
       "home": "AS Monaco",
       "away": "AJ Auxerre",
       "status": "SCHEDULED",
-      "home_score": null,
-      "away_score": null,
+      "home_score": 0,
+      "away_score": 0,
       "p_id": "espn_401876399"
     },
     {
@@ -1618,8 +2376,8 @@
       "home": "Lens",
       "away": "Toulouse",
       "status": "SCHEDULED",
-      "home_score": null,
-      "away_score": null,
+      "home_score": 0,
+      "away_score": 0,
       "p_id": "espn_401876403"
     },
     {
@@ -1628,8 +2386,8 @@
       "home": "Lille",
       "away": "Lyon",
       "status": "SCHEDULED",
-      "home_score": null,
-      "away_score": null,
+      "home_score": 0,
+      "away_score": 0,
       "p_id": "espn_401876402"
     },
     {
@@ -1638,91 +2396,71 @@
       "home": "Strasbourg",
       "away": "Brest",
       "status": "SCHEDULED",
-      "home_score": null,
-      "away_score": null,
+      "home_score": 0,
+      "away_score": 0,
       "p_id": "espn_401876396"
     },
     {
-      "date": "2026-11-21T11:30Z",
-      "league": 12,
-      "home": "Chennaiyin FC",
-      "away": "Punjab FC",
+      "date": "2026-11-21T20:00Z",
+      "league": 2,
+      "home": "Real Madrid",
+      "away": "Celta Vigo",
       "status": "SCHEDULED",
-      "home_score": null,
-      "away_score": null,
-      "p_id": "espn_401925410"
+      "home_score": 0,
+      "away_score": 0,
+      "p_id": "espn_401882798"
     },
     {
-      "date": "2026-11-21T14:00Z",
-      "league": 12,
-      "home": "NorthEast United FC",
-      "away": "FC GOA",
+      "date": "2026-11-21T20:00Z",
+      "league": 10,
+      "home": "Argentinos Juniors",
+      "away": "Independiente",
       "status": "SCHEDULED",
-      "home_score": null,
-      "away_score": null,
-      "p_id": "espn_401925409"
+      "home_score": 0,
+      "away_score": 0,
+      "p_id": "espn_401933755"
+    },
+    {
+      "date": "2026-11-21T20:30Z",
+      "league": 11,
+      "home": "Bahia",
+      "away": "Coritiba",
+      "status": "SCHEDULED",
+      "home_score": 0,
+      "away_score": 0,
+      "p_id": "espn_401841327"
+    },
+    {
+      "date": "2026-11-21T21:00Z",
+      "league": 9,
+      "home": "FC Dallas",
+      "away": "Portland Timbers",
+      "status": "SCHEDULED",
+      "home_score": 0,
+      "away_score": 0,
+      "p_id": "espn_401933732"
+    },
+    {
+      "date": "2026-11-21T23:00Z",
+      "league": 9,
+      "home": "Inter Miami CF",
+      "away": "Columbus Crew",
+      "status": "SCHEDULED",
+      "home_score": 0,
+      "away_score": 0,
+      "p_id": "espn_401933739"
     }
   ],
   "2026-11-22": [
     {
-      "date": "2026-11-22T14:00Z",
-      "league": 1,
-      "home": "Hull City",
-      "away": "Brighton & Hove Albion",
+      "date": "2026-11-22T00:00Z",
+      "league": 11,
+      "home": "Chapecoense",
+      "away": "Cruzeiro",
       "status": "SCHEDULED",
-      "home_score": null,
-      "away_score": null,
-      "p_id": "espn_401879234"
-    },
-    {
-      "date": "2026-11-22T16:30Z",
-      "league": 1,
-      "home": "Liverpool",
-      "away": "Manchester United",
-      "status": "SCHEDULED",
-      "home_score": null,
-      "away_score": null,
-      "p_id": "espn_401878755"
-    },
-    {
-      "date": "2026-11-22T13:00Z",
-      "league": 2,
-      "home": "Barcelona",
-      "away": "Villarreal",
-      "status": "SCHEDULED",
-      "home_score": null,
-      "away_score": null,
-      "p_id": "espn_401882804"
-    },
-    {
-      "date": "2026-11-22T15:15Z",
-      "league": 2,
-      "home": "Racing Santander",
-      "away": "Real Sociedad",
-      "status": "SCHEDULED",
-      "home_score": null,
-      "away_score": null,
-      "p_id": "espn_401882800"
-    },
-    {
-      "date": "2026-11-22T17:30Z",
-      "league": 2,
-      "home": "Osasuna",
-      "away": "M\u00e1laga",
-      "status": "SCHEDULED",
-      "home_score": null,
-      "away_score": null,
-      "p_id": "espn_401882801"
-    },
-    {
-      "date": "2026-11-22T20:00Z",
-      "league": 2,
-      "home": "Getafe",
-      "away": "Atl\u00e9tico Madrid",
-      "status": "SCHEDULED",
-      "home_score": null,
-      "away_score": null,
-      "p_id": "espn_401882803"
+      "home_score": 0,
+      "away_score": 0,
+      "p_id": "espn_401841325"
     },
     {
       "date": "2026-11-22T11:30Z",
@@ -1730,9 +2468,29 @@
       "home": "Juventus",
       "away": "Venezia",
       "status": "SCHEDULED",
-      "home_score": null,
-      "away_score": null,
+      "home_score": 0,
+      "away_score": 0,
       "p_id": "espn_401875008"
+    },
+    {
+      "date": "2026-11-22T13:00Z",
+      "league": 2,
+      "home": "Barcelona",
+      "away": "Villarreal",
+      "status": "SCHEDULED",
+      "home_score": 0,
+      "away_score": 0,
+      "p_id": "espn_401882804"
+    },
+    {
+      "date": "2026-11-22T14:00Z",
+      "league": 1,
+      "home": "Hull City",
+      "away": "Brighton & Hove Albion",
+      "status": "SCHEDULED",
+      "home_score": 0,
+      "away_score": 0,
+      "p_id": "espn_401879234"
     },
     {
       "date": "2026-11-22T14:00Z",
@@ -1740,8 +2498,8 @@
       "home": "Bologna",
       "away": "Udinese",
       "status": "SCHEDULED",
-      "home_score": null,
-      "away_score": null,
+      "home_score": 0,
+      "away_score": 0,
       "p_id": "espn_401875047"
     },
     {
@@ -1750,49 +2508,9 @@
       "home": "Sassuolo",
       "away": "Genoa",
       "status": "SCHEDULED",
-      "home_score": null,
-      "away_score": null,
+      "home_score": 0,
+      "away_score": 0,
       "p_id": "espn_401874960"
-    },
-    {
-      "date": "2026-11-22T17:00Z",
-      "league": 3,
-      "home": "AC Milan",
-      "away": "Frosinone",
-      "status": "SCHEDULED",
-      "home_score": null,
-      "away_score": null,
-      "p_id": "espn_401874989"
-    },
-    {
-      "date": "2026-11-22T19:45Z",
-      "league": 3,
-      "home": "Atalanta",
-      "away": "Internazionale",
-      "status": "SCHEDULED",
-      "home_score": null,
-      "away_score": null,
-      "p_id": "espn_401875001"
-    },
-    {
-      "date": "2026-11-22T14:30Z",
-      "league": 4,
-      "home": "FC Augsburg",
-      "away": "Mainz",
-      "status": "SCHEDULED",
-      "home_score": null,
-      "away_score": null,
-      "p_id": "espn_401884733"
-    },
-    {
-      "date": "2026-11-22T16:30Z",
-      "league": 4,
-      "home": "Werder Bremen",
-      "away": "Hamburg SV",
-      "status": "SCHEDULED",
-      "home_score": null,
-      "away_score": null,
-      "p_id": "espn_401884730"
     },
     {
       "date": "2026-11-22T14:00Z",
@@ -1800,29 +2518,9 @@
       "home": "Paris FC",
       "away": "Angers",
       "status": "SCHEDULED",
-      "home_score": null,
-      "away_score": null,
+      "home_score": 0,
+      "away_score": 0,
       "p_id": "espn_401876397"
-    },
-    {
-      "date": "2026-11-22T16:15Z",
-      "league": 5,
-      "home": "Lorient",
-      "away": "Stade Rennais",
-      "status": "SCHEDULED",
-      "home_score": null,
-      "away_score": null,
-      "p_id": "espn_401876401"
-    },
-    {
-      "date": "2026-11-22T19:45Z",
-      "league": 5,
-      "home": "Marseille",
-      "away": "Le Mans",
-      "status": "SCHEDULED",
-      "home_score": null,
-      "away_score": null,
-      "p_id": "espn_401876400"
     },
     {
       "date": "2026-11-22T14:00Z",
@@ -1830,9 +2528,517 @@
       "home": "Churchill Brothers",
       "away": "Mohun Bagan Super Giant",
       "status": "SCHEDULED",
-      "home_score": null,
-      "away_score": null,
+      "home_score": 0,
+      "away_score": 0,
       "p_id": "espn_401925408"
+    },
+    {
+      "date": "2026-11-22T14:30Z",
+      "league": 4,
+      "home": "FC Augsburg",
+      "away": "Mainz",
+      "status": "SCHEDULED",
+      "home_score": 0,
+      "away_score": 0,
+      "p_id": "espn_401884733"
+    },
+    {
+      "date": "2026-11-22T15:15Z",
+      "league": 2,
+      "home": "Racing Santander",
+      "away": "Real Sociedad",
+      "status": "SCHEDULED",
+      "home_score": 0,
+      "away_score": 0,
+      "p_id": "espn_401882800"
+    },
+    {
+      "date": "2026-11-22T16:15Z",
+      "league": 5,
+      "home": "Lorient",
+      "away": "Stade Rennais",
+      "status": "SCHEDULED",
+      "home_score": 0,
+      "away_score": 0,
+      "p_id": "espn_401876401"
+    },
+    {
+      "date": "2026-11-22T16:30Z",
+      "league": 1,
+      "home": "Liverpool",
+      "away": "Manchester United",
+      "status": "SCHEDULED",
+      "home_score": 0,
+      "away_score": 0,
+      "p_id": "espn_401878755"
+    },
+    {
+      "date": "2026-11-22T16:30Z",
+      "league": 4,
+      "home": "Werder Bremen",
+      "away": "Hamburg SV",
+      "status": "SCHEDULED",
+      "home_score": 0,
+      "away_score": 0,
+      "p_id": "espn_401884730"
+    },
+    {
+      "date": "2026-11-22T17:00Z",
+      "league": 3,
+      "home": "AC Milan",
+      "away": "Frosinone",
+      "status": "SCHEDULED",
+      "home_score": 0,
+      "away_score": 0,
+      "p_id": "espn_401874989"
+    },
+    {
+      "date": "2026-11-22T17:30Z",
+      "league": 2,
+      "home": "Osasuna",
+      "away": "M\u00e1laga",
+      "status": "SCHEDULED",
+      "home_score": 0,
+      "away_score": 0,
+      "p_id": "espn_401882801"
+    },
+    {
+      "date": "2026-11-22T19:00Z",
+      "league": 10,
+      "home": "Rosario Central",
+      "away": "Gimnasia (Mendoza)",
+      "status": "SCHEDULED",
+      "home_score": 0,
+      "away_score": 0,
+      "p_id": "espn_401933759"
+    },
+    {
+      "date": "2026-11-22T19:00Z",
+      "league": 11,
+      "home": "Athletico-PR",
+      "away": "Remo",
+      "status": "SCHEDULED",
+      "home_score": 0,
+      "away_score": 0,
+      "p_id": "espn_401841318"
+    },
+    {
+      "date": "2026-11-22T19:45Z",
+      "league": 3,
+      "home": "Atalanta",
+      "away": "Internazionale",
+      "status": "SCHEDULED",
+      "home_score": 0,
+      "away_score": 0,
+      "p_id": "espn_401875001"
+    },
+    {
+      "date": "2026-11-22T19:45Z",
+      "league": 5,
+      "home": "Marseille",
+      "away": "Le Mans",
+      "status": "SCHEDULED",
+      "home_score": 0,
+      "away_score": 0,
+      "p_id": "espn_401876400"
+    },
+    {
+      "date": "2026-11-22T20:00Z",
+      "league": 2,
+      "home": "Getafe",
+      "away": "Atl\u00e9tico Madrid",
+      "status": "SCHEDULED",
+      "home_score": 0,
+      "away_score": 0,
+      "p_id": "espn_401882803"
+    },
+    {
+      "date": "2026-11-22T21:00Z",
+      "league": 9,
+      "home": "Nashville SC",
+      "away": "TBD Away",
+      "status": "SCHEDULED",
+      "home_score": 0,
+      "away_score": 0,
+      "p_id": "espn_401933731"
+    },
+    {
+      "date": "2026-11-22T21:30Z",
+      "league": 11,
+      "home": "Fluminense",
+      "away": "Mirassol",
+      "status": "SCHEDULED",
+      "home_score": 0,
+      "away_score": 0,
+      "p_id": "espn_401841324"
+    },
+    {
+      "date": "2026-11-22T22:00Z",
+      "league": 10,
+      "home": "River Plate",
+      "away": "Lan\u00fas",
+      "status": "SCHEDULED",
+      "home_score": 0,
+      "away_score": 0,
+      "p_id": "espn_401933761"
+    },
+    {
+      "date": "2026-11-22T22:30Z",
+      "league": 11,
+      "home": "Red Bull Bragantino",
+      "away": "Vasco da Gama",
+      "status": "SCHEDULED",
+      "home_score": 0,
+      "away_score": 0,
+      "p_id": "espn_401841321"
+    },
+    {
+      "date": "2026-11-22T23:30Z",
+      "league": 9,
+      "home": "Chicago Fire FC",
+      "away": "Charlotte FC",
+      "status": "SCHEDULED",
+      "home_score": 0,
+      "away_score": 0,
+      "p_id": "espn_401933730"
+    }
+  ],
+  "2026-11-23": [
+    {
+      "date": "2026-11-23T01:00Z",
+      "league": 10,
+      "home": "Instituto (C\u00f3rdoba)",
+      "away": "Hurac\u00e1n",
+      "status": "SCHEDULED",
+      "home_score": 0,
+      "away_score": 0,
+      "p_id": "espn_401933762"
+    },
+    {
+      "date": "2026-11-23T01:30Z",
+      "league": 9,
+      "home": "Vancouver Whitecaps",
+      "away": "TBD Away",
+      "status": "SCHEDULED",
+      "home_score": 0,
+      "away_score": 0,
+      "p_id": "espn_401933729"
+    },
+    {
+      "date": "2026-11-23T19:45Z",
+      "league": 3,
+      "home": "Monza",
+      "away": "Fiorentina",
+      "status": "SCHEDULED",
+      "home_score": 0,
+      "away_score": 0,
+      "p_id": "espn_401875009"
+    },
+    {
+      "date": "2026-11-23T20:00Z",
+      "league": 1,
+      "home": "Brentford",
+      "away": "Everton",
+      "status": "SCHEDULED",
+      "home_score": 0,
+      "away_score": 0,
+      "p_id": "espn_401879237"
+    },
+    {
+      "date": "2026-11-23T20:00Z",
+      "league": 2,
+      "home": "Levante",
+      "away": "Elche",
+      "status": "SCHEDULED",
+      "home_score": 0,
+      "away_score": 0,
+      "p_id": "espn_401882802"
+    },
+    {
+      "date": "2026-11-23T20:00Z",
+      "league": 10,
+      "home": "Gimnasia La Plata",
+      "away": "Newell's Old Boys",
+      "status": "SCHEDULED",
+      "home_score": 0,
+      "away_score": 0,
+      "p_id": "espn_401933756"
+    },
+    {
+      "date": "2026-11-23T22:30Z",
+      "league": 11,
+      "home": "Internacional",
+      "away": "Vit\u00f3ria",
+      "status": "SCHEDULED",
+      "home_score": 0,
+      "away_score": 0,
+      "p_id": "espn_401841323"
+    },
+    {
+      "date": "2026-11-23T23:00Z",
+      "league": 11,
+      "home": "Botafogo",
+      "away": "S\u00e3o Paulo",
+      "status": "SCHEDULED",
+      "home_score": 0,
+      "away_score": 0,
+      "p_id": "espn_401841326"
+    }
+  ],
+  "2026-11-24": [
+    {
+      "date": "2026-11-24T00:00Z",
+      "league": 11,
+      "home": "Santos",
+      "away": "Gr\u00eamio",
+      "status": "SCHEDULED",
+      "home_score": 0,
+      "away_score": 0,
+      "p_id": "espn_401841320"
+    },
+    {
+      "date": "2026-11-24T01:00Z",
+      "league": 9,
+      "home": "St. Louis CITY SC",
+      "away": "LAFC",
+      "status": "SCHEDULED",
+      "home_score": 0,
+      "away_score": 0,
+      "p_id": "espn_401933728"
+    },
+    {
+      "date": "2026-11-24T14:00Z",
+      "league": 12,
+      "home": "NorthEast United FC",
+      "away": "Sporting Club Delhi",
+      "status": "SCHEDULED",
+      "home_score": 0,
+      "away_score": 0,
+      "p_id": "espn_401925407"
+    },
+    {
+      "date": "2026-11-24T17:45Z",
+      "league": 6,
+      "home": "Bodo/Glimt",
+      "away": "LASK Linz",
+      "status": "SCHEDULED",
+      "home_score": 0,
+      "away_score": 0,
+      "p_id": "espn_401915380"
+    },
+    {
+      "date": "2026-11-24T17:45Z",
+      "league": 6,
+      "home": "Galatasaray",
+      "away": "Aston Villa",
+      "status": "SCHEDULED",
+      "home_score": 0,
+      "away_score": 0,
+      "p_id": "espn_401915300"
+    },
+    {
+      "date": "2026-11-24T20:00Z",
+      "league": 6,
+      "home": "Arsenal",
+      "away": "Borussia Dortmund",
+      "status": "SCHEDULED",
+      "home_score": 0,
+      "away_score": 0,
+      "p_id": "espn_401915295"
+    },
+    {
+      "date": "2026-11-24T20:00Z",
+      "league": 6,
+      "home": "Como",
+      "away": "AEK Athens",
+      "status": "SCHEDULED",
+      "home_score": 0,
+      "away_score": 0,
+      "p_id": "espn_401915296"
+    },
+    {
+      "date": "2026-11-24T20:00Z",
+      "league": 6,
+      "home": "Feyenoord Rotterdam",
+      "away": "FC Porto",
+      "status": "SCHEDULED",
+      "home_score": 0,
+      "away_score": 0,
+      "p_id": "espn_401915294"
+    },
+    {
+      "date": "2026-11-24T20:00Z",
+      "league": 6,
+      "home": "Manchester City",
+      "away": "Napoli",
+      "status": "SCHEDULED",
+      "home_score": 0,
+      "away_score": 0,
+      "p_id": "espn_401915379"
+    },
+    {
+      "date": "2026-11-24T20:00Z",
+      "league": 6,
+      "home": "RB Leipzig",
+      "away": "Lens",
+      "status": "SCHEDULED",
+      "home_score": 0,
+      "away_score": 0,
+      "p_id": "espn_401915299"
+    },
+    {
+      "date": "2026-11-24T20:00Z",
+      "league": 6,
+      "home": "Real Madrid",
+      "away": "PSV Eindhoven",
+      "status": "SCHEDULED",
+      "home_score": 0,
+      "away_score": 0,
+      "p_id": "espn_401915298"
+    },
+    {
+      "date": "2026-11-24T20:00Z",
+      "league": 6,
+      "home": "Slovan Bratislava",
+      "away": "Real Betis",
+      "status": "SCHEDULED",
+      "home_score": 0,
+      "away_score": 0,
+      "p_id": "espn_401915297"
+    },
+    {
+      "date": "2026-11-24T21:00Z",
+      "league": 11,
+      "home": "Chapecoense",
+      "away": "Palmeiras",
+      "status": "SCHEDULED",
+      "home_score": 0,
+      "away_score": 0,
+      "p_id": "espn_401841335"
+    }
+  ],
+  "2026-11-25": [
+    {
+      "date": "2026-11-25T03:00Z",
+      "league": 9,
+      "home": "San Jose Earthquakes",
+      "away": "Houston Dynamo FC",
+      "status": "SCHEDULED",
+      "home_score": 0,
+      "away_score": 0,
+      "p_id": "espn_401933738"
+    },
+    {
+      "date": "2026-11-25T17:45Z",
+      "league": 6,
+      "home": "Sabah FK",
+      "away": "Barcelona",
+      "status": "SCHEDULED",
+      "home_score": 0,
+      "away_score": 0,
+      "p_id": "espn_401915378"
+    },
+    {
+      "date": "2026-11-25T17:45Z",
+      "league": 6,
+      "home": "Slavia Prague",
+      "away": "Villarreal",
+      "status": "SCHEDULED",
+      "home_score": 0,
+      "away_score": 0,
+      "p_id": "espn_401915293"
+    },
+    {
+      "date": "2026-11-25T20:00Z",
+      "league": 6,
+      "home": "Atl\u00e9tico Madrid",
+      "away": "Viking FK",
+      "status": "SCHEDULED",
+      "home_score": 0,
+      "away_score": 0,
+      "p_id": "espn_401915291"
+    },
+    {
+      "date": "2026-11-25T20:00Z",
+      "league": 6,
+      "home": "Club Brugge",
+      "away": "Liverpool",
+      "status": "SCHEDULED",
+      "home_score": 0,
+      "away_score": 0,
+      "p_id": "espn_401915292"
+    },
+    {
+      "date": "2026-11-25T20:00Z",
+      "league": 6,
+      "home": "Internazionale",
+      "away": "VfB Stuttgart",
+      "status": "SCHEDULED",
+      "home_score": 0,
+      "away_score": 0,
+      "p_id": "espn_401915376"
+    },
+    {
+      "date": "2026-11-25T20:00Z",
+      "league": 6,
+      "home": "Lille",
+      "away": "Bayern Munich",
+      "status": "SCHEDULED",
+      "home_score": 0,
+      "away_score": 0,
+      "p_id": "espn_401915377"
+    },
+    {
+      "date": "2026-11-25T20:00Z",
+      "league": 6,
+      "home": "Paris Saint-Germain",
+      "away": "AS Roma",
+      "status": "SCHEDULED",
+      "home_score": 0,
+      "away_score": 0,
+      "p_id": "espn_401915374"
+    },
+    {
+      "date": "2026-11-25T20:00Z",
+      "league": 6,
+      "home": "Shakhtar Donetsk",
+      "away": "Fenerbahce",
+      "status": "SCHEDULED",
+      "home_score": 0,
+      "away_score": 0,
+      "p_id": "espn_401915375"
+    },
+    {
+      "date": "2026-11-25T20:00Z",
+      "league": 6,
+      "home": "Sporting CP",
+      "away": "Manchester United",
+      "status": "SCHEDULED",
+      "home_score": 0,
+      "away_score": 0,
+      "p_id": "espn_401915373"
+    },
+    {
+      "date": "2026-11-25T23:00Z",
+      "league": 11,
+      "home": "Atl\u00e9tico-MG",
+      "away": "Corinthians",
+      "status": "SCHEDULED",
+      "home_score": 0,
+      "away_score": 0,
+      "p_id": "espn_401841319"
+    }
+  ],
+  "2026-11-26": [
+    {
+      "date": "2026-11-26T00:00Z",
+      "league": 10,
+      "home": "Boca Juniors",
+      "away": "Independiente Rivadavia",
+      "status": "SCHEDULED",
+      "home_score": 0,
+      "away_score": 0,
+      "p_id": "espn_401933757"
     }
   ]
 }
