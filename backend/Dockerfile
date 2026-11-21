@@ -41,6 +41,7 @@ ENV PYTHONUNBUFFERED=1
 
 # Copy application source code with non-root ownership
 COPY --chown=appuser:appgroup . /app
+RUN chown -R appuser:appgroup /app && chmod 775 /app
 
 # Run as unprivileged user
 USER appuser

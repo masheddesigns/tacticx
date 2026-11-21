@@ -37,6 +37,7 @@ ENV PYTHONPATH="/app"
 ENV PYTHONUNBUFFERED=1
 
 COPY --chown=appuser:appgroup backend/ /app
+RUN chown -R appuser:appgroup /app && chmod 775 /app
 
 USER appuser
 

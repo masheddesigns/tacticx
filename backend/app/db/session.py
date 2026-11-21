@@ -3,6 +3,7 @@ from __future__ import annotations
 
 import logging
 import os
+import tempfile
 from datetime import datetime
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
@@ -13,6 +14,19 @@ logger = logging.getLogger(__name__)
 
 _engine = None
 _SessionLocal = None
+
+
+def _get_fallback_sqlite_url() -> str:
+    """Return a guaranteed writable SQLite database path."""
+    base_dir = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+    local_db = os.path.join(base_dir, "dev.db")
+    if os.path.exists(local_db) and os.access(local_db, os.W_OK):
+        return f"sqlite:///{local_db}"
+    if os.access(base_dir, os.W_OK):
+        return f"sqlite:///{local_db}"
+    # In non-root Docker / cloud environments where /app is read-only, use /tmp (always world-writable)
+    tmp_db = os.path.join(tempfile.gettempdir(), "tacticx_dev.db")
+    return f"sqlite:///{tmp_db}"
 
 
 def _seed_from_cache(db, cache_path: str):
@@ -42,6 +56,7 @@ def _seed_from_cache(db, cache_path: str):
         db.commit()
 
         if not os.path.exists(cache_path):
+            logger.warning("Cache file not found at %s; skipping match seed.", cache_path)
             return
 
         with open(cache_path) as f:
@@ -129,6 +144,15 @@ def _ensure_sqlite_ready(engine):
             if db.query(Match).count() == 0:
                 base_dir = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
                 cache_path = os.path.join(base_dir, "scripts", "november_matches_cache.json")
+                if not os.path.exists(cache_path):
+                    for cand in [
+                        os.path.join("scripts", "november_matches_cache.json"),
+                        os.path.join("backend", "scripts", "november_matches_cache.json"),
+                        os.path.join("/app", "scripts", "november_matches_cache.json"),
+                    ]:
+                        if os.path.exists(cand):
+                            cache_path = cand
+                            break
                 _seed_from_cache(db, cache_path)
         except Exception as ex:
             logger.warning("Could not check/seed fallback database: %s", ex)
@@ -167,13 +191,11 @@ def get_engine():
                     "PostgreSQL unreachable (%s); gracefully falling back to local SQLite database.",
                     ex,
                 )
-                base_dir = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-                db_path = os.path.join(base_dir, "dev.db")
-                url = f"sqlite:///{db_path}"
+                url = _get_fallback_sqlite_url()
 
         kwargs = {"pool_pre_ping": True}
         if url.startswith("sqlite"):
-            kwargs = {}
+            kwargs = {"connect_args": {"check_same_thread": False}}
         _engine = create_engine(url, **kwargs)
 
         if url.startswith("sqlite"):
