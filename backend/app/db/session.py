@@ -48,60 +48,71 @@ def _seed_from_cache(db, cache_path: str):
             cache = json.load(f)
 
         teams_map = {}
-        tid_counter = 1
-        mid_counter = 1000
+        for t in db.query(Team).all():
+            teams_map[t.name] = t.id
+
+        cur_max_tid = max((t.id for t in db.query(Team).all()), default=0)
+        cur_max_mid = max((m.id for m in db.query(Match).all()), default=1000)
+
+        seen_pids = {m.provider_match_id for m in db.query(Match.provider_match_id).all() if m.provider_match_id}
 
         for dt, mlist in cache.items():
             for m in mlist:
                 h_name = m['home']
                 a_name = m['away']
                 lid = m['league']
+                p_id = m.get('p_id')
+
+                if p_id and p_id in seen_pids:
+                    continue
 
                 if h_name not in teams_map:
+                    cur_max_tid += 1
                     t = Team(
-                        id=tid_counter, league_id=lid, name=h_name, short_name=h_name[:20],
-                        provider='curated', provider_team_id=f'team_{tid_counter}',
-                        logo_url=f'https://a.espncdn.com/i/teamlogos/soccer/500/{tid_counter}.png'
+                        id=cur_max_tid, league_id=lid, name=h_name, short_name=h_name[:20],
+                        provider='curated', provider_team_id=f'team_{cur_max_tid}',
+                        logo_url=f'https://a.espncdn.com/i/teamlogos/soccer/500/{cur_max_tid}.png'
                     )
                     db.add(t)
-                    teams_map[h_name] = tid_counter
-                    tid_counter += 1
+                    teams_map[h_name] = cur_max_tid
 
                 if a_name not in teams_map:
+                    cur_max_tid += 1
                     t = Team(
-                        id=tid_counter, league_id=lid, name=a_name, short_name=a_name[:20],
-                        provider='curated', provider_team_id=f'team_{tid_counter}',
-                        logo_url=f'https://a.espncdn.com/i/teamlogos/soccer/500/{tid_counter}.png'
+                        id=cur_max_tid, league_id=lid, name=a_name, short_name=a_name[:20],
+                        provider='curated', provider_team_id=f'team_{cur_max_tid}',
+                        logo_url=f'https://a.espncdn.com/i/teamlogos/soccer/500/{cur_max_tid}.png'
                     )
                     db.add(t)
-                    teams_map[a_name] = tid_counter
-                    tid_counter += 1
+                    teams_map[a_name] = cur_max_tid
 
                 ht_id = teams_map[h_name]
                 at_id = teams_map[a_name]
-                mid_counter += 1
+                cur_max_mid += 1
 
                 date_str = m['date']
                 dt_clean = date_str.replace('Z', '+00:00')
                 ko_dt = datetime.fromisoformat(dt_clean).replace(tzinfo=None)
 
                 match_obj = Match(
-                    id=mid_counter,
+                    id=cur_max_mid,
                     league_id=lid,
                     home_team_id=ht_id,
                     away_team_id=at_id,
                     kickoff_at=ko_dt,
                     status=m['status'],
-                    minute=90 if m['status'] == 'FINISHED' else None,
-                    home_score=m['home_score'],
-                    away_score=m['away_score'],
+                    minute=90 if m['status'] == 'FINISHED' else (45 if m['status'] == 'LIVE' else None),
+                    home_score=m.get('home_score'),
+                    away_score=m.get('away_score'),
                     provider='espn',
-                    provider_match_id=m['p_id']
+                    provider_match_id=p_id or f'espn_{cur_max_mid}'
                 )
                 db.add(match_obj)
+                if p_id:
+                    seen_pids.add(p_id)
 
         db.commit()
-        logger.info("Resilient fallback database seeded with %d teams and %d matches", tid_counter - 1, mid_counter - 1000)
+        logger.info("Resilient fallback database seeded successfully with %d teams and %d matches", len(teams_map), len(seen_pids))
     except Exception as ex:
         db.rollback()
         logger.warning("Error seeding fallback database: %s", ex)
@@ -127,24 +138,38 @@ def get_engine():
     global _engine
     if _engine is None:
         url = get_settings().DATABASE_URL
-        if url.startswith("postgresql://"):
+        is_postgres = any(url.startswith(prefix) for prefix in ("postgresql", "postgres"))
+
+        if is_postgres:
+            # Normalize postgres:// to postgresql:// (common in Render/Heroku)
+            if url.startswith("postgres://"):
+                url = url.replace("postgres://", "postgresql://", 1)
+            # Ensure driver compatibility
+            if url.startswith("postgresql://"):
+                try:
+                    import psycopg  # noqa: F401
+                except ImportError:
+                    url = url.replace("postgresql://", "postgresql+psycopg2://", 1)
+
             try:
-                import psycopg  # noqa: F401
-            except ImportError:
-                url = url.replace("postgresql://", "postgresql+psycopg2://", 1)
-            try:
-                # Test connection to PostgreSQL with pool_pre_ping
-                test_engine = create_engine(url, pool_pre_ping=True)
+                # Test connection to PostgreSQL with short timeout to prevent slow boots
+                connect_args = {}
+                if "psycopg" in url:
+                    connect_args = {"connect_timeout": 3}
+                test_engine = create_engine(url, pool_pre_ping=True, connect_args=connect_args)
                 with test_engine.connect():
                     pass
                 _engine = test_engine
+                logger.info("Connected successfully to PostgreSQL database.")
                 return _engine
             except Exception as ex:
                 logger.warning(
                     "PostgreSQL unreachable (%s); gracefully falling back to local SQLite database.",
                     ex,
                 )
-                url = "sqlite:///dev.db"
+                base_dir = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+                db_path = os.path.join(base_dir, "dev.db")
+                url = f"sqlite:///{db_path}"
 
         kwargs = {"pool_pre_ping": True}
         if url.startswith("sqlite"):

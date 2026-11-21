@@ -1942,9 +1942,7 @@
       "status": "FINISHED",
       "home_score": 0,
       "away_score": 1,
-      "p_id": "espn_401841315",
-      "clock": "90'+8'",
-      "detail": "FT"
+      "p_id": "espn_401841315"
     },
     {
       "date": "2026-11-18T23:00Z",
@@ -1954,9 +1952,7 @@
       "status": "FINISHED",
       "home_score": 2,
       "away_score": 0,
-      "p_id": "espn_401841310",
-      "clock": "90'+4'",
-      "detail": "FT"
+      "p_id": "espn_401841310"
     },
     {
       "date": "2026-11-18T23:30Z",
@@ -1966,9 +1962,7 @@
       "status": "FINISHED",
       "home_score": 2,
       "away_score": 1,
-      "p_id": "espn_401841314",
-      "clock": "90'+8'",
-      "detail": "FT"
+      "p_id": "espn_401841314"
     },
     {
       "date": "2026-11-18T23:30Z",
@@ -1979,18 +1973,6 @@
       "home_score": 0,
       "away_score": 0,
       "p_id": "espn_401841313"
-    },
-    {
-      "date": "2026-11-18T23:30Z",
-      "league": 11,
-      "home": "Flamengo",
-      "away": "Athletico Paranaense",
-      "status": "FINISHED",
-      "home_score": 2,
-      "away_score": 1,
-      "p_id": "espn_401841313",
-      "clock": "90'+6'",
-      "detail": "FT"
     }
   ],
   "2026-11-19": [
@@ -2002,9 +1984,7 @@
       "status": "FINISHED",
       "home_score": 4,
       "away_score": 0,
-      "p_id": "espn_401841316",
-      "clock": "90'+1'",
-      "detail": "FT"
+      "p_id": "espn_401841316"
     },
     {
       "date": "2026-11-19T00:30Z",
@@ -2014,9 +1994,7 @@
       "status": "FINISHED",
       "home_score": 0,
       "away_score": 0,
-      "p_id": "espn_401841312",
-      "clock": "90'+6'",
-      "detail": "FT"
+      "p_id": "espn_401841312"
     },
     {
       "date": "2026-11-19T22:30Z",
@@ -2026,9 +2004,7 @@
       "status": "FINISHED",
       "home_score": 2,
       "away_score": 1,
-      "p_id": "espn_401841308",
-      "clock": "90'+7'",
-      "detail": "FT"
+      "p_id": "espn_401841308"
     },
     {
       "date": "2026-11-19T22:30Z",
@@ -2038,9 +2014,7 @@
       "status": "FINISHED",
       "home_score": 2,
       "away_score": 1,
-      "p_id": "espn_401841317",
-      "clock": "90'+7'",
-      "detail": "FT"
+      "p_id": "espn_401841317"
     }
   ],
   "2026-11-20": [
@@ -2052,9 +2026,7 @@
       "status": "FINISHED",
       "home_score": 1,
       "away_score": 3,
-      "p_id": "espn_401933535",
-      "clock": "90'+8'",
-      "detail": "FT"
+      "p_id": "espn_401933535"
     },
     {
       "date": "2026-11-20T00:30Z",
@@ -2064,9 +2036,7 @@
       "status": "FINISHED",
       "home_score": 0,
       "away_score": 1,
-      "p_id": "espn_401841309",
-      "clock": "90'+5'",
-      "detail": "FT"
+      "p_id": "espn_401841309"
     },
     {
       "date": "2026-11-20T03:00Z",
@@ -2076,9 +2046,7 @@
       "status": "FINISHED",
       "home_score": 1,
       "away_score": 1,
-      "p_id": "espn_401933555",
-      "clock": "102'",
-      "detail": "FT-Pens"
+      "p_id": "espn_401933555"
     },
     {
       "date": "2026-11-20T11:30Z",
@@ -2088,9 +2056,7 @@
       "status": "FINISHED",
       "home_score": 2,
       "away_score": 2,
-      "p_id": "espn_401925412",
-      "clock": "90'+6'",
-      "detail": "FT"
+      "p_id": "espn_401925412"
     },
     {
       "date": "2026-11-20T14:00Z",
@@ -2100,9 +2066,7 @@
       "status": "FINISHED",
       "home_score": 2,
       "away_score": 0,
-      "p_id": "espn_401925411",
-      "clock": "90'+6'",
-      "detail": "FT"
+      "p_id": "espn_401925411"
     },
     {
       "date": "2026-11-20T19:30Z",
@@ -2112,9 +2076,7 @@
       "status": "FINISHED",
       "home_score": 1,
       "away_score": 1,
-      "p_id": "espn_401884736",
-      "clock": "90'+3'",
-      "detail": "FT"
+      "p_id": "espn_401884736"
     },
     {
       "date": "2026-11-20T19:45Z",
@@ -2124,9 +2086,7 @@
       "status": "FINISHED",
       "home_score": 3,
       "away_score": 1,
-      "p_id": "espn_401876395",
-      "clock": "90'+9'",
-      "detail": "FT"
+      "p_id": "espn_401876395"
     },
     {
       "date": "2026-11-20T20:00Z",
@@ -2136,9 +2096,7 @@
       "status": "FINISHED",
       "home_score": 0,
       "away_score": 1,
-      "p_id": "espn_401882805",
-      "clock": "90'+4'",
-      "detail": "FT"
+      "p_id": "espn_401882805"
     },
     {
       "date": "2026-11-20T23:00Z",
@@ -2148,9 +2106,7 @@
       "status": "FINISHED",
       "home_score": 2,
       "away_score": 2,
-      "p_id": "espn_401933760",
-      "clock": "120'",
-      "detail": "FT-Pens"
+      "p_id": "espn_401933760"
     }
   ],
   "2026-11-21": [
@@ -2162,9 +2118,7 @@
       "status": "FINISHED",
       "home_score": 1,
       "away_score": 1,
-      "p_id": "espn_401925410",
-      "clock": "90'+6'",
-      "detail": "FT"
+      "p_id": "espn_401925410"
     },
     {
       "date": "2026-11-21T12:30Z",
@@ -2174,9 +2128,7 @@
       "status": "FINISHED",
       "home_score": 1,
       "away_score": 1,
-      "p_id": "espn_401879233",
-      "clock": "90'+3'",
-      "detail": "FT"
+      "p_id": "espn_401879233"
     },
     {
       "date": "2026-11-21T13:00Z",
@@ -2186,9 +2138,7 @@
       "status": "FINISHED",
       "home_score": 3,
       "away_score": 1,
-      "p_id": "espn_401882806",
-      "clock": "90'+6'",
-      "detail": "FT"
+      "p_id": "espn_401882806"
     },
     {
       "date": "2026-11-21T14:00Z",
@@ -2198,9 +2148,7 @@
       "status": "LIVE",
       "home_score": 2,
       "away_score": 0,
-      "p_id": "espn_401875056",
-      "clock": "69'",
-      "detail": "69'"
+      "p_id": "espn_401875056"
     },
     {
       "date": "2026-11-21T14:00Z",
@@ -2210,9 +2158,7 @@
       "status": "LIVE",
       "home_score": 2,
       "away_score": 0,
-      "p_id": "espn_401874981",
-      "clock": "74'",
-      "detail": "74'"
+      "p_id": "espn_401874981"
     },
     {
       "date": "2026-11-21T14:00Z",
@@ -2222,9 +2168,7 @@
       "status": "LIVE",
       "home_score": 0,
       "away_score": 1,
-      "p_id": "espn_401925409",
-      "clock": "66'",
-      "detail": "66'"
+      "p_id": "espn_401925409"
     },
     {
       "date": "2026-11-21T14:30Z",
@@ -2234,9 +2178,7 @@
       "status": "LIVE",
       "home_score": 1,
       "away_score": 1,
-      "p_id": "espn_401884732",
-      "clock": "45'+5'",
-      "detail": "HT"
+      "p_id": "espn_401884732"
     },
     {
       "date": "2026-11-21T14:30Z",
@@ -2246,9 +2188,7 @@
       "status": "LIVE",
       "home_score": 1,
       "away_score": 0,
-      "p_id": "espn_401884735",
-      "clock": "45'+2'",
-      "detail": "HT"
+      "p_id": "espn_401884735"
     },
     {
       "date": "2026-11-21T14:30Z",
@@ -2258,9 +2198,7 @@
       "status": "LIVE",
       "home_score": 0,
       "away_score": 0,
-      "p_id": "espn_401884731",
-      "clock": "45'+1'",
-      "detail": "HT"
+      "p_id": "espn_401884731"
     },
     {
       "date": "2026-11-21T14:30Z",
@@ -2270,9 +2208,7 @@
       "status": "LIVE",
       "home_score": 1,
       "away_score": 0,
-      "p_id": "espn_401884734",
-      "clock": "45'+3'",
-      "detail": "HT"
+      "p_id": "espn_401884734"
     },
     {
       "date": "2026-11-21T14:30Z",
@@ -2282,9 +2218,7 @@
       "status": "LIVE",
       "home_score": 0,
       "away_score": 0,
-      "p_id": "espn_401884728",
-      "clock": "45'+1'",
-      "detail": "HT"
+      "p_id": "espn_401884728"
     },
     {
       "date": "2026-11-21T15:00Z",
@@ -2294,9 +2228,7 @@
       "status": "LIVE",
       "home_score": 1,
       "away_score": 0,
-      "p_id": "espn_401879238",
-      "clock": "31'",
-      "detail": "31'"
+      "p_id": "espn_401879238"
     },
     {
       "date": "2026-11-21T15:00Z",
@@ -2306,9 +2238,7 @@
       "status": "LIVE",
       "home_score": 0,
       "away_score": 0,
-      "p_id": "espn_401878756",
-      "clock": "31'",
-      "detail": "31'"
+      "p_id": "espn_401878756"
     },
     {
       "date": "2026-11-21T15:00Z",
@@ -2318,9 +2248,7 @@
       "status": "LIVE",
       "home_score": 1,
       "away_score": 1,
-      "p_id": "espn_401879236",
-      "clock": "31'",
-      "detail": "31'"
+      "p_id": "espn_401879236"
     },
     {
       "date": "2026-11-21T15:00Z",
@@ -2330,9 +2258,7 @@
       "status": "LIVE",
       "home_score": 2,
       "away_score": 1,
-      "p_id": "espn_401879235",
-      "clock": "31'",
-      "detail": "31'"
+      "p_id": "espn_401879235"
     },
     {
       "date": "2026-11-21T15:00Z",
@@ -2342,9 +2268,7 @@
       "status": "LIVE",
       "home_score": 1,
       "away_score": 0,
-      "p_id": "espn_401878754",
-      "clock": "30'",
-      "detail": "30'"
+      "p_id": "espn_401878754"
     },
     {
       "date": "2026-11-21T15:15Z",
@@ -2354,9 +2278,7 @@
       "status": "LIVE",
       "home_score": 0,
       "away_score": 0,
-      "p_id": "espn_401882799",
-      "clock": "14'",
-      "detail": "14'"
+      "p_id": "espn_401882799"
     },
     {
       "date": "2026-11-21T16:15Z",
@@ -2366,9 +2288,7 @@
       "status": "SCHEDULED",
       "home_score": 0,
       "away_score": 0,
-      "p_id": "espn_401876398",
-      "clock": "0'",
-      "detail": "Sat, November 21st at 11:15 AM EST"
+      "p_id": "espn_401876398"
     },
     {
       "date": "2026-11-21T17:00Z",
@@ -2378,9 +2298,7 @@
       "status": "SCHEDULED",
       "home_score": 0,
       "away_score": 0,
-      "p_id": "espn_401874967",
-      "clock": "0'",
-      "detail": "Sat, November 21st at 12:00 PM EST"
+      "p_id": "espn_401874967"
     },
     {
       "date": "2026-11-21T17:30Z",
@@ -2390,9 +2308,7 @@
       "status": "SCHEDULED",
       "home_score": 0,
       "away_score": 0,
-      "p_id": "espn_401879232",
-      "clock": "0'",
-      "detail": "Sat, November 21st at 12:30 PM EST"
+      "p_id": "espn_401879232"
     },
     {
       "date": "2026-11-21T17:30Z",
@@ -2402,9 +2318,7 @@
       "status": "SCHEDULED",
       "home_score": 0,
       "away_score": 0,
-      "p_id": "espn_401882797",
-      "clock": "0'",
-      "detail": "Sat, November 21st at 12:30 PM EST"
+      "p_id": "espn_401882797"
     },
     {
       "date": "2026-11-21T17:30Z",
@@ -2414,9 +2328,7 @@
       "status": "SCHEDULED",
       "home_score": 0,
       "away_score": 0,
-      "p_id": "espn_401884729",
-      "clock": "0'",
-      "detail": "Sat, November 21st at 12:30 PM EST"
+      "p_id": "espn_401884729"
     },
     {
       "date": "2026-11-21T18:00Z",
@@ -2426,9 +2338,7 @@
       "status": "SCHEDULED",
       "home_score": 0,
       "away_score": 0,
-      "p_id": "espn_401933758",
-      "clock": "0'",
-      "detail": "Sat, November 21st at 1:00 PM EST"
+      "p_id": "espn_401933758"
     },
     {
       "date": "2026-11-21T19:00Z",
@@ -2438,9 +2348,7 @@
       "status": "SCHEDULED",
       "home_score": 0,
       "away_score": 0,
-      "p_id": "espn_401933733",
-      "clock": "0'",
-      "detail": "Sat, November 21st at 2:00 PM EST"
+      "p_id": "espn_401933733"
     },
     {
       "date": "2026-11-21T19:30Z",
@@ -2450,9 +2358,7 @@
       "status": "SCHEDULED",
       "home_score": 0,
       "away_score": 0,
-      "p_id": "espn_401841322",
-      "clock": "0'",
-      "detail": "Sat, November 21st at 2:30 PM EST"
+      "p_id": "espn_401841322"
     },
     {
       "date": "2026-11-21T19:45Z",
@@ -2462,9 +2368,7 @@
       "status": "SCHEDULED",
       "home_score": 0,
       "away_score": 0,
-      "p_id": "espn_401875067",
-      "clock": "0'",
-      "detail": "Sat, November 21st at 2:45 PM EST"
+      "p_id": "espn_401875067"
     },
     {
       "date": "2026-11-21T19:45Z",
@@ -2474,9 +2378,7 @@
       "status": "SCHEDULED",
       "home_score": 0,
       "away_score": 0,
-      "p_id": "espn_401876399",
-      "clock": "0'",
-      "detail": "Sat, November 21st at 2:45 PM EST"
+      "p_id": "espn_401876399"
     },
     {
       "date": "2026-11-21T19:45Z",
@@ -2486,9 +2388,7 @@
       "status": "SCHEDULED",
       "home_score": 0,
       "away_score": 0,
-      "p_id": "espn_401876403",
-      "clock": "0'",
-      "detail": "Sat, November 21st at 2:45 PM EST"
+      "p_id": "espn_401876403"
     },
     {
       "date": "2026-11-21T19:45Z",
@@ -2498,9 +2398,7 @@
       "status": "SCHEDULED",
       "home_score": 0,
       "away_score": 0,
-      "p_id": "espn_401876402",
-      "clock": "0'",
-      "detail": "Sat, November 21st at 2:45 PM EST"
+      "p_id": "espn_401876402"
     },
     {
       "date": "2026-11-21T19:45Z",
@@ -2510,9 +2408,7 @@
       "status": "SCHEDULED",
       "home_score": 0,
       "away_score": 0,
-      "p_id": "espn_401876396",
-      "clock": "0'",
-      "detail": "Sat, November 21st at 2:45 PM EST"
+      "p_id": "espn_401876396"
     },
     {
       "date": "2026-11-21T20:00Z",
@@ -2522,9 +2418,7 @@
       "status": "SCHEDULED",
       "home_score": 0,
       "away_score": 0,
-      "p_id": "espn_401882798",
-      "clock": "0'",
-      "detail": "Sat, November 21st at 3:00 PM EST"
+      "p_id": "espn_401882798"
     },
     {
       "date": "2026-11-21T20:00Z",
@@ -2534,9 +2428,7 @@
       "status": "SCHEDULED",
       "home_score": 0,
       "away_score": 0,
-      "p_id": "espn_401933755",
-      "clock": "0'",
-      "detail": "Sat, November 21st at 3:00 PM EST"
+      "p_id": "espn_401933755"
     },
     {
       "date": "2026-11-21T20:30Z",
@@ -2546,9 +2438,7 @@
       "status": "SCHEDULED",
       "home_score": 0,
       "away_score": 0,
-      "p_id": "espn_401841327",
-      "clock": "0'",
-      "detail": "Sat, November 21st at 3:30 PM EST"
+      "p_id": "espn_401841327"
     },
     {
       "date": "2026-11-21T21:00Z",
@@ -2558,9 +2448,7 @@
       "status": "SCHEDULED",
       "home_score": 0,
       "away_score": 0,
-      "p_id": "espn_401933732",
-      "clock": "0'",
-      "detail": "Sat, November 21st at 4:00 PM EST"
+      "p_id": "espn_401933732"
     },
     {
       "date": "2026-11-21T23:00Z",
@@ -2570,9 +2458,7 @@
       "status": "SCHEDULED",
       "home_score": 0,
       "away_score": 0,
-      "p_id": "espn_401933739",
-      "clock": "0'",
-      "detail": "Sat, November 21st at 6:00 PM EST"
+      "p_id": "espn_401933739"
     }
   ],
   "2026-11-22": [
@@ -2584,9 +2470,7 @@
       "status": "SCHEDULED",
       "home_score": 0,
       "away_score": 0,
-      "p_id": "espn_401841325",
-      "clock": "0'",
-      "detail": "Sat, November 21st at 7:00 PM EST"
+      "p_id": "espn_401841325"
     },
     {
       "date": "2026-11-22T11:30Z",
@@ -2596,9 +2480,7 @@
       "status": "SCHEDULED",
       "home_score": 0,
       "away_score": 0,
-      "p_id": "espn_401875008",
-      "clock": "0'",
-      "detail": "Sun, November 22nd at 6:30 AM EST"
+      "p_id": "espn_401875008"
     },
     {
       "date": "2026-11-22T13:00Z",
@@ -2608,9 +2490,7 @@
       "status": "SCHEDULED",
       "home_score": 0,
       "away_score": 0,
-      "p_id": "espn_401882804",
-      "clock": "0'",
-      "detail": "Sun, November 22nd at 8:00 AM EST"
+      "p_id": "espn_401882804"
     },
     {
       "date": "2026-11-22T14:00Z",
@@ -2620,9 +2500,7 @@
       "status": "SCHEDULED",
       "home_score": 0,
       "away_score": 0,
-      "p_id": "espn_401879234",
-      "clock": "0'",
-      "detail": "Sun, November 22nd at 9:00 AM EST"
+      "p_id": "espn_401879234"
     },
     {
       "date": "2026-11-22T14:00Z",
@@ -2632,9 +2510,7 @@
       "status": "SCHEDULED",
       "home_score": 0,
       "away_score": 0,
-      "p_id": "espn_401875047",
-      "clock": "0'",
-      "detail": "Sun, November 22nd at 9:00 AM EST"
+      "p_id": "espn_401875047"
     },
     {
       "date": "2026-11-22T14:00Z",
@@ -2644,9 +2520,7 @@
       "status": "SCHEDULED",
       "home_score": 0,
       "away_score": 0,
-      "p_id": "espn_401874960",
-      "clock": "0'",
-      "detail": "Sun, November 22nd at 9:00 AM EST"
+      "p_id": "espn_401874960"
     },
     {
       "date": "2026-11-22T14:00Z",
@@ -2656,9 +2530,7 @@
       "status": "SCHEDULED",
       "home_score": 0,
       "away_score": 0,
-      "p_id": "espn_401876397",
-      "clock": "0'",
-      "detail": "Sun, November 22nd at 9:00 AM EST"
+      "p_id": "espn_401876397"
     },
     {
       "date": "2026-11-22T14:00Z",
@@ -2668,9 +2540,7 @@
       "status": "SCHEDULED",
       "home_score": 0,
       "away_score": 0,
-      "p_id": "espn_401925408",
-      "clock": "0'",
-      "detail": "Sun, November 22nd at 9:00 AM EST"
+      "p_id": "espn_401925408"
     },
     {
       "date": "2026-11-22T14:30Z",
@@ -2680,9 +2550,7 @@
       "status": "SCHEDULED",
       "home_score": 0,
       "away_score": 0,
-      "p_id": "espn_401884733",
-      "clock": "0'",
-      "detail": "Sun, November 22nd at 9:30 AM EST"
+      "p_id": "espn_401884733"
     },
     {
       "date": "2026-11-22T15:15Z",
@@ -2692,9 +2560,7 @@
       "status": "SCHEDULED",
       "home_score": 0,
       "away_score": 0,
-      "p_id": "espn_401882800",
-      "clock": "0'",
-      "detail": "Sun, November 22nd at 10:15 AM EST"
+      "p_id": "espn_401882800"
     },
     {
       "date": "2026-11-22T16:15Z",
@@ -2704,9 +2570,7 @@
       "status": "SCHEDULED",
       "home_score": 0,
       "away_score": 0,
-      "p_id": "espn_401876401",
-      "clock": "0'",
-      "detail": "Sun, November 22nd at 11:15 AM EST"
+      "p_id": "espn_401876401"
     },
     {
       "date": "2026-11-22T16:30Z",
@@ -2716,9 +2580,7 @@
       "status": "SCHEDULED",
       "home_score": 0,
       "away_score": 0,
-      "p_id": "espn_401878755",
-      "clock": "0'",
-      "detail": "Sun, November 22nd at 11:30 AM EST"
+      "p_id": "espn_401878755"
     },
     {
       "date": "2026-11-22T16:30Z",
@@ -2728,9 +2590,7 @@
       "status": "SCHEDULED",
       "home_score": 0,
       "away_score": 0,
-      "p_id": "espn_401884730",
-      "clock": "0'",
-      "detail": "Sun, November 22nd at 11:30 AM EST"
+      "p_id": "espn_401884730"
     },
     {
       "date": "2026-11-22T17:00Z",
@@ -2740,9 +2600,7 @@
       "status": "SCHEDULED",
       "home_score": 0,
       "away_score": 0,
-      "p_id": "espn_401874989",
-      "clock": "0'",
-      "detail": "Sun, November 22nd at 12:00 PM EST"
+      "p_id": "espn_401874989"
     },
     {
       "date": "2026-11-22T17:30Z",
@@ -2752,9 +2610,7 @@
       "status": "SCHEDULED",
       "home_score": 0,
       "away_score": 0,
-      "p_id": "espn_401882801",
-      "clock": "0'",
-      "detail": "Sun, November 22nd at 12:30 PM EST"
+      "p_id": "espn_401882801"
     },
     {
       "date": "2026-11-22T19:00Z",
@@ -2764,21 +2620,7 @@
       "status": "SCHEDULED",
       "home_score": 0,
       "away_score": 0,
-      "p_id": "espn_401933759",
-      "clock": "0'",
-      "detail": "Sun, November 22nd at 2:00 PM EST"
-    },
-    {
-      "date": "2026-11-22T19:00Z",
-      "league": 11,
-      "home": "Athletico Paranaense",
-      "away": "Remo",
-      "status": "SCHEDULED",
-      "home_score": 0,
-      "away_score": 0,
-      "p_id": "espn_401841318",
-      "clock": "0'",
-      "detail": "Sun, November 22nd at 2:00 PM EST"
+      "p_id": "espn_401933759"
     },
     {
       "date": "2026-11-22T19:00Z",
@@ -2798,9 +2640,7 @@
       "status": "SCHEDULED",
       "home_score": 0,
       "away_score": 0,
-      "p_id": "espn_401875001",
-      "clock": "0'",
-      "detail": "Sun, November 22nd at 2:45 PM EST"
+      "p_id": "espn_401875001"
     },
     {
       "date": "2026-11-22T19:45Z",
@@ -2810,9 +2650,7 @@
       "status": "SCHEDULED",
       "home_score": 0,
       "away_score": 0,
-      "p_id": "espn_401876400",
-      "clock": "0'",
-      "detail": "Sun, November 22nd at 2:45 PM EST"
+      "p_id": "espn_401876400"
     },
     {
       "date": "2026-11-22T20:00Z",
@@ -2822,19 +2660,7 @@
       "status": "SCHEDULED",
       "home_score": 0,
       "away_score": 0,
-      "p_id": "espn_401882803",
-      "clock": "0'",
-      "detail": "Sun, November 22nd at 3:00 PM EST"
-    },
-    {
-      "date": "2026-11-22T21:00Z",
-      "league": 9,
-      "home": "Nashville SC",
-      "away": "TBD Away",
-      "status": "SCHEDULED",
-      "home_score": 0,
-      "away_score": 0,
-      "p_id": "espn_401933731"
+      "p_id": "espn_401882803"
     },
     {
       "date": "2026-11-22T21:00Z",
@@ -2844,9 +2670,7 @@
       "status": "SCHEDULED",
       "home_score": 0,
       "away_score": 0,
-      "p_id": "espn_401933731",
-      "clock": "0'",
-      "detail": "Sun, November 22nd at 4:00 PM EST"
+      "p_id": "espn_401933731"
     },
     {
       "date": "2026-11-22T21:30Z",
@@ -2856,9 +2680,7 @@
       "status": "SCHEDULED",
       "home_score": 0,
       "away_score": 0,
-      "p_id": "espn_401841324",
-      "clock": "0'",
-      "detail": "Sun, November 22nd at 4:30 PM EST"
+      "p_id": "espn_401841324"
     },
     {
       "date": "2026-11-22T22:00Z",
@@ -2868,9 +2690,7 @@
       "status": "SCHEDULED",
       "home_score": 0,
       "away_score": 0,
-      "p_id": "espn_401933761",
-      "clock": "0'",
-      "detail": "Sun, November 22nd at 5:00 PM EST"
+      "p_id": "espn_401933761"
     },
     {
       "date": "2026-11-22T22:30Z",
@@ -2880,9 +2700,7 @@
       "status": "SCHEDULED",
       "home_score": 0,
       "away_score": 0,
-      "p_id": "espn_401841321",
-      "clock": "0'",
-      "detail": "Sun, November 22nd at 5:30 PM EST"
+      "p_id": "espn_401841321"
     },
     {
       "date": "2026-11-22T23:30Z",
@@ -2892,9 +2710,7 @@
       "status": "SCHEDULED",
       "home_score": 0,
       "away_score": 0,
-      "p_id": "espn_401933730",
-      "clock": "0'",
-      "detail": "Sun, November 22nd at 6:30 PM EST"
+      "p_id": "espn_401933730"
     }
   ],
   "2026-11-23": [
@@ -2906,19 +2722,7 @@
       "status": "SCHEDULED",
       "home_score": 0,
       "away_score": 0,
-      "p_id": "espn_401933762",
-      "clock": "0'",
-      "detail": "Sun, November 22nd at 8:00 PM EST"
-    },
-    {
-      "date": "2026-11-23T01:30Z",
-      "league": 9,
-      "home": "Vancouver Whitecaps",
-      "away": "TBD Away",
-      "status": "SCHEDULED",
-      "home_score": 0,
-      "away_score": 0,
-      "p_id": "espn_401933729"
+      "p_id": "espn_401933762"
     },
     {
       "date": "2026-11-23T01:30Z",
@@ -2928,9 +2732,7 @@
       "status": "SCHEDULED",
       "home_score": 0,
       "away_score": 0,
-      "p_id": "espn_401933729",
-      "clock": "0'",
-      "detail": "Sun, November 22nd at 8:30 PM EST"
+      "p_id": "espn_401933729"
     },
     {
       "date": "2026-11-23T19:45Z",
@@ -2940,9 +2742,7 @@
       "status": "SCHEDULED",
       "home_score": 0,
       "away_score": 0,
-      "p_id": "espn_401875009",
-      "clock": "0'",
-      "detail": "Mon, November 23rd at 2:45 PM EST"
+      "p_id": "espn_401875009"
     },
     {
       "date": "2026-11-23T20:00Z",
@@ -2952,9 +2752,7 @@
       "status": "SCHEDULED",
       "home_score": 0,
       "away_score": 0,
-      "p_id": "espn_401879237",
-      "clock": "0'",
-      "detail": "Mon, November 23rd at 3:00 PM EST"
+      "p_id": "espn_401879237"
     },
     {
       "date": "2026-11-23T20:00Z",
@@ -2964,9 +2762,7 @@
       "status": "SCHEDULED",
       "home_score": 0,
       "away_score": 0,
-      "p_id": "espn_401882802",
-      "clock": "0'",
-      "detail": "Mon, November 23rd at 3:00 PM EST"
+      "p_id": "espn_401882802"
     },
     {
       "date": "2026-11-23T20:00Z",
@@ -2976,9 +2772,7 @@
       "status": "SCHEDULED",
       "home_score": 0,
       "away_score": 0,
-      "p_id": "espn_401933756",
-      "clock": "0'",
-      "detail": "Mon, November 23rd at 3:00 PM EST"
+      "p_id": "espn_401933756"
     },
     {
       "date": "2026-11-23T22:30Z",
@@ -2988,9 +2782,7 @@
       "status": "SCHEDULED",
       "home_score": 0,
       "away_score": 0,
-      "p_id": "espn_401841323",
-      "clock": "0'",
-      "detail": "Mon, November 23rd at 5:30 PM EST"
+      "p_id": "espn_401841323"
     },
     {
       "date": "2026-11-23T23:00Z",
@@ -3000,9 +2792,7 @@
       "status": "SCHEDULED",
       "home_score": 0,
       "away_score": 0,
-      "p_id": "espn_401841326",
-      "clock": "0'",
-      "detail": "Mon, November 23rd at 6:00 PM EST"
+      "p_id": "espn_401841326"
     }
   ],
   "2026-11-24": [
@@ -3014,9 +2804,7 @@
       "status": "SCHEDULED",
       "home_score": 0,
       "away_score": 0,
-      "p_id": "espn_401841320",
-      "clock": "0'",
-      "detail": "Mon, November 23rd at 7:00 PM EST"
+      "p_id": "espn_401841320"
     },
     {
       "date": "2026-11-24T01:00Z",
@@ -3026,9 +2814,7 @@
       "status": "SCHEDULED",
       "home_score": 0,
       "away_score": 0,
-      "p_id": "espn_401933728",
-      "clock": "0'",
-      "detail": "Mon, November 23rd at 8:00 PM EST"
+      "p_id": "espn_401933728"
     },
     {
       "date": "2026-11-24T14:00Z",
@@ -3038,9 +2824,7 @@
       "status": "SCHEDULED",
       "home_score": 0,
       "away_score": 0,
-      "p_id": "espn_401925407",
-      "clock": "0'",
-      "detail": "Tue, November 24th at 9:00 AM EST"
+      "p_id": "espn_401925407"
     },
     {
       "date": "2026-11-24T17:45Z",
@@ -3050,9 +2834,7 @@
       "status": "SCHEDULED",
       "home_score": 0,
       "away_score": 0,
-      "p_id": "espn_401915380",
-      "clock": "0'",
-      "detail": "Tue, November 24th at 12:45 PM EST"
+      "p_id": "espn_401915380"
     },
     {
       "date": "2026-11-24T17:45Z",
@@ -3062,9 +2844,7 @@
       "status": "SCHEDULED",
       "home_score": 0,
       "away_score": 0,
-      "p_id": "espn_401915300",
-      "clock": "0'",
-      "detail": "Tue, November 24th at 12:45 PM EST"
+      "p_id": "espn_401915300"
     },
     {
       "date": "2026-11-24T20:00Z",
@@ -3074,9 +2854,7 @@
       "status": "SCHEDULED",
       "home_score": 0,
       "away_score": 0,
-      "p_id": "espn_401915295",
-      "clock": "0'",
-      "detail": "Tue, November 24th at 3:00 PM EST"
+      "p_id": "espn_401915295"
     },
     {
       "date": "2026-11-24T20:00Z",
@@ -3086,9 +2864,7 @@
       "status": "SCHEDULED",
       "home_score": 0,
       "away_score": 0,
-      "p_id": "espn_401915296",
-      "clock": "0'",
-      "detail": "Tue, November 24th at 3:00 PM EST"
+      "p_id": "espn_401915296"
     },
     {
       "date": "2026-11-24T20:00Z",
@@ -3098,9 +2874,7 @@
       "status": "SCHEDULED",
       "home_score": 0,
       "away_score": 0,
-      "p_id": "espn_401915294",
-      "clock": "0'",
-      "detail": "Tue, November 24th at 3:00 PM EST"
+      "p_id": "espn_401915294"
     },
     {
       "date": "2026-11-24T20:00Z",
@@ -3110,9 +2884,7 @@
       "status": "SCHEDULED",
       "home_score": 0,
       "away_score": 0,
-      "p_id": "espn_401915379",
-      "clock": "0'",
-      "detail": "Tue, November 24th at 3:00 PM EST"
+      "p_id": "espn_401915379"
     },
     {
       "date": "2026-11-24T20:00Z",
@@ -3122,9 +2894,7 @@
       "status": "SCHEDULED",
       "home_score": 0,
       "away_score": 0,
-      "p_id": "espn_401915299",
-      "clock": "0'",
-      "detail": "Tue, November 24th at 3:00 PM EST"
+      "p_id": "espn_401915299"
     },
     {
       "date": "2026-11-24T20:00Z",
@@ -3134,9 +2904,7 @@
       "status": "SCHEDULED",
       "home_score": 0,
       "away_score": 0,
-      "p_id": "espn_401915298",
-      "clock": "0'",
-      "detail": "Tue, November 24th at 3:00 PM EST"
+      "p_id": "espn_401915298"
     },
     {
       "date": "2026-11-24T20:00Z",
@@ -3146,9 +2914,7 @@
       "status": "SCHEDULED",
       "home_score": 0,
       "away_score": 0,
-      "p_id": "espn_401915297",
-      "clock": "0'",
-      "detail": "Tue, November 24th at 3:00 PM EST"
+      "p_id": "espn_401915297"
     },
     {
       "date": "2026-11-24T21:00Z",
@@ -3158,9 +2924,7 @@
       "status": "SCHEDULED",
       "home_score": 0,
       "away_score": 0,
-      "p_id": "espn_401841335",
-      "clock": "0'",
-      "detail": "Tue, November 24th at 4:00 PM EST"
+      "p_id": "espn_401841335"
     }
   ],
   "2026-11-25": [
@@ -3172,9 +2936,7 @@
       "status": "SCHEDULED",
       "home_score": 0,
       "away_score": 0,
-      "p_id": "espn_401933738",
-      "clock": "0'",
-      "detail": "Tue, November 24th at 10:00 PM EST"
+      "p_id": "espn_401933738"
     },
     {
       "date": "2026-11-25T17:45Z",
@@ -3184,9 +2946,7 @@
       "status": "SCHEDULED",
       "home_score": 0,
       "away_score": 0,
-      "p_id": "espn_401915378",
-      "clock": "0'",
-      "detail": "Wed, November 25th at 12:45 PM EST"
+      "p_id": "espn_401915378"
     },
     {
       "date": "2026-11-25T17:45Z",
@@ -3196,9 +2956,7 @@
       "status": "SCHEDULED",
       "home_score": 0,
       "away_score": 0,
-      "p_id": "espn_401915293",
-      "clock": "0'",
-      "detail": "Wed, November 25th at 12:45 PM EST"
+      "p_id": "espn_401915293"
     },
     {
       "date": "2026-11-25T20:00Z",
@@ -3208,9 +2966,7 @@
       "status": "SCHEDULED",
       "home_score": 0,
       "away_score": 0,
-      "p_id": "espn_401915291",
-      "clock": "0'",
-      "detail": "Wed, November 25th at 3:00 PM EST"
+      "p_id": "espn_401915291"
     },
     {
       "date": "2026-11-25T20:00Z",
@@ -3220,9 +2976,7 @@
       "status": "SCHEDULED",
       "home_score": 0,
       "away_score": 0,
-      "p_id": "espn_401915292",
-      "clock": "0'",
-      "detail": "Wed, November 25th at 3:00 PM EST"
+      "p_id": "espn_401915292"
     },
     {
       "date": "2026-11-25T20:00Z",
@@ -3232,9 +2986,7 @@
       "status": "SCHEDULED",
       "home_score": 0,
       "away_score": 0,
-      "p_id": "espn_401915376",
-      "clock": "0'",
-      "detail": "Wed, November 25th at 3:00 PM EST"
+      "p_id": "espn_401915376"
     },
     {
       "date": "2026-11-25T20:00Z",
@@ -3244,9 +2996,7 @@
       "status": "SCHEDULED",
       "home_score": 0,
       "away_score": 0,
-      "p_id": "espn_401915377",
-      "clock": "0'",
-      "detail": "Wed, November 25th at 3:00 PM EST"
+      "p_id": "espn_401915377"
     },
     {
       "date": "2026-11-25T20:00Z",
@@ -3256,9 +3006,7 @@
       "status": "SCHEDULED",
       "home_score": 0,
       "away_score": 0,
-      "p_id": "espn_401915374",
-      "clock": "0'",
-      "detail": "Wed, November 25th at 3:00 PM EST"
+      "p_id": "espn_401915374"
     },
     {
       "date": "2026-11-25T20:00Z",
@@ -3268,9 +3016,7 @@
       "status": "SCHEDULED",
       "home_score": 0,
       "away_score": 0,
-      "p_id": "espn_401915375",
-      "clock": "0'",
-      "detail": "Wed, November 25th at 3:00 PM EST"
+      "p_id": "espn_401915375"
     },
     {
       "date": "2026-11-25T20:00Z",
@@ -3280,9 +3026,7 @@
       "status": "SCHEDULED",
       "home_score": 0,
       "away_score": 0,
-      "p_id": "espn_401915373",
-      "clock": "0'",
-      "detail": "Wed, November 25th at 3:00 PM EST"
+      "p_id": "espn_401915373"
     },
     {
       "date": "2026-11-25T23:00Z",
@@ -3292,9 +3036,7 @@
       "status": "SCHEDULED",
       "home_score": 0,
       "away_score": 0,
-      "p_id": "espn_401841319",
-      "clock": "0'",
-      "detail": "Wed, November 25th at 6:00 PM EST"
+      "p_id": "espn_401841319"
     }
   ],
   "2026-11-26": [
@@ -3306,9 +3048,7 @@
       "status": "SCHEDULED",
       "home_score": 0,
       "away_score": 0,
-      "p_id": "espn_401933757",
-      "clock": "0'",
-      "detail": "Wed, November 25th at 7:00 PM EST"
+      "p_id": "espn_401933757"
     }
   ]
 }
