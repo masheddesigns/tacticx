@@ -1097,6 +1097,11 @@ export const DailyAIPredictionsSection: React.FC<DailyAIPredictionsSectionProps>
                           <span className="text-xs px-2 py-0.5 rounded bg-emerald-950/70 text-fotmob-green font-bold border border-emerald-800/60">
                             {pred.best_outcome.ev_edge}
                           </span>
+                          {pred.best_outcome.recommended_stake && (
+                            <span className="text-xs px-2 py-0.5 rounded bg-amber-400/10 text-amber-300 font-bold border border-amber-400/20" title="Quarter-Kelly Recommended Stake">
+                              🎯 {pred.best_outcome.recommended_stake}
+                            </span>
+                          )}
                         </div>
                       </div>
 

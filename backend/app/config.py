@@ -1,12 +1,16 @@
 from __future__ import annotations
 
+import os
 from functools import lru_cache
 from typing import Optional
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
 class Settings(BaseSettings):
-    model_config = SettingsConfigDict(env_file=".env", extra="ignore")
+    model_config = SettingsConfigDict(
+        env_file=[".env", "backend/.env", os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), ".env")],
+        extra="ignore"
+    )
 
     DATABASE_URL: str = "postgresql+psycopg2://bet:bet@localhost:5432/betpredictor"
     REDIS_URL: str = "redis://localhost:6379/0"

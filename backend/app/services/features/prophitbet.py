@@ -15,6 +15,38 @@ from typing import Any, Dict, List, Optional, Tuple
 from sqlalchemy.orm import Session
 from app.db.models.core import Match, Team, MatchStatistic
 from app.db.models.enums import MatchStatus
+from app.services.predictions.math_utils import score_grid, markets_from_grid
+
+
+def compute_kelly_stake(probability: float, decimal_odds: float, bankroll_fraction: float = 0.25) -> Dict[str, float]:
+    """Compute optimal bankroll fraction using Kelly Criterion (Quarter-Kelly by default).
+    
+    Formula:
+      b = odds - 1
+      q = 1 - p
+      full_kelly = (b * p - q) / b = (p * odds - 1) / (odds - 1)
+      fractional_kelly = full_kelly * bankroll_fraction
+    """
+    if decimal_odds <= 1.0 or probability <= 0.0 or probability >= 1.0:
+        return {"ev_pct": 0.0, "full_kelly": 0.0, "kelly_fraction": 0.0, "recommended_units": 0.0}
+    
+    ev_pct = round(((probability * decimal_odds) - 1.0) * 100.0, 1)
+    b = decimal_odds - 1.0
+    q = 1.0 - probability
+    full_kelly = (b * probability - q) / b
+    
+    if full_kelly <= 0:
+        return {"ev_pct": ev_pct, "full_kelly": 0.0, "kelly_fraction": 0.0, "recommended_units": 0.0}
+    
+    fractional_kelly = full_kelly * bankroll_fraction
+    # Standard unit sizing for 100u bankroll: min 0.5u, max 3.0u
+    recommended_units = round(max(0.5, min(3.0, fractional_kelly * 20.0)), 1)
+    return {
+        "ev_pct": ev_pct,
+        "full_kelly": round(full_kelly, 4),
+        "kelly_fraction": round(fractional_kelly, 4),
+        "recommended_units": recommended_units,
+    }
 
 
 class ProphitBetFeatureEngine:
@@ -179,30 +211,17 @@ class ProphitBetFeatureEngine:
         lam_h = round(max(0.45, min(4.2, lam_h_adj)), 2)
         lam_a = round(max(0.35, min(3.8, lam_a_adj)), 2)
 
-        # Generate 10x10 bivariate Poisson probability grid
-        grid = [
-            [
-                (math.exp(-lam_h) * (lam_h ** i) / math.factorial(i))
-                * (math.exp(-lam_a) * (lam_a ** j) / math.factorial(j))
-                for j in range(10)
-            ]
-            for i in range(10)
-        ]
+        # Generate bivariate Poisson probability grid with Dixon-Coles low-score correction (rho=-0.13)
+        grid = score_grid(lam_h, lam_a, max_goals=9, dixon_coles_rho=-0.13)
+        mkts = markets_from_grid(grid)
 
-        p_h = sum(grid[i][j] for i in range(10) for j in range(10) if i > j)
-        p_d = sum(grid[i][j] for i in range(10) for j in range(10) if i == j)
-        p_a = sum(grid[i][j] for i in range(10) for j in range(10) if i < j)
-        p_o15 = sum(grid[i][j] for i in range(10) for j in range(10) if i + j >= 2)
-        p_o25 = sum(grid[i][j] for i in range(10) for j in range(10) if i + j >= 3)
-        p_o35 = sum(grid[i][j] for i in range(10) for j in range(10) if i + j >= 4)
-        p_btts = sum(grid[i][j] for i in range(10) for j in range(10) if i >= 1 and j >= 1)
-
-        # Normalize
-        norm_sum = p_h + p_d + p_a
-        if norm_sum > 0:
-            p_h /= norm_sum
-            p_d /= norm_sum
-            p_a /= norm_sum
+        p_h = mkts["home_win_probability"]
+        p_d = mkts["draw_probability"]
+        p_a = mkts["away_win_probability"]
+        p_o15 = mkts["over_1_5_probability"]
+        p_o25 = mkts["over_2_5_probability"]
+        p_o35 = mkts["over_3_5_probability"]
+        p_btts = mkts["btts_yes_probability"]
 
         return {
             "lam_h": lam_h,

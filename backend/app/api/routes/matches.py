@@ -729,10 +729,15 @@ def get_daily_slips(
             # Evaluate all candidate outcomes for this match to determine the single Best Possible Outcome
             match_candidates = []
 
-            # Helper to calculate continuous AI Power Index (15 - 99)
+            # Helper to calculate continuous AI Power Index (15 - 99) and Kelly stake
+            from app.services.features.prophitbet import compute_kelly_stake
             def _score_outcome(prob_val: float, odds_val: float, ev_val: float) -> float:
                 p_norm = prob_val / 100.0
                 return round(min(99.0, max(15.0, (p_norm * 75.0) + min(15.0, (odds_val - 1.0) * 8.0) + max(-5.0, ev_val * 0.4))), 1)
+
+            def _kelly_unit(prob_val: float, odds_val: float) -> str:
+                k = compute_kelly_stake(prob_val / 100.0, odds_val, bankroll_fraction=0.25)
+                return f"{k['recommended_units']}u" if k['recommended_units'] > 0 else "0.5u"
 
             # 1. Home Win
             p_h_ev = round(((p_h * _calc_odds(p_h)) - 1.0) * 100, 1)
@@ -748,6 +753,7 @@ def get_daily_slips(
                 "badge": "Top Home Banker" if p_h >= 0.70 else ("High Value Edge" if p_h_ev >= 5.0 else "Home Win"),
                 "ev_edge": f"+{p_h_ev}% Edge" if p_h_ev > 0 else f"{p_h_ev}% Edge",
                 "ai_score": _score_outcome(p_h_pct, p_h_odds, p_h_ev),
+                "recommended_stake": _kelly_unit(p_h_pct, p_h_odds),
                 "status": _get_pick_status(f"{h_name} to Win"),
             })
 
@@ -765,6 +771,7 @@ def get_daily_slips(
                 "badge": "Top Away Banker" if p_a >= 0.65 else ("High Value Edge" if p_a_ev >= 5.0 else "Away Win"),
                 "ev_edge": f"+{p_a_ev}% Edge" if p_a_ev > 0 else f"{p_a_ev}% Edge",
                 "ai_score": _score_outcome(p_a_pct, p_a_odds, p_a_ev),
+                "recommended_stake": _kelly_unit(p_a_pct, p_a_odds),
                 "status": _get_pick_status(f"{a_name} to Win"),
             })
 
@@ -783,6 +790,7 @@ def get_daily_slips(
                 "badge": "Safe Buffer (1X)",
                 "ev_edge": f"+{p_1x_ev}% Edge" if p_1x_ev > 0 else f"{p_1x_ev}% Edge",
                 "ai_score": _score_outcome(p_1x_pct, p_1x_odds, p_1x_ev),
+                "recommended_stake": _kelly_unit(p_1x_pct, p_1x_odds),
                 "status": _get_pick_status(f"{h_name} or Draw (1X)"),
             })
 
@@ -801,6 +809,7 @@ def get_daily_slips(
                 "badge": "Safe Buffer (X2)",
                 "ev_edge": f"+{p_x2_ev}% Edge" if p_x2_ev > 0 else f"{p_x2_ev}% Edge",
                 "ai_score": _score_outcome(p_x2_pct, p_x2_odds, p_x2_ev),
+                "recommended_stake": _kelly_unit(p_x2_pct, p_x2_odds),
                 "status": _get_pick_status(f"{a_name} or Draw (X2)"),
             })
 
@@ -818,6 +827,7 @@ def get_daily_slips(
                 "badge": "Over 1.5 Lock",
                 "ev_edge": f"+{p_o15_ev}% Edge" if p_o15_ev > 0 else f"{p_o15_ev}% Edge",
                 "ai_score": _score_outcome(p_o15_pct, p_o15_odds, p_o15_ev),
+                "recommended_stake": _kelly_unit(p_o15_pct, p_o15_odds),
                 "status": _get_pick_status("Over 1.5 Total Goals"),
             })
 
@@ -835,6 +845,7 @@ def get_daily_slips(
                 "badge": "Over 2.5 Goals",
                 "ev_edge": f"+{p_o25_ev}% Edge" if p_o25_ev > 0 else f"{p_o25_ev}% Edge",
                 "ai_score": _score_outcome(p_o25_pct, p_o25_odds, p_o25_ev),
+                "recommended_stake": _kelly_unit(p_o25_pct, p_o25_odds),
                 "status": _get_pick_status("Over 2.5 Goals"),
             })
 
@@ -852,6 +863,7 @@ def get_daily_slips(
                 "badge": "BTTS (Yes)",
                 "ev_edge": f"+{p_btts_ev}% Edge" if p_btts_ev > 0 else f"{p_btts_ev}% Edge",
                 "ai_score": _score_outcome(p_btts_pct, p_btts_odds, p_btts_ev),
+                "recommended_stake": _kelly_unit(p_btts_pct, p_btts_odds),
                 "status": _get_pick_status("Both Teams to Score (Yes)"),
             })
 
@@ -925,6 +937,17 @@ def get_daily_slips(
         ev_pct = round(((avg_prob * comb_odds) - 1.0) * 100, 1)
         ev_str = f"+{ev_pct}% Edge" if ev_pct > 0 else f"{ev_pct}% Edge"
 
+        # Kelly Criterion stake sizing
+        from app.services.features.prophitbet import compute_kelly_stake
+        prod_prob = 1.0
+        for p in picks_list:
+            p_val = p.get("probability", 0.7)
+            if p_val > 1.0:
+                p_val /= 100.0
+            prod_prob *= p_val
+        kelly_res = compute_kelly_stake(prod_prob, comb_odds, bankroll_fraction=0.25)
+        recommended_stake = f"{kelly_res['recommended_units']}u" if kelly_res['recommended_units'] > 0 else "0.5u (Micro)"
+
         # AI Ranking score (combining safety, payoff potential, and model edge)
         raw_score = (avg_prob * 65.0) + min(25.0, (comb_odds - 1.0) * 10.0) + (max(0.0, ev_pct) * 0.5)
         ai_score = round(min(99.0, max(55.0, raw_score)), 1)
@@ -951,6 +974,8 @@ def get_daily_slips(
             "is_single_match": is_single,
             "risk_level": risk_lvl,
             "ev_edge": ev_str,
+            "recommended_stake": recommended_stake,
+            "kelly_fraction": kelly_res["kelly_fraction"],
             "ai_score": ai_score,
             "outcome_status": outcome,
             "picks": picks_list,

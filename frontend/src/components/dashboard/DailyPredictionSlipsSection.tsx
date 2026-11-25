@@ -457,6 +457,11 @@ export const DailyPredictionSlipsSection: React.FC<DailyPredictionSlipsSectionPr
                         {slip.ev_edge}
                       </span>
                     )}
+                    {slip.recommended_stake && (
+                      <span className="text-[10px] font-mono font-semibold px-1.5 py-0.5 rounded bg-amber-400/10 text-amber-300 border border-amber-400/20" title="Quarter-Kelly Recommended Stake">
+                        🎯 {slip.recommended_stake}
+                      </span>
+                    )}
                     {slip.risk_level && (
                       <span
                         className={`text-[9px] font-mono uppercase px-1.5 py-0.5 rounded border ${

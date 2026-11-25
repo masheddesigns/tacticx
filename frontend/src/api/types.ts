@@ -65,6 +65,8 @@ export interface DailyPredictionSlip {
   rank?: number;
   ai_score?: number;
   ev_edge?: string;
+  recommended_stake?: string;
+  kelly_fraction?: number;
   risk_level?: 'LOW' | 'BALANCED' | 'HIGH_YIELD';
   outcome_status?: 'WON' | 'LOST' | 'LIVE' | 'PENDING';
   is_single_match?: boolean;
@@ -88,6 +90,7 @@ export interface RankedPredictionOutcome {
   badge: string;
   ev_edge: string;
   ai_score: number;
+  recommended_stake?: string;
   status: 'WON' | 'LOST' | 'LIVE' | 'PENDING';
 }
 
