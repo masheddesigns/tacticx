@@ -494,30 +494,37 @@ def get_daily_slips(
                     "shots_on_target": round(sot_total, 1),
                 }
 
+                # 1. Baseline goal strength estimation
+                base_lam_h = 1.45
+                base_lam_a = 1.15
                 try:
                     pred = poisson_model.predict(db, m.id, cutoff=m.kickoff_at or datetime.now(timezone.utc))
-                    p_h = float(pred.home_win_probability)
-                    p_d = float(pred.draw_probability)
-                    p_a = float(pred.away_win_probability)
-                    p_o15 = float(pred.over_1_5_probability)
-                    p_o25 = float(pred.over_2_5_probability)
-                    p_btts = float(pred.btts_yes_probability)
-                    lam_h = float(getattr(pred, "expected_home_goals", None) or 1.4)
-                    lam_a = float(getattr(pred, "expected_away_goals", None) or 1.1)
+                    if pred and getattr(pred, "status", "") == "valid":
+                        base_lam_h = float(getattr(pred, "expected_home_goals", 1.45))
+                        base_lam_a = float(getattr(pred, "expected_away_goals", 1.15))
                 except Exception:
-                    # Robust Poisson model fallback for UEFA Champions League and cup competitions
-                    import math
                     h_sot = t_proj.get("home", {}).get("shots_on_target", 4.5)
                     a_sot = t_proj.get("away", {}).get("shots_on_target", 3.8)
-                    lam_h = max(0.6, min(3.2, h_sot * 0.32))
-                    lam_a = max(0.5, min(2.8, a_sot * 0.30))
-                    grid = [[(math.exp(-lam_h) * (lam_h ** i) / math.factorial(i)) * (math.exp(-lam_a) * (lam_a ** j) / math.factorial(j)) for j in range(10)] for i in range(10)]
-                    p_h = sum(grid[i][j] for i in range(10) for j in range(10) if i > j)
-                    p_d = sum(grid[i][j] for i in range(10) for j in range(10) if i == j)
-                    p_a = sum(grid[i][j] for i in range(10) for j in range(10) if i < j)
-                    p_o15 = sum(grid[i][j] for i in range(10) for j in range(10) if i + j >= 2)
-                    p_o25 = sum(grid[i][j] for i in range(10) for j in range(10) if i + j >= 3)
-                    p_btts = sum(grid[i][j] for i in range(10) for j in range(10) if i >= 1 and j >= 1)
+                    base_lam_h = max(0.6, min(3.2, h_sot * 0.32))
+                    base_lam_a = max(0.5, min(2.8, a_sot * 0.30))
+
+                # 2. ProphitBet-inspired rolling form and H2H feature calibration
+                from app.services.features.prophitbet import ProphitBetFeatureEngine
+                pb_engine = ProphitBetFeatureEngine()
+                calib = pb_engine.calibrate_lambdas_and_probabilities(
+                    db, m.home_team_id, m.away_team_id,
+                    base_lam_h=base_lam_h, base_lam_a=base_lam_a,
+                    cutoff=m.kickoff_at or datetime.now(timezone.utc)
+                )
+
+                p_h = calib["p_h"]
+                p_d = calib["p_d"]
+                p_a = calib["p_a"]
+                p_o15 = calib["p_o15"]
+                p_o25 = calib["p_o25"]
+                p_btts = calib["p_btts"]
+                lam_h = calib["lam_h"]
+                lam_a = calib["lam_a"]
 
                 _PRED_MATCH_CACHE[m.id] = {
                     "ts": time.time(),
@@ -1437,26 +1444,32 @@ def get_prediction_history(
                 lam_h = cached_m["lam_h"]
                 lam_a = cached_m["lam_a"]
             else:
-                # Poisson pre-match prediction
+                # ProphitBet-inspired Poisson prediction
+                base_lam_h = 1.45
+                base_lam_a = 1.15
                 try:
                     pred = poisson_model.predict(db, m.id, cutoff=m.kickoff_at or now_utc)
-                    p_h = float(pred.home_win_probability)
-                    p_d = float(pred.draw_probability)
-                    p_a = float(pred.away_win_probability)
-                    p_o15 = float(pred.over_1_5_probability)
-                    p_o25 = float(pred.over_2_5_probability)
-                    p_btts = float(pred.btts_yes_probability)
-                    lam_h = float(getattr(pred, "expected_home_goals", None) or 1.4)
-                    lam_a = float(getattr(pred, "expected_away_goals", None) or 1.1)
+                    if pred and getattr(pred, "status", "") == "valid":
+                        base_lam_h = float(getattr(pred, "expected_home_goals", 1.45))
+                        base_lam_a = float(getattr(pred, "expected_away_goals", 1.15))
                 except Exception:
-                    lam_h, lam_a = 1.4, 1.1
-                    grid = [[(math.exp(-lam_h) * (lam_h ** i) / math.factorial(i)) * (math.exp(-lam_a) * (lam_a ** j) / math.factorial(j)) for j in range(10)] for i in range(10)]
-                    p_h = sum(grid[i][j] for i in range(10) for j in range(10) if i > j)
-                    p_d = sum(grid[i][j] for i in range(10) for j in range(10) if i == j)
-                    p_a = sum(grid[i][j] for i in range(10) for j in range(10) if i < j)
-                    p_o15 = sum(grid[i][j] for i in range(10) for j in range(10) if i + j >= 2)
-                    p_o25 = sum(grid[i][j] for i in range(10) for j in range(10) if i + j >= 3)
-                    p_btts = sum(grid[i][j] for i in range(10) for j in range(10) if i >= 1 and j >= 1)
+                    pass
+
+                from app.services.features.prophitbet import ProphitBetFeatureEngine
+                pb_engine = ProphitBetFeatureEngine()
+                calib = pb_engine.calibrate_lambdas_and_probabilities(
+                    db, m.home_team_id, m.away_team_id,
+                    base_lam_h=base_lam_h, base_lam_a=base_lam_a,
+                    cutoff=m.kickoff_at or now_utc
+                )
+                p_h = calib["p_h"]
+                p_d = calib["p_d"]
+                p_a = calib["p_a"]
+                p_o15 = calib["p_o15"]
+                p_o25 = calib["p_o25"]
+                p_btts = calib["p_btts"]
+                lam_h = calib["lam_h"]
+                lam_a = calib["lam_a"]
 
                 _PRED_MATCH_CACHE[m.id] = {
                     "ts": time.time(),

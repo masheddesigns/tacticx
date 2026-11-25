@@ -270,3 +270,41 @@ export function getLeagueFallbackEmoji(leagueCodeOrName?: string | null): string
   const meta = getLeagueMeta(leagueCodeOrName);
   return meta?.flagEmoji || '⚽';
 }
+
+/**
+ * Standard FotMob league display priority (lower rank appears first).
+ */
+export const LEAGUE_PRIORITY: Record<string, number> = {
+  'Premier League': 1,
+  'EPL': 1,
+  'La Liga': 2,
+  'LA_LIGA': 2,
+  'Serie A': 3,
+  'SERIE_A': 3,
+  'Bundesliga': 4,
+  'BUNDESLIGA': 4,
+  'Ligue 1': 5,
+  'LIGUE_1': 5,
+  'UEFA Champions League': 6,
+  'UCL': 6,
+  'UEFA Europa League': 7,
+  'UEL': 7,
+  'UEFA Conference League': 8,
+  'UECL': 8,
+  'Major League Soccer': 9,
+  'MLS': 9,
+  'Liga Profesional': 10,
+  'LIGA_ARG': 10,
+  'Brasileirão Série A': 11,
+  'BRA_SERIE_A': 11,
+  'Indian Super League': 12,
+  'ISL': 12,
+  'UEFA Nations League': 13,
+  'NATIONS_LEAGUE': 13,
+  'International Friendlies': 14,
+  'FRIENDLIES': 14,
+};
+
+export function getLeaguePriority(leagueKey: string): number {
+  return LEAGUE_PRIORITY[leagueKey] ?? 99;
+}
