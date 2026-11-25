@@ -8,6 +8,7 @@ import { getRelativeDateLabel, getTodayString, getDayOffsetString, formatDayDisp
 import { LoadingSpinner } from '../components/common/LoadingSpinner';
 import { ErrorCard } from '../components/common/ErrorCard';
 import { LeagueLogo } from '../components/common/LeagueLogo';
+import { getLeaguePriority } from '../lib/leagueLogos';
 
 export interface LeagueInfo {
   name: string;
@@ -63,37 +64,6 @@ export function getLeagueMeta(leagueKey?: string | null): LeagueInfo {
   }
   return { name: leagueKey.replace(/_/g, ' '), country: 'Football', flag: '⚽' };
 }
-
-const LEAGUE_PRIORITY: Record<string, number> = {
-  'Premier League': 1,
-  'EPL': 1,
-  'La Liga': 2,
-  'LA_LIGA': 2,
-  'Serie A': 3,
-  'SERIE_A': 3,
-  'Bundesliga': 4,
-  'BUNDESLIGA': 4,
-  'Ligue 1': 5,
-  'LIGUE_1': 5,
-  'UEFA Champions League': 6,
-  'UCL': 6,
-  'UEFA Europa League': 7,
-  'UEL': 7,
-  'UEFA Conference League': 8,
-  'UECL': 8,
-  'Indian Super League': 9,
-  'ISL': 9,
-  'Major League Soccer': 10,
-  'MLS': 10,
-  'Brasileirão Série A': 11,
-  'BRA_SERIE_A': 11,
-  'Liga Profesional': 12,
-  'LIGA_ARG': 12,
-  'UEFA Nations League': 13,
-  'NATIONS_LEAGUE': 13,
-  'International Friendlies': 14,
-  'FRIENDLIES': 14,
-};
 
 export interface MatchFiltersState {
   league?: string;
@@ -396,8 +366,8 @@ export const MatchExplorerPage: React.FC = () => {
               }, {});
 
               const sortedLeagues = Object.entries(leagueGroups).sort(([a], [b]) => {
-                const rankA = LEAGUE_PRIORITY[a] ?? 99;
-                const rankB = LEAGUE_PRIORITY[b] ?? 99;
+                const rankA = getLeaguePriority(a);
+                const rankB = getLeaguePriority(b);
                 if (rankA !== rankB) return rankA - rankB;
                 return a.localeCompare(b);
               });

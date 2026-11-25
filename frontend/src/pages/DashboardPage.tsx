@@ -31,6 +31,7 @@ import { MatchRow } from '../components/matches/MatchRow';
 import { DateSliderTabs } from '../components/matches/DateSliderTabs';
 import { DailyAIPredictionsSection } from '../components/dashboard/DailyAIPredictionsSection';
 import { getLeagueMeta } from './MatchExplorerPage';
+import { getLeaguePriority } from '../lib/leagueLogos';
 import { getRelativeDateLabel, getTodayString, getDayOffsetString, formatDayDisplay } from '../lib/utils';
 import { LoadingSpinner } from '../components/common/LoadingSpinner';
 import { ErrorCard } from '../components/common/ErrorCard';
@@ -247,38 +248,6 @@ export const DashboardPage: React.FC = () => {
   const liveMatches = liveData?.data || [];
   const homepageMatches = matchesData?.data || [];
 
-  // Standard FotMob League display priority
-  const LEAGUE_PRIORITY: Record<string, number> = {
-    'Premier League': 1,
-    'EPL': 1,
-    'La Liga': 2,
-    'LA_LIGA': 2,
-    'Serie A': 3,
-    'SERIE_A': 3,
-    'Bundesliga': 4,
-    'BUNDESLIGA': 4,
-    'Ligue 1': 5,
-    'LIGUE_1': 5,
-    'UEFA Champions League': 6,
-    'UCL': 6,
-    'UEFA Europa League': 7,
-    'UEL': 7,
-    'UEFA Conference League': 8,
-    'UECL': 8,
-    'Major League Soccer': 9,
-    'MLS': 9,
-    'Liga Profesional': 10,
-    'LIGA_ARG': 10,
-    'Brasileirão Série A': 11,
-    'BRA_SERIE_A': 11,
-    'Indian Super League': 12,
-    'ISL': 12,
-    'UEFA Nations League': 13,
-    'NATIONS_LEAGUE': 13,
-    'International Friendlies': 14,
-    'FRIENDLIES': 14,
-  };
-
   // Group homepage matches by League (FotMob standard)
   const leagueGroups = homepageMatches.reduce<Record<string, typeof homepageMatches>>((acc, m) => {
     const lKey = m.league_name || m.league_code || 'Other Competitions';
@@ -289,8 +258,8 @@ export const DashboardPage: React.FC = () => {
 
   // Sort leagues according to official FotMob hierarchy (EPL -> La Liga -> Serie A -> Bundesliga -> Ligue 1 -> UCL)
   const sortedLeagueEntries = Object.entries(leagueGroups).sort(([leagueA], [leagueB]) => {
-    const rankA = LEAGUE_PRIORITY[leagueA] ?? 99;
-    const rankB = LEAGUE_PRIORITY[leagueB] ?? 99;
+    const rankA = getLeaguePriority(leagueA);
+    const rankB = getLeaguePriority(leagueB);
     if (rankA !== rankB) return rankA - rankB;
     return leagueA.localeCompare(leagueB);
   });
@@ -336,19 +305,26 @@ export const DashboardPage: React.FC = () => {
 
         {/* Quick Stats Badges */}
         <div className="flex items-center gap-2.5 flex-wrap">
-          <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#161922] border border-[#242938] text-xs font-mono">
-            <span className="w-2 h-2 rounded-full bg-[#ff4b4b] animate-ping" />
-            <span className="text-[#ff4b4b] font-bold">{liveMatches.length}</span>
-            <span className="text-slate-400 font-sans">Live In-Play</span>
+          <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-surface-card border border-surface-border text-xs font-mono tabular-nums">
+            <span
+              className={`w-2 h-2 rounded-full bg-fotmob-red ${
+                liveMatches.length > 0 ? 'animate-ping' : 'opacity-60'
+              }`}
+            />
+            <span className="text-fotmob-red font-bold">{liveMatches.length}</span>
+            <span className="text-fotmob-textMuted font-sans">Live In-Play</span>
           </div>
 
-          <div className="px-3 py-1.5 rounded-lg bg-[#161922] border border-[#242938] text-xs font-mono">
-            <span className="text-[#21e786] font-bold">{totalFixtures}</span>
-            <span className="text-slate-400 ml-1.5 font-sans">Fixtures</span>
+          <div className="px-3 py-1.5 rounded-lg bg-surface-card border border-surface-border text-xs font-mono tabular-nums">
+            <span className="text-fotmob-green font-bold">{totalFixtures}</span>
+            <span className="text-fotmob-textMuted ml-1.5 font-sans">Fixtures</span>
           </div>
 
-          <div className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-[#161922] border border-[#242938] text-[11px] font-mono text-[#21e786]" title="Automatic live updates every 10 seconds">
-            <span className="w-1.5 h-1.5 rounded-full bg-[#21e786] animate-pulse" />
+          <div
+            className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-surface-card border border-surface-border text-[11px] font-mono tabular-nums text-fotmob-green"
+            title="Automatic live updates every 10 seconds"
+          >
+            <span className="w-1.5 h-1.5 rounded-full bg-fotmob-green" />
             <span>Auto-Sync 10s</span>
           </div>
 
@@ -358,10 +334,10 @@ export const DashboardPage: React.FC = () => {
               refetchMatches();
             }}
             disabled={isMatchesFetching}
-            className="p-2 rounded-lg border border-[#242938] bg-[#161922] text-slate-300 hover:text-white hover:border-[#21e786]/50 transition-colors disabled:opacity-50"
+            className="p-2 rounded-lg border border-surface-border bg-surface-card text-slate-300 hover:text-white hover:border-fotmob-green/50 transition-colors disabled:opacity-50"
             title="Refresh Live Scores"
           >
-            <RefreshCw className={`w-3.5 h-3.5 ${isMatchesFetching ? 'animate-spin text-[#21e786]' : ''}`} />
+            <RefreshCw className={`w-3.5 h-3.5 ${isMatchesFetching ? 'animate-spin text-fotmob-green' : ''}`} />
           </button>
         </div>
       </div>

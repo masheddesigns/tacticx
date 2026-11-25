@@ -156,32 +156,32 @@ export const MatchIntelligencePage: React.FC = () => {
         <div className="flex items-center gap-2.5">
           <button
             onClick={() => setShareOpen(true)}
-            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-mono font-semibold bg-emerald-600 hover:bg-emerald-500 text-white shadow-sm transition-all"
+            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-mono font-semibold bg-fotmob-green hover:bg-fotmob-greenHover text-surface-base shadow-sm transition-colors"
             title="Share Match Prediction Snapshot"
           >
             <Share2 className="w-3.5 h-3.5" />
             <span>Share Prediction</span>
           </button>
 
-          <div className="flex items-center gap-2 text-xs font-mono bg-slate-900 px-3 py-1.5 rounded-lg border border-slate-800">
-            <span className="text-slate-400">Mode:</span>
+          <div className="flex items-center gap-2 text-xs font-mono bg-surface-card px-3 py-1.5 rounded-lg border border-surface-border">
+            <span className="text-fotmob-textMuted">Mode:</span>
             <select
               value={temporalMode}
               onChange={(e) => setTemporalMode(e.target.value)}
               className="bg-transparent text-slate-200 font-semibold focus:outline-none cursor-pointer"
             >
-              <option value="strict_prematch">Strict Prematch</option>
-              <option value="historical_estimated">Historical Estimated</option>
+              <option value="strict_prematch" className="bg-surface-card">Strict Prematch</option>
+              <option value="historical_estimated" className="bg-surface-card">Historical Estimated</option>
             </select>
           </div>
 
           <button
             onClick={() => refetch()}
             disabled={isFetching}
-            className="p-2 rounded-lg border border-slate-700 bg-slate-800/80 text-slate-300 hover:text-white transition-colors disabled:opacity-50"
+            className="p-2 rounded-lg border border-surface-border bg-surface-card text-slate-300 hover:text-white hover:border-surface-borderLight transition-colors disabled:opacity-50"
             title="Refresh Canonical Document"
           >
-            <RefreshCw className={`w-3.5 h-3.5 ${isFetching ? 'animate-spin text-emerald-400' : ''}`} />
+            <RefreshCw className={`w-3.5 h-3.5 ${isFetching ? 'animate-spin text-fotmob-green' : ''}`} />
           </button>
         </div>
       </div>

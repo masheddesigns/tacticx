@@ -100,7 +100,7 @@ export const Navbar: React.FC = () => {
                 <Clock className="w-3.5 h-3.5 text-[#21e786]" />
                 <span>Upcoming</span>
                 {upcomingCount > 0 && (
-                  <span className="text-[10px] font-mono px-1.5 py-0.2 rounded-full bg-[#21e786]/10 text-[#21e786] border border-[#21e786]/30 font-semibold">
+                  <span className="text-[10px] font-mono tabular-nums px-1.5 py-0.2 rounded-full bg-fotmob-green/10 text-fotmob-green border border-fotmob-green/30 font-semibold">
                     {upcomingCount}
                   </span>
                 )}
@@ -113,11 +113,11 @@ export const Navbar: React.FC = () => {
                   onClick={() => setPlatformMenuOpen(!platformMenuOpen)}
                   className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium font-sans transition-colors ${
                     platformMenuOpen
-                      ? 'bg-[#1e222e] text-white border border-[#242938]'
-                      : 'text-slate-400 hover:text-white hover:bg-[#161922]'
+                      ? 'bg-surface-cardMuted text-white border border-surface-border'
+                      : 'text-slate-400 hover:text-white hover:bg-surface-card'
                   }`}
                 >
-                  <Layers className="w-3.5 h-3.5 text-purple-400" />
+                  <Layers className="w-3.5 h-3.5 text-fotmob-blue" />
                   <span>Platform & MLOps</span>
                   <ChevronDown className={`w-3 h-3 transition-transform ${platformMenuOpen ? 'rotate-180' : ''}`} />
                 </button>
