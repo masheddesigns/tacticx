@@ -44,7 +44,7 @@ export const ExpectedGoalsCard: React.FC<ExpectedGoalsCardProps> = ({
 
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         {/* Home Expected Goals */}
-        <div className="p-4 rounded-lg bg-slate-900/70 border border-slate-800 flex flex-col justify-between">
+        <div className="p-4 rounded-lg bg-surface-card border border-surface-border flex flex-col justify-between">
           <div>
             <div className="flex items-center gap-2 mb-1">
               <TeamLogo teamName={homeTeamName} size="xs" />
@@ -59,7 +59,7 @@ export const ExpectedGoalsCard: React.FC<ExpectedGoalsCardProps> = ({
               Estimated scoring intensity
             </span>
           </div>
-          <div className="w-full bg-slate-950 h-2 rounded-full mt-3 overflow-hidden border border-slate-800">
+          <div className="w-full bg-surface-base h-2 rounded-full mt-3 overflow-hidden border border-surface-border">
             <div
               style={{ width: `${homePct}%` }}
               className="bg-blue-500 h-full rounded-full transition-all"
@@ -68,7 +68,7 @@ export const ExpectedGoalsCard: React.FC<ExpectedGoalsCardProps> = ({
         </div>
 
         {/* Away Expected Goals */}
-        <div className="p-4 rounded-lg bg-slate-900/70 border border-slate-800 flex flex-col justify-between">
+        <div className="p-4 rounded-lg bg-surface-card border border-surface-border flex flex-col justify-between">
           <div>
             <div className="flex items-center gap-2 mb-1">
               <TeamLogo teamName={awayTeamName} size="xs" />
@@ -76,26 +76,26 @@ export const ExpectedGoalsCard: React.FC<ExpectedGoalsCardProps> = ({
                 {awayTeamName} (Away λ)
               </span>
             </div>
-            <div className="text-2xl font-mono font-bold text-emerald-400 mt-1">
+            <div className="text-2xl font-mono font-bold text-fotmob-green mt-1">
               {formatLambda(awayLambda)}
             </div>
             <span className="text-[10px] text-slate-400 font-sans mt-0.5 block">
               Estimated scoring intensity
             </span>
           </div>
-          <div className="w-full bg-slate-950 h-2 rounded-full mt-3 overflow-hidden border border-slate-800">
+          <div className="w-full bg-surface-base h-2 rounded-full mt-3 overflow-hidden border border-surface-border">
             <div
               style={{ width: `${awayPct}%` }}
-              className="bg-emerald-500 h-full rounded-full transition-all"
+              className="bg-fotmob-green h-full rounded-full transition-all"
             />
           </div>
         </div>
 
         {/* Combined Expected Goals */}
-        <div className="p-4 rounded-lg bg-slate-900/70 border border-slate-800 flex flex-col justify-between">
+        <div className="p-4 rounded-lg bg-surface-card border border-surface-border flex flex-col justify-between">
           <div>
             <span className="text-xs font-mono text-slate-400 block">Combined Total λ</span>
-            <div className="text-2xl font-mono font-bold text-purple-400 mt-1">
+            <div className="text-2xl font-mono font-bold text-fotmob-blue mt-1">
               {formatLambda(totalLambda)}
             </div>
             <span className="text-[10px] text-slate-400 font-sans mt-0.5 block">
@@ -113,7 +113,7 @@ export const ExpectedGoalsCard: React.FC<ExpectedGoalsCardProps> = ({
         </div>
       </div>
 
-      <div className="flex items-center gap-2 p-2.5 rounded bg-slate-950 border border-slate-800/80 text-[11px] text-slate-400 font-sans">
+      <div className="flex items-center gap-2 p-2.5 rounded bg-surface-base border border-surface-border text-[11px] text-slate-400 font-sans">
         <Info className="w-3.5 h-3.5 text-slate-500 shrink-0" />
         <span>
           λ represents the Poisson distribution rate parameter. It is a continuous statistical intensity estimate, not a discrete prediction of the match result.

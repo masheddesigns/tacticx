@@ -43,13 +43,13 @@ const getTeamInitials = (name?: string | null): string => {
 };
 
 const getTeamColorStyle = (name?: string | null): string => {
-  if (!name) return 'bg-slate-800 text-slate-300 border-slate-700';
+  if (!name) return 'bg-surface-cardMuted text-slate-300 border-surface-border';
   const colors = [
     'bg-red-950 text-red-300 border-red-700',
     'bg-blue-950 text-blue-300 border-blue-700',
-    'bg-emerald-950 text-emerald-300 border-emerald-700',
+    'bg-emerald-950 text-fotmob-green border-emerald-700',
     'bg-amber-950 text-amber-300 border-amber-700',
-    'bg-purple-950 text-purple-300 border-purple-700',
+    'bg-purple-950 text-fotmob-blue border-purple-700',
     'bg-cyan-950 text-cyan-300 border-cyan-700',
     'bg-rose-950 text-rose-300 border-rose-700',
   ];
@@ -295,14 +295,14 @@ export const SharePredictionModal: React.FC<SharePredictionModalProps> = ({
                 <span className="font-bold text-xs text-white mt-1.5 truncate max-w-[120px]" title={homeTeamName}>
                   {homeTeamName}
                 </span>
-                <span className="text-[10px] font-mono text-emerald-400 font-semibold mt-0.5">
+                <span className="text-[10px] font-mono text-fotmob-green font-semibold mt-0.5">
                   xG: {homeXg}
                 </span>
               </div>
 
               {/* Center VS & Kickoff */}
               <div className="col-span-1 flex flex-col items-center justify-center">
-                <span className="px-2 py-0.5 rounded bg-slate-900 border border-slate-800 font-mono text-[10px] font-extrabold text-emerald-400 tracking-wider">
+                <span className="px-2 py-0.5 rounded bg-surface-card border border-surface-border font-mono text-[10px] font-extrabold text-fotmob-green tracking-wider">
                   VS
                 </span>
                 <span className="text-[9px] font-mono text-slate-400 mt-1 whitespace-nowrap">
@@ -326,9 +326,9 @@ export const SharePredictionModal: React.FC<SharePredictionModalProps> = ({
             </div>
 
             {/* 1. Core 1X2 Mathematical Model Probability Bar */}
-            <div className="bg-slate-900/90 p-3 rounded-xl border border-slate-800 space-y-1.5">
+            <div className="bg-surface-card p-3 rounded-xl border border-surface-border space-y-1.5">
               <div className="flex items-center justify-between text-[11px] font-mono">
-                <span className="text-emerald-400 font-bold">
+                <span className="text-fotmob-green font-bold">
                   {homeInitials} Win: {homeProb}% <span className="text-amber-400">(@{homeOdds})</span>
                 </span>
                 <span className="text-amber-300 font-bold">
@@ -340,8 +340,8 @@ export const SharePredictionModal: React.FC<SharePredictionModalProps> = ({
               </div>
 
               {/* Tripartite Color Progress Bar */}
-              <div className="h-2.5 w-full bg-slate-800 rounded-full overflow-hidden flex gap-0.5">
-                <div className="bg-emerald-500 h-full rounded-l-full" style={{ width: `${homeProb}%` }} />
+              <div className="h-2.5 w-full bg-surface-cardMuted rounded-full overflow-hidden flex gap-0.5">
+                <div className="bg-fotmob-green h-full rounded-l-full" style={{ width: `${homeProb}%` }} />
                 <div className="bg-amber-400 h-full" style={{ width: `${drawProb}%` }} />
                 <div className="bg-blue-500 h-full rounded-r-full" style={{ width: `${awayProb}%` }} />
               </div>
@@ -350,8 +350,8 @@ export const SharePredictionModal: React.FC<SharePredictionModalProps> = ({
             {/* 2. Top Predicted Scores & Goals Over/Under Split */}
             <div className="grid grid-cols-2 gap-2.5">
               {/* Top 3 Predicted Scores */}
-              <div className="p-2.5 rounded-xl bg-slate-900/80 border border-slate-800 space-y-1.5">
-                <span className="text-[10px] font-mono text-purple-300 block uppercase font-bold flex items-center gap-1">
+              <div className="p-2.5 rounded-xl bg-surface-card border border-surface-border space-y-1.5">
+                <span className="text-[10px] font-mono text-fotmob-blue block uppercase font-bold flex items-center gap-1">
                   <Target className="w-3 h-3" /> Top Predicted Scores
                 </span>
                 <div className="flex items-center gap-1.5">
@@ -359,43 +359,43 @@ export const SharePredictionModal: React.FC<SharePredictionModalProps> = ({
                     <div
                       key={sc.score}
                       className={`flex-1 py-1 rounded text-center font-mono ${
-                        i === 0 ? 'bg-purple-950 border border-purple-700 text-white font-bold' : 'bg-slate-950 text-slate-300'
+                        i === 0 ? 'bg-purple-950 border border-purple-700 text-white font-bold' : 'bg-surface-base text-slate-300'
                       }`}
                     >
                       <div className="text-xs font-bold">{sc.score}</div>
-                      <div className="text-[9px] text-purple-400">{Math.round(sc.probability * 100)}%</div>
+                      <div className="text-[9px] text-fotmob-blue">{Math.round(sc.probability * 100)}%</div>
                     </div>
                   ))}
                 </div>
               </div>
 
               {/* Over / Under Goals & BTTS */}
-              <div className="p-2.5 rounded-xl bg-slate-900/80 border border-slate-800 space-y-1 text-xs font-mono">
+              <div className="p-2.5 rounded-xl bg-surface-card border border-surface-border space-y-1 text-xs font-mono">
                 <span className="text-[10px] text-blue-300 uppercase font-bold flex items-center gap-1">
                   <Goal className="w-3 h-3" /> Goals (Over / Under)
                 </span>
                 <div className="flex justify-between text-[11px] pt-0.5">
-                  <span className="text-slate-400">Over 1.5: <strong className="text-emerald-400">{over15Prob}%</strong></span>
+                  <span className="text-slate-400">Over 1.5: <strong className="text-fotmob-green">{over15Prob}%</strong></span>
                   <span className="text-slate-400">Over 2.5: <strong className="text-white">{over25Prob}%</strong></span>
                 </div>
                 <div className="flex justify-between text-[10px] text-slate-400">
                   <span>BTTS:</span>
-                  <span className="text-emerald-300 font-bold">Yes {bttsYesProb}% / No {bttsNoProb}%</span>
+                  <span className="text-fotmob-green font-bold">Yes {bttsYesProb}% / No {bttsNoProb}%</span>
                 </div>
               </div>
             </div>
 
             {/* 3. In-Game Predicted Stats (Corners & Discipline) */}
-            <div className="p-2.5 rounded-xl bg-slate-900/80 border border-slate-800 grid grid-cols-3 gap-2 text-center text-xs font-mono">
-              <div className="p-1 rounded bg-slate-950/60 border border-slate-800/80">
+            <div className="p-2.5 rounded-xl bg-surface-card border border-surface-border grid grid-cols-3 gap-2 text-center text-xs font-mono">
+              <div className="p-1 rounded bg-surface-base border border-surface-border">
                 <span className="text-[10px] text-slate-400 flex items-center justify-center gap-1">
-                  <Flag className="w-2.5 h-2.5 text-emerald-400" /> Corners
+                  <Flag className="w-2.5 h-2.5 text-fotmob-green" /> Corners
                 </span>
-                <div className="font-extrabold text-sm text-emerald-400 mt-0.5">~{cornersTot}</div>
+                <div className="font-extrabold text-sm text-fotmob-green mt-0.5">~{cornersTot}</div>
                 <div className="text-[9px] text-slate-400">{cornersH} - {cornersA}</div>
               </div>
 
-              <div className="p-1 rounded bg-slate-950/60 border border-slate-800/80">
+              <div className="p-1 rounded bg-surface-base border border-surface-border">
                 <span className="text-[10px] text-slate-400 flex items-center justify-center gap-1">
                   <CreditCard className="w-2.5 h-2.5 text-amber-400" /> Cards
                 </span>
@@ -403,7 +403,7 @@ export const SharePredictionModal: React.FC<SharePredictionModalProps> = ({
                 <div className="text-[9px] text-slate-400">Yellows total</div>
               </div>
 
-              <div className="p-1 rounded bg-slate-950/60 border border-slate-800/80">
+              <div className="p-1 rounded bg-surface-base border border-surface-border">
                 <span className="text-[10px] text-slate-400 flex items-center justify-center gap-1">
                   <Target className="w-2.5 h-2.5 text-blue-400" /> Target Shots
                 </span>
@@ -423,9 +423,9 @@ export const SharePredictionModal: React.FC<SharePredictionModalProps> = ({
             )}
 
             {/* Footer Cryptographic Cutoff Verification */}
-            <div className="pt-2 border-t border-slate-800/80 flex items-center justify-between text-[9px] font-mono text-slate-500">
+            <div className="pt-2 border-t border-surface-border flex items-center justify-between text-[9px] font-mono text-slate-500">
               <div className="flex items-center gap-1 text-slate-400">
-                <Shield className="w-3 h-3 text-emerald-400" />
+                <Shield className="w-3 h-3 text-fotmob-green" />
                 <span>Pre-Match Cutoff Frozen</span>
               </div>
               <span>Phase 27 Canonical Verification</span>
@@ -438,7 +438,7 @@ export const SharePredictionModal: React.FC<SharePredictionModalProps> = ({
           <button
             onClick={handleDownload}
             disabled={isCapturing}
-            className="flex items-center justify-center gap-1.5 px-3.5 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-mono text-xs font-semibold shadow-md transition-colors disabled:opacity-50"
+            className="flex items-center justify-center gap-1.5 px-3.5 py-2.5 rounded-xl bg-fotmob-green hover:bg-fotmob-greenHover text-white font-mono text-xs font-semibold shadow-md transition-colors disabled:opacity-50"
           >
             <Download className="w-4 h-4" />
             <span>Download PNG</span>
@@ -447,18 +447,18 @@ export const SharePredictionModal: React.FC<SharePredictionModalProps> = ({
           <button
             onClick={handleCopyImage}
             disabled={isCapturing}
-            className="flex items-center justify-center gap-1.5 px-3.5 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 font-mono text-xs font-semibold border border-slate-700 transition-colors disabled:opacity-50"
+            className="flex items-center justify-center gap-1.5 px-3.5 py-2.5 rounded-xl bg-surface-cardMuted hover:bg-slate-700 text-slate-200 font-mono text-xs font-semibold border border-surface-border transition-colors disabled:opacity-50"
           >
-            {copiedImage ? <Check className="w-4 h-4 text-emerald-400" /> : <Copy className="w-4 h-4" />}
+            {copiedImage ? <Check className="w-4 h-4 text-fotmob-green" /> : <Copy className="w-4 h-4" />}
             <span>{copiedImage ? 'Copied Image' : 'Copy Image'}</span>
           </button>
 
           <button
             onClick={handleNativeShare}
             disabled={isCapturing}
-            className="flex items-center justify-center gap-1.5 px-3.5 py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-slate-300 font-mono text-xs font-semibold border border-slate-800 transition-colors"
+            className="flex items-center justify-center gap-1.5 px-3.5 py-2.5 rounded-xl bg-surface-card hover:bg-surface-cardMuted text-slate-300 font-mono text-xs font-semibold border border-surface-border transition-colors"
           >
-            <Share2 className="w-4 h-4 text-emerald-400" />
+            <Share2 className="w-4 h-4 text-fotmob-green" />
             <span>Share</span>
           </button>
         </div>
@@ -467,9 +467,9 @@ export const SharePredictionModal: React.FC<SharePredictionModalProps> = ({
           <span>Match Link:</span>
           <button
             onClick={handleCopyLink}
-            className="text-emerald-400 hover:text-emerald-300 flex items-center gap-1"
+            className="text-fotmob-green hover:text-fotmob-green flex items-center gap-1"
           >
-            {copiedLink ? <Check className="w-3 h-3 text-emerald-400" /> : <ExternalLink className="w-3 h-3" />}
+            {copiedLink ? <Check className="w-3 h-3 text-fotmob-green" /> : <ExternalLink className="w-3 h-3" />}
             <span>{copiedLink ? 'Link Copied!' : 'Copy Match Link'}</span>
           </button>
         </div>

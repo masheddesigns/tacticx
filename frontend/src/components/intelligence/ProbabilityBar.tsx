@@ -35,7 +35,7 @@ export const ProbabilityBar: React.FC<ProbabilityBarProps> = ({
         aria-valuemin={0}
         aria-valuemax={100}
         aria-valuenow={Math.round(hPct)}
-        className="h-7 w-full flex rounded-lg overflow-hidden border border-slate-800 bg-slate-950 p-0.5 gap-0.5"
+        className="h-7 w-full flex rounded-lg overflow-hidden border border-surface-border bg-surface-base p-0.5 gap-0.5"
       >
         {/* Home Probability Segment */}
         <div
@@ -66,7 +66,7 @@ export const ProbabilityBar: React.FC<ProbabilityBarProps> = ({
         {/* Away Probability Segment */}
         <div
           style={{ width: `${aPct}%` }}
-          className="h-full bg-emerald-600/70 hover:bg-emerald-600 rounded-r flex items-center justify-center transition-all cursor-pointer group relative"
+          className="h-full bg-fotmob-green/70 hover:bg-fotmob-greenHover rounded-r flex items-center justify-center transition-all cursor-pointer group relative"
           title={`${awayTeamName} (Away): ${formatProbability(a, 2)} (Exact: ${a})`}
         >
           {aPct > 12 && (

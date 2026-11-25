@@ -26,7 +26,7 @@ export const DerivedMarketsCard: React.FC<DerivedMarketsCardProps> = ({
     <section aria-labelledby="derived-markets-heading" className="rounded-xl border border-surface-border bg-surface-card p-5 shadow-sm space-y-4">
       <div className="flex flex-wrap items-center justify-between gap-3 pb-3 border-b border-surface-border">
         <div className="flex items-center gap-2">
-          <div className="p-1.5 rounded bg-purple-500/10 border border-purple-500/20 text-purple-400">
+          <div className="p-1.5 rounded bg-fotmob-blue/10 border border-fotmob-blue/20 text-fotmob-blue">
             <Layers className="w-4 h-4" />
           </div>
           <div>
@@ -36,11 +36,11 @@ export const DerivedMarketsCard: React.FC<DerivedMarketsCardProps> = ({
         </div>
 
         {/* Tab Selection */}
-        <div className="flex rounded-lg bg-slate-900 p-1 border border-slate-800 text-xs font-mono">
+        <div className="flex rounded-lg bg-surface-card p-1 border border-surface-border text-xs font-mono">
           <button
             onClick={() => setActiveTab('double_chance')}
             className={`px-3 py-1 rounded transition-colors ${
-              activeTab === 'double_chance' ? 'bg-slate-800 text-emerald-400 font-semibold' : 'text-slate-400 hover:text-slate-200'
+              activeTab === 'double_chance' ? 'bg-surface-cardMuted text-fotmob-green font-semibold' : 'text-slate-400 hover:text-slate-200'
             }`}
           >
             Double Chance
@@ -48,7 +48,7 @@ export const DerivedMarketsCard: React.FC<DerivedMarketsCardProps> = ({
           <button
             onClick={() => setActiveTab('totals')}
             className={`px-3 py-1 rounded transition-colors ${
-              activeTab === 'totals' ? 'bg-slate-800 text-emerald-400 font-semibold' : 'text-slate-400 hover:text-slate-200'
+              activeTab === 'totals' ? 'bg-surface-cardMuted text-fotmob-green font-semibold' : 'text-slate-400 hover:text-slate-200'
             }`}
           >
             Totals
@@ -56,7 +56,7 @@ export const DerivedMarketsCard: React.FC<DerivedMarketsCardProps> = ({
           <button
             onClick={() => setActiveTab('btts')}
             className={`px-3 py-1 rounded transition-colors ${
-              activeTab === 'btts' ? 'bg-slate-800 text-emerald-400 font-semibold' : 'text-slate-400 hover:text-slate-200'
+              activeTab === 'btts' ? 'bg-surface-cardMuted text-fotmob-green font-semibold' : 'text-slate-400 hover:text-slate-200'
             }`}
           >
             BTTS
@@ -64,7 +64,7 @@ export const DerivedMarketsCard: React.FC<DerivedMarketsCardProps> = ({
           <button
             onClick={() => setActiveTab('team_totals')}
             className={`px-3 py-1 rounded transition-colors ${
-              activeTab === 'team_totals' ? 'bg-slate-800 text-emerald-400 font-semibold' : 'text-slate-400 hover:text-slate-200'
+              activeTab === 'team_totals' ? 'bg-surface-cardMuted text-fotmob-green font-semibold' : 'text-slate-400 hover:text-slate-200'
             }`}
           >
             Team Totals
@@ -75,14 +75,14 @@ export const DerivedMarketsCard: React.FC<DerivedMarketsCardProps> = ({
       {/* Tab 1: Double Chance */}
       {activeTab === 'double_chance' && (
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-          <div className="p-3.5 rounded-lg bg-slate-900/60 border border-slate-800 text-center flex flex-col justify-between">
+          <div className="p-3.5 rounded-lg bg-surface-card border border-surface-border text-center flex flex-col justify-between">
             <div>
               <span className="text-xs font-mono font-semibold text-slate-300 block">1X (Home Win or Draw)</span>
               <div className="text-xl font-mono font-bold text-slate-100 mt-1">
                 {formatProbability(dc['1x'])}
               </div>
               <div className="mt-1 flex items-center justify-center gap-1.5">
-                <span className="text-xs font-mono font-bold px-2 py-0.5 rounded bg-slate-800 text-emerald-400 border border-slate-700">
+                <span className="text-xs font-mono font-bold px-2 py-0.5 rounded bg-surface-cardMuted text-fotmob-green border border-surface-border">
                   {formatDecimalOdds(dc['1x'], true)}
                 </span>
                 <span className="text-[10px] font-mono text-slate-400">Odds</span>
@@ -93,14 +93,14 @@ export const DerivedMarketsCard: React.FC<DerivedMarketsCardProps> = ({
             </span>
           </div>
 
-          <div className="p-3.5 rounded-lg bg-slate-900/60 border border-slate-800 text-center flex flex-col justify-between">
+          <div className="p-3.5 rounded-lg bg-surface-card border border-surface-border text-center flex flex-col justify-between">
             <div>
               <span className="text-xs font-mono font-semibold text-slate-300 block">X2 (Draw or Away Win)</span>
               <div className="text-xl font-mono font-bold text-slate-100 mt-1">
                 {formatProbability(dc['x2'])}
               </div>
               <div className="mt-1 flex items-center justify-center gap-1.5">
-                <span className="text-xs font-mono font-bold px-2 py-0.5 rounded bg-slate-800 text-emerald-400 border border-slate-700">
+                <span className="text-xs font-mono font-bold px-2 py-0.5 rounded bg-surface-cardMuted text-fotmob-green border border-surface-border">
                   {formatDecimalOdds(dc['x2'], true)}
                 </span>
                 <span className="text-[10px] font-mono text-slate-400">Odds</span>
@@ -111,14 +111,14 @@ export const DerivedMarketsCard: React.FC<DerivedMarketsCardProps> = ({
             </span>
           </div>
 
-          <div className="p-3.5 rounded-lg bg-slate-900/60 border border-slate-800 text-center flex flex-col justify-between">
+          <div className="p-3.5 rounded-lg bg-surface-card border border-surface-border text-center flex flex-col justify-between">
             <div>
               <span className="text-xs font-mono font-semibold text-slate-300 block">12 (Any Team Wins)</span>
               <div className="text-xl font-mono font-bold text-slate-100 mt-1">
                 {formatProbability(dc['12'])}
               </div>
               <div className="mt-1 flex items-center justify-center gap-1.5">
-                <span className="text-xs font-mono font-bold px-2 py-0.5 rounded bg-slate-800 text-emerald-400 border border-slate-700">
+                <span className="text-xs font-mono font-bold px-2 py-0.5 rounded bg-surface-cardMuted text-fotmob-green border border-surface-border">
                   {formatDecimalOdds(dc['12'], true)}
                 </span>
                 <span className="text-[10px] font-mono text-slate-400">Odds</span>
@@ -142,8 +142,8 @@ export const DerivedMarketsCard: React.FC<DerivedMarketsCardProps> = ({
             const underVal = totals[underKey];
 
             return (
-              <div key={thresh} className="p-3 rounded-lg bg-slate-900/60 border border-slate-800 space-y-2">
-                <span className="text-[11px] font-mono font-semibold text-purple-300 block text-center pb-1 border-b border-slate-800">
+              <div key={thresh} className="p-3 rounded-lg bg-surface-card border border-surface-border space-y-2">
+                <span className="text-[11px] font-mono font-semibold text-fotmob-blue block text-center pb-1 border-b border-surface-border">
                   Total {displayLabel} Goals
                 </span>
                 <div className="space-y-1">
@@ -151,7 +151,7 @@ export const DerivedMarketsCard: React.FC<DerivedMarketsCardProps> = ({
                     <span className="text-slate-400">Over:</span>
                     <div className="flex items-center gap-1">
                       <span className="text-slate-100 font-bold">{formatProbability(overVal)}</span>
-                      <span className="text-[10px] text-emerald-400 font-mono bg-slate-950 px-1 py-0.2 rounded border border-slate-800">
+                      <span className="text-[10px] text-fotmob-green font-mono bg-surface-base px-1 py-0.2 rounded border border-surface-border">
                         {formatDecimalOdds(overVal, true)}
                       </span>
                     </div>
@@ -160,7 +160,7 @@ export const DerivedMarketsCard: React.FC<DerivedMarketsCardProps> = ({
                     <span className="text-slate-400">Under:</span>
                     <div className="flex items-center gap-1">
                       <span className="text-slate-300">{formatProbability(underVal)}</span>
-                      <span className="text-[10px] text-emerald-400 font-mono bg-slate-950 px-1 py-0.2 rounded border border-slate-800">
+                      <span className="text-[10px] text-fotmob-green font-mono bg-surface-base px-1 py-0.2 rounded border border-surface-border">
                         {formatDecimalOdds(underVal, true)}
                       </span>
                     </div>
@@ -175,13 +175,13 @@ export const DerivedMarketsCard: React.FC<DerivedMarketsCardProps> = ({
       {/* Tab 3: BTTS */}
       {activeTab === 'btts' && (
         <div className="grid grid-cols-2 gap-3 max-w-md mx-auto">
-          <div className="p-4 rounded-lg bg-slate-900/60 border border-slate-800 text-center">
+          <div className="p-4 rounded-lg bg-surface-card border border-surface-border text-center">
             <span className="text-xs font-mono font-semibold text-slate-300 block">Both Teams To Score: YES</span>
-            <div className="text-2xl font-mono font-bold text-emerald-400 mt-1">
+            <div className="text-2xl font-mono font-bold text-fotmob-green mt-1">
               {formatProbability(btts.yes)}
             </div>
             <div className="mt-1 flex items-center justify-center gap-1.5">
-              <span className="text-xs font-mono font-bold px-2 py-0.5 rounded bg-emerald-950 text-emerald-300 border border-emerald-800">
+              <span className="text-xs font-mono font-bold px-2 py-0.5 rounded bg-emerald-950 text-fotmob-green border border-emerald-800">
                 {formatDecimalOdds(btts.yes, true)}
               </span>
               <span className="text-[10px] font-mono text-slate-400">Odds</span>
@@ -191,13 +191,13 @@ export const DerivedMarketsCard: React.FC<DerivedMarketsCardProps> = ({
             </span>
           </div>
 
-          <div className="p-4 rounded-lg bg-slate-900/60 border border-slate-800 text-center">
+          <div className="p-4 rounded-lg bg-surface-card border border-surface-border text-center">
             <span className="text-xs font-mono font-semibold text-slate-300 block">Both Teams To Score: NO</span>
             <div className="text-2xl font-mono font-bold text-slate-200 mt-1">
               {formatProbability(btts.no)}
             </div>
             <div className="mt-1 flex items-center justify-center gap-1.5">
-              <span className="text-xs font-mono font-bold px-2 py-0.5 rounded bg-slate-800 text-slate-200 border border-slate-700">
+              <span className="text-xs font-mono font-bold px-2 py-0.5 rounded bg-surface-cardMuted text-slate-200 border border-surface-border">
                 {formatDecimalOdds(btts.no, true)}
               </span>
               <span className="text-[10px] font-mono text-slate-400">Odds</span>
@@ -212,7 +212,7 @@ export const DerivedMarketsCard: React.FC<DerivedMarketsCardProps> = ({
       {/* Tab 4: Team Totals */}
       {activeTab === 'team_totals' && (
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <div className="p-3.5 rounded-lg bg-slate-900/60 border border-slate-800 space-y-2">
+          <div className="p-3.5 rounded-lg bg-surface-card border border-surface-border space-y-2">
             <div className="flex items-center gap-2 mb-1">
               <TeamLogo teamName={homeTeamName} size="xs" />
               <span className="text-xs font-mono font-semibold text-blue-400 truncate" title={homeTeamName}>
@@ -220,11 +220,11 @@ export const DerivedMarketsCard: React.FC<DerivedMarketsCardProps> = ({
               </span>
             </div>
             <div className="space-y-1 text-xs font-mono">
-              <div className="flex justify-between py-0.5 border-b border-slate-800/80">
+              <div className="flex justify-between py-0.5 border-b border-surface-border">
                 <span className="text-slate-400">Over 0.5:</span>
                 <span className="text-slate-200 font-bold">{formatProbability(teamTotals.home?.over_0_5)}</span>
               </div>
-              <div className="flex justify-between py-0.5 border-b border-slate-800/80">
+              <div className="flex justify-between py-0.5 border-b border-surface-border">
                 <span className="text-slate-400">Over 1.5:</span>
                 <span className="text-slate-200">{formatProbability(teamTotals.home?.over_1_5)}</span>
               </div>
@@ -235,19 +235,19 @@ export const DerivedMarketsCard: React.FC<DerivedMarketsCardProps> = ({
             </div>
           </div>
 
-          <div className="p-3.5 rounded-lg bg-slate-900/60 border border-slate-800 space-y-2">
+          <div className="p-3.5 rounded-lg bg-surface-card border border-surface-border space-y-2">
             <div className="flex items-center gap-2 mb-1">
               <TeamLogo teamName={awayTeamName} size="xs" />
-              <span className="text-xs font-mono font-semibold text-emerald-400 truncate" title={awayTeamName}>
+              <span className="text-xs font-mono font-semibold text-fotmob-green truncate" title={awayTeamName}>
                 {awayTeamName} Individual Totals
               </span>
             </div>
             <div className="space-y-1 text-xs font-mono">
-              <div className="flex justify-between py-0.5 border-b border-slate-800/80">
+              <div className="flex justify-between py-0.5 border-b border-surface-border">
                 <span className="text-slate-400">Over 0.5:</span>
                 <span className="text-slate-200 font-bold">{formatProbability(teamTotals.away?.over_0_5)}</span>
               </div>
-              <div className="flex justify-between py-0.5 border-b border-slate-800/80">
+              <div className="flex justify-between py-0.5 border-b border-surface-border">
                 <span className="text-slate-400">Over 1.5:</span>
                 <span className="text-slate-200">{formatProbability(teamTotals.away?.over_1_5)}</span>
               </div>
@@ -260,7 +260,7 @@ export const DerivedMarketsCard: React.FC<DerivedMarketsCardProps> = ({
         </div>
       )}
 
-      <div className="pt-2 border-t border-slate-800/80 flex items-center gap-1.5 text-[11px] font-mono text-slate-400">
+      <div className="pt-2 border-t border-surface-border flex items-center gap-1.5 text-[11px] font-mono text-slate-400">
         <ShieldCheck className="w-3.5 h-3.5 text-slate-400" />
         <span>Values are projected strictly from bivariate Poisson model convolution. No client-side recalculation.</span>
       </div>

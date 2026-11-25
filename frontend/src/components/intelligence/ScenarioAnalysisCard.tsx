@@ -33,7 +33,7 @@ export const ScenarioAnalysisCard: React.FC<ScenarioAnalysisCardProps> = ({
     <section aria-labelledby="scenario-analysis-heading" className="rounded-xl border border-surface-border bg-surface-card p-5 shadow-sm space-y-5">
       <div className="flex flex-wrap items-center justify-between gap-3 pb-3 border-b border-surface-border">
         <div className="flex items-center gap-2">
-          <div className="p-1.5 rounded bg-emerald-500/10 border border-emerald-500/20 text-emerald-400">
+          <div className="p-1.5 rounded bg-fotmob-green/10 border border-fotmob-green/20 text-fotmob-green">
             <Sliders className="w-4 h-4" />
           </div>
           <div>
@@ -61,8 +61,8 @@ export const ScenarioAnalysisCard: React.FC<ScenarioAnalysisCardProps> = ({
               onClick={() => setSelectedIdx(idx)}
               className={`px-3 py-1.5 rounded-lg text-xs font-mono transition-all border ${
                 isSel
-                  ? 'bg-emerald-600 text-white border-emerald-500 font-semibold shadow-sm'
-                  : 'bg-slate-900/80 text-slate-400 hover:text-slate-200 border-slate-800'
+                  ? 'bg-fotmob-green text-white border-fotmob-green font-semibold shadow-sm'
+                  : 'bg-surface-card text-slate-400 hover:text-slate-200 border-surface-border'
               }`}
             >
               {sc.name.replace(/_/g, ' ')}
@@ -72,10 +72,10 @@ export const ScenarioAnalysisCard: React.FC<ScenarioAnalysisCardProps> = ({
       </div>
 
       {/* Selected Scenario Panel */}
-      <div className="p-4 rounded-xl bg-slate-950/80 border border-slate-800/80 space-y-4">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-800/80 pb-3">
+      <div className="p-4 rounded-xl bg-surface-base border border-surface-border space-y-4">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-surface-border pb-3">
           <div>
-            <span className="text-xs font-mono font-bold text-emerald-400 uppercase tracking-wide">
+            <span className="text-xs font-mono font-bold text-fotmob-green uppercase tracking-wide">
               {current.name.replace(/_/g, ' ')}
             </span>
             <p className="text-xs text-slate-300 font-sans mt-0.5">
@@ -104,7 +104,7 @@ export const ScenarioAnalysisCard: React.FC<ScenarioAnalysisCardProps> = ({
 
         {/* Changed Expected Goals & Probabilities Grid */}
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-2">
-          <div className="p-3 rounded-lg bg-slate-900 border border-slate-800">
+          <div className="p-3 rounded-lg bg-surface-card border border-surface-border">
             <div className="flex items-center gap-1.5 mb-0.5">
               <TeamLogo teamName={homeTeamName} size="xs" />
               <span className="text-xs font-mono text-slate-300 font-semibold truncate">{homeTeamName} λ</span>
@@ -119,12 +119,12 @@ export const ScenarioAnalysisCard: React.FC<ScenarioAnalysisCardProps> = ({
             )}
           </div>
 
-          <div className="p-3 rounded-lg bg-slate-900 border border-slate-800">
+          <div className="p-3 rounded-lg bg-surface-card border border-surface-border">
             <div className="flex items-center gap-1.5 mb-0.5">
               <TeamLogo teamName={awayTeamName} size="xs" />
               <span className="text-xs font-mono text-slate-300 font-semibold truncate">{awayTeamName} λ</span>
             </div>
-            <div className="text-xl font-mono font-bold text-emerald-400 mt-0.5">
+            <div className="text-xl font-mono font-bold text-fotmob-green mt-0.5">
               {formatLambda(current.goals.away_lambda)}
             </div>
             {!isBaseline && (
@@ -134,9 +134,9 @@ export const ScenarioAnalysisCard: React.FC<ScenarioAnalysisCardProps> = ({
             )}
           </div>
 
-          <div className="p-3 rounded-lg bg-slate-900 border border-slate-800">
+          <div className="p-3 rounded-lg bg-surface-card border border-surface-border">
             <span className="text-xs font-mono text-slate-400 block">Combined Total λ</span>
-            <div className="text-xl font-mono font-bold text-purple-400 mt-0.5">
+            <div className="text-xl font-mono font-bold text-fotmob-blue mt-0.5">
               {formatLambda(current.goals.total_lambda)}
             </div>
             {!isBaseline && (
@@ -149,7 +149,7 @@ export const ScenarioAnalysisCard: React.FC<ScenarioAnalysisCardProps> = ({
 
         {/* Delta from Baseline */}
         {!isBaseline && diff && (
-          <div className="p-3 rounded-lg bg-slate-900/60 border border-slate-800 flex flex-wrap items-center justify-between text-xs font-mono gap-3">
+          <div className="p-3 rounded-lg bg-surface-card border border-surface-border flex flex-wrap items-center justify-between text-xs font-mono gap-3">
             <span className="text-slate-400 font-semibold">Shift from baseline:</span>
             <div className="flex items-center gap-4">
               <span className={diff.home > 0 ? 'text-blue-400' : 'text-slate-300'}>
@@ -158,7 +158,7 @@ export const ScenarioAnalysisCard: React.FC<ScenarioAnalysisCardProps> = ({
               <span className={diff.draw > 0 ? 'text-blue-400' : 'text-slate-300'}>
                 Draw: {diff.draw > 0 ? `+${(diff.draw * 100).toFixed(1)}%` : `${(diff.draw * 100).toFixed(1)}%`}
               </span>
-              <span className={diff.away > 0 ? 'text-emerald-400' : 'text-slate-300'}>
+              <span className={diff.away > 0 ? 'text-fotmob-green' : 'text-slate-300'}>
                 Away: {diff.away > 0 ? `+${(diff.away * 100).toFixed(1)}%` : `${(diff.away * 100).toFixed(1)}%`}
               </span>
             </div>

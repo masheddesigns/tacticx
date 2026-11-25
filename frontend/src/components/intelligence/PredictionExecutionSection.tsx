@@ -12,7 +12,7 @@ const STATUS_META: Record<string, { label: string; icon: React.ReactNode; tone: 
   GENERATED: {
     label: 'Generated',
     icon: <CheckCircle2 className="w-4 h-4" />,
-    tone: 'text-emerald-400',
+    tone: 'text-fotmob-green',
   },
   DEGRADED: {
     label: 'Generated (Degraded)',
@@ -120,7 +120,7 @@ export const PredictionExecutionSection: React.FC<PredictionExecutionSectionProp
             { label: 'Draw', value: payload.draw_probability },
             { label: 'Away', value: payload.away_win_probability },
           ].map((row) => (
-            <div key={row.label} className="rounded-lg border border-slate-800 bg-slate-900/60 px-3 py-2">
+            <div key={row.label} className="rounded-lg border border-surface-border bg-surface-card px-3 py-2">
               <div className="text-[11px] font-mono text-slate-500">{row.label}</div>
               <div className="text-sm font-mono font-semibold text-slate-100">
                 {typeof row.value === 'number' ? row.value.toFixed(4) : '—'}

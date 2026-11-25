@@ -51,13 +51,13 @@ export const ModelAgreementTable: React.FC<ModelAgreementTableProps> = ({
       <div className="overflow-x-auto">
         <table className="w-full text-xs font-mono border-collapse" aria-label="Model Agreement Table">
           <thead>
-            <tr className="border-b border-slate-800 bg-slate-950/60 text-slate-400">
+            <tr className="border-b border-surface-border bg-surface-base text-slate-400">
               <th className="p-2.5 text-left font-medium">Outcome</th>
               <th className="p-2.5 text-center font-medium">Elo</th>
               <th className="p-2.5 text-center font-medium">Poisson</th>
               <th className="p-2.5 text-center font-medium">Advanced</th>
               <th className="p-2.5 text-center font-medium">Ensemble</th>
-              <th className="p-2.5 text-center font-medium border-l border-slate-800 text-slate-400">Mean</th>
+              <th className="p-2.5 text-center font-medium border-l border-surface-border text-slate-400">Mean</th>
               <th className="p-2.5 text-center font-medium text-slate-400">Std Dev</th>
               <th className="p-2.5 text-center font-medium text-slate-400">Range</th>
             </tr>
@@ -67,7 +67,7 @@ export const ModelAgreementTable: React.FC<ModelAgreementTableProps> = ({
               const stats = perOutcome[item.key] || {};
 
               return (
-                <tr key={item.key} className="hover:bg-slate-900/40 transition-colors">
+                <tr key={item.key} className="hover:bg-surface-cardMuted/40 transition-colors">
                   <td className="p-2.5 font-semibold text-slate-200">
                     <div className="flex items-center gap-1.5">
                       {item.team && <TeamLogo teamName={item.team} size="xs" />}
@@ -100,7 +100,7 @@ export const ModelAgreementTable: React.FC<ModelAgreementTableProps> = ({
                   })}
 
                   {/* Summary Statistics */}
-                  <td className="p-2.5 text-center border-l border-slate-800 font-semibold text-slate-200">
+                  <td className="p-2.5 text-center border-l border-surface-border font-semibold text-slate-200">
                     {stats.mean !== undefined ? formatProbability(stats.mean) : '—'}
                   </td>
                   <td className="p-2.5 text-center text-slate-400">

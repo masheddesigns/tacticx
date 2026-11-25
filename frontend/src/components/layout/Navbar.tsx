@@ -198,7 +198,7 @@ export const Navbar: React.FC = () => {
           to="/system"
           className="flex flex-col items-center py-1 px-2.5 rounded-lg text-[10px] font-medium font-sans text-slate-400 hover:text-white"
         >
-          <Layers className="w-4 h-4 mb-0.5 text-purple-400" />
+          <Layers className="w-4 h-4 mb-0.5 text-fotmob-blue" />
           <span>Platform</span>
         </NavLink>
       </div>

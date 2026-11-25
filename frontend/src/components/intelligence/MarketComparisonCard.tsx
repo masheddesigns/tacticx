@@ -34,7 +34,7 @@ export const MarketComparisonCard: React.FC<MarketComparisonCardProps> = ({
     <section aria-labelledby="market-comparison-heading" className="rounded-xl border border-surface-border bg-surface-card p-5 shadow-sm space-y-4">
       <div className="flex flex-wrap items-center justify-between gap-3 pb-3 border-b border-surface-border">
         <div className="flex items-center gap-2">
-          <div className="p-1.5 rounded bg-emerald-500/10 border border-emerald-500/20 text-emerald-400">
+          <div className="p-1.5 rounded bg-fotmob-green/10 border border-fotmob-green/20 text-fotmob-green">
             <Scale className="w-4 h-4" />
           </div>
           <div>
@@ -61,7 +61,7 @@ export const MarketComparisonCard: React.FC<MarketComparisonCardProps> = ({
       </div>
 
       {!hasMarket ? (
-        <div className="p-6 text-center rounded-lg bg-slate-900/60 border border-slate-800 space-y-1">
+        <div className="p-6 text-center rounded-lg bg-surface-card border border-surface-border space-y-1">
           <span className="text-xs font-mono text-slate-300">
             No active pre-match market consensus recorded
           </span>
@@ -79,14 +79,14 @@ export const MarketComparisonCard: React.FC<MarketComparisonCardProps> = ({
               const magnitude = (perOutcome as any)[item.key]?.magnitude;
 
               return (
-                <div key={item.key} className="p-3.5 rounded-lg bg-slate-900/60 border border-slate-800 space-y-2">
+                <div key={item.key} className="p-3.5 rounded-lg bg-surface-card border border-surface-border space-y-2">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-1.5 min-w-0">
                       {item.team && <TeamLogo teamName={item.team} size="xs" />}
                       <span className="text-xs font-mono font-semibold text-slate-200 truncate">{item.label}</span>
                     </div>
                     {magnitude && (
-                      <span className="text-[10px] font-mono px-1.5 py-0.2 rounded bg-slate-800 text-slate-400 shrink-0">
+                      <span className="text-[10px] font-mono px-1.5 py-0.2 rounded bg-surface-cardMuted text-slate-400 shrink-0">
                         {magnitude.replace('_', ' ')}
                       </span>
                     )}
@@ -104,7 +104,7 @@ export const MarketComparisonCard: React.FC<MarketComparisonCardProps> = ({
                   </div>
 
                   {diff !== undefined && (
-                    <div className="pt-2 border-t border-slate-800 flex items-center justify-between text-[11px] font-mono">
+                    <div className="pt-2 border-t border-surface-border flex items-center justify-between text-[11px] font-mono">
                       <span className="text-slate-400">Divergence:</span>
                       <span className={diff > 0 ? 'text-blue-400 font-semibold' : 'text-slate-300 font-semibold'}>
                         {diff > 0 ? `+${(diff * 100).toFixed(1)}%` : `${(diff * 100).toFixed(1)}%`}
@@ -116,7 +116,7 @@ export const MarketComparisonCard: React.FC<MarketComparisonCardProps> = ({
             })}
           </div>
 
-          <div className="flex flex-wrap items-center justify-between text-[11px] font-mono text-slate-400 pt-1 border-t border-slate-800/60">
+          <div className="flex flex-wrap items-center justify-between text-[11px] font-mono text-slate-400 pt-1 border-t border-surface-border">
             {market.market_timing && (
               <span className="flex items-center gap-1">
                 <Clock className="w-3 h-3 text-slate-400" />

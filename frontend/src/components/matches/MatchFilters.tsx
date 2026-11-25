@@ -58,7 +58,7 @@ export const MatchFilters: React.FC<MatchFiltersProps> = ({
             onClick={() => onFilterChange({ ...filters, status: 'LIVE', date: undefined })}
             className={`px-2.5 py-1 rounded text-xs font-mono transition-colors flex items-center gap-1.5 ${
               filters.status === 'LIVE' && !filters.date
-                ? 'bg-rose-600 text-white font-bold animate-pulse'
+                ? 'bg-rose-600 text-white font-bold'
                 : 'bg-rose-950/80 text-rose-300 hover:bg-rose-900 border border-rose-800/60'
             }`}
           >
@@ -69,8 +69,8 @@ export const MatchFilters: React.FC<MatchFiltersProps> = ({
             onClick={() => handleQuickDay(yesterdayStr)}
             className={`px-2.5 py-1 rounded text-xs font-mono transition-colors ${
               filters.date === yesterdayStr
-                ? 'bg-emerald-600 text-white font-bold'
-                : 'bg-slate-800 text-slate-300 hover:bg-slate-700'
+                ? 'bg-fotmob-green text-white font-bold'
+                : 'bg-surface-cardMuted text-slate-300 hover:bg-slate-700'
             }`}
           >
             Yesterday ({formatDayDisplay(yesterdayStr, timeZone)})
@@ -79,8 +79,8 @@ export const MatchFilters: React.FC<MatchFiltersProps> = ({
             onClick={() => handleQuickDay(todayStr)}
             className={`px-2.5 py-1 rounded text-xs font-mono transition-colors ${
               filters.date === todayStr
-                ? 'bg-emerald-600 text-white font-bold'
-                : 'bg-slate-800 text-slate-300 hover:bg-slate-700'
+                ? 'bg-fotmob-green text-white font-bold'
+                : 'bg-surface-cardMuted text-slate-300 hover:bg-slate-700'
             }`}
           >
             Today ({formatDayDisplay(todayStr, timeZone)})
@@ -89,8 +89,8 @@ export const MatchFilters: React.FC<MatchFiltersProps> = ({
             onClick={() => handleQuickDay(tomorrowStr)}
             className={`px-2.5 py-1 rounded text-xs font-mono transition-colors ${
               filters.date === tomorrowStr
-                ? 'bg-emerald-600 text-white font-bold'
-                : 'bg-slate-800 text-slate-300 hover:bg-slate-700'
+                ? 'bg-fotmob-green text-white font-bold'
+                : 'bg-surface-cardMuted text-slate-300 hover:bg-slate-700'
             }`}
           >
             Tomorrow ({formatDayDisplay(tomorrowStr, timeZone)})
@@ -99,8 +99,8 @@ export const MatchFilters: React.FC<MatchFiltersProps> = ({
             onClick={() => onFilterChange({ ...filters, status: 'SCHEDULED', date: undefined })}
             className={`px-2.5 py-1 rounded text-xs font-mono transition-colors ${
               filters.status === 'SCHEDULED' && !filters.date
-                ? 'bg-emerald-600 text-white font-bold'
-                : 'bg-slate-800 text-slate-300 hover:bg-slate-700'
+                ? 'bg-fotmob-green text-white font-bold'
+                : 'bg-surface-cardMuted text-slate-300 hover:bg-slate-700'
             }`}
           >
             All Upcoming
@@ -111,17 +111,17 @@ export const MatchFilters: React.FC<MatchFiltersProps> = ({
         {/* Timezone & Reset Controls */}
         <div className="flex items-center gap-2">
           {onTimeZoneChange && (
-            <div className="flex items-center gap-1 text-xs font-mono bg-slate-900 px-2 py-1 rounded border border-slate-800">
+            <div className="flex items-center gap-1 text-xs font-mono bg-surface-card px-2 py-1 rounded border border-surface-border">
               <span className="text-slate-400">Timezone:</span>
               <button
                 onClick={() => onTimeZoneChange('IST')}
-                className={`px-1.5 py-0.5 rounded ${timeZone === 'IST' ? 'bg-emerald-950/80 text-emerald-400 font-bold border border-emerald-500/40' : 'text-slate-400 hover:text-slate-300'}`}
+                className={`px-1.5 py-0.5 rounded ${timeZone === 'IST' ? 'bg-emerald-950/80 text-fotmob-green font-bold border border-fotmob-green/40' : 'text-slate-400 hover:text-slate-300'}`}
               >
                 IST (+5:30)
               </button>
               <button
                 onClick={() => onTimeZoneChange('UTC')}
-                className={`px-1.5 py-0.5 rounded ${timeZone === 'UTC' ? 'bg-slate-800 text-emerald-400 font-bold' : 'text-slate-400 hover:text-slate-300'}`}
+                className={`px-1.5 py-0.5 rounded ${timeZone === 'UTC' ? 'bg-surface-cardMuted text-fotmob-green font-bold' : 'text-slate-400 hover:text-slate-300'}`}
               >
                 UTC
               </button>
@@ -141,7 +141,7 @@ export const MatchFilters: React.FC<MatchFiltersProps> = ({
       {/* Quick October Matchday Shortcuts */}
       <div className="flex flex-wrap items-center gap-1.5 text-xs">
         <span className="text-[11px] font-mono text-slate-400 font-semibold flex items-center gap-1 mr-0.5">
-          <Sparkles className="w-3 h-3 text-emerald-400" />
+          <Sparkles className="w-3 h-3 text-fotmob-green" />
           <span>Oct Matchdays:</span>
         </span>
         {[
@@ -159,8 +159,8 @@ export const MatchFilters: React.FC<MatchFiltersProps> = ({
             onClick={() => handleQuickDay(chip.date)}
             className={`px-2 py-0.5 rounded-md text-[11px] font-sans font-medium transition-all ${
               filters.date === chip.date
-                ? 'bg-emerald-600 text-white font-bold'
-                : 'bg-slate-900 text-slate-300 hover:text-white hover:bg-slate-800 border border-slate-800'
+                ? 'bg-fotmob-green text-white font-bold'
+                : 'bg-surface-card text-slate-300 hover:text-white hover:bg-surface-cardMuted border border-surface-border'
             }`}
           >
             {chip.label}
@@ -178,7 +178,7 @@ export const MatchFilters: React.FC<MatchFiltersProps> = ({
             placeholder="Search team name..."
             value={filters.team || ''}
             onChange={(e) => handleChange('team', e.target.value)}
-            className="w-full bg-slate-900 border border-slate-700/80 rounded-lg pl-9 pr-3 py-2 text-xs text-slate-200 placeholder-slate-500 focus:outline-none focus:border-emerald-500/60 focus:ring-1 focus:ring-emerald-500/60 font-sans"
+            className="w-full bg-surface-card border border-surface-border rounded-lg pl-9 pr-3 py-2 text-xs text-slate-200 placeholder-slate-500 focus:outline-none focus:border-fotmob-green/60 focus:ring-1 focus:ring-emerald-500/60 font-sans"
           />
         </div>
 
@@ -187,7 +187,7 @@ export const MatchFilters: React.FC<MatchFiltersProps> = ({
           <select
             value={filters.league || ''}
             onChange={(e) => handleChange('league', e.target.value)}
-            className="w-full bg-slate-900 border border-slate-700/80 rounded-lg px-3 py-2 text-xs text-slate-200 focus:outline-none focus:border-emerald-500/60 focus:ring-1 focus:ring-emerald-500/60 font-sans"
+            className="w-full bg-surface-card border border-surface-border rounded-lg px-3 py-2 text-xs text-slate-200 focus:outline-none focus:border-fotmob-green/60 focus:ring-1 focus:ring-emerald-500/60 font-sans"
           >
             <option value="">All Competitions</option>
             {availableLeagues.map((lg) => (
@@ -203,7 +203,7 @@ export const MatchFilters: React.FC<MatchFiltersProps> = ({
           <select
             value={filters.status || ''}
             onChange={(e) => handleChange('status', e.target.value)}
-            className="w-full bg-slate-900 border border-slate-700/80 rounded-lg px-3 py-2 text-xs text-slate-200 focus:outline-none focus:border-emerald-500/60 focus:ring-1 focus:ring-emerald-500/60 font-sans"
+            className="w-full bg-surface-card border border-surface-border rounded-lg px-3 py-2 text-xs text-slate-200 focus:outline-none focus:border-fotmob-green/60 focus:ring-1 focus:ring-emerald-500/60 font-sans"
           >
             <option value="">All Statuses</option>
             <option value="FINISHED">Finished</option>
@@ -220,7 +220,7 @@ export const MatchFilters: React.FC<MatchFiltersProps> = ({
             type="date"
             value={filters.date || ''}
             onChange={(e) => handleChange('date', e.target.value)}
-            className="w-full bg-slate-900 border border-slate-700/80 rounded-lg px-3 py-2 text-xs text-slate-200 focus:outline-none focus:border-emerald-500/60 focus:ring-1 focus:ring-emerald-500/60 font-sans [color-scheme:dark]"
+            className="w-full bg-surface-card border border-surface-border rounded-lg px-3 py-2 text-xs text-slate-200 focus:outline-none focus:border-fotmob-green/60 focus:ring-1 focus:ring-emerald-500/60 font-sans [color-scheme:dark]"
           />
         </div>
 
@@ -229,7 +229,7 @@ export const MatchFilters: React.FC<MatchFiltersProps> = ({
           <select
             value={filters.sort_order || 'asc'}
             onChange={(e) => handleChange('sort_order', e.target.value)}
-            className="w-full bg-slate-900 border border-slate-700/80 rounded-lg px-3 py-2 text-xs text-slate-200 focus:outline-none focus:border-emerald-500/60 focus:ring-1 focus:ring-emerald-500/60 font-sans"
+            className="w-full bg-surface-card border border-surface-border rounded-lg px-3 py-2 text-xs text-slate-200 focus:outline-none focus:border-fotmob-green/60 focus:ring-1 focus:ring-emerald-500/60 font-sans"
           >
             <option value="asc">Kickoff: Earliest First</option>
             <option value="desc">Kickoff: Latest First</option>

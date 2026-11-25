@@ -651,12 +651,12 @@ export const DailyAIPredictionsSection: React.FC<DailyAIPredictionsSectionProps>
             </div>
 
             <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[#171c28] border border-[#262f42] text-slate-300">
-              <TrendingUp className="w-3.5 h-3.5 text-emerald-400" />
+              <TrendingUp className="w-3.5 h-3.5 text-fotmob-green" />
               <span>+EV Value:</span>
               {isLoading ? (
                 <span className="inline-block w-8 h-3.5 bg-slate-700/60 rounded animate-pulse" />
               ) : (
-                <span className="text-emerald-300 font-bold">{highValueCount} Picks</span>
+                <span className="text-fotmob-green font-bold">{highValueCount} Picks</span>
               )}
             </div>
           </div>
@@ -703,7 +703,7 @@ export const DailyAIPredictionsSection: React.FC<DailyAIPredictionsSectionProps>
                 <span className={`text-[10px] font-mono px-1.5 py-0.2 rounded-full font-bold ${
                   activeTab === 'PREDICTION_HISTORY'
                     ? 'bg-[#0a0d14]/20 text-[#0a0d14]'
-                    : 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30'
+                    : 'bg-fotmob-green/20 text-fotmob-green border border-fotmob-green/30'
                 }`}>
                   {historyData.summary.win_rate}% Won
                 </span>
@@ -714,7 +714,7 @@ export const DailyAIPredictionsSection: React.FC<DailyAIPredictionsSectionProps>
           <div className="flex items-center gap-2 text-xs font-mono text-slate-400">
             <Clock className="w-3 h-3 text-[#21e786]" />
             <span>Timezone:</span>
-            <span className="text-emerald-400 font-bold">{timeZone === 'IST' ? 'IST (UTC+5:30)' : timeZone}</span>
+            <span className="text-fotmob-green font-bold">{timeZone === 'IST' ? 'IST (UTC+5:30)' : timeZone}</span>
           </div>
         </div>
 
@@ -722,7 +722,7 @@ export const DailyAIPredictionsSection: React.FC<DailyAIPredictionsSectionProps>
         {finishedPredictionsToday.length > 0 && activeTab !== 'PREDICTION_HISTORY' && (
           <div className="mt-3 p-3 rounded-xl bg-[#141a26] border border-[#243044] flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-xs font-sans">
             <div className="flex items-center gap-2 text-slate-300">
-              <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
+              <CheckCircle2 className="w-4 h-4 text-fotmob-green shrink-0" />
               <span>
                 <strong className="text-white font-mono">{finishedPredictionsToday.length} matches</strong> finished earlier today.
                 Fully-pending slips are listed first; settled legs carry WON / LOST badges.
@@ -771,7 +771,7 @@ export const DailyAIPredictionsSection: React.FC<DailyAIPredictionsSectionProps>
                         <span>{napOfTheDay.away_team}</span>
                       </div>
                       {napOfTheDay.status === 'LIVE' && (
-                        <span className="px-2 py-0.5 rounded-full bg-rose-500 text-white text-[10px] font-mono font-bold animate-pulse">
+                        <span className="px-2 py-0.5 rounded-full bg-rose-500 text-white text-[10px] font-mono font-bold">
                           LIVE
                         </span>
                       )}
@@ -801,9 +801,9 @@ export const DailyAIPredictionsSection: React.FC<DailyAIPredictionsSectionProps>
                     </span>
                   </div>
 
-                  <div className="flex flex-col items-center justify-center px-3 py-1 bg-emerald-500/15 rounded-lg border border-emerald-500/30">
-                    <span className="text-[10px] font-mono text-emerald-300">WIN PROB</span>
-                    <span className="text-base font-bold font-mono text-emerald-400">
+                  <div className="flex flex-col items-center justify-center px-3 py-1 bg-fotmob-green/15 rounded-lg border border-fotmob-green/30">
+                    <span className="text-[10px] font-mono text-fotmob-green">WIN PROB</span>
+                    <span className="text-base font-bold font-mono text-fotmob-green">
                       {napOfTheDay.best_outcome.probability}%
                     </span>
                   </div>
@@ -862,7 +862,7 @@ export const DailyAIPredictionsSection: React.FC<DailyAIPredictionsSectionProps>
                   className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-sans transition-all ${
                     filterMode === 'VALUE'
                       ? 'bg-emerald-400 text-[#0a0d14] font-bold shadow-sm'
-                      : 'bg-[#1b202c] text-emerald-300 hover:bg-[#222838] border border-emerald-900/40'
+                      : 'bg-[#1b202c] text-fotmob-green hover:bg-[#222838] border border-emerald-900/40'
                   }`}
                 >
                   <TrendingUp className="w-3 h-3" />
@@ -886,7 +886,7 @@ export const DailyAIPredictionsSection: React.FC<DailyAIPredictionsSectionProps>
                   className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-sans transition-all ${
                     filterMode === 'SAFETY'
                       ? 'bg-indigo-400 text-[#0a0d14] font-bold shadow-sm'
-                      : 'bg-[#1b202c] text-indigo-300 hover:bg-[#222838] border border-indigo-900/40'
+                      : 'bg-[#1b202c] text-fotmob-blue hover:bg-[#222838] border border-indigo-900/40'
                   }`}
                 >
                   <ShieldCheck className="w-3 h-3" />
@@ -1037,11 +1037,11 @@ export const DailyAIPredictionsSection: React.FC<DailyAIPredictionsSectionProps>
                         )}
 
                         {pred.status === 'LIVE' ? (
-                          <span className="px-2 py-0.5 rounded-full bg-rose-500/20 text-rose-400 border border-rose-500/40 text-[10px] font-mono font-bold animate-pulse">
+                          <span className="px-2 py-0.5 rounded-full bg-rose-500/20 text-rose-400 border border-rose-500/40 text-[10px] font-mono font-bold">
                             LIVE
                           </span>
                         ) : pred.status === 'FINISHED' ? (
-                          <span className="px-2 py-0.5 rounded-full bg-slate-800 text-slate-400 border border-slate-700 text-[10px] font-mono">
+                          <span className="px-2 py-0.5 rounded-full bg-surface-cardMuted text-slate-400 border border-surface-border text-[10px] font-mono">
                             {pred.home_score !== null ? `${pred.home_score}-${pred.away_score}` : 'FT'}
                           </span>
                         ) : null}
@@ -1077,7 +1077,7 @@ export const DailyAIPredictionsSection: React.FC<DailyAIPredictionsSectionProps>
                             pred.best_outcome.category === 'BANKER'
                               ? 'bg-amber-400/20 text-amber-300 border border-amber-500/40'
                               : pred.best_outcome.category === 'VALUE'
-                              ? 'bg-emerald-400/20 text-emerald-300 border border-emerald-500/40'
+                              ? 'bg-fotmob-green/20 text-fotmob-green border border-fotmob-green/40'
                               : 'bg-sky-400/20 text-sky-300 border border-sky-500/40'
                           }`}
                         >
@@ -1094,7 +1094,7 @@ export const DailyAIPredictionsSection: React.FC<DailyAIPredictionsSectionProps>
                           <span className="text-xs px-2 py-0.5 rounded bg-[#181d2a] text-slate-200 font-bold border border-[#2b354a]">
                             @{pred.best_outcome.odds.toFixed(2)}
                           </span>
-                          <span className="text-xs px-2 py-0.5 rounded bg-emerald-950/70 text-emerald-400 font-bold border border-emerald-800/60">
+                          <span className="text-xs px-2 py-0.5 rounded bg-emerald-950/70 text-fotmob-green font-bold border border-emerald-800/60">
                             {pred.best_outcome.ev_edge}
                           </span>
                         </div>
@@ -1237,7 +1237,7 @@ export const DailyAIPredictionsSection: React.FC<DailyAIPredictionsSectionProps>
                     key={sIdx}
                     className={`rounded-2xl border p-4 space-y-3.5 flex flex-col justify-between shadow-sm transition-all ${
                       isSettledWon
-                        ? 'border-emerald-500/35 bg-gradient-to-b from-[#0f1917] via-[#141822] to-[#10141d]'
+                        ? 'border-fotmob-green/35 bg-gradient-to-b from-[#0f1917] via-[#141822] to-[#10141d]'
                         : isSettledLost
                         ? 'border-rose-500/35 bg-gradient-to-b from-[#1a1015] via-[#141822] to-[#10141d]'
                         : 'border-[#242938] bg-[#141822] hover:bg-[#161b26]'
@@ -1256,8 +1256,8 @@ export const DailyAIPredictionsSection: React.FC<DailyAIPredictionsSectionProps>
                         </div>
                         <div className="flex items-center gap-1.5">
                           {isSettledWon && (
-                            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-mono font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/40">
-                              <CheckCircle2 className="w-3 h-3 text-emerald-400" />
+                            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-mono font-bold bg-fotmob-green/20 text-fotmob-green border border-fotmob-green/40">
+                              <CheckCircle2 className="w-3 h-3 text-fotmob-green" />
                               <span>WON</span>
                             </span>
                           )}
@@ -1267,7 +1267,7 @@ export const DailyAIPredictionsSection: React.FC<DailyAIPredictionsSectionProps>
                               <span>LOST</span>
                             </span>
                           )}
-                          <span className="text-xs font-mono font-bold px-2 py-0.5 rounded bg-emerald-950/80 text-emerald-400 border border-emerald-800">
+                          <span className="text-xs font-mono font-bold px-2 py-0.5 rounded bg-emerald-950/80 text-fotmob-green border border-emerald-800">
                             Total @{slip.total_odds.toFixed(2)}
                           </span>
                         </div>
@@ -1316,7 +1316,7 @@ export const DailyAIPredictionsSection: React.FC<DailyAIPredictionsSectionProps>
                                     <span
                                       className={`text-[9px] font-mono font-bold px-1.5 py-0.2 rounded ${
                                         legWon
-                                          ? 'bg-emerald-950 text-emerald-300 border border-emerald-800'
+                                          ? 'bg-emerald-950 text-fotmob-green border border-emerald-800'
                                           : 'bg-rose-950 text-rose-300 border border-rose-800'
                                       }`}
                                     >
@@ -1344,7 +1344,7 @@ export const DailyAIPredictionsSection: React.FC<DailyAIPredictionsSectionProps>
                                     {pick.pick}
                                   </div>
                                 </div>
-                                <span className="font-mono text-emerald-400 font-bold whitespace-nowrap text-[11px] px-2 py-0.5 rounded bg-emerald-950/60 border border-emerald-800/50">
+                                <span className="font-mono text-fotmob-green font-bold whitespace-nowrap text-[11px] px-2 py-0.5 rounded bg-emerald-950/60 border border-emerald-800/50">
                                   @{pick.odds.toFixed(2)}
                                 </span>
                               </div>
@@ -1384,7 +1384,7 @@ export const DailyAIPredictionsSection: React.FC<DailyAIPredictionsSectionProps>
             <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
               <div>
                 <div className="flex items-center gap-2">
-                  <span className="p-1.5 rounded-lg bg-emerald-500/10 text-emerald-400 border border-emerald-500/25">
+                  <span className="p-1.5 rounded-lg bg-fotmob-green/10 text-fotmob-green border border-fotmob-green/25">
                     <ShieldCheck className="w-4 h-4" />
                   </span>
                   <h3 className="font-bold text-white text-base font-sans">
@@ -1457,13 +1457,13 @@ export const DailyAIPredictionsSection: React.FC<DailyAIPredictionsSectionProps>
                 <div className="text-xl sm:text-2xl font-bold font-mono text-white flex items-center gap-2">
                   {historySubTab === 'SLIPS' ? (
                     <>
-                      <span className="text-emerald-400">{effectiveHistoricalSlips.filter((s) => s.outcome_status === 'WON').length}W</span>
+                      <span className="text-fotmob-green">{effectiveHistoricalSlips.filter((s) => s.outcome_status === 'WON').length}W</span>
                       <span className="text-slate-500">/</span>
                       <span className="text-rose-400">{effectiveHistoricalSlips.filter((s) => s.outcome_status === 'LOST').length}L</span>
                     </>
                   ) : (
                     <>
-                      <span className="text-emerald-400">{historyData?.summary?.won_count ?? 0}W</span>
+                      <span className="text-fotmob-green">{historyData?.summary?.won_count ?? 0}W</span>
                       <span className="text-slate-500">/</span>
                       <span className="text-rose-400">{historyData?.summary?.lost_count ?? 0}L</span>
                     </>
@@ -1482,7 +1482,7 @@ export const DailyAIPredictionsSection: React.FC<DailyAIPredictionsSectionProps>
                     (historySubTab === 'SLIPS'
                       ? effectiveHistoricalSlips.reduce((acc, s) => acc + s.unit_pnl, 0)
                       : (historyData?.summary?.net_units_num ?? 0)) >= 0
-                      ? 'text-emerald-400'
+                      ? 'text-fotmob-green'
                       : 'text-rose-400'
                   }`}
                 >
@@ -1517,7 +1517,7 @@ export const DailyAIPredictionsSection: React.FC<DailyAIPredictionsSectionProps>
                     className={`px-3 py-1.5 rounded-lg font-semibold transition-all ${
                       historyOutcome === mode
                         ? mode === 'WON'
-                          ? 'bg-emerald-500 text-slate-950 shadow-sm font-bold'
+                          ? 'bg-fotmob-green text-slate-950 shadow-sm font-bold'
                           : mode === 'LOST'
                           ? 'bg-rose-500 text-white shadow-sm font-bold'
                           : 'bg-[#21e786] text-[#0a0d14] shadow-sm font-bold'
@@ -1627,7 +1627,7 @@ export const DailyAIPredictionsSection: React.FC<DailyAIPredictionsSectionProps>
                         key={slip.id}
                         className={`rounded-2xl border p-4 space-y-3.5 shadow-sm transition-all flex flex-col justify-between ${
                           isSlipWon
-                            ? 'border-emerald-500/35 bg-gradient-to-b from-[#0f1917] via-[#0d141c] to-[#0a0d14]'
+                            ? 'border-fotmob-green/35 bg-gradient-to-b from-[#0f1917] via-[#0d141c] to-[#0a0d14]'
                             : 'border-rose-500/35 bg-gradient-to-b from-[#1a1015] via-[#0f121a] to-[#0a0d14]'
                         }`}
                       >
@@ -1646,13 +1646,13 @@ export const DailyAIPredictionsSection: React.FC<DailyAIPredictionsSectionProps>
                             <span
                               className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-mono font-bold tracking-wide shrink-0 ${
                                 isSlipWon
-                                  ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/40'
+                                  ? 'bg-fotmob-green/20 text-fotmob-green border border-fotmob-green/40'
                                   : 'bg-rose-500/20 text-rose-300 border border-rose-500/40'
                               }`}
                             >
                               {isSlipWon ? (
                                 <>
-                                  <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />
+                                  <CheckCircle2 className="w-3.5 h-3.5 text-fotmob-green" />
                                   <span>SLIP WON • {slip.unit_return}</span>
                                 </>
                               ) : (
@@ -1678,7 +1678,7 @@ export const DailyAIPredictionsSection: React.FC<DailyAIPredictionsSectionProps>
 
                             <div className="text-right shrink-0">
                               <div className="text-[10px] font-mono text-slate-400 uppercase">Total Odds</div>
-                              <span className="text-xs font-mono font-bold px-2 py-1 rounded bg-[#0c1017] text-emerald-400 border border-emerald-800/80 inline-block">
+                              <span className="text-xs font-mono font-bold px-2 py-1 rounded bg-[#0c1017] text-fotmob-green border border-emerald-800/80 inline-block">
                                 @{slip.total_odds.toFixed(2)}
                               </span>
                             </div>
@@ -1731,7 +1731,7 @@ export const DailyAIPredictionsSection: React.FC<DailyAIPredictionsSectionProps>
                                       <span
                                         className={`inline-flex items-center gap-0.5 text-[10px] font-mono font-bold px-1.5 py-0.2 rounded ${
                                           legWon
-                                            ? 'bg-emerald-950 text-emerald-300 border border-emerald-800'
+                                            ? 'bg-emerald-950 text-fotmob-green border border-emerald-800'
                                             : 'bg-rose-950 text-rose-300 border border-rose-800'
                                         }`}
                                       >
@@ -1840,7 +1840,7 @@ export const DailyAIPredictionsSection: React.FC<DailyAIPredictionsSectionProps>
                         key={item.match_id}
                         className={`rounded-2xl border p-4 space-y-3 shadow-sm transition-all ${
                           isWon
-                            ? 'border-emerald-500/30 bg-gradient-to-b from-[#101918] to-[#0e141a]'
+                            ? 'border-fotmob-green/30 bg-gradient-to-b from-[#101918] to-[#0e141a]'
                             : 'border-rose-500/30 bg-gradient-to-b from-[#1a1014] to-[#0e141a]'
                         }`}
                       >
@@ -1855,13 +1855,13 @@ export const DailyAIPredictionsSection: React.FC<DailyAIPredictionsSectionProps>
                             <span
                               className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-mono font-bold tracking-wide ${
                                 isWon
-                                  ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/40'
+                                  ? 'bg-fotmob-green/20 text-fotmob-green border border-fotmob-green/40'
                                   : 'bg-rose-500/20 text-rose-300 border border-rose-500/40'
                               }`}
                             >
                               {isWon ? (
                                 <>
-                                  <CheckCircle2 className="w-3 h-3 text-emerald-400" />
+                                  <CheckCircle2 className="w-3 h-3 text-fotmob-green" />
                                   <span>CORRECT • {item.unit_return}</span>
                                 </>
                               ) : (

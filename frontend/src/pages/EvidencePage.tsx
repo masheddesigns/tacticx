@@ -57,7 +57,7 @@ export const EvidencePage: React.FC = () => {
         </div>
         <button
           onClick={() => refetch()}
-          className="p-2 rounded-lg border border-slate-700 bg-slate-800/80 text-slate-300 hover:text-white transition-colors self-start sm:self-auto"
+          className="p-2 rounded-lg border border-surface-border bg-surface-cardMuted text-slate-300 hover:text-white transition-colors self-start sm:self-auto"
           title="Refresh evidence"
         >
           <RefreshCw className="w-3.5 h-3.5" />

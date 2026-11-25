@@ -27,8 +27,8 @@ export const ExplanationSection: React.FC<ExplanationSectionProps> = ({ explanat
       </div>
 
       {headline && (
-        <div className="p-3.5 rounded-lg bg-slate-900/80 border border-slate-800 text-xs text-slate-200 leading-relaxed font-sans">
-          <span className="font-semibold text-emerald-400 font-mono text-[11px] block mb-1 uppercase tracking-wider">
+        <div className="p-3.5 rounded-lg bg-surface-card border border-surface-border text-xs text-slate-200 leading-relaxed font-sans">
+          <span className="font-semibold text-fotmob-green font-mono text-[11px] block mb-1 uppercase tracking-wider">
             Summary:
           </span>
           {headline}
@@ -42,7 +42,7 @@ export const ExplanationSection: React.FC<ExplanationSectionProps> = ({ explanat
           </span>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
             {factors.map((f, idx) => (
-              <div key={idx} className="p-3.5 rounded-lg bg-slate-950 border border-slate-800 space-y-1.5">
+              <div key={idx} className="p-3.5 rounded-lg bg-surface-base border border-surface-border space-y-1.5">
                 <div className="flex items-center justify-between">
                   <span className="text-xs font-mono font-bold text-slate-200 uppercase">
                     {f.factor.replace(/_/g, ' ')}
@@ -61,7 +61,7 @@ export const ExplanationSection: React.FC<ExplanationSectionProps> = ({ explanat
       )}
 
       {explanation.model_disagreement_note && (
-        <div className="text-[11px] font-mono text-slate-400 pt-2 border-t border-slate-800/80">
+        <div className="text-[11px] font-mono text-slate-400 pt-2 border-t border-surface-border">
           Note: {explanation.model_disagreement_note}
         </div>
       )}

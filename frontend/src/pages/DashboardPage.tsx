@@ -453,7 +453,7 @@ export const DashboardPage: React.FC = () => {
           <ErrorCard error={matchesError as Error} title="Unable to Load Matches" onRetry={() => refetchMatches()} />
         ) : homepageMatches.length === 0 ? (
           <div className="rounded-2xl border border-surface-border bg-surface-card p-10 text-center space-y-4">
-            <div className="w-12 h-12 mx-auto rounded-full bg-slate-800/80 border border-slate-700 flex items-center justify-center text-slate-400">
+            <div className="w-12 h-12 mx-auto rounded-full bg-surface-cardMuted border border-surface-border flex items-center justify-center text-slate-400">
               <Clock className="w-6 h-6" />
             </div>
             <div>
@@ -510,7 +510,7 @@ export const DashboardPage: React.FC = () => {
                   className="rounded-2xl border border-surface-border bg-surface-card overflow-hidden shadow-sm"
                 >
                   {/* FotMob League Header Banner */}
-                  <div className="px-4 py-2.5 bg-slate-900/90 border-b border-surface-border flex items-center justify-between">
+                  <div className="px-4 py-2.5 bg-surface-card border-b border-surface-border flex items-center justify-between">
                     <div className="flex items-center gap-2.5">
                       <span className="text-lg select-none">{lMeta.flag}</span>
                       <div className="flex items-center gap-2">
@@ -523,7 +523,7 @@ export const DashboardPage: React.FC = () => {
                       </div>
                     </div>
 
-                    <span className="text-[11px] font-mono text-slate-400 bg-slate-950 px-2 py-0.5 rounded-md border border-slate-800">
+                    <span className="text-[11px] font-mono text-slate-400 bg-surface-base px-2 py-0.5 rounded-md border border-surface-border">
                       {matchesInLeague.length} {matchesInLeague.length === 1 ? 'match' : 'matches'}
                     </span>
                   </div>
@@ -545,7 +545,7 @@ export const DashboardPage: React.FC = () => {
       <section className="space-y-4 pt-4 border-t border-surface-border/70">
         <div className="flex items-center justify-between">
           <h2 className="text-base font-semibold text-slate-100 flex items-center gap-2">
-            <Database className="w-4 h-4 text-emerald-400" />
+            <Database className="w-4 h-4 text-fotmob-green" />
             <span>Supported Competitions Overview</span>
           </h2>
           <span className="text-xs font-mono text-slate-400">12 Supported Competitions</span>

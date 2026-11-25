@@ -105,13 +105,13 @@ export const MatchIntelligencePage: React.FC = () => {
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           <div className="md:col-span-2 rounded-2xl border border-[#242938] bg-[#161922] p-6 animate-pulse space-y-4">
-            <div className="h-6 bg-slate-800 rounded w-1/3" />
-            <div className="h-32 bg-slate-800/60 rounded" />
-            <div className="h-20 bg-slate-800/40 rounded" />
+            <div className="h-6 bg-surface-cardMuted rounded w-1/3" />
+            <div className="h-32 bg-surface-cardMuted rounded" />
+            <div className="h-20 bg-surface-cardMuted rounded" />
           </div>
           <div className="rounded-2xl border border-[#242938] bg-[#161922] p-6 animate-pulse space-y-4">
-            <div className="h-6 bg-slate-800 rounded w-1/2" />
-            <div className="h-40 bg-slate-800/60 rounded" />
+            <div className="h-6 bg-surface-cardMuted rounded w-1/2" />
+            <div className="h-40 bg-surface-cardMuted rounded" />
           </div>
         </div>
       </div>
@@ -222,7 +222,7 @@ export const MatchIntelligencePage: React.FC = () => {
             className={`py-3 px-1 border-b-2 font-semibold text-xs font-sans flex items-center gap-2 whitespace-nowrap transition-colors ${
               activeTab === 'markets'
                 ? 'border-[#21e786] text-[#21e786]'
-                : 'border-transparent text-slate-400 hover:text-white hover:border-slate-700'
+                : 'border-transparent text-slate-400 hover:text-white hover:border-surface-borderLight'
             }`}
           >
             <span>Core Predictions & Markets</span>
@@ -234,7 +234,7 @@ export const MatchIntelligencePage: React.FC = () => {
             className={`py-3 px-1 border-b-2 font-semibold text-xs font-sans flex items-center gap-2 whitespace-nowrap transition-colors ${
               activeTab === 'comparison'
                 ? 'border-[#21e786] text-[#21e786]'
-                : 'border-transparent text-slate-400 hover:text-white hover:border-slate-700'
+                : 'border-transparent text-slate-400 hover:text-white hover:border-surface-borderLight'
             }`}
           >
             <span>Match Results vs Model</span>
@@ -248,7 +248,7 @@ export const MatchIntelligencePage: React.FC = () => {
             className={`py-3 px-1 border-b-2 font-semibold text-xs font-sans flex items-center gap-2 whitespace-nowrap transition-colors ${
               activeTab === 'analysis'
                 ? 'border-[#21e786] text-[#21e786]'
-                : 'border-transparent text-slate-400 hover:text-white hover:border-slate-700'
+                : 'border-transparent text-slate-400 hover:text-white hover:border-surface-borderLight'
             }`}
           >
             <span>MiroFish & Scenarios</span>
@@ -260,7 +260,7 @@ export const MatchIntelligencePage: React.FC = () => {
             className={`py-3 px-1 border-b-2 font-semibold text-xs font-sans flex items-center gap-2 whitespace-nowrap transition-colors ${
               activeTab === 'telemetry'
                 ? 'border-[#21e786] text-[#21e786]'
-                : 'border-transparent text-slate-400 hover:text-white hover:border-slate-700'
+                : 'border-transparent text-slate-400 hover:text-white hover:border-surface-borderLight'
             }`}
           >
             <span>Audit & Cryptographic Telemetry</span>

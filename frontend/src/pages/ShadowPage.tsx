@@ -47,7 +47,7 @@ export const ShadowPage: React.FC = () => {
           <select
             value={challenger}
             onChange={(e) => setChallenger(e.target.value)}
-            className="px-2 py-1.5 rounded-lg border border-slate-700 bg-slate-900 text-xs font-mono text-slate-200"
+            className="px-2 py-1.5 rounded-lg border border-surface-border bg-surface-card text-xs font-mono text-slate-200"
           >
             <option value="">Select challenger…</option>
             {(challengers?.challengers || []).map((c: string) => (
@@ -56,7 +56,7 @@ export const ShadowPage: React.FC = () => {
           </select>
           <button
             onClick={() => refetch()}
-            className="p-2 rounded-lg border border-slate-700 bg-slate-800/80 text-slate-300 hover:text-white transition-colors"
+            className="p-2 rounded-lg border border-surface-border bg-surface-cardMuted text-slate-300 hover:text-white transition-colors"
             title="Refresh shadow"
           >
             <RefreshCw className="w-3.5 h-3.5" />

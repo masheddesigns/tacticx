@@ -17,7 +17,7 @@ export const HistoricalAnaloguesCard: React.FC<HistoricalAnaloguesCardProps> = (
     <section aria-labelledby="analogues-heading" className="rounded-xl border border-surface-border bg-surface-card p-5 shadow-sm space-y-4">
       <div className="flex flex-wrap items-center justify-between gap-3 pb-3 border-b border-surface-border">
         <div className="flex items-center gap-2">
-          <div className="p-1.5 rounded bg-purple-500/10 border border-purple-500/20 text-purple-400">
+          <div className="p-1.5 rounded bg-fotmob-blue/10 border border-fotmob-blue/20 text-fotmob-blue">
             <History className="w-4 h-4" />
           </div>
           <div>
@@ -35,7 +35,7 @@ export const HistoricalAnaloguesCard: React.FC<HistoricalAnaloguesCardProps> = (
             <span className="text-slate-400">Past Distribution (N={distribution.n}):</span>
             <span className="text-blue-400">H: {formatProbability(distribution.home)}</span>
             <span className="text-slate-300">D: {formatProbability(distribution.draw)}</span>
-            <span className="text-emerald-400">A: {formatProbability(distribution.away)}</span>
+            <span className="text-fotmob-green">A: {formatProbability(distribution.away)}</span>
           </div>
         )}
       </div>
@@ -48,7 +48,7 @@ export const HistoricalAnaloguesCard: React.FC<HistoricalAnaloguesCardProps> = (
         <div className="overflow-x-auto">
           <table className="w-full text-xs font-mono border-collapse" aria-label="Historical Analogues Table">
             <thead>
-              <tr className="border-b border-slate-800 bg-slate-950/60 text-slate-400">
+              <tr className="border-b border-surface-border bg-surface-base text-slate-400">
                 <th className="p-2.5 text-left font-medium">Match ID</th>
                 <th className="p-2.5 text-left font-medium">Kickoff</th>
                 <th className="p-2.5 text-center font-medium">Past Score</th>
@@ -61,7 +61,7 @@ export const HistoricalAnaloguesCard: React.FC<HistoricalAnaloguesCardProps> = (
               {matches.slice(0, 8).map((m) => {
                 const kickoff = formatDateTime(m.kickoff_at);
                 return (
-                  <tr key={m.match_id} className="hover:bg-slate-900/40 transition-colors">
+                  <tr key={m.match_id} className="hover:bg-surface-cardMuted/40 transition-colors">
                     <td className="p-2.5 text-slate-300 font-semibold">Match #{m.match_id}</td>
                     <td className="p-2.5 text-slate-400">{kickoff.date}</td>
                     <td className="p-2.5 text-center font-bold text-slate-100">
@@ -81,13 +81,13 @@ export const HistoricalAnaloguesCard: React.FC<HistoricalAnaloguesCardProps> = (
                         {m.actual.toUpperCase()}
                       </Badge>
                     </td>
-                    <td className="p-2.5 text-right font-bold text-emerald-400">
+                    <td className="p-2.5 text-right font-bold text-fotmob-green">
                       {(m.similarity * 100).toFixed(1)}%
                     </td>
                     <td className="p-2.5 text-right">
                       <Link
                         to={`/matches/${m.match_id}`}
-                        className="inline-flex items-center gap-1 text-slate-400 hover:text-emerald-400 transition-colors"
+                        className="inline-flex items-center gap-1 text-slate-400 hover:text-fotmob-green transition-colors"
                       >
                         <span>View</span>
                         <ExternalLink className="w-3 h-3" />
@@ -102,9 +102,9 @@ export const HistoricalAnaloguesCard: React.FC<HistoricalAnaloguesCardProps> = (
       )}
 
       {/* Methodology disclosure */}
-      <div className="p-3 rounded-lg bg-slate-950 border border-slate-800 text-[11px] text-slate-400 font-sans space-y-1">
+      <div className="p-3 rounded-lg bg-surface-base border border-surface-border text-[11px] text-slate-400 font-sans space-y-1">
         <div className="flex items-center gap-1.5 font-semibold text-slate-300 font-mono text-xs">
-          <BookOpen className="w-3.5 h-3.5 text-purple-400" />
+          <BookOpen className="w-3.5 h-3.5 text-fotmob-blue" />
           <span>Similarity Methodology Disclosure:</span>
         </div>
         <p className="leading-relaxed">

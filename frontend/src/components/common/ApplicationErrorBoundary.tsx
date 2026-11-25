@@ -52,7 +52,7 @@ export class ApplicationErrorBoundary extends Component<Props, State> {
                 </p>
 
                 {this.state.error && (
-                  <div className="mt-4 p-3 rounded-md bg-black/40 border border-slate-800/80 font-mono text-xs text-rose-300 overflow-x-auto">
+                  <div className="mt-4 p-3 rounded-md bg-black/40 border border-surface-border font-mono text-xs text-rose-300 overflow-x-auto">
                     {this.state.error.toString()}
                   </div>
                 )}
@@ -67,7 +67,7 @@ export class ApplicationErrorBoundary extends Component<Props, State> {
                   </button>
                   <button
                     onClick={() => window.location.reload()}
-                    className="px-4 py-2 text-xs font-mono font-medium rounded-md bg-slate-800/80 border border-slate-700 text-slate-300 hover:bg-slate-700 transition-colors"
+                    className="px-4 py-2 text-xs font-mono font-medium rounded-md bg-surface-cardMuted border border-surface-border text-slate-300 hover:bg-slate-700 transition-colors"
                   >
                     Reload Page
                   </button>

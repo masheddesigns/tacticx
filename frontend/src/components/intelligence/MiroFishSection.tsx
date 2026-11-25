@@ -39,7 +39,7 @@ export const MiroFishSection: React.FC<MiroFishSectionProps> = ({ mirofish }) =>
       </div>
 
       {!isOk ? (
-        <div className="p-6 text-center rounded-lg bg-slate-900/60 border border-slate-800 space-y-1.5">
+        <div className="p-6 text-center rounded-lg bg-surface-card border border-surface-border space-y-1.5">
           <span className="text-xs font-mono font-semibold text-slate-300 block">
             MiroFish provider is not configured.
           </span>
@@ -50,8 +50,8 @@ export const MiroFishSection: React.FC<MiroFishSectionProps> = ({ mirofish }) =>
         </div>
       ) : (
         <div className="space-y-4">
-          <div className="p-4 rounded-lg bg-slate-900/80 border border-slate-800 space-y-3">
-            <div className="flex flex-wrap items-center justify-between gap-2 text-xs font-mono text-slate-400 border-b border-slate-800 pb-2">
+          <div className="p-4 rounded-lg bg-surface-card border border-surface-border space-y-3">
+            <div className="flex flex-wrap items-center justify-between gap-2 text-xs font-mono text-slate-400 border-b border-surface-border pb-2">
               <span>Provider: {mirofish.provider || 'default'}</span>
               <span>Contract: {mirofish.contract_version || 'v1'}</span>
             </div>
@@ -62,7 +62,7 @@ export const MiroFishSection: React.FC<MiroFishSectionProps> = ({ mirofish }) =>
                 <span className="text-xs font-mono font-semibold text-slate-300">
                   Simulation Narrative:
                 </span>
-                <p className="text-xs text-slate-200 font-sans leading-relaxed whitespace-pre-wrap bg-slate-950 p-3.5 rounded border border-slate-800">
+                <p className="text-xs text-slate-200 font-sans leading-relaxed whitespace-pre-wrap bg-surface-base p-3.5 rounded border border-surface-border">
                   {scenario.narrative}
                 </p>
               </div>
@@ -77,13 +77,13 @@ export const MiroFishSection: React.FC<MiroFishSectionProps> = ({ mirofish }) =>
                 {Array.isArray(scenario.structured_observations) ? (
                   <div className="grid grid-cols-1 gap-2">
                     {scenario.structured_observations.map((obs: { kind?: string; statement?: string; detail?: Record<string, unknown> }, idx: number) => (
-                      <div key={idx} className="p-3 rounded bg-slate-950 border border-slate-800 text-xs space-y-1.5">
+                      <div key={idx} className="p-3 rounded bg-surface-base border border-surface-border text-xs space-y-1.5">
                         {obs.kind && (
                           <span className={`inline-block px-1.5 py-0.5 rounded font-mono font-bold text-[10px] uppercase ${
                             obs.kind === 'sensitivity' ? 'bg-blue-950 text-blue-400 border border-blue-800' :
                             obs.kind === 'divergence' ? 'bg-amber-950 text-amber-400 border border-amber-800' :
                             obs.kind === 'caveat' ? 'bg-red-950 text-red-400 border border-red-800' :
-                            'bg-slate-800 text-slate-300 border border-slate-700'
+                            'bg-surface-cardMuted text-slate-300 border border-surface-border'
                           }`}>
                             {obs.kind}
                           </span>
@@ -108,7 +108,7 @@ export const MiroFishSection: React.FC<MiroFishSectionProps> = ({ mirofish }) =>
                 ) : (
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                     {Object.entries(scenario.structured_observations).map(([k, v]) => (
-                      <div key={k} className="p-2.5 rounded bg-slate-950 border border-slate-800 text-xs font-mono">
+                      <div key={k} className="p-2.5 rounded bg-surface-base border border-surface-border text-xs font-mono">
                         <span className="text-slate-400 block">{k.replace(/_/g, ' ')}:</span>
                         <span className="text-slate-200 font-semibold">{typeof v === 'object' ? JSON.stringify(v) : String(v)}</span>
                       </div>
@@ -122,7 +122,7 @@ export const MiroFishSection: React.FC<MiroFishSectionProps> = ({ mirofish }) =>
       )}
 
       {/* Safety Notice */}
-      <div className="flex items-start gap-2 p-3 rounded-lg bg-slate-950 border border-slate-800 text-[11px] text-slate-400 font-sans leading-relaxed">
+      <div className="flex items-start gap-2 p-3 rounded-lg bg-surface-base border border-surface-border text-[11px] text-slate-400 font-sans leading-relaxed">
         <Info className="w-4 h-4 text-slate-400 shrink-0 mt-0.5" />
         <span>
           MiroFish simulations are qualitative agentic stress-test scenarios. Outputs are strictly simulated hypotheses and are not converted into probability, confidence, or statistical evidence.

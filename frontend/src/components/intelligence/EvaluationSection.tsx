@@ -43,7 +43,7 @@ export const EvaluationSection: React.FC<EvaluationSectionProps> = ({
     >
       <div className="flex flex-wrap items-center justify-between gap-3 pb-3 border-b border-surface-border">
         <div className="flex items-center gap-2">
-          <div className="p-1.5 rounded bg-emerald-500/10 border border-emerald-500/20 text-emerald-400">
+          <div className="p-1.5 rounded bg-fotmob-green/10 border border-fotmob-green/20 text-fotmob-green">
             <Target className="w-4 h-4" />
           </div>
           <div>
@@ -52,7 +52,7 @@ export const EvaluationSection: React.FC<EvaluationSectionProps> = ({
                 Match Result & Prediction Evaluation
               </h2>
               <span className={`text-[10px] uppercase font-mono font-bold px-2 py-0.5 rounded border ${
-                hit ? 'bg-emerald-950 text-emerald-400 border-emerald-800' : 'bg-rose-950 text-rose-400 border-rose-800'
+                hit ? 'bg-emerald-950 text-fotmob-green border-emerald-800' : 'bg-rose-950 text-rose-400 border-rose-800'
               }`}>
                 {hit ? '1X2 PREDICTION CORRECT' : '1X2 OUTCOME MISSED'}
               </span>
@@ -63,7 +63,7 @@ export const EvaluationSection: React.FC<EvaluationSectionProps> = ({
           </div>
         </div>
         <div className={`flex items-center gap-1.5 px-3 py-1 rounded-lg border ${
-          hit ? 'bg-emerald-950/60 border-emerald-800/80 text-emerald-400' : 'bg-rose-950/60 border-rose-800/80 text-rose-400'
+          hit ? 'bg-emerald-950/60 border-emerald-800/80 text-fotmob-green' : 'bg-rose-950/60 border-rose-800/80 text-rose-400'
         }`}>
           {hit ? <CheckCircle2 className="w-4 h-4" /> : <XCircle className="w-4 h-4" />}
           <span className="text-xs font-mono font-bold">
@@ -113,7 +113,7 @@ export const EvaluationSection: React.FC<EvaluationSectionProps> = ({
           <div className="text-slate-500">Exact score</div>
           <div className="text-slate-200 flex items-center gap-1">
             {m.exact_score_hit === 1 ? (
-              <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />
+              <CheckCircle2 className="w-3.5 h-3.5 text-fotmob-green" />
             ) : m.exact_score_hit === 0 ? (
               <MinusCircle className="w-3.5 h-3.5 text-slate-500" />
             ) : null}

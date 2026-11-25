@@ -50,7 +50,7 @@ export const OperationsPage: React.FC = () => {
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <h1 className="text-2xl font-bold tracking-tight text-slate-100 flex items-center gap-2">
-            <Terminal className="w-6 h-6 text-emerald-400" />
+            <Terminal className="w-6 h-6 text-fotmob-green" />
             <span>Scheduler Operations & Job Audit</span>
           </h1>
           <p className="text-xs text-slate-400 font-sans mt-1">
@@ -61,7 +61,7 @@ export const OperationsPage: React.FC = () => {
         <div className="flex items-center gap-3">
           <button
             onClick={handleRefresh}
-            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-slate-700 bg-slate-800 text-xs font-mono text-slate-300 hover:text-white transition-colors"
+            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-surface-border bg-surface-cardMuted text-xs font-mono text-slate-300 hover:text-white transition-colors"
           >
             <RefreshCw className="w-3.5 h-3.5" />
             <span>Refresh Telemetry</span>
@@ -132,7 +132,7 @@ export const OperationsPage: React.FC = () => {
           <select
             value={jobStatusFilter}
             onChange={(e) => setJobStatusFilter(e.target.value)}
-            className="bg-slate-900 border border-slate-700 rounded px-2 py-1 text-slate-200"
+            className="bg-surface-card border border-surface-border rounded px-2 py-1 text-slate-200"
           >
             <option value="">All Statuses</option>
             <option value="succeeded">Succeeded</option>
@@ -192,7 +192,7 @@ export const OperationsPage: React.FC = () => {
             <div className="overflow-x-auto">
               <table className="w-full text-xs font-mono border-collapse" aria-label="Job Execution Logs">
                 <thead>
-                  <tr className="border-b border-slate-800 bg-slate-950/60 text-slate-400">
+                  <tr className="border-b border-surface-border bg-surface-base text-slate-400">
                     <th className="p-2.5 text-left font-medium">Job ID</th>
                     <th className="p-2.5 text-left font-medium">Type</th>
                     <th className="p-2.5 text-left font-medium">Source / League</th>
@@ -204,7 +204,7 @@ export const OperationsPage: React.FC = () => {
                 </thead>
                 <tbody className="divide-y divide-slate-800/60">
                   {jobRecords.map((j) => (
-                    <tr key={j.id} className="hover:bg-slate-900/40 transition-colors">
+                    <tr key={j.id} className="hover:bg-surface-cardMuted/40 transition-colors">
                       <td className="p-2.5 text-slate-300 font-semibold">{j.job_id}</td>
                       <td className="p-2.5 text-slate-200">{j.job_type}</td>
                       <td className="p-2.5 text-slate-400">
@@ -225,7 +225,7 @@ export const OperationsPage: React.FC = () => {
                         </Badge>
                       </td>
                       <td className="p-2.5 text-right text-slate-400">{j.duration_ms ?? 0} ms</td>
-                      <td className="p-2.5 text-right text-emerald-400">{j.new_observations ?? 0}</td>
+                      <td className="p-2.5 text-right text-fotmob-green">{j.new_observations ?? 0}</td>
                       <td className="p-2.5 text-right text-slate-400">{j.conflicts ?? 0}</td>
                     </tr>
                   ))}

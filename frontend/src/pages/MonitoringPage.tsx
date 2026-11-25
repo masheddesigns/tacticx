@@ -72,17 +72,17 @@ export const MonitoringPage: React.FC = () => {
             value={competition}
             onChange={(e) => setCompetition(e.target.value)}
             placeholder="Competition (e.g. EPL)"
-            className="px-2 py-1.5 rounded-lg border border-slate-700 bg-slate-900 text-xs font-mono text-slate-200 w-44"
+            className="px-2 py-1.5 rounded-lg border border-surface-border bg-surface-card text-xs font-mono text-slate-200 w-44"
           />
           <input
             value={season}
             onChange={(e) => setSeason(e.target.value)}
             placeholder="Season (e.g. 2024)"
-            className="px-2 py-1.5 rounded-lg border border-slate-700 bg-slate-900 text-xs font-mono text-slate-200 w-32"
+            className="px-2 py-1.5 rounded-lg border border-surface-border bg-surface-card text-xs font-mono text-slate-200 w-32"
           />
           <button
             onClick={handleRefresh}
-            className="p-2 rounded-lg border border-slate-700 bg-slate-800/80 text-slate-300 hover:text-white transition-colors"
+            className="p-2 rounded-lg border border-surface-border bg-surface-cardMuted text-slate-300 hover:text-white transition-colors"
             title="Refresh monitoring"
           >
             <RefreshCw className="w-3.5 h-3.5" />
@@ -120,7 +120,7 @@ export const MonitoringPage: React.FC = () => {
         <div className="p-4 rounded-xl border border-surface-border bg-surface-card">
           {!anomalies || anomalies.anomaly_count === 0 ? (
             <div className="text-xs font-mono text-slate-400 flex items-center gap-2">
-              <CheckCircle2 className="w-4 h-4 text-emerald-400" />
+              <CheckCircle2 className="w-4 h-4 text-fotmob-green" />
               No anomalies detected under current deterministic rules.
             </div>
           ) : (

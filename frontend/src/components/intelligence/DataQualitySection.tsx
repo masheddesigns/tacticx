@@ -28,7 +28,7 @@ export const DataQualitySection: React.FC<DataQualitySectionProps> = ({
     <section aria-labelledby="data-quality-heading" className="rounded-xl border border-surface-border bg-surface-card p-5 shadow-sm space-y-4">
       <div className="flex flex-wrap items-center justify-between gap-3 pb-3 border-b border-surface-border">
         <div className="flex items-center gap-2">
-          <div className="p-1.5 rounded bg-emerald-500/10 border border-emerald-500/20 text-emerald-400">
+          <div className="p-1.5 rounded bg-fotmob-green/10 border border-fotmob-green/20 text-fotmob-green">
             <Database className="w-4 h-4" />
           </div>
           <div>
@@ -53,16 +53,16 @@ export const DataQualitySection: React.FC<DataQualitySectionProps> = ({
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {/* Coverage Checks */}
-        <div className="p-4 rounded-lg bg-slate-900/60 border border-slate-800 space-y-2.5">
+        <div className="p-4 rounded-lg bg-surface-card border border-surface-border space-y-2.5">
           <span className="text-xs font-mono font-semibold text-slate-300 block">
             Family Ingestion Coverage
           </span>
           <div className="space-y-2 text-xs font-mono">
             {coverageItems.map((item) => (
-              <div key={item.label} className="flex items-center justify-between py-1 border-b border-slate-800/80">
+              <div key={item.label} className="flex items-center justify-between py-1 border-b border-surface-border">
                 <span className="text-slate-300">{item.label}</span>
                 {item.available ? (
-                  <span className="inline-flex items-center gap-1 text-emerald-400 font-semibold">
+                  <span className="inline-flex items-center gap-1 text-fotmob-green font-semibold">
                     <CheckCircle2 className="w-3.5 h-3.5" />
                     Available
                   </span>
@@ -78,18 +78,18 @@ export const DataQualitySection: React.FC<DataQualitySectionProps> = ({
         </div>
 
         {/* Temporal Quality Statuses */}
-        <div className="p-4 rounded-lg bg-slate-900/60 border border-slate-800 space-y-2.5">
+        <div className="p-4 rounded-lg bg-surface-card border border-surface-border space-y-2.5">
           <span className="text-xs font-mono font-semibold text-slate-300 block">
             Temporal Quality Breakdown
           </span>
           <div className="space-y-2 text-xs font-mono">
-            <div className="flex items-start justify-between py-1 border-b border-slate-800/80">
-              <span className="text-emerald-400 font-medium">Strict (Exact Pre-Cutoff):</span>
+            <div className="flex items-start justify-between py-1 border-b border-surface-border">
+              <span className="text-fotmob-green font-medium">Strict (Exact Pre-Cutoff):</span>
               <span className="text-slate-300 text-right">
                 {temporalQuality?.strict?.length ? temporalQuality.strict.join(', ') : 'None'}
               </span>
             </div>
-            <div className="flex items-start justify-between py-1 border-b border-slate-800/80">
+            <div className="flex items-start justify-between py-1 border-b border-surface-border">
               <span className="text-amber-400 font-medium">Estimated Timing:</span>
               <span className="text-slate-300 text-right">
                 {temporalQuality?.estimated?.length ? temporalQuality.estimated.join(', ') : 'None'}
@@ -106,7 +106,7 @@ export const DataQualitySection: React.FC<DataQualitySectionProps> = ({
       </div>
 
       {missingFamilies.length > 0 && (
-        <div className="p-3 rounded-lg bg-slate-950 border border-slate-800 flex items-center gap-2 text-xs font-mono text-slate-400">
+        <div className="p-3 rounded-lg bg-surface-base border border-surface-border flex items-center gap-2 text-xs font-mono text-slate-400">
           <AlertCircle className="w-4 h-4 text-amber-500 shrink-0" />
           <span>
             Excluded feature families: {missingFamilies.join(', ')}. In accordance with model design, missing features are treated as missing rather than assumed zero.

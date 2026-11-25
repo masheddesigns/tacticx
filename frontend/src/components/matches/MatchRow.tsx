@@ -21,15 +21,15 @@ const getTeamInitials = (name?: string | null): string => {
 };
 
 const getTeamColorStyle = (name?: string | null): string => {
-  if (!name) return 'bg-slate-800 text-slate-300 border-slate-700';
+  if (!name) return 'bg-surface-cardMuted text-slate-300 border-surface-border';
   const colors = [
     'bg-red-950/80 text-red-300 border-red-800/60',
     'bg-blue-950/80 text-blue-300 border-blue-800/60',
-    'bg-emerald-950/80 text-emerald-300 border-emerald-800/60',
+    'bg-emerald-950/80 text-fotmob-green border-emerald-800/60',
     'bg-amber-950/80 text-amber-300 border-amber-800/60',
-    'bg-purple-950/80 text-purple-300 border-purple-800/60',
+    'bg-purple-950/80 text-fotmob-blue border-purple-800/60',
     'bg-cyan-950/80 text-cyan-300 border-cyan-800/60',
-    'bg-indigo-950/80 text-indigo-300 border-indigo-800/60',
+    'bg-indigo-950/80 text-fotmob-blue border-indigo-800/60',
   ];
   let hash = 0;
   for (let i = 0; i < name.length; i++) hash = (hash * 31 + name.charCodeAt(i)) & 0xffffffff;
@@ -77,7 +77,7 @@ export const MatchRow: React.FC<MatchRowProps> = ({ match, timeZone = 'UTC' }) =
         <div className="flex flex-col items-center justify-center w-16 text-center">
           {isLive ? (
             <div className="flex flex-col items-center">
-              <span className="inline-flex items-center gap-1 text-[11px] font-bold font-mono text-[#ff4b4b] bg-[#ff4b4b]/10 border border-[#ff4b4b]/30 px-2 py-0.5 rounded-full animate-pulse">
+              <span className="inline-flex items-center gap-1 text-[11px] font-bold font-mono text-[#ff4b4b] bg-[#ff4b4b]/10 border border-[#ff4b4b]/30 px-2 py-0.5 rounded-full">
                 <span className="w-1.5 h-1.5 rounded-full bg-[#ff4b4b] animate-ping inline-block" />
                 {match.minute ? `${match.minute}'` : 'LIVE'}
               </span>

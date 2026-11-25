@@ -48,7 +48,7 @@ export const CorrectScoreGrid: React.FC<CorrectScoreGridProps> = ({
     <section aria-labelledby="correct-score-heading" className="rounded-xl border border-surface-border bg-surface-card p-5 shadow-sm space-y-4">
       <div className="flex flex-wrap items-center justify-between gap-3 pb-3 border-b border-surface-border">
         <div className="flex items-center gap-2">
-          <div className="p-1.5 rounded bg-emerald-500/10 border border-emerald-500/20 text-emerald-400">
+          <div className="p-1.5 rounded bg-fotmob-green/10 border border-fotmob-green/20 text-fotmob-green">
             <Grid className="w-4 h-4" />
           </div>
           <div>
@@ -62,11 +62,11 @@ export const CorrectScoreGrid: React.FC<CorrectScoreGridProps> = ({
         </div>
 
         {topScore && (
-          <div className="flex items-center gap-2 px-3 py-1 rounded bg-slate-900 border border-slate-800">
+          <div className="flex items-center gap-2 px-3 py-1 rounded bg-surface-card border border-surface-border">
             <span className="text-[11px] font-mono text-slate-400">
               Highest-probability scoreline:
             </span>
-            <span className="text-xs font-mono font-bold text-emerald-400">
+            <span className="text-xs font-mono font-bold text-fotmob-green">
               {topScore.score} ({formatProbability(topScore.probability)})
             </span>
           </div>
@@ -78,12 +78,12 @@ export const CorrectScoreGrid: React.FC<CorrectScoreGridProps> = ({
         <div className="lg:col-span-7 space-y-3">
           <div className="flex flex-wrap items-center gap-2 text-xs font-mono text-slate-300">
             <span className="font-semibold">Grid Heatmap:</span>
-            <div className="flex items-center gap-1.5 text-blue-400 font-semibold bg-slate-900 px-2 py-0.5 rounded border border-slate-800">
+            <div className="flex items-center gap-1.5 text-blue-400 font-semibold bg-surface-card px-2 py-0.5 rounded border border-surface-border">
               <TeamLogo teamName={homeTeamName} size="xs" />
               <span>{homeTeamName} (Rows)</span>
             </div>
             <span className="text-slate-500">vs</span>
-            <div className="flex items-center gap-1.5 text-emerald-400 font-semibold bg-slate-900 px-2 py-0.5 rounded border border-slate-800">
+            <div className="flex items-center gap-1.5 text-fotmob-green font-semibold bg-surface-card px-2 py-0.5 rounded border border-surface-border">
               <TeamLogo teamName={awayTeamName} size="xs" />
               <span>{awayTeamName} (Cols)</span>
             </div>
@@ -93,11 +93,11 @@ export const CorrectScoreGrid: React.FC<CorrectScoreGridProps> = ({
             <table className="w-full text-xs font-mono border-collapse" aria-label="Scoreline Heatmap">
               <thead>
                 <tr>
-                  <th className="p-2 text-slate-400 border border-slate-800 bg-slate-950 font-normal">
+                  <th className="p-2 text-slate-400 border border-surface-border bg-surface-base font-normal">
                     {homeTeamName.slice(0, 4)} \ {awayTeamName.slice(0, 4)}
                   </th>
                   {[0, 1, 2, 3].map((awayGoals) => (
-                    <th key={awayGoals} className="p-2 text-slate-400 border border-slate-800 bg-slate-950 font-medium">
+                    <th key={awayGoals} className="p-2 text-slate-400 border border-surface-border bg-surface-base font-medium">
                       {awayGoals} Away
                     </th>
                   ))}
@@ -106,7 +106,7 @@ export const CorrectScoreGrid: React.FC<CorrectScoreGridProps> = ({
               <tbody>
                 {matrix.map((row, homeGoals) => (
                   <tr key={homeGoals}>
-                    <th className="p-2 text-slate-400 border border-slate-800 bg-slate-950 font-medium text-left">
+                    <th className="p-2 text-slate-400 border border-surface-border bg-surface-base font-medium text-left">
                       {homeGoals} Home
                     </th>
                     {row.map((cell) => {
@@ -116,7 +116,7 @@ export const CorrectScoreGrid: React.FC<CorrectScoreGridProps> = ({
                       return (
                         <td
                           key={cell.score}
-                          className="p-2.5 text-center border border-slate-800 transition-colors cursor-pointer group relative"
+                          className="p-2.5 text-center border border-surface-border transition-colors cursor-pointer group relative"
                           style={{
                             backgroundColor: `rgba(16, 185, 129, ${Math.max(0.04, intensity * 0.45)})`,
                           }}
@@ -125,7 +125,7 @@ export const CorrectScoreGrid: React.FC<CorrectScoreGridProps> = ({
                           <div className="flex flex-col items-center justify-center">
                             <span
                               className={`font-semibold ${
-                                isTop ? 'text-emerald-300 underline font-bold' : 'text-slate-200'
+                                isTop ? 'text-fotmob-green underline font-bold' : 'text-slate-200'
                               }`}
                             >
                               {formatProbability(cell.probability)}
@@ -164,15 +164,15 @@ export const CorrectScoreGrid: React.FC<CorrectScoreGridProps> = ({
                   key={item.score}
                   className={`flex items-center justify-between px-3 py-2 rounded-lg border text-xs font-mono ${
                     isFirst
-                      ? 'bg-emerald-950/30 border-emerald-800/60 text-emerald-300'
-                      : 'bg-slate-900/60 border-slate-800 text-slate-300'
+                      ? 'bg-emerald-950/30 border-emerald-800/60 text-fotmob-green'
+                      : 'bg-surface-card border-surface-border text-slate-300'
                   }`}
                 >
                   <div className="flex items-center gap-2">
                     <span className="w-4 text-slate-500 font-bold">{idx + 1}.</span>
                     <span className="font-bold text-slate-100">{item.score}</span>
                     {isFirst && (
-                      <span className="text-[10px] px-1.5 py-0.2 rounded bg-emerald-900/60 text-emerald-300">
+                      <span className="text-[10px] px-1.5 py-0.2 rounded bg-emerald-900/60 text-fotmob-green">
                         Highest
                       </span>
                     )}

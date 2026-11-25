@@ -129,11 +129,11 @@ export const DailyPredictionSlipsSection: React.FC<DailyPredictionSlipsSectionPr
   if (isLoading) {
     return (
       <div className="rounded-2xl border border-[#242938] bg-[#161922] p-6 animate-pulse space-y-4">
-        <div className="h-5 w-48 bg-slate-800 rounded-lg" />
+        <div className="h-5 w-48 bg-surface-cardMuted rounded-lg" />
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          <div className="h-52 bg-slate-800/50 rounded-xl" />
-          <div className="h-52 bg-slate-800/50 rounded-xl" />
-          <div className="h-52 bg-slate-800/50 rounded-xl" />
+          <div className="h-52 bg-surface-cardMuted rounded-xl" />
+          <div className="h-52 bg-surface-cardMuted rounded-xl" />
+          <div className="h-52 bg-surface-cardMuted rounded-xl" />
         </div>
       </div>
     );
@@ -150,11 +150,11 @@ export const DailyPredictionSlipsSection: React.FC<DailyPredictionSlipsSectionPr
       case 'accumulator':
         return <Zap className="w-4 h-4 text-amber-400" />;
       case 'corners_cards':
-        return <Flag className="w-4 h-4 text-purple-400" />;
+        return <Flag className="w-4 h-4 text-fotmob-blue" />;
       case 'goals':
         return <Flame className="w-4 h-4 text-rose-400" />;
       case 'value':
-        return <TrendingUp className="w-4 h-4 text-emerald-400" />;
+        return <TrendingUp className="w-4 h-4 text-fotmob-green" />;
       case 'mega':
         return <Sparkles className="w-4 h-4 text-cyan-400" />;
       case 'single_match':
@@ -171,17 +171,17 @@ export const DailyPredictionSlipsSection: React.FC<DailyPredictionSlipsSectionPr
       case 'accumulator':
         return 'border-amber-400/30 hover:border-amber-400/60 shadow-[0_0_15px_rgba(251,191,36,0.06)]';
       case 'corners_cards':
-        return 'border-purple-400/30 hover:border-purple-400/60 shadow-[0_0_15px_rgba(192,132,252,0.06)]';
+        return 'border-fotmob-blue/30 hover:border-fotmob-blue/60 shadow-[0_0_15px_rgba(192,132,252,0.06)]';
       case 'goals':
         return 'border-rose-400/30 hover:border-rose-400/60 shadow-[0_0_15px_rgba(244,63,94,0.06)]';
       case 'value':
-        return 'border-emerald-400/30 hover:border-emerald-400/60 shadow-[0_0_15px_rgba(52,211,153,0.06)]';
+        return 'border-fotmob-green/30 hover:border-fotmob-green/60 shadow-[0_0_15px_rgba(52,211,153,0.06)]';
       case 'mega':
         return 'border-cyan-400/30 hover:border-cyan-400/60 shadow-[0_0_15px_rgba(34,211,238,0.06)]';
       case 'single_match':
         return 'border-[#21e786]/30 hover:border-[#21e786]/60 shadow-[0_0_15px_rgba(33,231,134,0.06)]';
       default:
-        return 'border-[#242938] hover:border-slate-700';
+        return 'border-[#242938] hover:border-surface-borderLight';
     }
   };
 
@@ -189,7 +189,7 @@ export const DailyPredictionSlipsSection: React.FC<DailyPredictionSlipsSectionPr
     switch (status) {
       case 'WON':
         return (
-          <span className="flex items-center gap-1 text-[10px] font-mono font-bold px-2 py-0.5 rounded-full bg-emerald-500/20 text-[#21e786] border border-emerald-500/30">
+          <span className="flex items-center gap-1 text-[10px] font-mono font-bold px-2 py-0.5 rounded-full bg-fotmob-green/20 text-[#21e786] border border-fotmob-green/30">
             <CheckCircle2 className="w-3 h-3 text-[#21e786]" />
             <span>WON</span>
           </span>
@@ -204,7 +204,7 @@ export const DailyPredictionSlipsSection: React.FC<DailyPredictionSlipsSectionPr
       case 'LIVE':
         return (
           <span className="flex items-center gap-1 text-[10px] font-mono font-bold px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-300 border border-amber-500/30">
-            <Activity className="w-3 h-3 text-amber-400 animate-pulse" />
+            <Activity className="w-3 h-3 text-amber-400" />
             <span>LIVE</span>
           </span>
         );
@@ -344,7 +344,7 @@ export const DailyPredictionSlipsSection: React.FC<DailyPredictionSlipsSectionPr
               className={`px-2.5 py-1 rounded-lg text-xs font-sans font-semibold transition-colors flex items-center gap-1 ${
                 activeFilter === 'WON'
                   ? 'bg-emerald-400 text-[#0e1015] shadow-sm font-bold'
-                  : 'bg-[#161922] text-emerald-300 hover:text-emerald-200 border border-emerald-500/30'
+                  : 'bg-[#161922] text-fotmob-green hover:text-emerald-200 border border-fotmob-green/30'
               }`}
             >
               <CheckCircle2 className="w-3 h-3 text-[#21e786]" />
@@ -461,7 +461,7 @@ export const DailyPredictionSlipsSection: React.FC<DailyPredictionSlipsSectionPr
                       <span
                         className={`text-[9px] font-mono uppercase px-1.5 py-0.5 rounded border ${
                           slip.risk_level === 'LOW'
-                            ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20'
+                            ? 'bg-fotmob-green/10 text-fotmob-green border-fotmob-green/20'
                             : slip.risk_level === 'BALANCED'
                             ? 'bg-blue-500/10 text-blue-400 border-blue-500/20'
                             : 'bg-amber-500/10 text-amber-400 border-amber-500/20'
@@ -471,7 +471,7 @@ export const DailyPredictionSlipsSection: React.FC<DailyPredictionSlipsSectionPr
                       </span>
                     )}
                     {slip.is_single_match && (
-                      <span className="text-[9px] font-mono uppercase px-1.5 py-0.5 rounded bg-purple-500/10 text-purple-300 border border-purple-500/20">
+                      <span className="text-[9px] font-mono uppercase px-1.5 py-0.5 rounded bg-fotmob-blue/10 text-fotmob-blue border border-fotmob-blue/20">
                         Single Bet
                       </span>
                     )}
@@ -493,7 +493,7 @@ export const DailyPredictionSlipsSection: React.FC<DailyPredictionSlipsSectionPr
                   {slip.picks.map((pick, pIdx) => (
                     <div
                       key={pIdx}
-                      className="p-2.5 rounded-lg bg-[#161922] border border-[#242938] hover:border-slate-700 transition-colors flex flex-col gap-1.5"
+                      className="p-2.5 rounded-lg bg-[#161922] border border-[#242938] hover:border-surface-borderLight transition-colors flex flex-col gap-1.5"
                     >
                       <div className="flex items-start justify-between gap-2">
                         <div className="min-w-0 flex-1">
@@ -551,8 +551,8 @@ export const DailyPredictionSlipsSection: React.FC<DailyPredictionSlipsSectionPr
                       {pick.projected_stats && (
                         <div className="flex flex-wrap items-center gap-1.5 pt-1.5 border-t border-[#242938]/60 text-[10px] font-mono">
                           {pick.projected_stats.corners_total !== undefined && (
-                            <div className="flex items-center gap-1 bg-[#0e1015] px-1.5 py-0.5 rounded border border-[#242938] text-purple-300">
-                              <Flag className="w-2.5 h-2.5 text-purple-400" />
+                            <div className="flex items-center gap-1 bg-[#0e1015] px-1.5 py-0.5 rounded border border-[#242938] text-fotmob-blue">
+                              <Flag className="w-2.5 h-2.5 text-fotmob-blue" />
                               <span>~{pick.projected_stats.corners_total} Corn</span>
                               {pick.projected_stats.corners_home !== undefined && pick.projected_stats.corners_away !== undefined && (
                                 <span className="text-slate-500 text-[9px]">({pick.projected_stats.corners_home}-{pick.projected_stats.corners_away})</span>

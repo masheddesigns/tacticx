@@ -41,7 +41,7 @@ export const UncertaintySection: React.FC<UncertaintySectionProps> = ({
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3.5">
         {/* Predictive Entropy */}
-        <div className="p-3.5 rounded-lg bg-slate-900/60 border border-slate-800 space-y-1">
+        <div className="p-3.5 rounded-lg bg-surface-card border border-surface-border space-y-1">
           <span className="text-xs font-mono text-slate-400 block">Predictive Entropy</span>
           <div className="text-xl font-mono font-bold text-slate-100">
             {entropy !== undefined && entropy !== null ? entropy.toFixed(4) : '—'}
@@ -52,7 +52,7 @@ export const UncertaintySection: React.FC<UncertaintySectionProps> = ({
         </div>
 
         {/* Probability Margin */}
-        <div className="p-3.5 rounded-lg bg-slate-900/60 border border-slate-800 space-y-1">
+        <div className="p-3.5 rounded-lg bg-surface-card border border-surface-border space-y-1">
           <span className="text-xs font-mono text-slate-400 block">Top Margin Separation</span>
           <div className="text-xl font-mono font-bold text-slate-100">
             {margin !== undefined && margin !== null ? margin.toFixed(4) : '—'}
@@ -63,7 +63,7 @@ export const UncertaintySection: React.FC<UncertaintySectionProps> = ({
         </div>
 
         {/* Sample History Completeness */}
-        <div className="p-3.5 rounded-lg bg-slate-900/60 border border-slate-800 space-y-1">
+        <div className="p-3.5 rounded-lg bg-surface-card border border-surface-border space-y-1">
           <span className="text-xs font-mono text-slate-400 block">Sample History Depth</span>
           <div className="text-base font-mono font-bold text-slate-100">
             H: {completeness.home_history ?? 0} | A: {completeness.away_history ?? 0} matches
@@ -74,7 +74,7 @@ export const UncertaintySection: React.FC<UncertaintySectionProps> = ({
         </div>
 
         {/* Temporal Audit Classification */}
-        <div className="p-3.5 rounded-lg bg-slate-900/60 border border-slate-800 space-y-1">
+        <div className="p-3.5 rounded-lg bg-surface-card border border-surface-border space-y-1">
           <span className="text-xs font-mono text-slate-400 block">Temporal Classification</span>
           <div className="flex items-center gap-1.5 pt-0.5">
             <Badge variant={strictCount > 0 ? 'success' : 'default'} size="sm">
@@ -93,7 +93,7 @@ export const UncertaintySection: React.FC<UncertaintySectionProps> = ({
         </div>
       </div>
 
-      <div className="p-3 rounded-lg bg-slate-950 border border-slate-800 flex items-start gap-2 text-xs text-slate-400 font-sans">
+      <div className="p-3 rounded-lg bg-surface-base border border-surface-border flex items-start gap-2 text-xs text-slate-400 font-sans">
         <Shield className="w-4 h-4 text-slate-400 shrink-0 mt-0.5" />
         <p className="leading-relaxed text-[11px]">
           {uncertainty.note ||

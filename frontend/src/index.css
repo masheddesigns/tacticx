@@ -23,6 +23,10 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
+.font-mono {
+  font-variant-numeric: tabular-nums;
+}
+
 /* FotMob-style Custom Scrollbars */
 ::-webkit-scrollbar {
   width: 5px;

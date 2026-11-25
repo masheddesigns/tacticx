@@ -22,13 +22,13 @@ const getTeamInitials = (name?: string | null): string => {
 };
 
 const getTeamColorStyle = (name?: string | null): string => {
-  if (!name) return 'bg-slate-800 text-slate-200 border-slate-700';
+  if (!name) return 'bg-surface-cardMuted text-slate-200 border-surface-border';
   const colors = [
     'bg-red-950/90 text-red-300 border-red-700/80',
     'bg-blue-950/90 text-blue-300 border-blue-700/80',
-    'bg-emerald-950/90 text-emerald-300 border-emerald-700/80',
+    'bg-emerald-950/90 text-fotmob-green border-emerald-700/80',
     'bg-amber-950/90 text-amber-300 border-amber-700/80',
-    'bg-purple-950/90 text-purple-300 border-purple-700/80',
+    'bg-purple-950/90 text-fotmob-blue border-purple-700/80',
     'bg-cyan-950/90 text-cyan-300 border-cyan-700/80',
     'bg-rose-950/90 text-rose-300 border-rose-700/80',
   ];
@@ -78,7 +78,7 @@ export const MatchHeader: React.FC<MatchHeaderProps> = ({ match, cutoff, onShare
           )}
 
           {isLive ? (
-            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold font-mono bg-[#ff4b4b]/10 text-[#ff4b4b] border border-[#ff4b4b]/30 animate-pulse">
+            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold font-mono bg-[#ff4b4b]/10 text-[#ff4b4b] border border-[#ff4b4b]/30">
               <span className="w-2 h-2 rounded-full bg-[#ff4b4b] animate-ping inline-block" />
               LIVE
             </span>
@@ -116,7 +116,7 @@ export const MatchHeader: React.FC<MatchHeaderProps> = ({ match, cutoff, onShare
         <div className="md:col-span-1 flex flex-col items-center justify-center shrink-0 order-3 md:order-2">
           {isLive ? (
             <div className="text-center space-y-1">
-              <div className="px-3 py-1 rounded-full bg-[#ff4b4b]/10 border border-[#ff4b4b]/30 text-[11px] font-mono font-bold text-[#ff4b4b] inline-flex items-center gap-1 animate-pulse">
+              <div className="px-3 py-1 rounded-full bg-[#ff4b4b]/10 border border-[#ff4b4b]/30 text-[11px] font-mono font-bold text-[#ff4b4b] inline-flex items-center gap-1">
                 <span className="w-1.5 h-1.5 rounded-full bg-[#ff4b4b]" />
                 Live In-Play
               </div>
@@ -162,7 +162,7 @@ export const MatchHeader: React.FC<MatchHeaderProps> = ({ match, cutoff, onShare
           <span>Ingested Sources:</span>
           {match.sources?.length > 0 ? (
             match.sources.map((s, idx) => (
-              <span key={idx} className="px-2 py-0.5 rounded bg-slate-800 text-slate-300 text-[11px] border border-slate-700/60">
+              <span key={idx} className="px-2 py-0.5 rounded bg-surface-cardMuted text-slate-300 text-[11px] border border-surface-border">
                 {s.source}
               </span>
             ))
@@ -179,8 +179,8 @@ export const MatchHeader: React.FC<MatchHeaderProps> = ({ match, cutoff, onShare
         )}
 
         {cutoff?.cutoff && (
-          <div className="flex items-center gap-1.5 text-slate-300 bg-slate-900 px-2.5 py-1 rounded-lg border border-slate-800">
-            <Shield className="w-3.5 h-3.5 text-emerald-400" />
+          <div className="flex items-center gap-1.5 text-slate-300 bg-surface-card px-2.5 py-1 rounded-lg border border-surface-border">
+            <Shield className="w-3.5 h-3.5 text-fotmob-green" />
             <span>Snapshot Cutoff: {cutoff.cutoff}</span>
           </div>
         )}

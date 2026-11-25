@@ -82,8 +82,8 @@ export const WarningsSection: React.FC<WarningsSectionProps> = ({ warnings, defa
                 key={idx}
                 className={`p-3.5 rounded-lg border text-xs font-mono space-y-2.5 ${
                   isWarning
-                    ? 'bg-slate-900/90 border-slate-800 text-slate-300'
-                    : 'bg-slate-950/60 border-slate-800 text-slate-400'
+                    ? 'bg-surface-card border-surface-border text-slate-300'
+                    : 'bg-surface-base border-surface-border text-slate-400'
                 }`}
               >
                 <div className="flex flex-wrap items-center justify-between gap-2">
@@ -99,7 +99,7 @@ export const WarningsSection: React.FC<WarningsSectionProps> = ({ warnings, defa
                 </div>
 
                 {/* Human-friendly translation of the warning */}
-                <div className="flex items-start gap-2 p-2.5 rounded bg-slate-950/80 border border-slate-800 text-xs text-slate-300 font-sans leading-relaxed">
+                <div className="flex items-start gap-2 p-2.5 rounded bg-surface-base border border-surface-border text-xs text-slate-300 font-sans leading-relaxed">
                   <Info className="w-4 h-4 text-blue-400 shrink-0 mt-0.5" />
                   <span>
                     <strong className="text-white">What this means:</strong> {explanation}
@@ -108,7 +108,7 @@ export const WarningsSection: React.FC<WarningsSectionProps> = ({ warnings, defa
 
 
               {w.evidence && Object.keys(w.evidence).length > 0 && (
-                <div className="pt-2 border-t border-slate-800/80 text-[11px] text-slate-400 font-mono">
+                <div className="pt-2 border-t border-surface-border text-[11px] text-slate-400 font-mono">
                   <span className="font-semibold text-slate-400 block mb-1">Audit Evidence:</span>
                   <div className="flex flex-wrap gap-2">
                     {Object.entries(w.evidence).map(([key, val]) => {
@@ -135,7 +135,7 @@ export const WarningsSection: React.FC<WarningsSectionProps> = ({ warnings, defa
                       };
 
                       return (
-                        <div key={key} className="px-2 py-1 rounded bg-slate-950 border border-slate-800 text-[11px] leading-relaxed">
+                        <div key={key} className="px-2 py-1 rounded bg-surface-base border border-surface-border text-[11px] leading-relaxed">
                           <span className="text-slate-400 font-semibold">{key}: </span>
                           <span className="text-slate-300 font-mono">{formatVal(val)}</span>
                         </div>

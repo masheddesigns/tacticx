@@ -48,7 +48,7 @@ export const ResearchPage: React.FC = () => {
         </div>
         <button
           onClick={() => refetchExps()}
-          className="p-2 rounded-lg border border-slate-700 bg-slate-800/80 text-slate-300 hover:text-white transition-colors self-start sm:self-auto"
+          className="p-2 rounded-lg border border-surface-border bg-surface-cardMuted text-slate-300 hover:text-white transition-colors self-start sm:self-auto"
           title="Refresh registry"
         >
           <RefreshCw className="w-3.5 h-3.5" />
@@ -122,7 +122,7 @@ export const ResearchPage: React.FC = () => {
           <div className="p-4 rounded-xl border border-surface-border bg-surface-card space-y-3">
             <div className="flex items-center gap-2 text-xs font-mono">
               {shown.leakage_status === 'PASS' ? (
-                <CheckCircle2 className="w-4 h-4 text-emerald-400" />
+                <CheckCircle2 className="w-4 h-4 text-fotmob-green" />
               ) : (
                 <ShieldAlert className="w-4 h-4 text-red-400" />
               )}

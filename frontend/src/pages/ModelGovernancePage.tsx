@@ -34,7 +34,7 @@ export const ModelGovernancePage: React.FC = () => {
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <h1 className="text-2xl font-bold tracking-tight text-slate-100 flex items-center gap-2">
-            <ShieldCheck className="w-6 h-6 text-emerald-400" />
+            <ShieldCheck className="w-6 h-6 text-fotmob-green" />
             <span>Model Governance</span>
           </h1>
           <p className="text-xs text-slate-400 font-sans mt-1">
@@ -43,7 +43,7 @@ export const ModelGovernancePage: React.FC = () => {
         </div>
         <button
           onClick={() => refetch()}
-          className="p-2 rounded-lg border border-slate-700 bg-slate-800/80 text-slate-300 hover:text-white transition-colors self-start sm:self-auto"
+          className="p-2 rounded-lg border border-surface-border bg-surface-cardMuted text-slate-300 hover:text-white transition-colors self-start sm:self-auto"
           title="Refresh governance"
         >
           <RefreshCw className="w-3.5 h-3.5" />
@@ -52,7 +52,7 @@ export const ModelGovernancePage: React.FC = () => {
 
       <section className="space-y-3">
         <h2 className="text-base font-semibold text-slate-100">Current Production Champion</h2>
-        <div className="p-4 rounded-xl border border-emerald-500/20 bg-surface-card space-y-1">
+        <div className="p-4 rounded-xl border border-fotmob-green/20 bg-surface-card space-y-1">
           <div className="text-sm font-mono font-semibold text-slate-100">
             {champion?.artifact?.model_id} · {champion?.artifact?.model_version}
           </div>

@@ -111,7 +111,7 @@ export const QuickPredictionSummaryCard: React.FC<QuickPredictionSummaryCardProp
       {/* Main Grid: 4 Core Easy-to-Read Tiles */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3.5">
         {/* Tile 1: Match Winner & Confidence */}
-        <div className="p-4 rounded-xl bg-[#1e222e] border border-[#242938] space-y-2 hover:border-slate-700 transition-colors">
+        <div className="p-4 rounded-xl bg-[#1e222e] border border-[#242938] space-y-2 hover:border-surface-borderLight transition-colors">
           <div className="flex items-center justify-between text-xs text-slate-400 font-sans">
             <span className="flex items-center gap-1.5">
               <Trophy className="w-3.5 h-3.5 text-amber-400" />
@@ -166,7 +166,7 @@ export const QuickPredictionSummaryCard: React.FC<QuickPredictionSummaryCardProp
         </div>
 
         {/* Tile 2: Goals (Over / Under & BTTS) */}
-        <div className="p-4 rounded-xl bg-[#1e222e] border border-[#242938] space-y-2 hover:border-slate-700 transition-colors">
+        <div className="p-4 rounded-xl bg-[#1e222e] border border-[#242938] space-y-2 hover:border-surface-borderLight transition-colors">
           <div className="flex items-center justify-between text-xs text-slate-400 font-sans">
             <span className="flex items-center gap-1.5">
               <Goal className="w-3.5 h-3.5 text-blue-400" />
@@ -193,13 +193,13 @@ export const QuickPredictionSummaryCard: React.FC<QuickPredictionSummaryCardProp
         </div>
 
         {/* Tile 3: Top Predicted Scores */}
-        <div className="p-4 rounded-xl bg-[#1e222e] border border-[#242938] space-y-2 hover:border-slate-700 transition-colors">
+        <div className="p-4 rounded-xl bg-[#1e222e] border border-[#242938] space-y-2 hover:border-surface-borderLight transition-colors">
           <div className="flex items-center justify-between text-xs text-slate-400 font-sans">
             <span className="flex items-center gap-1.5">
-              <Target className="w-3.5 h-3.5 text-purple-400" />
+              <Target className="w-3.5 h-3.5 text-fotmob-blue" />
               <span className="font-semibold text-slate-300">Top Scores</span>
             </span>
-            <span className="text-purple-400 font-bold font-mono">Poisson Max</span>
+            <span className="text-fotmob-blue font-bold font-mono">Poisson Max</span>
           </div>
 
           <div className="flex items-center justify-between gap-1.5 pt-0.5">
@@ -226,19 +226,19 @@ export const QuickPredictionSummaryCard: React.FC<QuickPredictionSummaryCardProp
         </div>
 
         {/* Tile 4: In-Game Stats (Corners & Cards) */}
-        <div className="p-4 rounded-xl bg-[#1e222e] border border-[#242938] space-y-2 hover:border-slate-700 transition-colors">
+        <div className="p-4 rounded-xl bg-[#1e222e] border border-[#242938] space-y-2 hover:border-surface-borderLight transition-colors">
           <div className="flex items-center justify-between text-xs text-slate-400 font-sans">
             <span className="flex items-center gap-1.5">
-              <Flag className="w-3.5 h-3.5 text-purple-400" />
+              <Flag className="w-3.5 h-3.5 text-fotmob-blue" />
               <span className="font-semibold text-slate-300">Projected Stats</span>
             </span>
-            <span className="text-purple-400 font-bold font-mono">~{cornersTot} Corners</span>
+            <span className="text-fotmob-blue font-bold font-mono">~{cornersTot} Corners</span>
           </div>
 
           <div className="space-y-1.5 pt-0.5 text-xs font-mono">
             <div className="flex items-center justify-between">
               <span className="text-slate-400 flex items-center gap-1 font-sans">
-                <Flag className="w-3 h-3 text-purple-400" /> Corners:
+                <Flag className="w-3 h-3 text-fotmob-blue" /> Corners:
               </span>
               <span className="text-white font-bold flex items-center gap-1">
                 <TeamLogo teamName={homeTeamName} size="xs" />

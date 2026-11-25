@@ -20,7 +20,7 @@ export const Badge: React.FC<BadgeProps> = ({
     warning: 'bg-amber-500/10 text-amber-400 border-amber-500/30',
     error: 'bg-[#ff4b4b]/10 text-[#ff4b4b] border-[#ff4b4b]/30',
     info: 'bg-blue-500/10 text-blue-400 border-blue-500/30',
-    purple: 'bg-purple-500/10 text-purple-400 border-purple-500/30',
+    purple: 'bg-fotmob-blue/10 text-fotmob-blue border-fotmob-blue/30',
     outline: 'bg-transparent text-slate-400 border-[#242938]',
   };
 

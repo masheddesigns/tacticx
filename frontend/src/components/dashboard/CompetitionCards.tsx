@@ -28,7 +28,7 @@ export const CompetitionCards: React.FC<CompetitionCardsProps> = ({ competitions
         return (
           <div
             key={comp.code}
-            className="rounded-xl border border-[#242938] bg-[#161922] p-5 flex flex-col justify-between hover:border-slate-700 transition-all shadow-sm"
+            className="rounded-xl border border-[#242938] bg-[#161922] p-5 flex flex-col justify-between hover:border-surface-borderLight transition-all shadow-sm"
           >
             <div>
               <div className="flex items-center justify-between">

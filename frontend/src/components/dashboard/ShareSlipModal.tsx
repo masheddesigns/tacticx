@@ -249,8 +249,8 @@ export const ShareSlipModal: React.FC<ShareSlipModalProps> = ({
                   {pick.projected_stats && (
                     <div className="flex flex-wrap items-center gap-1.5 pt-1.5 border-t border-[#242938]/60 text-[10px] font-mono">
                       {pick.projected_stats.corners_total !== undefined && (
-                        <div className="flex items-center gap-1 bg-[#0e1015] px-1.5 py-0.5 rounded border border-[#242938] text-purple-300">
-                          <Flag className="w-2.5 h-2.5 text-purple-400" />
+                        <div className="flex items-center gap-1 bg-[#0e1015] px-1.5 py-0.5 rounded border border-[#242938] text-fotmob-blue">
+                          <Flag className="w-2.5 h-2.5 text-fotmob-blue" />
                           <span>~{pick.projected_stats.corners_total} Corn</span>
                           {pick.projected_stats.corners_home !== undefined && pick.projected_stats.corners_away !== undefined && (
                             <span className="text-slate-500 text-[9px]">({pick.projected_stats.corners_home}-{pick.projected_stats.corners_away})</span>

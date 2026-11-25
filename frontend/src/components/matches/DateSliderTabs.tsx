@@ -265,7 +265,7 @@ export const DateSliderTabs: React.FC<DateSliderTabsProps> = ({
                 {/* Top line: Relative / Weekday Label */}
                 <div className="flex items-center gap-1">
                   {item.isToday && !isSelected && (
-                    <span className="w-1.5 h-1.5 rounded-full bg-[#21e786] inline-block animate-pulse" />
+                    <span className="w-1.5 h-1.5 rounded-full bg-[#21e786] inline-block" />
                   )}
                   <span
                     className={`text-[10px] tracking-wider font-semibold uppercase ${

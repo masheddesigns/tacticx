@@ -23,7 +23,7 @@ export const CorePredictionCard: React.FC<CorePredictionCardProps> = ({
     <section aria-labelledby="core-prediction-heading" className="rounded-xl border border-surface-border bg-surface-card p-5 shadow-sm space-y-5">
       <div className="flex flex-wrap items-center justify-between gap-3 pb-3 border-b border-surface-border">
         <div className="flex items-center gap-2">
-          <div className="p-1.5 rounded bg-emerald-500/10 border border-emerald-500/20 text-emerald-400">
+          <div className="p-1.5 rounded bg-fotmob-green/10 border border-fotmob-green/20 text-fotmob-green">
             <Percent className="w-4 h-4" />
           </div>
           <div>
@@ -62,7 +62,7 @@ export const CorePredictionCard: React.FC<CorePredictionCardProps> = ({
       {/* 3 Outcome Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
         {/* Home */}
-        <div className="p-3.5 rounded-lg bg-slate-900/80 border border-blue-900/40 text-center flex flex-col justify-between">
+        <div className="p-3.5 rounded-lg bg-surface-card border border-blue-900/40 text-center flex flex-col justify-between">
           <div>
             <span className="text-[11px] font-mono font-semibold text-blue-400 uppercase tracking-wider flex items-center justify-center gap-1.5">
               <TeamLogo teamName={homeTeamName} size="xs" />
@@ -81,13 +81,13 @@ export const CorePredictionCard: React.FC<CorePredictionCardProps> = ({
               <span className="text-[10px] font-mono text-slate-400">Decimal Odds</span>
             </div>
           </div>
-          <div className="mt-2.5 pt-2 border-t border-slate-800 text-[10px] text-slate-400 font-sans leading-tight">
+          <div className="mt-2.5 pt-2 border-t border-surface-border text-[10px] text-slate-400 font-sans leading-tight">
             Multiply bet by <span className="font-mono text-slate-200 font-semibold">{formatDecimalOdds(prediction.home, true)}</span> for total payout.
           </div>
         </div>
 
         {/* Draw */}
-        <div className="p-3.5 rounded-lg bg-slate-900/80 border border-slate-700/60 text-center flex flex-col justify-between">
+        <div className="p-3.5 rounded-lg bg-surface-card border border-surface-border text-center flex flex-col justify-between">
           <div>
             <span className="text-[11px] font-mono font-semibold text-slate-300 uppercase tracking-wider block">
               Draw (Tie)
@@ -99,21 +99,21 @@ export const CorePredictionCard: React.FC<CorePredictionCardProps> = ({
               Model probability
             </span>
             <div className="mt-1 flex items-center justify-center gap-1.5">
-              <span className="text-xs font-mono font-bold px-2 py-0.5 rounded bg-slate-800 text-slate-200 border border-slate-700">
+              <span className="text-xs font-mono font-bold px-2 py-0.5 rounded bg-surface-cardMuted text-slate-200 border border-surface-border">
                 {formatDecimalOdds(prediction.draw, true)}
               </span>
               <span className="text-[10px] font-mono text-slate-400">Decimal Odds</span>
             </div>
           </div>
-          <div className="mt-2.5 pt-2 border-t border-slate-800 text-[10px] text-slate-400 font-sans leading-tight">
+          <div className="mt-2.5 pt-2 border-t border-surface-border text-[10px] text-slate-400 font-sans leading-tight">
             Multiply bet by <span className="font-mono text-slate-200 font-semibold">{formatDecimalOdds(prediction.draw, true)}</span> for total payout.
           </div>
         </div>
 
         {/* Away */}
-        <div className="p-3.5 rounded-lg bg-slate-900/80 border border-emerald-900/40 text-center flex flex-col justify-between">
+        <div className="p-3.5 rounded-lg bg-surface-card border border-emerald-900/40 text-center flex flex-col justify-between">
           <div>
-            <span className="text-[11px] font-mono font-semibold text-emerald-400 uppercase tracking-wider flex items-center justify-center gap-1.5">
+            <span className="text-[11px] font-mono font-semibold text-fotmob-green uppercase tracking-wider flex items-center justify-center gap-1.5">
               <TeamLogo teamName={awayTeamName} size="xs" />
               <span>Away ({awayTeamName})</span>
             </span>
@@ -124,13 +124,13 @@ export const CorePredictionCard: React.FC<CorePredictionCardProps> = ({
               Model probability
             </span>
             <div className="mt-1 flex items-center justify-center gap-1.5">
-              <span className="text-xs font-mono font-bold px-2 py-0.5 rounded bg-emerald-950 text-emerald-300 border border-emerald-800">
+              <span className="text-xs font-mono font-bold px-2 py-0.5 rounded bg-emerald-950 text-fotmob-green border border-emerald-800">
                 {formatDecimalOdds(prediction.away, true)}
               </span>
               <span className="text-[10px] font-mono text-slate-400">Decimal Odds</span>
             </div>
           </div>
-          <div className="mt-2.5 pt-2 border-t border-slate-800 text-[10px] text-slate-400 font-sans leading-tight">
+          <div className="mt-2.5 pt-2 border-t border-surface-border text-[10px] text-slate-400 font-sans leading-tight">
             Multiply bet by <span className="font-mono text-slate-200 font-semibold">{formatDecimalOdds(prediction.away, true)}</span> for total payout.
           </div>
         </div>

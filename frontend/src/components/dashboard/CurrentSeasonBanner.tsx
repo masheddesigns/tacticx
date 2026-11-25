@@ -40,16 +40,16 @@ export const CurrentSeasonBanner: React.FC<CurrentSeasonBannerProps> = ({
   return (
     <section
       aria-labelledby="current-season-notice-title"
-      className={`rounded-xl border ${anyActive ? 'border-emerald-500/40 bg-gradient-to-br from-emerald-950/30 via-slate-900/60 to-slate-900/80' : 'border-amber-800/40 bg-gradient-to-br from-amber-950/30 via-slate-900/60 to-slate-900/80'} p-5 shadow-lg backdrop-blur-sm`}
+      className={`rounded-xl border ${anyActive ? 'border-fotmob-green/40 bg-gradient-to-br from-emerald-950/30 via-slate-900/60 to-slate-900/80' : 'border-amber-800/40 bg-gradient-to-br from-amber-950/30 via-slate-900/60 to-slate-900/80'} p-5 shadow-lg backdrop-blur-sm`}
     >
       <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
         <div className="flex items-start gap-3.5">
-          <div className={`p-2 rounded-lg ${anyActive ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-400' : 'bg-amber-500/10 border-amber-500/20 text-amber-400'} border mt-0.5 shrink-0`}>
+          <div className={`p-2 rounded-lg ${anyActive ? 'bg-fotmob-green/10 border-fotmob-green/20 text-fotmob-green' : 'bg-amber-500/10 border-amber-500/20 text-amber-400'} border mt-0.5 shrink-0`}>
             {anyActive ? <CheckCircle2 className="w-5 h-5" aria-hidden="true" /> : <ShieldOff className="w-5 h-5" aria-hidden="true" />}
           </div>
           <div>
             <div className="flex items-center gap-2">
-              <span className={`text-[11px] font-mono uppercase tracking-wider px-2 py-0.5 rounded ${anyActive ? 'bg-emerald-950 text-emerald-400 border-emerald-800/60' : 'bg-amber-950 text-amber-400 border-amber-800/60'} border`}>
+              <span className={`text-[11px] font-mono uppercase tracking-wider px-2 py-0.5 rounded ${anyActive ? 'bg-emerald-950 text-fotmob-green border-emerald-800/60' : 'bg-amber-950 text-amber-400 border-amber-800/60'} border`}>
                 Data Transparency
               </span>
               <span className="text-xs font-mono text-slate-400">Season: {currentSeason}</span>
@@ -67,7 +67,7 @@ export const CurrentSeasonBanner: React.FC<CurrentSeasonBannerProps> = ({
 
         <Link
           to="/system"
-          className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-lg text-xs font-mono font-medium bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 transition-colors shrink-0"
+          className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-lg text-xs font-mono font-medium bg-surface-cardMuted hover:bg-slate-700 text-slate-200 border border-surface-border transition-colors shrink-0"
         >
           <span>Provider Qualification & Readiness</span>
           <ArrowRight className="w-3.5 h-3.5 text-slate-400" />
@@ -75,7 +75,7 @@ export const CurrentSeasonBanner: React.FC<CurrentSeasonBannerProps> = ({
       </div>
 
       {/* Honest 0-coverage & dynamic activation telemetry */}
-      <div className="mt-4 pt-4 border-t border-slate-800/80 grid grid-cols-2 sm:grid-cols-5 gap-3 text-center">
+      <div className="mt-4 pt-4 border-t border-surface-border grid grid-cols-2 sm:grid-cols-5 gap-3 text-center">
         {primaryLeagues.map((code) => {
           const item = itemsByComp[code];
           const legacy = leaguesCoverage[code];
@@ -88,7 +88,7 @@ export const CurrentSeasonBanner: React.FC<CurrentSeasonBannerProps> = ({
           let coverageText = isMeasurable ? 'Coverage: 0.0%' : 'N/A - Provider Unavailable';
 
           if (status === 'ACTIVE') {
-            badgeColor = 'text-emerald-400 border-emerald-800/60 bg-emerald-950/40';
+            badgeColor = 'text-fotmob-green border-emerald-800/60 bg-emerald-950/40';
             statusLabel = 'Active';
             coverageText = `${fixtureCount} fixtures active`;
           } else if (status === 'QUALIFIED') {
@@ -107,14 +107,14 @@ export const CurrentSeasonBanner: React.FC<CurrentSeasonBannerProps> = ({
           }
 
           return (
-            <div key={code} className="p-2.5 rounded bg-slate-900/60 border border-slate-800 flex flex-col justify-between">
+            <div key={code} className="p-2.5 rounded bg-surface-card border border-surface-border flex flex-col justify-between">
               <div>
                 <span className="text-[11px] font-mono text-slate-400 block">{code.replace('_', ' ')}</span>
-                <span className={`text-sm font-mono font-bold ${status === 'ACTIVE' ? 'text-emerald-400' : 'text-amber-400'} mt-0.5 block`}>
+                <span className={`text-sm font-mono font-bold ${status === 'ACTIVE' ? 'text-fotmob-green' : 'text-amber-400'} mt-0.5 block`}>
                   {fixtureCount} fixtures
                 </span>
               </div>
-              <div className="mt-2 pt-1.5 border-t border-slate-800/50">
+              <div className="mt-2 pt-1.5 border-t border-surface-border">
                 <span className={`text-[10px] font-mono px-1.5 py-0.5 rounded border block truncate ${badgeColor}`}>
                   {statusLabel}
                 </span>
