@@ -1051,6 +1051,46 @@ def get_daily_slips(
                 "value"
             ))
 
+    # League-specific All-Games Accumulators (EPL, UEL, UECL, LA_LIGA, SERIE_A, BUNDESLIGA)
+    for lg_target, lg_title, lg_badge in [
+        ("EPL", "🏆 All-Games Premier League Accumulator", "All Premier League Banker"),
+        ("UEL", "🏆 All-Games Europa League Accumulator", "All Europa League Banker"),
+        ("UECL", "🏆 All-Games Conference League Accumulator", "All Conference League Banker"),
+        ("LA_LIGA", "🏆 All-Games La Liga Accumulator", "All La Liga Banker"),
+        ("SERIE_A", "🏆 All-Games Serie A Accumulator", "All Serie A Banker"),
+        ("BUNDESLIGA", "🏆 All-Games Bundesliga Accumulator", "All Bundesliga Banker"),
+    ]:
+        lg_matches = [rp for rp in ranked_predictions if rp.get("league_code") == lg_target]
+        if len(lg_matches) >= 3:
+            all_lg_banker_picks = []
+            for rp in lg_matches:
+                best_pick_for_match = rp["best_outcome"]
+                all_lg_banker_picks.append({
+                    "match_id": rp["match_id"],
+                    "fixture": rp["fixture"],
+                    "pick": best_pick_for_match["pick"],
+                    "market": best_pick_for_match["market"],
+                    "probability": best_pick_for_match["probability"] / 100.0,
+                    "odds": best_pick_for_match["odds"],
+                    "league_code": lg_target,
+                    "league_name": rp["league_name"],
+                    "league_flag": rp["league_flag"],
+                    "home_team": rp["home_team"],
+                    "away_team": rp["away_team"],
+                    "home_team_logo": rp.get("home_team_logo"),
+                    "away_team_logo": rp.get("away_team_logo"),
+                    "badge": best_pick_for_match.get("badge", "Banker"),
+                    "status": best_pick_for_match.get("status", "PENDING"),
+                    "category": best_pick_for_match.get("category", "BANKER"),
+                })
+            slips.append(_combine_slip(
+                all_lg_banker_picks,
+                f"{lg_title} ({len(all_lg_banker_picks)} Matches)",
+                lg_badge,
+                f"Complete {lg_matches[0]['league_name']} accumulator combining top-ranked selections across all {len(all_lg_banker_picks)} matches.",
+                "banker"
+            ))
+
     # Also: ALL-MATCHES OF THE DAY SLIP (Every single game across all leagues!)
     if len(ranked_predictions) > len(ucl_matches):
         all_games_today_picks = []
